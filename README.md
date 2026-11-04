@@ -1,0 +1,129 @@
+# Simple Aircraft Manager (Rails)
+
+A Ruby on Rails port of [Simple Aircraft Manager](https://github.com/marbindrakon/simple-aircraft-manager), a self-hosted app for tracking records and status for small fleets of aircraft: components and TBO, squawks, ADs, inspections, logbook, documents, oil and fuel trends, and read-only share links for mechanics and buyers.
+
+The port aims to be **easy to host**. It runs as one process with one SQLite database directory. It needs no Postgres, no Redis, no nginx, and no Kubernetes.
+
+## Stack
+
+- Rails 8.1, SQLite. Solid Queue, Solid Cache, and Solid Cable all use SQLite, so there are no extra services.
+- Hotwire (Turbo and Stimulus) with importmap, so there is no Node build step. Tailwind CSS 4 runs through `tailwindcss-rails`.
+- Active Storage on local disk handles pictures, document pages, squawk attachments, and track logs.
+- Chartkick and Chart.js draw the oil and fuel charts.
+- Authentication uses the Rails 8 built-in generator (sessions plus password reset).
+
+## Quick start (development)
+
+```bash
+bundle install
+bin/rails db:prepare
+DEMO=1 bin/rails db:seed     # optional: demo aircraft N12345
+bin/dev                      # http://localhost:3000
+```
+
+With demo data, sign in as `admin@example.com` / `password123` (owner) or `pilot@example.com` / `password123` (pilot).
+Without demo data, the first visit asks you to create the admin account.
+
+Run the tests: `bin/rails test`
+
+## Hosting
+
+Everything persistent lives in `storage/`: the SQLite databases and the uploaded files. Back up that one directory.
+
+### Option A: Docker Compose (simplest)
+
+```bash
+cp .env.example .env          # set SECRET_KEY_BASE (bin/rails secret), APP_HOST, FORCE_SSL
+docker compose up -d --build  # http://<host>:3000
+```
+
+Data lives in the `sam_storage` volume. Set `FORCE_SSL=false` if you serve plain HTTP on a LAN. Set it to `true` when a TLS reverse proxy such as Caddy, Traefik, or Cloudflare Tunnel sits in front.
+
+### Option B: Kamal (any VPS, automatic TLS)
+
+Edit `config/deploy.yml` with your server IP, registry, and domain, then run `bin/kamal setup`. Kamal Proxy handles Let's Encrypt certificates. Background jobs run inside Puma (`SOLID_QUEUE_IN_PUMA`).
+
+### Option C: Plain server / PaaS
+
+The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rails server` with `RAILS_ENV=production`, `SECRET_KEY_BASE`, and `SOLID_QUEUE_IN_PUMA=true`. Mount `storage/` on persistent disk.
+
+### Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `SECRET_KEY_BASE` | Required in production (`bin/rails secret`). Alternatively provide `RAILS_MASTER_KEY`. |
+| `FORCE_SSL` | `true` (default) redirects to HTTPS and sets secure cookies. Use `false` for plain HTTP. |
+| `APP_HOST` | Host used in password-reset email links. |
+| `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | Optional. They enable password-reset emails. Without them an admin resets passwords from **Users**. |
+
+### Backups
+
+SQLite runs in WAL mode, so a plain file copy taken while the app is running can be inconsistent. Use the SQLite backup command instead:
+
+```bash
+mkdir -p backup
+for db in storage/production*.sqlite3; do sqlite3 "$db" ".backup 'backup/$(basename "$db")'"; done
+rsync -a --exclude '*.sqlite3*' storage/ backup/   # uploaded files
+```
+
+Alternatively, stop the container and copy the volume.
+
+## Features
+
+| Area | Notes |
+|---|---|
+| Fleet dashboard | Every aircraft you can access, with airworthiness status and its top issues. |
+| Airworthiness | RED/ORANGE/GREEN from AD compliance, grounding squawks, inspection recurrency, and replacement-critical components. Warnings start 10 hours or 30 days ahead. Logic: `app/services/airworthiness.rb`, `app/services/compliance.rb`. |
+| Hours | Absolute tach/hobbs updates or per-flight logs. Both apply the delta to every in-service component. Downward corrections are clamped at 0. |
+| Airworthiness enforcement | Optional per aircraft. It blocks flight logs and hours updates while the aircraft is RED. |
+| Components | Tree of parent and child parts, TBO and replacement limits, and service/replace reset. Owners can create new component types inline. |
+| Squawks | Four priorities. "Ground Aircraft" makes the aircraft RED. Supports attachments, resolve, and reopen. |
+| ADs and bulletins | Shared across aircraft and applicable to the airframe or to specific components. Hour- and month-based recurrence (due at end of month), conditional and non-mandatory types, and compliance history. |
+| Inspections | Shared inspection types with hour, month, and day recurrence, plus history. |
+| Logbook | Maintenance entries with search and a link to a scanned document page. |
+| Documents | Collections, multi-file documents with a page viewer, and per-document share visibility. |
+| Major repairs and alterations | Form 337, STC, and ICA tracking. |
+| Oil and fuel | Records, trend charts, and averages (last 20 intervals, IQR outlier filtering, manual exclusion). |
+| Activity log | Every write is recorded as an `AircraftEvent`. |
+| Access | Admin, owner, and pilot roles, plus share links (Status or Maintenance privilege, optional expiry, at most 10 per aircraft). |
+
+### Roles
+
+| Action | Admin | Owner | Pilot |
+|---|:-:|:-:|:-:|
+| View everything on the aircraft | ✓ | ✓ | ✓ |
+| Update hours, log flights, add squawks/notes/oil/fuel | ✓ | ✓ | ✓ |
+| Edit or delete squawks and notes, resolve squawks | ✓ | ✓ | |
+| Components, logbook, ADs, inspections, documents, major records | ✓ | ✓ | |
+| Edit or delete aircraft, manage people and share links | ✓ | ✓ | |
+| Create aircraft (creator becomes owner) | ✓ | ✓ | ✓ |
+| Manage users and component types | ✓ | | |
+
+Users who aren't on an aircraft get a 404 for it, identical to a missing record.
+
+## Mapping from the Django original
+
+| Django | Rails |
+|---|---|
+| `health/services.py` | `app/services/airworthiness.rb`, `compliance.rb`, `hours_service.rb`, `consumption_stats.rb` |
+| `AircraftScopedMixin` / `core/permissions.py` | `app/controllers/concerns/aircraft_scoped.rb` |
+| `EventLoggingMixin` / `log_event` | `Aircraft#log_event!`, called from controllers |
+| DRF viewsets + Alpine.js mixins | Server-rendered controllers and ERB views with Turbo |
+| `AD` | `AirworthinessDirective` |
+| `MajorRepairAlteration` | `MajorRecord` |
+| `DocumentImage` | `Document has_many_attached :pages` |
+| `AircraftShareToken` | `ShareToken` (`has_secure_token`) |
+| `views_public.py` | `SharedController` → `/shared/:token` |
+
+Differences from the original:
+- Integer primary keys instead of UUIDs. Share tokens are 32-character random strings.
+- Logbook entries and inspection records don't keep many-to-many links to components. An inspection record or AD compliance can reference one component.
+- Accounts are created by an admin, or by the first-run setup. The original's invitation codes aren't implemented yet.
+
+### Not yet ported
+
+AI logbook transcription, oil-analysis PDF import, the MCP server for AI agents, OIDC single sign-on, invitation codes, aircraft import/export, the plugin system, and the desktop builds.
+
+## License
+
+The original project is released under [The Unlicense](https://unlicense.org). This port follows the same spirit.

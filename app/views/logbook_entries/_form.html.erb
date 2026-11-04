@@ -1,0 +1,18 @@
+<%= form_with model: [aircraft, entry], class: "card card-body space-y-4 max-w-3xl" do |f| %>
+  <%= f.errors_summary %>
+  <div class="grid gap-4 sm:grid-cols-4">
+    <%= f.field :date, as: :date %>
+    <%= f.field :log_type, as: :select, label: "Logbook", collection: LogbookEntry::LOG_TYPES.invert %>
+    <%= f.field :entry_type, as: :select, label: "Entry type", collection: LogbookEntry::ENTRY_TYPES.invert %>
+    <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: "Aircraft hours" %>
+  </div>
+  <%= f.field :text, as: :textarea, label: "Entry text", rows: 8 %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :signoff_person, label: "Signed off by", placeholder: "Name, A&P/IA #" %>
+    <%= f.field :signoff_location, label: "Location / shop" %>
+    <%= f.field :document_id, as: :select, label: "Scanned page document", collection: document_options(aircraft) %>
+    <%= f.field :page_number, as: :number, label: "Page # in document" %>
+  </div>
+  <div class="flex gap-2"><%= f.submit "Save Entry" %><%= link_to "Cancel", aircraft_logbook_entries_path(aircraft), class: "btn-secondary" %></div>
+<% end %>
+<% if entry.persisted? %><div class="mt-4"><%= delete_button "Delete entry", aircraft_logbook_entry_path(aircraft, entry) %></div><% end %>

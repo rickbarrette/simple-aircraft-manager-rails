@@ -1,0 +1,50 @@
+<%= form_with model: [aircraft, component], class: "card card-body space-y-5 max-w-4xl" do |f| %>
+  <%= f.errors_summary %>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div>
+      <%= f.field :component_type_id, as: :select, label: "Type",
+            collection: ComponentType.ordered.map { [_1.name, _1.id] }, include_blank: "— Select —" %>
+      <%= text_field_tag :new_component_type, params[:new_component_type], class: "input mt-2", placeholder: "…or type a new one" %>
+    </div>
+    <%= f.field :manufacturer, required: true %>
+    <%= f.field :model, required: true %>
+    <%= f.field :serial_number %>
+    <%= f.field :install_location, hint: "e.g. Left mag, #3 cylinder" %>
+    <%= f.field :status, as: :select, collection: Component::STATUSES.invert %>
+    <%= f.field :parent_component_id, as: :select, label: "Parent component",
+          collection: [["— None —", nil]] + aircraft.components.where.not(id: component.id).includes(:component_type).map { [_1.to_s, _1.id] } %>
+  </div>
+
+  <fieldset class="grid gap-4 sm:grid-cols-4">
+    <legend class="mb-2 text-sm font-semibold text-slate-900">Time</legend>
+    <%= f.field :date_in_service, as: :date, required: true %>
+    <%= f.field :hours_in_service, as: :number, step: 0.1 %>
+    <%= f.field :overhaul_date, as: :date, label: "Last overhaul / service" %>
+    <%= f.field :hours_since_overhaul, as: :number, step: 0.1, label: "Hours since OH / service" %>
+  </fieldset>
+
+  <fieldset class="grid gap-4 sm:grid-cols-3">
+    <legend class="mb-2 text-sm font-semibold text-slate-900">Limits</legend>
+    <%= f.field :replacement_hours, as: :number, label: "Replace every (hrs)" %>
+    <%= f.field :replacement_days, as: :number, label: "Replace every (days)" %>
+    <%= f.field :replacement_critical, as: :checkbox, label: "Replacement critical", hint: "Overdue replacement grounds the aircraft (oil, filters, ELT battery…)." %>
+    <%= f.field :tbo_hours, as: :number, label: "TBO (hrs)" %>
+    <%= f.field :tbo_days, as: :number, label: "TBO (days)" %>
+    <div class="space-y-2">
+      <%= f.field :tbo_critical, as: :checkbox, label: "TBO critical" %>
+      <%= f.field :on_condition, as: :checkbox, label: "On condition (Part 91)" %>
+    </div>
+    <%= f.field :inspection_hours, as: :number, label: "Inspect every (hrs)" %>
+    <%= f.field :inspection_days, as: :number, label: "Inspect every (days)" %>
+    <%= f.field :inspection_critical, as: :checkbox, label: "Inspection critical" %>
+  </fieldset>
+
+  <%= f.field :notes, as: :textarea, rows: 3 %>
+  <div class="flex gap-2">
+    <%= f.submit component.new_record? ? "Add Component" : "Save" %>
+    <%= link_to "Cancel", aircraft_components_path(aircraft), class: "btn-secondary" %>
+  </div>
+<% end %>
+<% if component.persisted? %>
+  <div class="mt-4"><%= delete_button "Delete component", aircraft_component_path(aircraft, component), confirm: "Delete #{component} and its sub-components?" %></div>
+<% end %>

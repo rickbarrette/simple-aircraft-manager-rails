@@ -1,0 +1,12 @@
+<div class="mx-auto max-w-md">
+  <h1 class="mb-1 text-2xl font-bold">Welcome</h1>
+  <p class="mb-4 text-sm text-slate-600">Create the administrator account to get started.</p>
+  <%= form_with model: @user, url: setup_path, class: "card card-body space-y-4" do |f| %>
+    <%= f.errors_summary %>
+    <%= f.field :name %>
+    <%= f.field :email_address, as: :email, label: "Email", required: true %>
+    <%= f.field :password, as: :password, required: true, hint: "At least 8 characters." %>
+    <%= f.field :password_confirmation, as: :password, required: true %>
+    <%= f.submit "Create Admin Account", class: "btn-primary w-full justify-center" %>
+  <% end %>
+</div>

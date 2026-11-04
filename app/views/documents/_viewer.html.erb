@@ -1,0 +1,21 @@
+<%# Multi-page viewer: one attachment per "page", with prev/next. %>
+<% pages = document.pages.to_a %>
+<% if pages.empty? %>
+  <%= empty_state "No files uploaded." %>
+<% else %>
+  <% current = pages[page - 1] %>
+  <div class="mb-3 flex items-center justify-between text-sm">
+    <%= link_to "← Prev", url_for(page: page - 1), class: ["btn-secondary btn-sm", ("pointer-events-none opacity-40" if page <= 1)] %>
+    <span>Page <%= page %> of <%= pages.size %> · <%= link_to current.filename, rails_blob_path(current, disposition: :attachment), class: "link" %></span>
+    <%= link_to "Next →", url_for(page: page + 1), class: ["btn-secondary btn-sm", ("pointer-events-none opacity-40" if page >= pages.size)] %>
+  </div>
+  <div class="flex justify-center rounded bg-slate-50 p-2">
+    <% if current.image? %>
+      <%= image_tag rails_blob_path(current, disposition: :inline), class: "max-h-[80vh] max-w-full" %>
+    <% elsif current.content_type == "application/pdf" %>
+      <iframe src="<%= rails_blob_path(current, disposition: :inline) %>" class="h-[80vh] w-full"></iframe>
+    <% else %>
+      <p class="p-6 text-sm"><%= link_to "Download #{current.filename}", rails_blob_path(current, disposition: :attachment), class: "link" %></p>
+    <% end %>
+  </div>
+<% end %>

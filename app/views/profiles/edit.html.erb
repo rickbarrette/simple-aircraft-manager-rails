@@ -1,0 +1,9 @@
+<h1 class="mb-4 text-2xl font-bold">Your Profile</h1>
+<%= form_with model: @user, url: profile_path, method: :patch, class: "card card-body space-y-4 max-w-md" do |f| %>
+  <%= f.errors_summary %>
+  <%= f.field :name %>
+  <%= f.field :email_address, as: :email, label: "Email" %>
+  <%= f.field :password, as: :password, label: "New password", hint: "Leave blank to keep your current password.", autocomplete: "new-password" %>
+  <%= f.field :password_confirmation, as: :password, label: "Confirm new password" %>
+  <%= f.submit "Save" %>
+<% end %>

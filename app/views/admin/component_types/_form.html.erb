@@ -1,0 +1,7 @@
+<%= form_with model: [:admin, component_type], class: "card card-body space-y-4 max-w-md" do |f| %>
+  <%= f.errors_summary %>
+  <%= f.field :name, required: true %>
+  <%= f.field :consumable, as: :checkbox, label: "Consumable (oil filter, spark plugs…)" %>
+  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", admin_component_types_path, class: "btn-secondary" %></div>
+<% end %>
+<% if component_type.persisted? %><div class="mt-4"><%= delete_button "Delete type", admin_component_type_path(component_type) %></div><% end %>

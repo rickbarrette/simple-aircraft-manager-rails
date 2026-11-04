@@ -1,0 +1,15 @@
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card max-w-3xl">
+  <div class="card-header"><h2 class="card-title">Flight on <%= fmt_date(@flight_log.date) %></h2>
+    <% if owner? %><%= delete_button "Delete", aircraft_flight_log_path(@aircraft, @flight_log), confirm: "Delete this flight log? Aircraft and component hours will NOT be rolled back." %><% end %></div>
+  <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
+    <dt class="text-slate-500">Tach</dt><dd><%= hours(@flight_log.tach_time) %> <span class="text-xs text-slate-500"><%= "(#{@flight_log.tach_out} → #{@flight_log.tach_in})" if @flight_log.tach_out && @flight_log.tach_in %></span></dd>
+    <dt class="text-slate-500">Hobbs</dt><dd><%= hours(@flight_log.hobbs_time) %> <span class="text-xs text-slate-500"><%= "(#{@flight_log.hobbs_out} → #{@flight_log.hobbs_in})" if @flight_log.hobbs_out && @flight_log.hobbs_in %></span></dd>
+    <dt class="text-slate-500">Route</dt><dd class="col-span-3"><%= @flight_log.route_summary.presence || "—" %> <%= @flight_log.route %></dd>
+    <dt class="text-slate-500">Oil added</dt><dd><%= @flight_log.oil_added ? "#{@flight_log.oil_added} qt #{@flight_log.oil_added_type}" : "—" %></dd>
+    <dt class="text-slate-500">Fuel added</dt><dd><%= @flight_log.fuel_added ? "#{@flight_log.fuel_added} gal #{@flight_log.fuel_added_type}" : "—" %></dd>
+    <dt class="text-slate-500">Pilot</dt><dd><%= @flight_log.user&.display_name || "—" %></dd>
+    <dt class="text-slate-500">Track log</dt><dd><%= @flight_log.track_log.attached? ? link_to(@flight_log.track_log.filename, rails_blob_path(@flight_log.track_log, disposition: :attachment), class: "link") : "—" %></dd>
+  </dl>
+  <% if @flight_log.notes.present? %><div class="border-t border-slate-100 px-4 py-3 text-sm"><%= simple_format @flight_log.notes %></div><% end %>
+</section>

@@ -1,0 +1,25 @@
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>Priority</th><th>Issue</th><th>Component</th><th>Reported</th><th></th></tr></thead>
+    <tbody>
+      <% squawks.each do |s| %>
+        <tr>
+          <td><%= squawk_priority_badge(s) %></td>
+          <td class="max-w-md">
+            <%= s.issue_reported %>
+            <% if s.attachment.attached? %><div><%= link_to "📎 #{s.attachment.filename}", rails_blob_path(s.attachment, disposition: :inline), class: "link text-xs", target: "_blank" %></div><% end %>
+            <% if s.notes.present? %><div class="mt-1 text-xs text-slate-500"><%= s.notes %></div><% end %>
+          </td>
+          <td><%= s.component&.to_s || "—" %></td>
+          <td class="whitespace-nowrap text-xs text-slate-500"><%= s.created_at.to_date %><br><%= s.reported_by&.display_name %></td>
+          <td class="whitespace-nowrap text-right">
+            <% if owner? %>
+              <%= button_to "Resolve", resolve_aircraft_squawk_path(aircraft, s), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %>
+              <%= link_to "Edit", edit_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

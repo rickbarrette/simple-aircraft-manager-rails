@@ -1,0 +1,18 @@
+# Simplest self-hosting: one container, SQLite + uploads in a named volume.
+#
+#   cp .env.example .env   # set SECRET_KEY_BASE (bin/rails secret) and APP_HOST
+#   docker compose up -d --build
+#   open http://localhost:3000  → create the admin account
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    env_file: .env
+    environment:
+      SOLID_QUEUE_IN_PUMA: "true"   # background jobs run inside the web process
+    volumes:
+      - sam_storage:/rails/storage  # databases + uploaded files: back this up
+volumes:
+  sam_storage:

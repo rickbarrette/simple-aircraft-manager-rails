@@ -1,0 +1,52 @@
+<% content_for :title, "#{@aircraft.tail_number} Components" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card">
+  <div class="card-header">
+    <h2 class="card-title">Components</h2>
+    <div class="flex items-center gap-3">
+      <%= link_to (@show_disposed ? "Hide disposed" : "Show disposed"),
+            aircraft_components_path(@aircraft, disposed: (@show_disposed ? nil : 1)), class: "link text-sm" %>
+      <% if owner? %><%= link_to "+ Add Component", new_aircraft_component_path(@aircraft), class: "btn-primary" %><% end %>
+    </div>
+  </div>
+  <% if @rows.empty? %>
+    <%= empty_state "No components yet. Add the engine, propeller, oil filter, ELT battery, etc." %>
+  <% else %>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr>
+          <th>Component</th><th>Make / Model</th><th>Status</th>
+          <th class="text-right">In service</th><th class="text-right">Since OH/svc</th>
+          <th>Limit</th><th>Life</th><th></th>
+        </tr></thead>
+        <tbody>
+          <% @rows.each do |c, depth| %>
+            <tr>
+              <td style="padding-left: <%= 0.75 + depth * 1.25 %>rem">
+                <%= "↳ " if depth > 0 %><%= link_to c.component_type.name, aircraft_component_path(@aircraft, c), class: "link font-medium" %>
+                <% if c.install_location.present? %><div class="text-xs text-slate-500"><%= c.install_location %></div><% end %>
+              </td>
+              <td><%= c.manufacturer %> <%= c.model %><% if c.serial_number.present? %><div class="text-xs text-slate-500">S/N <%= c.serial_number %></div><% end %></td>
+              <td><%= tag.span c.status_label, class: { "IN-USE" => "badge-green", "SPARE" => "badge-gray", "DISPOSED" => "badge-gray" }[c.status] %></td>
+              <td class="text-right tabular-nums"><%= hours(c.hours_in_service) %></td>
+              <td class="text-right tabular-nums"><%= hours(c.hours_since_overhaul) %></td>
+              <td class="text-xs text-slate-600">
+                <% if c.replacement_critical? && (c.replacement_hours || c.replacement_days) %>
+                  Replace: <%= [c.replacement_hours && "#{c.replacement_hours} h", c.replacement_days && "#{c.replacement_days} d"].compact.join(" / ") %><br>
+                <% end %>
+                <% if c.tbo_critical? && c.tbo_hours %>TBO: <%= c.tbo_hours %> h<%= " (on condition)" if c.on_condition? %><% end %>
+              </td>
+              <td><%= life_badge(c.life_status) %></td>
+              <td class="whitespace-nowrap text-right">
+                <% if owner? %>
+                  <%= link_to "Edit", edit_aircraft_component_path(@aircraft, c), class: "btn-secondary btn-sm" %>
+                  <%= link_to "Service", aircraft_component_path(@aircraft, c, anchor: "service"), class: "btn-secondary btn-sm" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</section>

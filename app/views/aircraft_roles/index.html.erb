@@ -1,0 +1,61 @@
+<% content_for :title, "#{@aircraft.tail_number} Access" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<div class="grid gap-5 lg:grid-cols-2">
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">People</h2></div>
+    <table class="table">
+      <tbody>
+        <% @roles.each do |r| %>
+          <tr>
+            <td><%= r.user.display_name %><div class="text-xs text-slate-500"><%= r.user.email_address %></div></td>
+            <td>
+              <%= form_with url: aircraft_aircraft_role_path(@aircraft, r), method: :patch do |f| %>
+                <%= f.select :role, AircraftRole::ROLES.invert, { selected: r.role }, class: "input w-28", onchange: "this.form.requestSubmit()" %>
+              <% end %>
+            </td>
+            <td class="text-right"><% unless r.user == current_user %><%= delete_button "Remove", aircraft_aircraft_role_path(@aircraft, r), confirm: "Remove #{r.user.display_name}'s access?" %><% end %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <%= form_with url: aircraft_aircraft_roles_path(@aircraft), class: "flex flex-wrap items-end gap-2 border-t border-slate-100 p-4" do |f| %>
+      <div class="flex-1"><%= f.label :email_address, "Add by email", class: "label" %><%= f.email_field :email_address, class: "input", required: true %></div>
+      <%= f.select :role, AircraftRole::ROLES.invert, { selected: "pilot" }, class: "input w-28" %>
+      <%= f.submit "Add", class: "btn-primary" %>
+    <% end %>
+    <p class="px-4 pb-4 hint"><strong>Owners</strong> can edit everything. <strong>Pilots</strong> can view all records, log flights, update hours, and add squawks, notes and oil/fuel.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">Share Links</h2></div>
+    <% if @share_tokens.any? %>
+      <ul class="divide-y divide-slate-100">
+        <% @share_tokens.each do |t| %>
+          <li class="px-4 py-3">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <span class="font-medium"><%= t.label.presence || "Untitled link" %></span>
+                <%= tag.span ShareToken::PRIVILEGES[t.privilege], class: t.maintenance? ? "badge-blue" : "badge-green" %>
+                <% if t.expired? %><span class="badge-red">Expired</span><% end %>
+              </div>
+              <%= delete_button "Revoke", aircraft_share_token_path(@aircraft, t), confirm: "Revoke this link? Anyone using it will lose access." %>
+            </div>
+            <input type="text" readonly value="<%= shared_url(t.token) %>" class="input mt-2 font-mono text-xs" onclick="this.select()">
+            <div class="mt-1 text-xs text-slate-500">Created <%= t.created_at.to_date %><%= " by #{t.created_by.display_name}" if t.created_by %> · <%= t.expires_at ? "expires #{l t.expires_at, format: :short}" : "never expires" %></div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <%= empty_state "No share links." %>
+    <% end %>
+    <%= form_with model: ShareToken.new, url: aircraft_share_tokens_path(@aircraft), class: "space-y-3 border-t border-slate-100 p-4" do |f| %>
+      <div class="grid gap-3 sm:grid-cols-3">
+        <%= f.field :label, placeholder: "Mechanic, buyer…" %>
+        <%= f.field :privilege, as: :select, label: "Shows", collection: ShareToken::PRIVILEGES.invert %>
+        <%= f.field :expires_at, as: :datetime, label: "Expires (optional)" %>
+      </div>
+      <p class="hint"><strong>Current Status</strong>: overview, airworthiness, components, open squawks, AD/inspection status, oil & fuel, public notes and documents shared with all links. <strong>Maintenance Detail</strong> adds the full logbook, history, resolved squawks and major records.</p>
+      <%= f.submit "Create Share Link" %>
+    <% end %>
+  </section>
+</div>

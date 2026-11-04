@@ -1,0 +1,30 @@
+<%# Header + tab bar shown on every aircraft page. %>
+<% aw = aircraft.airworthiness %>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <% if aircraft.picture.attached? %>
+      <%= image_tag aircraft.picture, class: "h-12 w-12 rounded-md object-cover" %>
+    <% end %>
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">
+        <%= link_to aircraft.tail_number, aircraft_path(aircraft) %>
+        <span class="ml-1 text-base font-normal text-slate-500"><%= [aircraft.make, aircraft.model].compact_blank.join(" ") %></span>
+      </h1>
+      <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
+        <%= airworthiness_badge(aw) %>
+        <%= aircraft_status_badge(aircraft) %>
+        <span class="text-slate-500">Tach <%= hours(aircraft.tach_time) %> · Hobbs <%= hours(aircraft.hobbs_time) %></span>
+        <span class="badge-gray"><%= current_role.capitalize %></span>
+      </div>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <%= link_to "Log Flight", new_aircraft_flight_log_path(aircraft), class: "btn-primary" %>
+    <%= link_to "Report Squawk", new_aircraft_squawk_path(aircraft), class: "btn-secondary" %>
+  </div>
+</div>
+<nav class="mb-5 flex overflow-x-auto border-b border-slate-200">
+  <% aircraft_tabs(aircraft).each do |label, path, names| %>
+    <%= nav_tab label, path, names.include?(controller_name) %>
+  <% end %>
+</nav>

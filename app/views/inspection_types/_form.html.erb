@@ -1,0 +1,19 @@
+<%= form_with model: inspection_type, url: inspection_type.new_record? ? aircraft_inspection_types_path(aircraft) : aircraft_inspection_type_path(aircraft, inspection_type), class: "card card-body space-y-4 max-w-2xl" do |f| %>
+  <%= f.errors_summary %>
+  <%= f.field :name, required: true, placeholder: "Annual Inspection" %>
+  <div class="flex gap-6">
+    <%= f.field :required, as: :checkbox, label: "Required for airworthiness" %>
+    <%= f.field :recurring, as: :checkbox, label: "Recurring" %>
+  </div>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <%= f.field :recurring_hours, as: :number, step: 0.1, label: "Every (hours)" %>
+    <%= f.field :recurring_months, as: :number, label: "Every (calendar months)", hint: "Due end of month." %>
+    <%= f.field :recurring_days, as: :number, label: "Every (days)" %>
+  </div>
+  <%= render "shared/applicability_fields", aircraft: aircraft, record: inspection_type, applies_to_airframe: @applies_to_airframe %>
+  <% if inspection_type.persisted? && inspection_type.aircraft.count > 1 %>
+    <p class="rounded bg-amber-50 p-2 text-xs text-amber-800">This inspection type is shared with other aircraft; interval changes affect them too.</p>
+  <% end %>
+  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_inspections_path(aircraft), class: "btn-secondary" %></div>
+<% end %>
+<% if inspection_type.persisted? %><div class="mt-4"><%= delete_button "Remove from #{aircraft.tail_number}", aircraft_inspection_type_path(aircraft, inspection_type) %></div><% end %>

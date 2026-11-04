@@ -1,0 +1,15 @@
+<%= form_with model: compliance, url: compliance.new_record? ? aircraft_ad_compliances_path(aircraft) : aircraft_ad_compliance_path(aircraft, compliance), class: "card card-body space-y-4 max-w-2xl" do |f| %>
+  <%= f.errors_summary %>
+  <%= f.field :airworthiness_directive_id, as: :select, label: "AD", collection: aircraft.applicable_ads.ordered.map { ["#{_1.name} – #{_1.short_description.truncate(50)}", _1.id] } %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :date_complied, as: :date %>
+    <%= f.field :aircraft_hours_at_compliance, as: :number, step: 0.1, label: "Aircraft hours (tach)" %>
+    <%= f.field :next_due_at_time, as: :number, step: 0.1, label: "Next due at (tach hours)", hint: "0 = no hour-based recurrence." %>
+    <%= f.field :component_id, as: :select, label: "Component", collection: component_options(aircraft) %>
+    <%= f.field :logbook_entry_id, as: :select, label: "Logbook entry", collection: logbook_options(aircraft) %>
+  </div>
+  <%= f.field :permanent, as: :checkbox, label: "Permanently complied (terminating action)" %>
+  <%= f.field :compliance_notes, as: :textarea, label: "Method of compliance", rows: 3, required: true %>
+  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_airworthiness_directives_path(aircraft), class: "btn-secondary" %></div>
+<% end %>
+<% if compliance.persisted? %><div class="mt-4"><%= delete_button "Delete record", aircraft_ad_compliance_path(aircraft, compliance) %></div><% end %>

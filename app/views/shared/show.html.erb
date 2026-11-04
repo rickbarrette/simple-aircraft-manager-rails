@@ -1,0 +1,101 @@
+<% content_for :title, @aircraft.tail_number %>
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+    <% if @aircraft.picture.attached? %><%= image_tag rails_blob_path(@aircraft.picture, disposition: :inline), class: "h-16 w-16 rounded-md object-cover" %><% end %>
+    <div>
+      <h1 class="text-2xl font-bold"><%= @aircraft.tail_number %> <span class="text-base font-normal text-slate-500"><%= [@aircraft.make, @aircraft.model].compact_blank.join(" ") %></span></h1>
+      <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
+        <%= airworthiness_badge(@airworthiness) %> <%= aircraft_status_badge(@aircraft) %>
+        <span class="text-slate-500">Tach <%= hours(@aircraft.tach_time) %> · Hobbs <%= hours(@aircraft.hobbs_time) %></span>
+      </div>
+    </div>
+  </div>
+  <span class="badge-gray">Shared view · <%= ShareToken::PRIVILEGES[@share.privilege] %></span>
+</div>
+
+<div class="space-y-5">
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">Airworthiness</h2><%= airworthiness_badge(@airworthiness, large: true) %></div>
+    <div class="card-body">
+      <% if @airworthiness.issues.empty? %><p class="text-sm text-emerald-700">No open issues.</p><% else %>
+        <ul class="space-y-1 text-sm"><% @airworthiness.issues.each do |i| %><li><span class="<%= i.severity == 'RED' ? 'badge-red' : 'badge-orange' %>"><%= i.category %></span> <%= i.title %> <span class="text-xs text-slate-500"><%= i.description %></span></li><% end %></ul>
+      <% end %>
+    </div>
+  </section>
+
+  <div class="grid gap-5 lg:grid-cols-2">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Open Squawks</h2></div>
+      <% if @active_squawks.any? %>
+        <ul class="divide-y divide-slate-100"><% @active_squawks.each do |s| %><li class="px-4 py-2 text-sm"><%= squawk_priority_badge(s) %> <%= s.issue_reported %></li><% end %></ul>
+      <% else %><%= empty_state "None." %><% end %>
+    </section>
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Consumption</h2></div>
+      <div class="card-body grid grid-cols-2 gap-4 text-center">
+        <div><div class="text-2xl font-semibold"><%= @oil.average || "—" %></div><div class="text-xs text-slate-500">Oil hrs/qt</div></div>
+        <div><div class="text-2xl font-semibold"><%= @fuel.average || "—" %></div><div class="text-xs text-slate-500">Fuel gal/hr</div></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">Components</h2></div>
+    <div class="overflow-x-auto"><table class="table">
+      <thead><tr><th>Component</th><th>Make / Model</th><th class="text-right">In service</th><th class="text-right">Since OH/svc</th><th>TBO</th><th>Life</th></tr></thead>
+      <tbody><% @components.each do |c| %><tr>
+        <td><%= c %></td><td><%= c.manufacturer %> <%= c.model %></td>
+        <td class="text-right"><%= hours(c.hours_in_service) %></td><td class="text-right"><%= hours(c.hours_since_overhaul) %></td>
+        <td><%= c.tbo_hours %></td><td><%= life_badge(c.life_status) %></td></tr><% end %></tbody>
+    </table></div>
+  </section>
+
+  <div class="grid gap-5 lg:grid-cols-2">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Inspections</h2></div>
+      <table class="table"><tbody><% @inspection_rows.each do |r| %><tr>
+        <td><%= r.type.name %></td><td class="text-xs"><%= r.latest&.date || "—" %></td><td><%= compliance_badge(r.status) %></td></tr><% end %></tbody></table>
+    </section>
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">ADs</h2></div>
+      <table class="table"><tbody><% @ad_rows.each do |r| %><tr>
+        <td><%= r.ad.name %><div class="text-xs text-slate-500"><%= r.ad.short_description %></div></td><td class="text-xs"><%= r.latest&.date_complied || "—" %></td><td><%= compliance_badge(r.status) %></td></tr><% end %></tbody></table>
+    </section>
+  </div>
+
+  <% if @notes.any? %>
+    <section class="card"><div class="card-header"><h2 class="card-title">Notes</h2></div>
+      <ul class="divide-y divide-slate-100"><% @notes.each do |n| %><li class="px-4 py-2 text-sm"><%= simple_format n.text %><div class="text-xs text-slate-500"><%= n.created_at.to_date %></div></li><% end %></ul></section>
+  <% end %>
+
+  <% if @documents.any? %>
+    <section class="card"><div class="card-header"><h2 class="card-title">Documents</h2></div>
+      <ul class="divide-y divide-slate-100"><% @documents.each do |d| %><li class="px-4 py-2 text-sm">
+        <span class="font-medium"><%= d.name %></span> <span class="text-xs text-slate-500"><%= d.type_label %></span>
+        <div class="mt-1 flex flex-wrap gap-2"><% d.pages.each_with_index do |p, i| %><%= link_to "#{i + 1}. #{p.filename}", rails_blob_path(p, disposition: :inline), class: "link text-xs", target: "_blank" %><% end %></div>
+      </li><% end %></ul></section>
+  <% end %>
+
+  <% if @share.maintenance? %>
+    <section class="card"><div class="card-header"><h2 class="card-title">Logbook</h2></div>
+      <% if @logbook.any? %><table class="table"><tbody><% @logbook.each do |e| %><tr>
+        <td class="whitespace-nowrap"><%= e.date %></td><td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
+        <td class="text-right"><%= hours(e.aircraft_hours_at_entry) %></td><td class="whitespace-pre-wrap text-xs"><%= e.text %></td><td class="text-xs"><%= e.signoff_person %></td></tr><% end %></tbody></table>
+      <% else %><%= empty_state "No entries." %><% end %></section>
+
+    <div class="grid gap-5 lg:grid-cols-2">
+      <section class="card"><div class="card-header"><h2 class="card-title">Inspection History</h2></div>
+        <table class="table"><tbody><% @inspection_history.each do |r| %><tr><td><%= r.date %></td><td><%= r.inspection_type.name %></td><td class="text-right"><%= hours(r.hours_at_inspection) %></td></tr><% end %></tbody></table></section>
+      <section class="card"><div class="card-header"><h2 class="card-title">AD Compliance History</h2></div>
+        <table class="table"><tbody><% @ad_history.each do |c| %><tr><td><%= c.date_complied %></td><td><%= c.airworthiness_directive.name %></td><td class="text-xs"><%= c.compliance_notes %></td></tr><% end %></tbody></table></section>
+    </div>
+
+    <section class="card"><div class="card-header"><h2 class="card-title">Major Repairs & Alterations</h2></div>
+      <% if @major_records.any? %><table class="table"><tbody><% @major_records.each do |r| %><tr><td><%= r.date_performed %></td><td><%= r.type_label %></td><td><%= r.title %><div class="text-xs text-slate-500"><%= r.description %></div></td><td class="text-xs"><%= r.stc_number %></td></tr><% end %></tbody></table>
+      <% else %><%= empty_state "None recorded." %><% end %></section>
+
+    <section class="card"><div class="card-header"><h2 class="card-title">Resolved Squawks</h2></div>
+      <% if @resolved_squawks.any? %><ul class="divide-y divide-slate-100"><% @resolved_squawks.each do |s| %><li class="px-4 py-2 text-sm"><%= squawk_priority_badge(s) %> <%= s.issue_reported %> <span class="text-xs text-slate-500">resolved <%= s.resolved_at&.to_date %></span></li><% end %></ul>
+      <% else %><%= empty_state "None." %><% end %></section>
+  <% end %>
+</div>

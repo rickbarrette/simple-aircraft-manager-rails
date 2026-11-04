@@ -1,0 +1,15 @@
+<%= form_with model: [aircraft, record], class: "card card-body space-y-4 max-w-2xl" do |f| %>
+  <%= f.errors_summary %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :record_type, as: :select, label: "Type", collection: ConsumableRecord::TYPES.invert %>
+    <%= f.field :date, as: :date %>
+    <%= f.field :quantity_added, as: :number, step: 0.01, label: "Quantity added (qt / gal)" %>
+    <%= f.field :level_after, as: :number, step: 0.01, label: "Level after" %>
+    <%= f.field :consumable_type, label: "Product", placeholder: "Aeroshell W100 / 100LL" %>
+    <%= f.field :flight_hours, as: :number, step: 0.1, label: "Tach at time of record" %>
+  </div>
+  <%= f.field :notes, as: :textarea, rows: 2 %>
+  <%= f.field :excluded_from_averages, as: :checkbox, label: "Exclude from averages", hint: "Use for oil changes or partial fills that would skew the trend." %>
+  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_consumable_records_path(aircraft), class: "btn-secondary" %></div>
+<% end %>
+<% if record.persisted? %><div class="mt-4"><%= delete_button "Delete record", aircraft_consumable_record_path(aircraft, record) %></div><% end %>

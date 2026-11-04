@@ -1,0 +1,18 @@
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card max-w-4xl">
+  <div class="card-header">
+    <h2 class="card-title"><%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log — <%= fmt_date(@entry.date) %></h2>
+    <% if owner? %><%= link_to "Edit", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
+  </div>
+  <div class="card-body space-y-3">
+    <div class="flex flex-wrap gap-4 text-sm text-slate-600">
+      <span>Type: <%= LogbookEntry::ENTRY_TYPES[@entry.entry_type] %></span>
+      <span>Aircraft hours: <%= hours(@entry.aircraft_hours_at_entry) %></span>
+    </div>
+    <div class="whitespace-pre-wrap rounded bg-slate-50 p-3 font-mono text-sm"><%= @entry.text %></div>
+    <div class="text-sm text-slate-600">Signed off: <%= @entry.signoff_person.presence || "—" %> <%= "(#{@entry.signoff_location})" if @entry.signoff_location.present? %></div>
+    <% if @entry.document %>
+      <p class="text-sm">Scan: <%= link_to @entry.document.name, aircraft_document_path(@aircraft, @entry.document, page: @entry.page_number), class: "link" %><%= " (page #{@entry.page_number})" if @entry.page_number %></p>
+    <% end %>
+  </div>
+</section>

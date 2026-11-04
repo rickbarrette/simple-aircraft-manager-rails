@@ -1,0 +1,18 @@
+<% content_for :title, @document.name %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title"><%= @document.name %></h2>
+      <p class="text-xs text-slate-500"><%= @document.type_label %><%= " · #{@document.document_collection.name}" if @document.document_collection %></p>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= visibility_badge(@document.effective_visibility) %>
+      <% if owner? %><%= link_to "Edit", edit_aircraft_document_path(@aircraft, @document), class: "btn-secondary btn-sm" %><% end %>
+    </div>
+  </div>
+  <div class="card-body">
+    <% if @document.description.present? %><p class="mb-3 text-sm text-slate-600"><%= @document.description %></p><% end %>
+    <%= render "documents/viewer", document: @document, page: @page %>
+  </div>
+</section>

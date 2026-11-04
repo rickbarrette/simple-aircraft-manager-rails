@@ -1,0 +1,31 @@
+<% content_for :title, "#{@aircraft.tail_number} Squawks" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card">
+  <div class="card-header">
+    <h2 class="card-title">Open Squawks</h2>
+    <%= link_to "+ Report Squawk", new_aircraft_squawk_path(@aircraft), class: "btn-primary" %>
+  </div>
+  <% if @active.any? %><%= render "squawks/table", squawks: @active, aircraft: @aircraft %><% else %><%= empty_state "No open squawks." %><% end %>
+</section>
+
+<section class="card mt-5">
+  <div class="card-header"><h2 class="card-title">Resolved</h2></div>
+  <% if @resolved.any? %>
+    <table class="table">
+      <thead><tr><th>Priority</th><th>Issue</th><th>Resolution</th><th>Resolved</th><th></th></tr></thead>
+      <tbody>
+        <% @resolved.each do |s| %>
+          <tr>
+            <td><%= squawk_priority_badge(s) %></td>
+            <td><%= s.issue_reported %></td>
+            <td class="text-xs text-slate-600"><%= s.notes %></td>
+            <td class="text-xs text-slate-500"><%= s.resolved_at&.to_date %></td>
+            <td class="text-right"><% if owner? %><%= button_to "Reopen", reopen_aircraft_squawk_path(@aircraft, s), method: :patch, class: "btn-secondary btn-sm" %><% end %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <%= empty_state "No resolved squawks." %>
+  <% end %>
+</section>

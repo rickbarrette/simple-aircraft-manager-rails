@@ -1,0 +1,51 @@
+<% content_for :title, "#{@aircraft.tail_number} Oil & Fuel" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<div class="grid gap-5 lg:grid-cols-2">
+  <% [@oil, @fuel].each do |stats| %>
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title"><%= stats.oil? ? "Oil Consumption" : "Fuel Burn" %></h2>
+        <%= link_to "+ Add #{stats.oil? ? 'Oil' : 'Fuel'}", new_aircraft_consumable_record_path(@aircraft, type: stats.record_type), class: "btn-secondary btn-sm" %>
+      </div>
+      <div class="card-body">
+        <div class="mb-3 flex gap-6 text-sm">
+          <div><span class="text-2xl font-semibold"><%= stats.average || "—" %></span> <span class="text-slate-500"><%= stats.metric_label %> avg (last 20)</span></div>
+          <div><span class="text-lg"><%= stats.latest || "—" %></span> <span class="text-slate-500">latest</span></div>
+        </div>
+        <% if stats.points.size >= 2 %>
+          <%= line_chart stats.chart_data, xtitle: "Tach hours", ytitle: stats.metric_label, height: "220px",
+                library: { scales: { x: { type: "linear" } } }, colors: [stats.oil? ? "#b45309" : "#0369a1"] %>
+        <% else %>
+          <%= empty_state "Add at least three records to see a trend." %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>
+
+<section class="card mt-5">
+  <div class="card-header"><h2 class="card-title">Records</h2></div>
+  <% if @records.any? %>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>Date</th><th>Type</th><th class="text-right">Added</th><th class="text-right">Level after</th><th>Product</th><th class="text-right">Tach</th><th>Notes</th><th></th></tr></thead>
+        <tbody>
+          <% @records.each do |r| %>
+            <tr>
+              <td class="whitespace-nowrap"><%= r.date %></td>
+              <td><%= tag.span ConsumableRecord::TYPES[r.record_type], class: r.record_type == "oil" ? "badge-orange" : "badge-blue" %></td>
+              <td class="text-right tabular-nums"><%= r.quantity_added %> <%= r.unit %></td>
+              <td class="text-right tabular-nums"><%= r.level_after ? "#{r.level_after} #{r.unit}" : "" %></td>
+              <td><%= r.consumable_type %></td>
+              <td class="text-right tabular-nums"><%= hours(r.flight_hours) %></td>
+              <td class="text-xs text-slate-500"><%= r.notes %><%= " (excluded from average)" if r.excluded_from_averages? %></td>
+              <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_consumable_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <%= empty_state "No oil or fuel records yet." %>
+  <% end %>
+</section>

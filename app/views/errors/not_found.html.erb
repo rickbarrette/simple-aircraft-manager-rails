@@ -1,0 +1,5 @@
+<div class="card mx-auto max-w-lg card-body text-center">
+  <h1 class="text-lg font-semibold">Not found</h1>
+  <p class="mt-2 text-sm text-slate-600">That page doesn't exist, or you don't have access to it.</p>
+  <% if current_user %><p class="mt-4"><%= link_to "Back to fleet", root_path, class: "btn-secondary" %></p><% end %>
+</div>

@@ -1,0 +1,70 @@
+<% content_for :title, "#{@aircraft.tail_number} ADs" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card">
+  <div class="card-header">
+    <h2 class="card-title">Airworthiness Directives & Bulletins</h2>
+    <% if owner? %>
+      <div class="flex flex-wrap items-center gap-2">
+        <% if @attachable.any? %>
+          <%= form_with url: attach_aircraft_airworthiness_directives_path(@aircraft), class: "flex gap-2" do |f| %>
+            <%= f.select :airworthiness_directive_id, @attachable.map { ["#{_1.name} – #{_1.short_description.truncate(40)}", _1.id] }, {}, class: "input w-64" %>
+            <%= f.submit "Link existing", class: "btn-secondary" %>
+          <% end %>
+        <% end %>
+        <%= link_to "+ New AD", new_aircraft_airworthiness_directive_path(@aircraft), class: "btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+  <% if @rows.any? %>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>AD / Bulletin</th><th>Description</th><th>Recurrence</th><th>Last complied</th><th>Next due</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <% @rows.each do |row| ad = row.ad %>
+            <tr>
+              <td class="whitespace-nowrap font-medium"><span class="badge-gray mr-1"><%= ad.bulletin_label %></span><%= ad.name %>
+                <% unless ad.mandatory? %><div class="text-xs text-slate-400">not mandatory</div><% end %></td>
+              <td class="max-w-sm text-xs"><%= ad.short_description %>
+                <% if ad.conditional? && ad.trigger_condition.present? %><div class="text-slate-500">Trigger: <%= ad.trigger_condition %></div><% end %></td>
+              <td class="text-xs"><%= ad.recurring? ? [ad.recurring_hours.to_f > 0 && "#{hours(ad.recurring_hours)} h", ad.recurring_months > 0 && "#{ad.recurring_months} mo"].select(&:itself).join(" / ") : "One-time" %></td>
+              <td class="text-xs"><%= row.latest ? "#{row.latest.date_complied}#{' (permanent)' if row.latest.permanent?}" : "—" %></td>
+              <td class="text-xs"><%= [row.next_due_date&.strftime("%b %Y"), row.next_due_hours && "#{hours(row.next_due_hours)} h"].compact.join(" / ").presence || "—" %></td>
+              <td><%= compliance_badge(row.status) %></td>
+              <td class="whitespace-nowrap text-right">
+                <% if owner? %>
+                  <%= link_to "Comply", new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id), class: "btn-secondary btn-sm" %>
+                  <%= link_to "Edit", edit_aircraft_airworthiness_directive_path(@aircraft, ad), class: "btn-secondary btn-sm" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <%= empty_state "No ADs tracked for this aircraft." %>
+  <% end %>
+</section>
+
+<section class="card mt-5">
+  <div class="card-header"><h2 class="card-title">Compliance History</h2></div>
+  <% if @history.any? %>
+    <table class="table">
+      <thead><tr><th>Date</th><th>AD</th><th class="text-right">Hours</th><th>Next due (hrs)</th><th>Notes</th><th></th></tr></thead>
+      <tbody>
+        <% @history.each do |c| %>
+          <tr>
+            <td class="whitespace-nowrap"><%= c.date_complied %></td>
+            <td><%= c.airworthiness_directive.name %><%= " (#{c.component})" if c.component %></td>
+            <td class="text-right"><%= hours(c.aircraft_hours_at_compliance) %></td>
+            <td><%= c.permanent? ? "Permanent" : (c.next_due_at_time.to_f > 0 ? hours(c.next_due_at_time) : "—") %></td>
+            <td class="max-w-md text-xs"><%= c.compliance_notes %></td>
+            <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_ad_compliance_path(@aircraft, c), class: "btn-secondary btn-sm" %><% end %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <%= empty_state "No compliance records." %>
+  <% end %>
+</section>

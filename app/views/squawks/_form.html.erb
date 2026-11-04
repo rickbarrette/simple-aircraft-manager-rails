@@ -1,0 +1,15 @@
+<%= form_with model: [aircraft, squawk], class: "card card-body space-y-4 max-w-2xl" do |f| %>
+  <%= f.errors_summary %>
+  <%= f.field :priority, as: :select, collection: Squawk::PRIORITIES.invert, hint: "“Ground Aircraft” makes the aircraft not airworthy until resolved." %>
+  <%= f.field :issue_reported, as: :textarea, label: "Issue", required: true, autofocus: true %>
+  <%= f.field :component_id, as: :select, label: "Component (optional)", collection: component_options(aircraft) %>
+  <%= f.field :attachment, as: :file, label: "Photo / attachment" %>
+  <% if squawk.persisted? %><%= f.field :notes, as: :textarea, rows: 3 %><% end %>
+  <div class="flex gap-2">
+    <%= f.submit squawk.new_record? ? "Report Squawk" : "Save" %>
+    <%= link_to "Cancel", aircraft_squawks_path(aircraft), class: "btn-secondary" %>
+  </div>
+<% end %>
+<% if squawk.persisted? && owner? %>
+  <div class="mt-4"><%= delete_button "Delete squawk", aircraft_squawk_path(aircraft, squawk) %></div>
+<% end %>

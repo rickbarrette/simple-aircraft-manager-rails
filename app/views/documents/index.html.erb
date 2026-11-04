@@ -1,0 +1,39 @@
+<% content_for :title, "#{@aircraft.tail_number} Documents" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<div class="mb-4 flex justify-end gap-2">
+  <% if owner? %>
+    <%= link_to "+ Collection", new_aircraft_document_collection_path(@aircraft), class: "btn-secondary" %>
+    <%= link_to "+ Upload Document", new_aircraft_document_path(@aircraft), class: "btn-primary" %>
+  <% end %>
+</div>
+<% if @collections.empty? && @uncollected.empty? %>
+  <div class="card"><%= empty_state "No documents yet. Upload logbook scans, 337s, weight & balance, receipts…" %></div>
+<% end %>
+<div class="space-y-5">
+  <% @collections.each do |col| %>
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title"><%= "★ " if col.starred? %><%= col.name %></h2>
+          <% if col.description.present? %><p class="text-xs text-slate-500"><%= col.description %></p><% end %>
+        </div>
+        <div class="flex items-center gap-2">
+          <%= visibility_badge(col.visibility) %>
+          <% if owner? %>
+            <%= link_to "+ Document", new_aircraft_document_path(@aircraft, collection_id: col.id), class: "btn-secondary btn-sm" %>
+            <%= link_to "Edit", edit_aircraft_document_collection_path(@aircraft, col), class: "btn-secondary btn-sm" %>
+          <% end %>
+        </div>
+      </div>
+      <% if col.documents.any? %>
+        <ul class="divide-y divide-slate-100"><% col.documents.sort_by(&:name).each do |doc| %><%= render "documents/doc_row", doc: doc, aircraft: @aircraft %><% end %></ul>
+      <% else %><%= empty_state "Empty collection." %><% end %>
+    </section>
+  <% end %>
+  <% if @uncollected.any? %>
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Uncollected</h2></div>
+      <ul class="divide-y divide-slate-100"><% @uncollected.each do |doc| %><%= render "documents/doc_row", doc: doc, aircraft: @aircraft %><% end %></ul>
+    </section>
+  <% end %>
+</div>

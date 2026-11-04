@@ -1,0 +1,24 @@
+<%= form_with model: [aircraft, record], class: "card card-body space-y-4 max-w-3xl" do |f| %>
+  <%= f.errors_summary %>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <%= f.field :record_type, as: :select, label: "Type", collection: MajorRecord::RECORD_TYPES.invert %>
+    <%= f.field :date_performed, as: :date %>
+    <%= f.field :aircraft_hours, as: :number, step: 0.1 %>
+  </div>
+  <%= f.field :title, required: true %>
+  <%= f.field :description, as: :textarea, rows: 4 %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :performed_by %>
+    <%= f.field :component_id, as: :select, label: "Component", collection: component_options(aircraft) %>
+    <%= f.field :form_337_document_id, as: :select, label: "Form 337 document", collection: document_options(aircraft) %>
+    <%= f.field :logbook_entry_id, as: :select, label: "Logbook entry", collection: logbook_options(aircraft) %>
+    <%= f.field :stc_number, label: "STC number" %>
+    <%= f.field :stc_holder, label: "STC holder" %>
+    <%= f.field :stc_document_id, as: :select, label: "STC document", collection: document_options(aircraft) %>
+  </div>
+  <%= f.field :has_ica, as: :checkbox, label: "Includes Instructions for Continued Airworthiness" %>
+  <%= f.field :ica_notes, as: :textarea, rows: 2, label: "ICA notes" %>
+  <%= f.field :notes, as: :textarea, rows: 2 %>
+  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_major_records_path(aircraft), class: "btn-secondary" %></div>
+<% end %>
+<% if record.persisted? %><div class="mt-4"><%= delete_button "Delete record", aircraft_major_record_path(aircraft, record) %></div><% end %>

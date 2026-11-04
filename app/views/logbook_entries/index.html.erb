@@ -1,0 +1,36 @@
+<% content_for :title, "#{@aircraft.tail_number} Logbook" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card">
+  <div class="card-header">
+    <h2 class="card-title">Maintenance Logbook</h2>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= form_with url: aircraft_logbook_entries_path(@aircraft), method: :get, class: "flex gap-2" do |f| %>
+        <%= f.search_field :q, value: @query, placeholder: "Search entries…", class: "input w-48" %>
+        <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: "All logs", selected: @log_type }, class: "input w-32" %>
+        <%= f.submit "Filter", class: "btn-secondary" %>
+      <% end %>
+      <% if owner? %><%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %><% end %>
+    </div>
+  </div>
+  <% if @entries.any? %>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>Date</th><th>Log</th><th>Type</th><th class="text-right">Hours</th><th>Entry</th><th>Signed off</th></tr></thead>
+        <tbody>
+          <% @entries.each do |e| %>
+            <tr>
+              <td class="whitespace-nowrap"><%= link_to e.date, aircraft_logbook_entry_path(@aircraft, e), class: "link" %></td>
+              <td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
+              <td class="text-xs"><%= LogbookEntry::ENTRY_TYPES[e.entry_type] %></td>
+              <td class="text-right tabular-nums"><%= hours(e.aircraft_hours_at_entry) %></td>
+              <td class="max-w-xl"><%= e.text.truncate(220) %> <%= "📄" if e.document %></td>
+              <td class="text-xs text-slate-500"><%= e.signoff_person %><% if e.signoff_location.present? %><br><%= e.signoff_location %><% end %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <%= empty_state(@query.present? ? "No entries match “#{@query}”." : "No logbook entries yet.") %>
+  <% end %>
+</section>

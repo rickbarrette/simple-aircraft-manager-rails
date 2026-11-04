@@ -1,0 +1,24 @@
+<%= form_with model: [aircraft, document], class: "card card-body space-y-4 max-w-3xl", multipart: true do |f| %>
+  <%= f.errors_summary %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :name, required: true %>
+    <%= f.field :doc_type, as: :select, label: "Type", collection: Document::TYPES.invert %>
+    <%= f.field :document_collection_id, as: :select, label: "Collection",
+          collection: [["— None —", nil]] + aircraft.document_collections.ordered.map { [_1.name, _1.id] } %>
+    <%= f.field :visibility, as: :select, label: "Share-link visibility",
+          collection: [["Inherit from collection", nil]] + DocumentCollection::VISIBILITIES.invert.to_a %>
+  </div>
+  <%= f.field :description, as: :textarea, rows: 2 %>
+  <%= f.field :pages, as: :file, multiple: true, label: document.persisted? ? "Add files" : "Files",
+        hint: "Images, PDFs or text. Each file is a page in the viewer, in upload order." %>
+  <% if document.persisted? && document.pages.any? %>
+    <div>
+      <p class="label">Remove existing files</p>
+      <% document.pages.each do |p| %>
+        <label class="flex items-center gap-2 text-sm"><%= check_box_tag "remove_page_ids[]", p.id, false %> <%= p.filename %></label>
+      <% end %>
+    </div>
+  <% end %>
+  <div class="flex gap-2"><%= f.submit "Save Document" %><%= link_to "Cancel", aircraft_documents_path(aircraft), class: "btn-secondary" %></div>
+<% end %>
+<% if document.persisted? %><div class="mt-4"><%= delete_button "Delete document", aircraft_document_path(aircraft, document) %></div><% end %>

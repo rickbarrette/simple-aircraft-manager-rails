@@ -1,0 +1,24 @@
+<% content_for :title, "#{@aircraft.tail_number} Notes" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<section class="card">
+  <div class="card-header"><h2 class="card-title">Notes</h2><%= link_to "+ Add Note", new_aircraft_note_path(@aircraft), class: "btn-primary" %></div>
+  <% if @notes.any? %>
+    <ul class="divide-y divide-slate-100">
+      <% @notes.each do |note| %>
+        <li class="flex items-start justify-between gap-4 px-4 py-3">
+          <div>
+            <div class="text-sm"><%= simple_format note.text %></div>
+            <div class="mt-1 text-xs text-slate-500">
+              <%= note.user&.display_name || "Unknown" %> · <%= l note.created_at, format: :short %>
+              <%= "· edited" if note.edited_at %>
+              <% if note.public? %><span class="badge-green ml-1">Visible on share links</span><% end %>
+            </div>
+          </div>
+          <% if owner? %><%= link_to "Edit", edit_aircraft_note_path(@aircraft, note), class: "btn-secondary btn-sm" %><% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <%= empty_state "No notes yet." %>
+  <% end %>
+</section>

@@ -65,3 +65,9 @@ end
 gem "chartkick", "~> 5.2"
 
 gem "json", "~> 2.10"
+
+gem "roo", "~> 2.10"
+
+gem "csv", "~> 3.3"
+
+gem "caxlsx", "~> 4.5", group: :test

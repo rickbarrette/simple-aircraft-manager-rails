@@ -46,8 +46,8 @@
       <div class="card-header"><h2 class="card-title">Consumption</h2>
         <%= link_to "Oil & fuel →", aircraft_consumable_records_path(@aircraft), class: "link text-sm" %></div>
       <div class="card-body grid grid-cols-2 gap-4 text-center">
-        <div><div class="text-2xl font-semibold"><%= @oil.average || "—" %></div><div class="text-xs text-slate-500">Avg oil, hrs/qt</div></div>
-        <div><div class="text-2xl font-semibold"><%= @fuel.average || "—" %></div><div class="text-xs text-slate-500">Avg fuel burn, gal/hr</div></div>
+        <div><div class="text-2xl font-semibold"><%= @oil.recent || "—" %></div><div class="text-xs text-slate-500">Oil, hrs/qt (last ~100 hrs)</div></div>
+        <div><div class="text-2xl font-semibold"><%= @fuel.recent || "—" %></div><div class="text-xs text-slate-500">Fuel burn, gal/hr (last ~50 hrs)</div></div>
       </div>
     </section>
   </div>

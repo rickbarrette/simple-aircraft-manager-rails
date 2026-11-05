@@ -1,0 +1,10 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "File Access",
+      "fingerprint": "c1d23cfd1f641b61be5cc6d747c8658806ed9e5adccb66eaca8f2aac5ef449ee",
+      "file": "app/controllers/flight_imports_controller.rb",
+      "note": "Token is validated against TOKEN_FORMAT (server-generated uuid.ext) before use, and File.basename is applied; path is confined to tmp/imports."
+    }
+  ]
+}

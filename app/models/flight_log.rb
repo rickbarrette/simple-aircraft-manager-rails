@@ -7,7 +7,7 @@ class FlightLog < ApplicationRecord
   has_one_attached :track_log
 
   validates :date, presence: true
-  validates :tach_time, presence: true, numericality: { greater_than: 0 }
+  validates :tach_time, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :hobbs_time, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates_uploads :track_log
   before_validation :derive_times

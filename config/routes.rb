@@ -20,6 +20,9 @@ Rails.application.routes.draw do
     end
     resources :notes, except: :show
     resources :flight_logs, only: %i[index new create show destroy]
+    resource :flight_import, only: %i[new create show] do
+      post :confirm
+    end
     resources :consumable_records, path: "consumables", except: :show
     resources :logbook_entries
     resources :documents

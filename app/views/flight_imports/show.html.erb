@@ -1,0 +1,84 @@
+<% content_for :title, "Import Preview" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<% rows = @import.rows %>
+<% problems = rows.select { _1.status.in?(%i[error warning]) } %>
+<% last = @import.last_reading %>
+
+<section class="card mb-5">
+  <div class="card-header">
+    <h2 class="card-title">Preview: <%= @filename %></h2>
+    <span class="text-xs text-slate-500">Columns found: <%= @import.columns.keys.map { _1.to_s.humanize }.join(", ") %></span>
+  </div>
+  <div class="card-body grid grid-cols-2 gap-4 text-center sm:grid-cols-5">
+    <div><div class="text-2xl font-semibold"><%= @import.importable.size %></div><div class="text-xs text-slate-500">flights to import</div></div>
+    <div><div class="text-2xl font-semibold"><%= hours(@import.total_tach_hours) %></div><div class="text-xs text-slate-500">tach hours</div></div>
+    <div><div class="text-2xl font-semibold text-amber-700"><%= @import.count(:warning) %></div><div class="text-xs text-slate-500">warnings (imported)</div></div>
+    <div><div class="text-2xl font-semibold text-red-700"><%= @import.count(:error) %></div><div class="text-xs text-slate-500">errors (skipped)</div></div>
+    <div><div class="text-2xl font-semibold text-slate-500"><%= @import.count(:duplicate) %></div><div class="text-xs text-slate-500">already imported</div></div>
+  </div>
+
+  <% if @import.importable.any? %>
+    <%= form_with url: confirm_aircraft_flight_import_path(@aircraft), class: "space-y-3 border-t border-slate-100 p-4",
+                  data: { turbo_confirm: "Import #{@import.importable.size} flights?" } do |f| %>
+      <%= hidden_field_tag :token, @token %>
+      <%= hidden_field_tag :filename, @filename %>
+      <%= hidden_field_tag :starting_tach, @starting_tach %>
+      <%= hidden_field_tag :starting_hobbs, @starting_hobbs %>
+      <% if last && last.tach_in > @aircraft.tach_time %>
+        <label class="flex items-start gap-2 text-sm">
+          <%= check_box_tag :update_aircraft_hours, "1", true, class: "mt-0.5 h-4 w-4" %>
+          <span>Also update <%= @aircraft.tail_number %>'s tach from <%= hours(@aircraft.tach_time) %> to <strong><%= hours(last.tach_in) %></strong>
+            <%= "and hobbs to #{hours(last.hobbs_in)}" if last.hobbs_in && last.hobbs_in >= @aircraft.hobbs_time %>.
+            <span class="block text-xs text-slate-500">Works like a normal hours update: the difference (<%= hours(last.tach_in - @aircraft.tach_time) %> hrs) is added to in-service components. Leave unchecked if component times are already current.</span></span>
+        </label>
+      <% elsif last %>
+        <p class="text-xs text-slate-500">The aircraft's tach (<%= hours(@aircraft.tach_time) %>) is already at or past the last reading (<%= hours(last.tach_in) %>), so its hours won't change.</p>
+      <% end %>
+      <div class="flex gap-2">
+        <%= f.submit "Import #{@import.importable.size} Flights", class: "btn-primary" %>
+        <%= link_to "Upload a different file", new_aircraft_flight_import_path(@aircraft), class: "btn-secondary" %>
+      </div>
+      <% if @import.count(:error) > 0 %><p class="hint">Rows with errors are skipped. The next good row absorbs their time, so total hours stay correct. To include them, fix the spreadsheet and upload it again. Rows already imported are skipped automatically.</p><% end %>
+    <% end %>
+  <% else %>
+    <p class="border-t border-slate-100 p-4 text-sm">Nothing to import. <%= link_to "Upload a different file", new_aircraft_flight_import_path(@aircraft), class: "link" %></p>
+  <% end %>
+</section>
+
+<% if problems.any? %>
+  <section class="card mb-5">
+    <div class="card-header"><h2 class="card-title">Rows needing attention</h2></div>
+    <table class="table">
+      <thead><tr><th>Row</th><th>Date</th><th>Route</th><th class="text-right">Tach</th><th>Issue</th></tr></thead>
+      <tbody>
+        <% problems.each do |r| %>
+          <tr>
+            <td><%= r.line %></td><td class="whitespace-nowrap"><%= r.date || "—" %></td>
+            <td><%= [r.from, r.to].compact.join(" → ") %></td><td class="text-right"><%= r.tach_in %></td>
+            <td><%= tag.span(r.status == :error ? "Skipped" : "Warning", class: r.status == :error ? "badge-red" : "badge-orange") %> <span class="text-xs"><%= r.messages.join("; ") %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+<% end %>
+
+<details class="card">
+  <summary class="card-header cursor-pointer"><span class="card-title">All <%= rows.size %> rows</span></summary>
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead><tr><th>Row</th><th>Date</th><th>From</th><th>To</th><th class="text-right">Tach</th><th class="text-right">Tach hrs</th><th class="text-right">Hobbs</th><th class="text-right">Hobbs hrs</th><th class="text-right">Oil</th><th class="text-right">Fuel</th><th></th></tr></thead>
+      <tbody>
+        <% rows.each do |r| %>
+          <tr class="<%= 'opacity-50' unless r.importable? %>">
+            <td><%= r.line %></td><td class="whitespace-nowrap"><%= r.date %></td><td><%= r.from %></td><td><%= r.to %></td>
+            <td class="text-right tabular-nums"><%= r.tach_in %></td><td class="text-right tabular-nums"><%= hours(r.tach_time) if r.tach_time %></td>
+            <td class="text-right tabular-nums"><%= r.hobbs_in %></td><td class="text-right tabular-nums"><%= hours(r.hobbs_time) if r.hobbs_time %></td>
+            <td class="text-right"><%= r.oil %></td><td class="text-right"><%= r.fuel %></td>
+            <td><%= { ok: "", warning: tag.span("warning", class: "badge-orange"), error: tag.span("skipped", class: "badge-red"), duplicate: tag.span("duplicate", class: "badge-gray") }[r.status] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</details>

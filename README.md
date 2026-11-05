@@ -75,6 +75,7 @@ Alternatively, stop the container and copy the volume.
 | Fleet dashboard | Every aircraft you can access, with airworthiness status and its top issues. |
 | Airworthiness | RED/ORANGE/GREEN from AD compliance, grounding squawks, inspection recurrency, and replacement-critical components. Warnings start 10 hours or 30 days ahead. Logic: `app/services/airworthiness.rb`, `app/services/compliance.rb`. |
 | Hours | Absolute tach/hobbs updates or per-flight logs. Both apply the delta to every in-service component. Downward corrections are clamped at 0. |
+| Flight import | Owners can import historical flights from `.xlsx` or `.csv` (Date, From, To, Tach, Hobbs, Oil Added, Fuel Added). Each flight's time is derived from the previous row's reading. A preview flags typos such as a tach going backwards, and rows already imported are skipped. History only: component hours aren't changed unless you choose to advance the aircraft's meters. |
 | Airworthiness enforcement | Optional per aircraft. It blocks flight logs and hours updates while the aircraft is RED. |
 | Components | Tree of parent and child parts, TBO and replacement limits, and service/replace reset. Owners can create new component types inline. |
 | Squawks | Four priorities. "Ground Aircraft" makes the aircraft RED. Supports attachments, resolve, and reopen. |

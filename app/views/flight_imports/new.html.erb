@@ -1,0 +1,40 @@
+<% content_for :title, "Import Flights" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<div class="grid gap-5 lg:grid-cols-3">
+  <%= form_with url: aircraft_flight_import_path(@aircraft), multipart: true, class: "card card-body space-y-4 lg:col-span-2" do |f| %>
+    <h2 class="card-title">Import flights from a spreadsheet</h2>
+    <div>
+      <%= f.label :file, "Spreadsheet (.xlsx or .csv)", class: "label" %>
+      <%= f.file_field :file, accept: ".xlsx,.csv", required: true,
+            class: "block text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <%= f.label :starting_tach, "Tach before the first flight (optional)", class: "label" %>
+        <%= f.number_field :starting_tach, step: 0.1, class: "input" %>
+        <p class="hint">E.g. the tach at purchase. Without it, the first row's time comes from a Flight Time column, if you have one.</p>
+      </div>
+      <div>
+        <%= f.label :starting_hobbs, "Hobbs before the first flight (optional)", class: "label" %>
+        <%= f.number_field :starting_hobbs, step: 0.1, class: "input" %>
+      </div>
+    </div>
+    <%= f.submit "Upload & Preview", class: "btn-primary" %>
+    <p class="hint">Nothing is saved until you confirm on the next page.</p>
+  <% end %>
+
+  <section class="card card-body text-sm text-slate-700 space-y-2">
+    <h3 class="font-semibold">Expected layout</h3>
+    <p>One row per flight, with the meter readings <em>at the end</em> of the flight. Columns are matched by header name, in any order:</p>
+    <ul class="list-disc pl-5 text-xs">
+      <li><strong>Date</strong> (required)</li>
+      <li><strong>Tach</strong> / Tach Time (required)</li>
+      <li>From, To</li>
+      <li>Hobbs / Hobbs Time</li>
+      <li>Oil Added (qt), Fuel Added (gal); “N” or blank = none</li>
+      <li>Flight Time (used only for the first row)</li>
+    </ul>
+    <p class="text-xs">Each flight's time is the difference from the row above. Rows are kept in file order.</p>
+    <p class="text-xs">Importing records history only. It doesn't add time to components.</p>
+  </section>
+</div>

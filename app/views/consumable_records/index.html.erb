@@ -8,15 +8,16 @@
         <%= link_to "+ Add #{stats.oil? ? 'Oil' : 'Fuel'}", new_aircraft_consumable_record_path(@aircraft, type: stats.record_type), class: "btn-secondary btn-sm" %>
       </div>
       <div class="card-body">
-        <div class="mb-3 flex gap-6 text-sm">
-          <div><span class="text-2xl font-semibold"><%= stats.average || "—" %></span> <span class="text-slate-500"><%= stats.metric_label %> avg (last 20)</span></div>
-          <div><span class="text-lg"><%= stats.latest || "—" %></span> <span class="text-slate-500">latest</span></div>
+        <div class="mb-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+          <div><span class="text-2xl font-semibold"><%= stats.recent || "—" %></span> <span class="text-slate-500"><%= stats.metric_label %>, last ~<%= stats.recent_window_hours %> hrs</span></div>
+          <div><span class="text-lg"><%= stats.lifetime || "—" %></span> <span class="text-slate-500">lifetime</span></div>
         </div>
         <% if stats.points.size >= 2 %>
-          <%= line_chart stats.chart_data, xtitle: "Tach hours", ytitle: stats.metric_label, height: "220px",
+          <%= line_chart stats.chart_data, xtitle: "Tach hours", ytitle: stats.metric_label, height: "220px", curve: false, points: false,
                 library: { scales: { x: { type: "linear" } } }, colors: [stats.oil? ? "#b45309" : "#0369a1"] %>
+          <p class="hint">Rolling <%= stats.chart_window_hours %>-hour window: total <%= stats.oil? ? "oil" : "fuel" %> added ÷ hours flown, so partial fills average out.<%= " Higher is better." if stats.oil? %></p>
         <% else %>
-          <%= empty_state "Add at least three records to see a trend." %>
+          <%= empty_state "Not enough history yet (need more than #{stats.chart_window_hours} tach hours of records)." %>
         <% end %>
       </div>
     </section>

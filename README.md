@@ -79,7 +79,8 @@ Alternatively, stop the container and copy the volume.
 | Airworthiness enforcement | Optional per aircraft. It blocks flight logs and hours updates while the aircraft is RED. |
 | Components | Tree of parent and child parts, TBO and replacement limits, and service/replace reset. Owners can create new component types inline. |
 | Squawks | Four priorities. "Ground Aircraft" makes the aircraft RED. Supports attachments, resolve, and reopen. |
-| ADs and bulletins | Shared across aircraft and applicable to the airframe or to specific components. Hour- and month-based recurrence (due at end of month), conditional and non-mandatory types, and compliance history. |
+| ADs and bulletins | Shared across aircraft and applicable to the airframe or to specific components. Hour- and month-based recurrence (due at end of month), conditional and non-mandatory types, per-aircraft "not applicable" determinations, and compliance history. |
+| AD import | Import ADs from an FAA DRS export (`.xlsx` recommended: its AD numbers link to each AD's DRS page, which the import keeps; `.csv` works without links). ADs are matched by number, so nothing is duplicated. The preview suggests Track, Not applicable or Skip for each AD, and flags superseded or non-current ADs, model mismatches, appliance or STC-only ADs, and repetitive actions. |
 | Inspections | Shared inspection types with hour, month, and day recurrence, plus history. |
 | Logbook | Maintenance entries with search and a link to a scanned document page. |
 | Documents | Collections, multi-file documents with a page viewer, and per-document share visibility. |

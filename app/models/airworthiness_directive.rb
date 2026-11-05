@@ -14,8 +14,19 @@ class AirworthinessDirective < ApplicationRecord
   validates :name, :short_description, presence: true
   validates :compliance_type, inclusion: { in: COMPLIANCE_TYPES.keys }
   validates :bulletin_type, inclusion: { in: BULLETIN_TYPES.keys }
+  validates :document_url, format: { with: %r{\Ahttps?://\S+\z}i, message: "must be an http(s) link" }, allow_blank: true
+  normalizes :document_url, with: ->(url) { url.strip.presence }
 
   scope :ordered, -> { order(:name) }
+
+  # "2009-10-09  r2" → "2009-10-09 R2"
+  def self.normalize_number(number)
+    number.to_s.strip.upcase.gsub(/\s+/, " ")
+  end
+
+  def self.find_by_number(number)
+    find_by("upper(replace(name, ' ', '')) = ?", normalize_number(number).delete(" "))
+  end
 
   def self.applicable_to(aircraft)
     direct = joins(:aircraft).where(aircraft: { id: aircraft.id }).select(:id)
@@ -24,6 +35,14 @@ class AirworthinessDirective < ApplicationRecord
   end
 
   def to_s = name
+
+  # [url, label] for this AD's document, when we have its link (DRS Excel
+  # exports carry one per AD; it can also be pasted in). DRS links use an
+  # internal document id, so they can't be derived from the AD number.
+  def reference_link
+    [ document_url, "View AD" ] if document_url.present?
+  end
+
   def conditional? = compliance_type == "conditional"
   def bulletin_label = BULLETIN_LABELS[bulletin_type]
 

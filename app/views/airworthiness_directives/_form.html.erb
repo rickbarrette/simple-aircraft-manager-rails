@@ -18,6 +18,8 @@
     <%= f.field :recurring_months, as: :number, label: "Every (months)" %>
     <%= f.field :document_id, as: :select, label: "Reference document", collection: document_options(aircraft) %>
   </div>
+  <%= f.field :document_url, label: "Link to AD document", placeholder: "https://…",
+        hint: "Filled in automatically from a DRS Excel export. In DRS, open the AD and copy its link." %>
   <%= render "shared/applicability_fields", aircraft: aircraft, record: ad, applies_to_airframe: @applies_to_airframe %>
   <% if ad.persisted? && (ad.aircraft.count + ad.components.where.not(aircraft_id: aircraft.id).count) > 1 %>
     <p class="rounded bg-amber-50 p-2 text-xs text-amber-800">This AD is shared with other aircraft; edits affect them too.</p>

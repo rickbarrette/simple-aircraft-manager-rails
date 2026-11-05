@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_11_04_222400) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_05_200000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -52,6 +52,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_11_04_222400) do
     t.decimal "aircraft_hours_at_compliance", precision: 8, scale: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "not_applicable", default: false, null: false
     t.index ["aircraft_id"], name: "index_ad_compliances_on_aircraft_id"
     t.index ["airworthiness_directive_id"], name: "index_ad_compliances_on_airworthiness_directive_id"
     t.index ["component_id"], name: "index_ad_compliances_on_component_id"
@@ -74,6 +75,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_11_04_222400) do
     t.boolean "airworthiness_enforcement", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "drs_search_url"
   end
 
   create_table "aircraft_airworthiness_directives", id: false, force: :cascade do |t|
@@ -138,6 +140,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_11_04_222400) do
     t.integer "document_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "effective_date"
+    t.string "supersedes"
+    t.string "superseded_by"
+    t.string "docket_number"
+    t.text "applicable_models"
+    t.string "product_type"
+    t.string "document_url"
     t.index ["document_id"], name: "index_airworthiness_directives_on_document_id"
   end
 

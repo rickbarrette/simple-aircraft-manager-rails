@@ -1,0 +1,24 @@
+<% content_for :title, "Import ADs" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<div class="grid gap-5 lg:grid-cols-3">
+  <%= form_with url: aircraft_ad_import_path(@aircraft), multipart: true, class: "card card-body space-y-4 lg:col-span-2" do |f| %>
+    <h2 class="card-title">Import ADs from the FAA DRS</h2>
+    <div>
+      <%= f.label :file, "DRS export (.csv or .xlsx)", class: "label" %>
+      <%= f.file_field :file, accept: ".xlsx,.csv", required: true,
+            class: "block text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
+    </div>
+    <%= f.submit "Upload & Preview", class: "btn-primary" %>
+    <p class="hint">Nothing is saved until you confirm on the next page.</p>
+  <% end %>
+  <section class="card card-body space-y-2 text-sm text-slate-700">
+    <h3 class="font-semibold">Getting the file</h3>
+    <ol class="list-decimal space-y-1 pl-4 text-xs">
+      <li>On <a href="<%= @aircraft.drs_search_url.presence || "https://drs.faa.gov" %>" class="link" target="_blank" rel="noopener noreferrer"><%= @aircraft.drs_search_url.present? ? "your saved DRS search" : "drs.faa.gov" %></a>, search Airworthiness Directives for this aircraft's make and model (add the engine and propeller too).</li>
+      <li>Save the results as <strong>Excel</strong>. The Excel file links each AD number to its DRS page; the CSV doesn't, so a CSV import won't have links.</li>
+      <li>Upload it here.</li>
+    </ol>
+    <% unless @aircraft.drs_search_url.present? %><p class="text-xs">Tip: save the DRS search link on the aircraft (Edit aircraft) for a one-click “Open in DRS” button.</p><% end %>
+    <p class="text-xs">ADs already tracked are matched by number, so importing the Excel file after a CSV import just adds the links.</p>
+  </section>
+</div>

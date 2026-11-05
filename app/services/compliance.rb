@@ -36,7 +36,7 @@ module Compliance
   def ad_status(ad, compliance, current_hours, today = Date.current)
     return Result.new(rank: COMPLIANT) if ad.conditional?
     return Result.new(rank: OVERDUE) unless compliance
-    return Result.new(rank: COMPLIANT) if compliance.permanent?
+    return Result.new(rank: COMPLIANT) if compliance.closed?
 
     rank = COMPLIANT
     result = Result.new
@@ -109,6 +109,7 @@ module Compliance
       status =
         if ad.conditional? then latest ? "compliant" : "conditional"
         elsif latest.nil? then "no_compliance"
+        elsif latest.not_applicable? then "not_applicable"
         elsif latest.permanent? then "compliant"
         end
       res = ad_status(ad, latest, hours) unless status

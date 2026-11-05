@@ -21,7 +21,8 @@ module ApplicationHelper
   COMPLIANCE_BADGES = {
     "compliant" => [ "green", "Compliant" ], "due_soon" => [ "orange", "Due Soon" ],
     "overdue" => [ "red", "Overdue" ], "no_compliance" => [ "red", "No Record" ],
-    "never_completed" => [ "red", "Never Completed" ], "conditional" => [ "gray", "Conditional" ]
+    "never_completed" => [ "red", "Never Completed" ], "conditional" => [ "gray", "Conditional" ],
+    "not_applicable" => [ "gray", "N/A" ]
   }.freeze
 
   def compliance_badge(status)
@@ -47,6 +48,13 @@ module ApplicationHelper
   def visibility_badge(visibility)
     color = { "private" => "gray", "status" => "green", "maintenance" => "blue" }[visibility]
     tag.span(DocumentCollection::VISIBILITIES[visibility], class: "badge-#{color}")
+  end
+
+  # AD number, linked to its document (opens in a new tab) when we have a link.
+  def ad_link(ad)
+    link = ad.reference_link
+    return ad.name unless link
+    link_to ad.name, link[0], class: "link", target: "_blank", rel: "noopener noreferrer", title: link[1]
   end
 
   def delete_button(label, path, confirm: "Are you sure?", **opts)

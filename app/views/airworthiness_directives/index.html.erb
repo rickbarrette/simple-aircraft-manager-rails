@@ -11,6 +11,8 @@
             <%= f.submit "Link existing", class: "btn-secondary" %>
           <% end %>
         <% end %>
+        <% if @aircraft.drs_search_url.present? %><%= link_to "Open in DRS ↗", @aircraft.drs_search_url, class: "btn-secondary", target: "_blank", rel: "noopener noreferrer" %><% end %>
+        <%= link_to "Import from FAA DRS", new_aircraft_ad_import_path(@aircraft), class: "btn-secondary" %>
         <%= link_to "+ New AD", new_aircraft_airworthiness_directive_path(@aircraft), class: "btn-primary" %>
       </div>
     <% end %>
@@ -22,9 +24,12 @@
         <tbody>
           <% @rows.each do |row| ad = row.ad %>
             <tr>
-              <td class="whitespace-nowrap font-medium"><span class="badge-gray mr-1"><%= ad.bulletin_label %></span><%= ad.name %>
+              <td class="whitespace-nowrap font-medium"><span class="badge-gray mr-1"><%= ad.bulletin_label %></span><%= ad_link(ad) %>
+                <% if ad.document %><%= link_to "📄", aircraft_document_path(@aircraft, ad.document), title: ad.document.name %><% end %>
                 <% unless ad.mandatory? %><div class="text-xs text-slate-400">not mandatory</div><% end %></td>
               <td class="max-w-sm text-xs"><%= ad.short_description %>
+                <% if ad.effective_date || ad.product_type.present? %><div class="text-slate-500"><%= [(ad.effective_date && "Effective #{ad.effective_date}"), ad.product_type.presence].compact.join(" · ") %></div><% end %>
+                <% if ad.superseded_by.present? %><div class="text-amber-700">Superseded by <%= ad.superseded_by %></div><% end %>
                 <% if ad.conditional? && ad.trigger_condition.present? %><div class="text-slate-500">Trigger: <%= ad.trigger_condition %></div><% end %></td>
               <td class="text-xs"><%= ad.recurring? ? [ad.recurring_hours.to_f > 0 && "#{hours(ad.recurring_hours)} h", ad.recurring_months > 0 && "#{ad.recurring_months} mo"].select(&:itself).join(" / ") : "One-time" %></td>
               <td class="text-xs"><%= row.latest ? "#{row.latest.date_complied}#{' (permanent)' if row.latest.permanent?}" : "—" %></td>
@@ -33,6 +38,7 @@
               <td class="whitespace-nowrap text-right">
                 <% if owner? %>
                   <%= link_to "Comply", new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id), class: "btn-secondary btn-sm" %>
+                  <% if row.status.in?(%w[no_compliance overdue due_soon conditional]) %><%= link_to "N/A", new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id, not_applicable: 1), class: "btn-secondary btn-sm", title: "Record that this AD doesn't apply to this aircraft" %><% end %>
                   <%= link_to "Edit", edit_aircraft_airworthiness_directive_path(@aircraft, ad), class: "btn-secondary btn-sm" %>
                 <% end %>
               </td>
@@ -55,10 +61,23 @@
         <% @history.each do |c| %>
           <tr>
             <td class="whitespace-nowrap"><%= c.date_complied %></td>
-            <td><%= c.airworthiness_directive.name %><%= " (#{c.component})" if c.component %></td>
+            <% ad = c.airworthiness_directive %>
+            <td class="max-w-xs">
+              <span class="whitespace-nowrap font-medium"><%= ad_link(ad) %></span>
+              <% if ad.document %><%= link_to "📄", aircraft_document_path(@aircraft, ad.document), title: ad.document.name %><% end %>
+              <div class="text-xs text-slate-500"><%= ad.short_description %><%= " · #{c.component}" if c.component %></div>
+            </td>
             <td class="text-right"><%= hours(c.aircraft_hours_at_compliance) %></td>
-            <td><%= c.permanent? ? "Permanent" : (c.next_due_at_time.to_f > 0 ? hours(c.next_due_at_time) : "—") %></td>
-            <td class="max-w-md text-xs"><%= c.compliance_notes %></td>
+            <td><%= c.not_applicable? ? "N/A" : c.permanent? ? "Permanent" : (c.next_due_at_time.to_f > 0 ? hours(c.next_due_at_time) : "—") %></td>
+            <td class="max-w-md text-xs">
+              <%= c.compliance_notes %>
+              <% if c.logbook_entry || c.inspection_record %>
+                <div class="mt-1 flex flex-wrap gap-x-3">
+                  <% if c.logbook_entry %><%= link_to "Logbook #{c.logbook_entry.date}", aircraft_logbook_entry_path(@aircraft, c.logbook_entry), class: "link" %><% end %>
+                  <% if c.inspection_record %><%= link_to "#{c.inspection_record.inspection_type.name} #{c.inspection_record.date}", aircraft_inspections_path(@aircraft), class: "link" %><% end %>
+                </div>
+              <% end %>
+            </td>
             <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_ad_compliance_path(@aircraft, c), class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>

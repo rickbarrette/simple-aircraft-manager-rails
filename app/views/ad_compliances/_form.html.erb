@@ -18,7 +18,10 @@
   <p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-next-due-target="preview" hidden></p>
   <%= f.field :permanent, as: :checkbox, label: "Permanently complied (terminating action)",
         data: { next_due_target: "permanent", action: "change->next-due#changed" } %>
-  <%= f.field :compliance_notes, as: :textarea, label: "Method of compliance", rows: 3, required: true %>
+  <%= f.field :not_applicable, as: :checkbox, label: "Not applicable to this aircraft",
+        hint: "E.g. serial number outside the affected range, or the equipment isn't installed. Record why below.",
+        data: { next_due_target: "permanent", action: "change->next-due#changed" } %>
+  <%= f.field :compliance_notes, as: :textarea, label: "Method of compliance / reason", rows: 3, required: true %>
   <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_airworthiness_directives_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
 <% if compliance.persisted? %><div class="mt-4"><%= delete_button "Delete record", aircraft_ad_compliance_path(aircraft, compliance) %></div><% end %>

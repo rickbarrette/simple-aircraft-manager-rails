@@ -40,7 +40,7 @@ export default class extends Controller {
     if (!this.hasPreviewTarget) return
     const rule = this.currentRule
     let text
-    if (this.isPermanent) text = "Permanent compliance: never due again."
+    if (this.isPermanent) text = "Permanent compliance or not applicable: never due again."
     else if (!this.ruleTarget.value) text = ""
     else if (!rule) text = "One-time: no recurring due date."
     else {
@@ -60,6 +60,6 @@ export default class extends Controller {
   }
 
   get isPermanent() {
-    return this.hasPermanentTarget && this.permanentTarget.checked
+    return this.permanentTargets.some((el) => el.checked)
   }
 }

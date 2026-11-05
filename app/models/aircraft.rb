@@ -28,6 +28,8 @@ class Aircraft < ApplicationRecord
 
   validates :tail_number, presence: true
   validates :status, inclusion: { in: STATUSES.keys }
+  validates :drs_search_url, format: { with: %r{\Ahttps://drs\.faa\.gov/\S*\z}, message: "must be a https://drs.faa.gov/ link" }, allow_blank: true
+  normalizes :drs_search_url, with: ->(url) { url.strip.sub(/#.*\z/, "").presence }
   validate :picture_is_image
 
   scope :ordered, -> { order(:tail_number) }

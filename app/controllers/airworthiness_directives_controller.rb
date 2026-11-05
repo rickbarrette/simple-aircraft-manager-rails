@@ -6,7 +6,8 @@ class AirworthinessDirectivesController < ApplicationController
 
   def index
     @rows = Compliance.ad_rows(@aircraft)
-    @history = AdCompliance.for_aircraft(@aircraft).recent_first.includes(:airworthiness_directive, :component)
+    @history = AdCompliance.for_aircraft(@aircraft).recent_first
+                           .includes(:component, :logbook_entry, airworthiness_directive: :document, inspection_record: :inspection_type)
     @attachable = AirworthinessDirective.where.not(id: @aircraft.applicable_ads.select(:id)).ordered if owner?
   end
 
@@ -66,7 +67,7 @@ class AirworthinessDirectivesController < ApplicationController
   def ad_params
     p = params.require(:airworthiness_directive).permit(
       :name, :short_description, :required_action, :compliance_type, :trigger_condition, :recurring,
-      :recurring_hours, :recurring_months, :recurring_days, :bulletin_type, :mandatory, :document_id
+      :recurring_hours, :recurring_months, :recurring_days, :bulletin_type, :mandatory, :document_id, :document_url
     )
     p[:document_id] = scoped_id(@aircraft.documents, p[:document_id])
     p

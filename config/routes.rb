@@ -34,6 +34,9 @@ Rails.application.routes.draw do
       collection { post :attach }
     end
     resources :ad_compliances, except: %i[index show]
+    resource :ad_import, only: %i[new create show] do
+      post :confirm
+    end
     resources :major_records
     resources :aircraft_roles, path: "access", only: %i[index create update destroy]
     resources :share_tokens, only: %i[create destroy]

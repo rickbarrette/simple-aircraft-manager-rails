@@ -9,7 +9,7 @@ module AircraftHelper
       [ "Oil & Fuel", aircraft_consumable_records_path(aircraft), %w[consumable_records] ],
       [ "Logbook", aircraft_logbook_entries_path(aircraft), %w[logbook_entries] ],
       [ "Inspections", aircraft_inspections_path(aircraft), %w[inspections inspection_types inspection_records] ],
-      [ "ADs", aircraft_airworthiness_directives_path(aircraft), %w[airworthiness_directives ad_compliances] ],
+      [ "ADs", aircraft_airworthiness_directives_path(aircraft), %w[airworthiness_directives ad_compliances ad_imports] ],
       [ "Documents", aircraft_documents_path(aircraft), %w[documents document_collections] ],
       [ "Major Records", aircraft_major_records_path(aircraft), %w[major_records] ],
       [ "Notes", aircraft_notes_path(aircraft), %w[notes] ],

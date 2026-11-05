@@ -67,6 +67,21 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select "form[data-controller='next-due'][data-next-due-rules-value*='\"months\":12']"
   end
 
+  test "compliance history shows the AD's description and links" do
+    @ad.update!(document_url: "https://drs.faa.gov/browse/excelExternalWindow/ABC.0001")
+    @adc.update!(logbook_entry: @entry)
+    get aircraft_airworthiness_directives_path(@a)
+    assert_select "section", text: /Compliance History/ do
+      assert_select "a[href='https://drs.faa.gov/browse/excelExternalWindow/ABC.0001'][target='_blank']", text: "2020-01-01"
+      assert_select "div", text: "Check"
+      assert_select "a[href='#{aircraft_logbook_entry_path(@a, @entry)}']"
+    end
+
+    delete session_path
+    get shared_path(@token.token)
+    assert_select "a[href='https://drs.faa.gov/browse/excelExternalWindow/ABC.0001']", minimum: 2 # status + history
+  end
+
   test "maintenance share link renders without login and shows history" do
     delete session_path
     get shared_path(@token.token)

@@ -1,0 +1,54 @@
+<% content_for :title, "AD Import Preview" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<% rows = @import.rows %>
+<%= form_with url: confirm_aircraft_ad_import_path(@aircraft), class: "space-y-5" do |f| %>
+  <%= hidden_field_tag :token, @token %>
+  <%= hidden_field_tag :filename, @filename %>
+  <section class="card">
+    <div class="card-header">
+      <h2 class="card-title">Preview: <%= @filename %></h2>
+      <span class="text-xs text-slate-500"><%= pluralize(rows.size, "AD") %> found · <%= rows.count(&:url) %> with DRS links</span>
+    </div>
+    <div class="card-body space-y-3 text-sm">
+      <% if rows.none?(&:url) %><p class="rounded-md bg-amber-50 px-3 py-2 text-amber-900 ring-1 ring-amber-200">This file has no links to the AD documents. DRS's <strong>Excel</strong> export includes them; import that file instead (or afterwards) to get clickable AD numbers.</p><% end %>
+      <p>Choose what to do with each AD. The suggestions are based on the FAA data and your aircraft's model (<%= @aircraft.model.presence || "not set" %>); you make the call.</p>
+      <ul class="list-disc space-y-1 pl-5 text-xs text-slate-600">
+        <li><strong>Track</strong>: adds the AD. Until you record compliance, it counts against airworthiness, so <%= @aircraft.tail_number %> will show <span class="badge-red">Not Airworthy</span> for each tracked AD without a compliance record.</li>
+        <li><strong>Not applicable</strong>: adds the AD with an N/A record (e.g. the equipment isn't installed). You can edit the reason afterwards.</li>
+        <li><strong>Update</strong> (ADs already tracked): refreshes the FAA details: subject, summary, dates, supersession and DRS link. Compliance records aren't touched.</li>
+        <li><strong>Skip</strong>: not imported, or left exactly as is.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>AD</th><th>Subject</th><th>Effective</th><th>Notes</th><th class="w-44">Action</th></tr></thead>
+        <tbody>
+          <% rows.each do |r| %>
+            <tr>
+              <td class="whitespace-nowrap font-medium"><%= r.number %><%= link_to " 🔗", r.url, target: "_blank", rel: "noopener noreferrer", title: "Link found in file" if r.url %>
+                <% if r.product_type %><div class="text-xs font-normal text-slate-500"><%= r.product_type %></div><% end %></td>
+              <td class="max-w-md">
+                <%= r.subject %>
+                <% if r.summary %><details class="mt-1 text-xs text-slate-600"><summary class="cursor-pointer text-sky-700">Summary</summary><%= r.summary %></details><% end %>
+              </td>
+              <td class="whitespace-nowrap text-xs"><%= r.effective_date %></td>
+              <td class="text-xs">
+                <% r.notes.each do |n| %><div class="<%= n.start_with?("Already", "Matches") ? 'text-slate-500' : 'text-amber-800' %>">• <%= n %></div><% end %>
+              </td>
+              <td><% choices = r.tracked ? [ [ "Update", "track" ], [ "Not applicable", "na" ], [ "Skip (leave as is)", "skip" ] ] : AdImport::ACTIONS.invert %>
+                <%= select_tag "decisions[#{r.number}]", options_for_select(choices, r.suggested), class: "input" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="flex gap-2">
+    <%= f.submit "Import ADs", class: "btn-primary", data: { turbo_confirm: "Import these ADs to #{@aircraft.tail_number}?" } %>
+    <%= link_to "Upload a different file", new_aircraft_ad_import_path(@aircraft), class: "btn-secondary" %>
+  </div>
+<% end %>

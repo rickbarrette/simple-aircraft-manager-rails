@@ -59,7 +59,7 @@
     <section class="card">
       <div class="card-header"><h2 class="card-title">ADs</h2></div>
       <table class="table"><tbody><% @ad_rows.each do |r| %><tr>
-        <td><%= r.ad.name %><div class="text-xs text-slate-500"><%= r.ad.short_description %></div></td><td class="text-xs"><%= r.latest&.date_complied || "—" %></td><td><%= compliance_badge(r.status) %></td></tr><% end %></tbody></table>
+        <td><%= ad_link(r.ad) %><div class="text-xs text-slate-500"><%= r.ad.short_description %></div></td><td class="text-xs"><%= r.latest&.date_complied || "—" %></td><td><%= compliance_badge(r.status) %></td></tr><% end %></tbody></table>
     </section>
   </div>
 
@@ -87,7 +87,7 @@
       <section class="card"><div class="card-header"><h2 class="card-title">Inspection History</h2></div>
         <table class="table"><tbody><% @inspection_history.each do |r| %><tr><td><%= r.date %></td><td><%= r.inspection_type.name %></td><td class="text-right"><%= hours(r.hours_at_inspection) %></td></tr><% end %></tbody></table></section>
       <section class="card"><div class="card-header"><h2 class="card-title">AD Compliance History</h2></div>
-        <table class="table"><tbody><% @ad_history.each do |c| %><tr><td><%= c.date_complied %></td><td><%= c.airworthiness_directive.name %></td><td class="text-xs"><%= c.compliance_notes %></td></tr><% end %></tbody></table></section>
+        <table class="table"><tbody><% @ad_history.each do |c| %><tr><td class="whitespace-nowrap"><%= c.date_complied %></td><td><%= ad_link(c.airworthiness_directive) %><div class="text-xs text-slate-500"><%= c.airworthiness_directive.short_description %></div></td><td class="text-xs"><%= c.not_applicable? ? "N/A: " : "" %><%= c.compliance_notes %></td></tr><% end %></tbody></table></section>
     </div>
 
     <section class="card"><div class="card-header"><h2 class="card-title">Major Repairs & Alterations</h2></div>

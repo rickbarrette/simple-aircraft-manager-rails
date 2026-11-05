@@ -1,0 +1,61 @@
+<%# Flying metrics. "Flight time" = Hobbs where recorded, else tach. %>
+<% periods = stats.periods %>
+<div class="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <% [ [ "Past 30 days", periods[0] ], [ "This year", periods[2] ], [ "Past 12 months", periods[1] ], [ "Since #{fmt_date(stats.first_date)}", periods[4] ] ].each do |title, p| %>
+    <section class="card card-body">
+      <div class="text-xs font-medium uppercase tracking-wide text-slate-500"><%= title %></div>
+      <div class="mt-1 text-2xl font-semibold tabular-nums"><%= hours(p.flight) %> <span class="text-sm font-normal text-slate-500">hrs</span></div>
+      <div class="mt-1 text-xs text-slate-600"><%= pluralize(p.flights, "flight") %> · <%= hours(p.tach) %> tach · <%= number_with_delimiter(p.fuel) %> gal</div>
+    </section>
+  <% end %>
+</div>
+
+<div class="mb-5 grid gap-5 lg:grid-cols-3">
+  <section class="card lg:col-span-2">
+    <div class="card-header"><h2 class="card-title">Flight hours by month</h2>
+      <span class="text-xs text-slate-500">Avg <%= hours(stats.monthly_average_past_year) %> hrs/month over the past year</span></div>
+    <div class="card-body">
+      <%= column_chart stats.flight_hours_by_month, height: "220px", colors: [ "#0369a1" ], ytitle: "hrs", library: { plugins: { legend: { display: false } } } %>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">Totals</h2></div>
+    <dl class="card-body grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+      <dt class="text-slate-500">Flights logged</dt><dd class="text-right tabular-nums"><%= number_with_delimiter(stats.count) %></dd>
+      <dt class="text-slate-500">Flight time</dt><dd class="text-right tabular-nums"><%= hours(stats.total_flight) %> hrs</dd>
+      <dt class="text-slate-500">Tach time</dt><dd class="text-right tabular-nums"><%= hours(stats.total_tach) %> hrs</dd>
+      <dt class="text-slate-500">Average flight</dt><dd class="text-right tabular-nums"><%= hours(stats.average_flight) %> hrs</dd>
+      <dt class="text-slate-500">Longest flight</dt><dd class="text-right tabular-nums"><%= hours(stats.longest_flight) %> hrs</dd>
+      <dt class="text-slate-500">Fuel</dt><dd class="text-right tabular-nums"><%= number_with_delimiter(stats.total_fuel) %> gal</dd>
+      <dt class="text-slate-500">Fuel burn</dt><dd class="text-right tabular-nums"><%= stats.gph || "—" %> gal/hr</dd>
+      <dt class="text-slate-500">Airports visited</dt><dd class="text-right tabular-nums"><%= stats.airports_visited %></dd>
+    </dl>
+    <% if stats.top_airports.any? %>
+      <div class="border-t border-slate-100 px-4 py-3 text-xs text-slate-600">
+        <span class="font-medium text-slate-700">Most visited:</span>
+        <%= stats.top_airports.map { |code, n| "#{code} (#{n})" }.join(" · ") %>
+      </div>
+    <% end %>
+  </section>
+</div>
+
+<details class="card mb-5">
+  <summary class="card-header cursor-pointer"><span class="card-title">By year</span></summary>
+  <table class="table">
+    <thead><tr><th>Year</th><th class="text-right">Flights</th><th class="text-right">Flight hrs</th><th class="text-right">Tach hrs</th><th class="text-right">Fuel (gal)</th><th class="text-right">Avg flight</th></tr></thead>
+    <tbody>
+      <% stats.by_year.each do |y| %>
+        <tr>
+          <td><%= y.label %></td>
+          <td class="text-right tabular-nums"><%= y.flights %></td>
+          <td class="text-right tabular-nums"><%= hours(y.flight) %></td>
+          <td class="text-right tabular-nums"><%= hours(y.tach) %></td>
+          <td class="text-right tabular-nums"><%= number_with_delimiter(y.fuel) %></td>
+          <td class="text-right tabular-nums"><%= y.flights.positive? ? hours(y.flight / y.flights) : "—" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="px-4 pb-3 hint">Flight time is Hobbs time where recorded, otherwise tach time.</p>
+</details>

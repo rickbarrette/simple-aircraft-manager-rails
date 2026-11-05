@@ -14,11 +14,10 @@
   <section class="card card-body space-y-2 text-sm text-slate-700">
     <h3 class="font-semibold">Getting the file</h3>
     <ol class="list-decimal space-y-1 pl-4 text-xs">
-      <li>On <a href="<%= @aircraft.drs_search_url.presence || "https://drs.faa.gov" %>" class="link" target="_blank" rel="noopener noreferrer"><%= @aircraft.drs_search_url.present? ? "your saved DRS search" : "drs.faa.gov" %></a>, search Airworthiness Directives for this aircraft's make and model (add the engine and propeller too).</li>
+      <li>On <a href="https://drs.faa.gov" class="link" target="_blank" rel="noopener noreferrer">drs.faa.gov</a>, search Airworthiness Directives for this aircraft's make and model (add the engine and propeller too).</li>
       <li>Save the results as <strong>Excel</strong>. The Excel file links each AD number to its DRS page; the CSV doesn't, so a CSV import won't have links.</li>
       <li>Upload it here.</li>
     </ol>
-    <% unless @aircraft.drs_search_url.present? %><p class="text-xs">Tip: save the DRS search link on the aircraft (Edit aircraft) for a one-click “Open in DRS” button.</p><% end %>
     <p class="text-xs">ADs already tracked are matched by number, so importing the Excel file after a CSV import just adds the links.</p>
   </section>
 </div>

@@ -1,5 +1,6 @@
 <% content_for :title, "#{@aircraft.tail_number} Flights" %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
+<% if @stats.any? %><%= render "flight_logs/stats", stats: @stats %><% end %>
 <section class="card">
   <div class="card-header"><h2 class="card-title">Flight Log</h2><div class="flex gap-2"><% if owner? %><%= link_to "Import from spreadsheet", new_aircraft_flight_import_path(@aircraft), class: "btn-secondary" %><% end %><%= link_to "+ Log Flight", new_aircraft_flight_log_path(@aircraft), class: "btn-primary" %></div></div>
   <% if @flight_logs.any? %>

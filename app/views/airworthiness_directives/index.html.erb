@@ -11,7 +11,6 @@
             <%= f.submit "Link existing", class: "btn-secondary" %>
           <% end %>
         <% end %>
-        <% if @aircraft.drs_search_url.present? %><%= link_to "Open in DRS ↗", @aircraft.drs_search_url, class: "btn-secondary", target: "_blank", rel: "noopener noreferrer" %><% end %>
         <%= link_to "Import from FAA DRS", new_aircraft_ad_import_path(@aircraft), class: "btn-secondary" %>
         <%= link_to "+ New AD", new_aircraft_airworthiness_directive_path(@aircraft), class: "btn-primary" %>
       </div>

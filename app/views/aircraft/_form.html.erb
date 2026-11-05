@@ -20,8 +20,6 @@
   <% unless aircraft.new_record? %>
     <p class="hint">To change hours use “Update Hours” on the overview, so component times stay in sync.</p>
   <% end %>
-  <%= f.field :drs_search_url, label: "FAA DRS AD search link", placeholder: "https://drs.faa.gov/browse/ADFRAWD/doctypeDetails?…",
-        hint: "Run the AD search for this aircraft on drs.faa.gov and paste the page link. The ADs tab then gets a one-click “Open in DRS” button." %>
   <%= f.field :picture, as: :file, accept: "image/*" %>
   <%= f.field :airworthiness_enforcement, as: :checkbox, label: "Enforce airworthiness",
               hint: "Block flight logs and hours updates while the aircraft is red." %>

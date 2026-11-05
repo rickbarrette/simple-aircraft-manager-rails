@@ -180,7 +180,6 @@ class AdImportTest < ActiveSupport::TestCase
     AdImport::FAA_FIELDS.each_key do |attr|
       assert_includes AirworthinessDirective.column_names, attr.to_s
     end
-    assert_includes Aircraft.column_names, "drs_search_url"
   end
 
   test "rejects files that aren't DRS exports" do

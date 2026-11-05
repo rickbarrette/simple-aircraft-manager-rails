@@ -82,6 +82,12 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select "a[href='https://drs.faa.gov/browse/excelExternalWindow/ABC.0001']", minimum: 2 # status + history
   end
 
+  test "flights tab shows flying stats" do
+    get aircraft_flight_logs_path(@a)
+    assert_select "h2", text: "Flight hours by month"
+    assert_select "dt", text: "Airports visited"
+  end
+
   test "maintenance share link renders without login and shows history" do
     delete session_path
     get shared_path(@token.token)

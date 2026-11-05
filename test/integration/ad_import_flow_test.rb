@@ -45,18 +45,6 @@ class AdImportFlowTest < ActionDispatch::IntegrationTest
     assert_equal "GREEN", @aircraft.reload.airworthiness.status
   end
 
-  test "saved DRS search link shows an Open in DRS button; only drs.faa.gov links allowed" do
-    sign_in @owner
-    url = "https://drs.faa.gov/browse/ADFRAWD/doctypeDetails?Status=Current&Make=Cessna%20Aircraft%20Company&Model=150L#:~:text=Save-,Results"
-    patch aircraft_path(@aircraft), params: { aircraft: { drs_search_url: url } }
-    assert_equal url.sub(/#.*/, ""), @aircraft.reload.drs_search_url
-    get aircraft_airworthiness_directives_path(@aircraft)
-    assert_select "a[href='#{@aircraft.drs_search_url}']", text: "Open in DRS ↗"
-
-    patch aircraft_path(@aircraft), params: { aircraft: { drs_search_url: "https://evil.example/drs.faa.gov" } }
-    assert_response :unprocessable_entity
-  end
-
   test "pilots cannot import ADs" do
     sign_in @pilot
     post aircraft_ad_import_path(@aircraft), params: { file: fixture_file_upload("drs_ads.csv", "text/csv") }

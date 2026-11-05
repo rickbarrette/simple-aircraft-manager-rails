@@ -4,6 +4,7 @@ class FlightLogsController < ApplicationController
 
   def index
     @flight_logs = @aircraft.flight_logs.recent_first.includes(:user)
+    @stats = FlightStats.new(@aircraft)
   end
 
   def show

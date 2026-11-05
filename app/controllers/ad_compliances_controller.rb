@@ -7,9 +7,7 @@ class AdCompliancesController < ApplicationController
     ad = @aircraft.applicable_ads.find_by(id: params[:ad_id])
     @compliance = AdCompliance.new(aircraft: @aircraft, airworthiness_directive: ad, date_complied: Date.current,
                                    aircraft_hours_at_compliance: @aircraft.tach_time)
-    if ad&.recurring? && ad.recurring_hours.to_d > 0
-      @compliance.next_due_at_time = @aircraft.current_hours + ad.recurring_hours
-    end
+    @compliance.fill_next_due
   end
 
   def create

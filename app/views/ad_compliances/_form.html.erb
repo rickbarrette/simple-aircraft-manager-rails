@@ -1,14 +1,23 @@
-<%= form_with model: compliance, url: compliance.new_record? ? aircraft_ad_compliances_path(aircraft) : aircraft_ad_compliance_path(aircraft, compliance), class: "card card-body space-y-4 max-w-2xl" do |f| %>
+<% ads = aircraft.applicable_ads.ordered %>
+<% rules = ads.each_with_object({}) { |ad, h| (r = ad.due_rule) && h[ad.id.to_s] = r } %>
+<%= form_with model: compliance, url: compliance.new_record? ? aircraft_ad_compliances_path(aircraft) : aircraft_ad_compliance_path(aircraft, compliance),
+              class: "card card-body space-y-4 max-w-2xl", data: { controller: "next-due", next_due_rules_value: rules.to_json } do |f| %>
   <%= f.errors_summary %>
-  <%= f.field :airworthiness_directive_id, as: :select, label: "AD", collection: aircraft.applicable_ads.ordered.map { ["#{_1.name} – #{_1.short_description.truncate(50)}", _1.id] } %>
+  <%= f.field :airworthiness_directive_id, as: :select, label: "AD", collection: ads.map { ["#{_1.name} – #{_1.short_description.truncate(50)}", _1.id] },
+        data: { next_due_target: "rule", action: "change->next-due#changed" } %>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :date_complied, as: :date %>
-    <%= f.field :aircraft_hours_at_compliance, as: :number, step: 0.1, label: "Aircraft hours (tach)" %>
-    <%= f.field :next_due_at_time, as: :number, step: 0.1, label: "Next due at (tach hours)", hint: "0 = no hour-based recurrence." %>
+    <%= f.field :date_complied, as: :date, data: { next_due_target: "date", action: "change->next-due#changed" } %>
+    <%= f.field :aircraft_hours_at_compliance, as: :number, step: 0.1, label: "Aircraft hours (tach)",
+          data: { next_due_target: "hours", action: "input->next-due#changed" } %>
+    <%= f.field :next_due_at_time, as: :number, step: 0.1, label: "Next due at tach reading",
+          hint: "Calculated from the AD's recurrence; you can override it. Leave 0 if not hour-based.",
+          data: { next_due_target: "dueHours", action: "input->next-due#markManual" } %>
     <%= f.field :component_id, as: :select, label: "Component", collection: component_options(aircraft) %>
     <%= f.field :logbook_entry_id, as: :select, label: "Logbook entry", collection: logbook_options(aircraft) %>
   </div>
-  <%= f.field :permanent, as: :checkbox, label: "Permanently complied (terminating action)" %>
+  <p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-next-due-target="preview" hidden></p>
+  <%= f.field :permanent, as: :checkbox, label: "Permanently complied (terminating action)",
+        data: { next_due_target: "permanent", action: "change->next-due#changed" } %>
   <%= f.field :compliance_notes, as: :textarea, label: "Method of compliance", rows: 3, required: true %>
   <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_airworthiness_directives_path(aircraft), class: "btn-secondary" %></div>
 <% end %>

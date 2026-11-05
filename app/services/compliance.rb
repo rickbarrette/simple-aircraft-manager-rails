@@ -17,6 +17,22 @@ module Compliance
     (date >> months).end_of_month
   end
 
+  # Next due date/hours from a recurrence rule ({hours:, months:, days:}),
+  # matching the status math below: months land on the end of the month,
+  # then days are added; hours are added to the hours at completion.
+  def next_due(rule, date:, hours:)
+    return {} unless rule
+    due = {}
+    if rule[:months].to_i.positive? || rule[:days].to_i.positive?
+      d = date
+      d = end_of_month_after(d, rule[:months].to_i) if rule[:months].to_i.positive?
+      d += rule[:days].to_i.days if rule[:days].to_i.positive?
+      due[:date] = d if date
+    end
+    due[:hours] = hours.to_d + rule[:hours].to_d if rule[:hours].to_d.positive? && hours
+    due
+  end
+
   def ad_status(ad, compliance, current_hours, today = Date.current)
     return Result.new(rank: COMPLIANT) if ad.conditional?
     return Result.new(rank: OVERDUE) unless compliance

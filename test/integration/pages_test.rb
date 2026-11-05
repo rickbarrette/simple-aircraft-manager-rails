@@ -59,6 +59,14 @@ class PagesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "AD compliance form is prefilled from the AD's recurrence" do
+    get new_aircraft_ad_compliance_path(@a, ad_id: @ad.id)
+    assert_select "input[name='ad_compliance[next_due_at_time]'][value='1100.0']"
+    assert_select "form[data-controller='next-due'][data-next-due-rules-value*='\"#{@ad.id}\"']"
+    get new_aircraft_inspection_record_path(@a, inspection_type_id: @itype.id)
+    assert_select "form[data-controller='next-due'][data-next-due-rules-value*='\"months\":12']"
+  end
+
   test "maintenance share link renders without login and shows history" do
     delete session_path
     get shared_path(@token.token)

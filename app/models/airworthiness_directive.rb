@@ -27,6 +27,11 @@ class AirworthinessDirective < ApplicationRecord
   def conditional? = compliance_type == "conditional"
   def bulletin_label = BULLETIN_LABELS[bulletin_type]
 
+  # Recurrence rule for next-due math (AD status uses hours and months).
+  def due_rule
+    { hours: recurring_hours.to_f, months: recurring_months, days: 0 } if recurring?
+  end
+
   def latest_compliance_for(aircraft)
     ad_compliances.for_aircraft(aircraft).order(date_complied: :desc, created_at: :desc).first
   end

@@ -16,6 +16,10 @@ class InspectionType < ApplicationRecord
 
   def to_s = name
 
+  def due_rule
+    { hours: recurring_hours.to_f, months: recurring_months, days: recurring_days } if recurring?
+  end
+
   def interval_description
     return "One-time" unless recurring?
     parts = []

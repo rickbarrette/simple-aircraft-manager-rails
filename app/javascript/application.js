@@ -19,3 +19,8 @@ styleCharts()
 // Charts can be created before this module runs, so restyle after each page load too.
 document.addEventListener("turbo:load", restyleCharts)
 window.addEventListener("theme:change", restyleCharts)
+
+// Installable app (PWA): the service worker adds an offline page and caches static assets.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("/service-worker.js", { scope: "/" }).catch(() => {}))
+}

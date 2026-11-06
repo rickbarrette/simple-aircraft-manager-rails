@@ -30,7 +30,10 @@
   </fieldset>
   <%= f.field :route, as: :textarea, rows: 2 %>
   <%= f.field :notes, as: :textarea, rows: 2 %>
-  <%= f.field :track_log, as: :file, label: "Track log (GPX/KML/CSV)" %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :track_log, as: :file, label: "Track log (GPX/KML/CSV)" %>
+    <%= f.field :engine_data, as: :file, label: "Engine monitor data", hint: "CGR-30P / CGR-30C flight recording (.csv).", accept: ".csv,text/csv" %>
+  </div>
   <p class="hint">Saving adds the tach time to the aircraft and all in-service components, and records any oil/fuel added.</p>
   <div class="flex gap-2"><%= f.submit "Log Flight" %><%= link_to "Cancel", aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %></div>
 <% end %>

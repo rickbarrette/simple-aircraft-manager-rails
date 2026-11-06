@@ -24,7 +24,12 @@ Rails.application.routes.draw do
       end
     end
     resources :notes, except: :show
-    resources :flight_logs, only: %i[index new create show destroy]
+    resources :flight_logs, only: %i[index new create show destroy] do
+      member do
+        patch :engine_data, action: :attach_engine_data
+        delete :engine_data, action: :remove_engine_data
+      end
+    end
     resource :air_trail_export, path: "airtrail_export", only: %i[new create]
     resource :airport_codes, only: %i[show update]
     resource :flight_import, only: %i[new create show] do

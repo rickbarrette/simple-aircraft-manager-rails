@@ -1,0 +1,82 @@
+<%# Engine monitor recording: summary and charts. Locals: flight_log, recording, error %>
+<section class="card max-w-5xl" id="engine-data">
+  <div class="card-header">
+    <h2 class="card-title">Engine data</h2>
+    <% if flight_log.engine_data.attached? %>
+      <div class="flex items-center gap-2 text-xs">
+        <%= link_to flight_log.engine_data.filename, rails_blob_path(flight_log.engine_data, disposition: :attachment), class: "link" %>
+        <% if manage_engine_data? %><%= delete_button "Remove", engine_data_aircraft_flight_log_path(@aircraft, flight_log), confirm: "Remove the engine data file from this flight?" %><% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if recording %>
+    <% hours_line = ->(key, places) { (a = recording.first(key)) && (b = recording.last(key)) ? "#{number_with_precision(a, precision: places)} → #{number_with_precision(b, precision: places)} (#{number_with_precision(b - a, precision: places)})" : "—" } %>
+    <% egt, cht = recording.hottest(:egt), recording.hottest(:cht) %>
+    <% tail = recording.metadata[:aircraft_id] %>
+    <% if tail.present? && tail.upcase != @aircraft.tail_number.to_s.upcase %>
+      <p class="border-b border-slate-100 bg-amber-50 px-4 py-2 text-xs text-amber-800">This recording is from <strong><%= tail %></strong>, not <%= @aircraft.tail_number %>.</p>
+    <% end %>
+    <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
+      <dt class="text-slate-500">Recorded</dt>
+      <dd class="col-span-3"><%= recording.local(recording.started_at).strftime("%Y-%m-%d %H:%M") %>–<%= recording.local(recording.ended_at).strftime("%H:%M") %> monitor time
+        <span class="text-xs text-slate-500">· <%= recording.format %><%= " flight ##{recording.metadata[:flight_number]}" if recording.metadata[:flight_number] %> · <%= number_with_delimiter(recording.samples) %> samples</span></dd>
+      <dt class="text-slate-500">Engine run</dt><dd><%= recording.engine_start ? run_duration(recording.run_time) : "Engine not run" %></dd>
+      <dt class="text-slate-500">Fuel burned</dt><dd><%= engine_value(recording.fuel_burned, "gal", precision: 1) %></dd>
+      <dt class="text-slate-500">Tach</dt><dd class="tabular-nums"><%= hours_line.(:tach, 2) %></dd>
+      <dt class="text-slate-500">Engine hrs</dt><dd class="tabular-nums"><%= hours_line.(:engine_hours, 2) %></dd>
+      <% if (flt = recording.last(:flight_hours)) %><dt class="text-slate-500">Airborne</dt><dd><%= flt.zero? ? "No (ground run)" : "#{number_with_precision(flt, precision: 2)} hrs" %></dd><% end %>
+    </dl>
+
+    <div class="overflow-x-auto border-t border-slate-100">
+      <table class="table">
+        <thead><tr><th>Peak (engine running)</th><th class="text-right">Value</th><th class="text-right">At</th></tr></thead>
+        <tbody>
+          <% peaks = [
+               [ "RPM", recording.max(:rpm), "rpm" ],
+               [ "Manifold pressure", recording.max(:map), "inHg", 1 ],
+               [ (egt ? "EGT (cyl #{egt[:cylinder]})" : "EGT"), egt && [ egt[:value], egt[:at] ], "°F" ],
+               [ (cht ? "CHT (cyl #{cht[:cylinder]})" : "CHT"), cht && [ cht[:value], cht[:at] ], "°F" ],
+               [ "TIT", recording.max(:tit), "°F" ],
+               [ "Oil temp", recording.max(:oil_t), "°F" ],
+               [ "Oil pressure", recording.max(:oil_p), "psi" ],
+               [ "Fuel flow", recording.max(:fuel_flow), "gph", 1 ],
+               [ "Volts (low)", recording.min(:volts), "V", 1 ]
+             ].select { _2 } %>
+          <% peaks.each do |label, (value, at), unit, places| %>
+            <tr><td><%= label %></td><td class="text-right tabular-nums"><%= engine_value(value, unit, precision: places || 0) %></td>
+              <td class="text-right tabular-nums text-slate-500"><%= recording.local(at).strftime("%H:%M:%S") %></td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid gap-6 border-t border-slate-100 p-4 lg:grid-cols-2">
+      <% colors = FlightLogsHelper::CYLINDER_COLORS %>
+      <% [
+           [ "CHT", recording.cht_keys, "°F", colors ],
+           [ "EGT", recording.egt_keys, "°F", colors ],
+           [ "RPM", [ :rpm ], "rpm" ],
+           [ "Manifold pressure", [ :map ], "inHg" ],
+           [ "Fuel flow", [ :fuel_flow ], "gph" ],
+           [ "Oil temp", [ :oil_t ], "°F" ],
+           [ "Oil pressure", [ :oil_p ], "psi" ],
+           [ "Volts", [ :volts ], "V" ]
+         ].each do |title, keys, unit, palette| %>
+        <% chart = engine_chart(recording, *keys, ytitle: unit, colors: palette) %>
+        <% if chart %><figure><figcaption class="mb-1 text-xs font-semibold text-slate-600"><%= title %></figcaption><%= chart %></figure><% end %>
+      <% end %>
+    </div>
+  <% elsif error %>
+    <p class="card-body text-sm text-amber-700"><%= error %></p>
+  <% end %>
+
+  <% if manage_engine_data? && !flight_log.engine_data.attached? %>
+    <%= form_with model: flight_log, url: engine_data_aircraft_flight_log_path(@aircraft, flight_log), method: :patch, class: "card-body flex flex-wrap items-end gap-3" do |f| %>
+      <%= f.field :engine_data, as: :file, label: "Attach engine monitor data", hint: "CGR-30P / CGR-30C flight recording (.csv).", accept: ".csv,text/csv" %>
+      <%= f.submit "Upload", class: "btn-secondary" %>
+    <% end %>
+  <% elsif !flight_log.engine_data.attached? %>
+    <%= empty_state "No engine data for this flight." %>
+  <% end %>
+</section>

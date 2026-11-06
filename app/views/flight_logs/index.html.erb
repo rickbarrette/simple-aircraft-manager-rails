@@ -15,6 +15,7 @@
               <td class="whitespace-nowrap">
                 <%= fl.route_summary.presence || blank %>
                 <% if fl.track_log.attached? %><span class="ml-1" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
+                <% if fl.engine_data.attached? %><span class="ml-1" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
               </td>
               <td class="text-right tabular-nums"><%= fl.tach_time ? hours(fl.tach_time) : blank %></td>
               <td class="text-right tabular-nums"><%= fl.hobbs_time ? hours(fl.hobbs_time) : blank %></td>

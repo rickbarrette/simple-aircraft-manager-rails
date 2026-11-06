@@ -1,18 +1,25 @@
 class FlightLogsController < ApplicationController
   include AircraftScoped
   before_action :require_owner!, only: :destroy
+  before_action :set_flight_log, only: %i[show attach_engine_data remove_engine_data]
+  before_action :require_engine_data_access!, only: %i[attach_engine_data remove_engine_data]
+  helper_method :manage_engine_data?
 
   def index
-    @flight_logs = @aircraft.flight_logs.recent_first.includes(:user).with_attached_track_log
+    @flight_logs = @aircraft.flight_logs.recent_first.includes(:user).with_attached_track_log.with_attached_engine_data
     @stats = FlightStats.new(@aircraft)
   end
 
   def show
-    @flight_log = @aircraft.flight_logs.find(params[:id])
     begin
       @track = TrackParser.parse_attachment(@flight_log.track_log)
     rescue TrackParser::Error => e
       @track_error = "Couldn't read track: #{e.message}"
+    end
+    begin
+      @engine_data = EngineDataParser.parse_attachment(@flight_log.engine_data)
+    rescue EngineDataParser::Error, ActiveStorage::FileNotFoundError => e
+      @engine_data_error = "Couldn't read engine data: #{e.message}"
     end
     @air_trail_connection = @flight_log.user&.air_trail_connection
     @air_trail_sync = @flight_log.air_trail_syncs.first
@@ -39,6 +46,23 @@ class FlightLogsController < ApplicationController
     render :new, status: :conflict
   end
 
+  def attach_engine_data
+    file = params.dig(:flight_log, :engine_data)
+    return redirect_to(aircraft_flight_log_path(@aircraft, @flight_log), alert: "Choose an engine data file.") if file.blank?
+
+    @flight_log.engine_data = file
+    if @flight_log.save
+      redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: "Engine data attached."
+    else
+      redirect_to aircraft_flight_log_path(@aircraft, @flight_log), alert: @flight_log.errors.full_messages.to_sentence
+    end
+  end
+
+  def remove_engine_data
+    @flight_log.engine_data.purge_later
+    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: "Engine data removed."
+  end
+
   # Deleting a flight does not roll back hours; correct those with an hours update.
   def destroy
     @aircraft.flight_logs.find(params[:id]).destroy!
@@ -48,11 +72,25 @@ class FlightLogsController < ApplicationController
 
   private
 
+  def set_flight_log
+    @flight_log = @aircraft.flight_logs.find(params[:id])
+  end
+
+  # Owners, or the pilot who logged the flight.
+  def manage_engine_data?
+    owner? || (@flight_log.user_id.present? && @flight_log.user_id == current_user.id)
+  end
+
+  def require_engine_data_access!
+    return if manage_engine_data?
+    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), alert: "Only owners or the flight's pilot can do that."
+  end
+
   def flight_log_params
     params.require(:flight_log).permit(
       :date, :tach_time, :tach_out, :tach_in, :hobbs_time, :hobbs_out, :hobbs_in,
       :departure_location, :destination_location, :route, :oil_added, :oil_added_type,
-      :oil_level_after, :fuel_added, :fuel_added_type, :fuel_level_after, :notes, :track_log
+      :oil_level_after, :fuel_added, :fuel_added_type, :fuel_level_after, :notes, :track_log, :engine_data
     )
   end
 end

@@ -7,7 +7,7 @@
           <td><%= squawk_priority_badge(s) %></td>
           <td class="max-w-md">
             <%= s.issue_reported %>
-            <% if s.attachment.attached? %><div><%= link_to "📎 #{s.attachment.filename}", rails_blob_path(s.attachment, disposition: :inline), class: "link text-xs", target: "_blank" %></div><% end %>
+            <%= render "squawks/attachments", squawk: s %>
             <% if s.notes.present? %><div class="mt-1 text-xs text-slate-500"><%= s.notes %></div><% end %>
           </td>
           <td><%= s.component&.to_s || "—" %></td>

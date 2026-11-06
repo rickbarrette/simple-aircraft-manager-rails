@@ -22,7 +22,7 @@ class ComponentsController < ApplicationController
   end
 
   def show
-    @squawks = @component.squawks.by_priority
+    @squawks = @component.squawks.by_priority.with_attached_attachments
   end
 
   def new

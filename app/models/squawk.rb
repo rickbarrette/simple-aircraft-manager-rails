@@ -7,11 +7,11 @@ class Squawk < ApplicationRecord
   belongs_to :aircraft
   belongs_to :component, optional: true
   belongs_to :reported_by, class_name: "User", optional: true
-  has_one_attached :attachment
+  has_many_attached :attachments
 
   validates :priority, inclusion: { in: PRIORITIES.keys }
   validates :issue_reported, presence: true
-  validates_uploads :attachment
+  validates_uploads :attachments
 
   scope :active, -> { where(resolved: false) }
   scope :resolved, -> { where(resolved: true) }

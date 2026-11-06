@@ -5,8 +5,8 @@ class SquawksController < ApplicationController
   before_action :set_squawk, only: %i[edit update destroy resolve reopen]
 
   def index
-    @active = @aircraft.squawks.active.by_priority.includes(:component, :reported_by)
-    @resolved = @aircraft.squawks.resolved.order(resolved_at: :desc).includes(:component).limit(100)
+    @active = @aircraft.squawks.active.by_priority.includes(:component, :reported_by).with_attached_attachments
+    @resolved = @aircraft.squawks.resolved.order(resolved_at: :desc).includes(:component).with_attached_attachments.limit(100)
   end
 
   def new
@@ -26,7 +26,9 @@ class SquawksController < ApplicationController
   def edit; end
 
   def update
-    if @squawk.update(squawk_params)
+    @squawk.assign_attributes(squawk_params.except(:attachments))
+    change_attachments
+    if @squawk.save
       log_event("squawk", "Squawk updated")
       redirect_to aircraft_squawks_path(@aircraft), notice: "Squawk updated."
     else
@@ -56,7 +58,17 @@ class SquawksController < ApplicationController
 
   def set_squawk = @squawk = @aircraft.squawks.find(params[:id])
 
+  # Adds uploads and drops ticked files in one change, so nothing is saved
+  # (or purged) unless the whole update validates.
+  def change_attachments
+    added = Array(squawk_params[:attachments]).compact_blank
+    removed = Array(params[:remove_attachment_ids]).map(&:to_s)
+    return if added.empty? && removed.empty?
+    kept = @squawk.attachments.reject { removed.include?(_1.id.to_s) }.map(&:blob)
+    @squawk.attachments = kept + added
+  end
+
   def squawk_params
-    params.require(:squawk).permit(:priority, :issue_reported, :component_id, :notes, :attachment)
+    params.require(:squawk).permit(:priority, :issue_reported, :component_id, :notes, attachments: [])
   end
 end

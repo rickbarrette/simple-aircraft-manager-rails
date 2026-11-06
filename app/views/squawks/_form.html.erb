@@ -1,9 +1,18 @@
-<%= form_with model: [aircraft, squawk], class: "card card-body space-y-4 max-w-2xl" do |f| %>
+<%= form_with model: [aircraft, squawk], multipart: true, class: "card card-body space-y-4 max-w-2xl" do |f| %>
   <%= f.errors_summary %>
   <%= f.field :priority, as: :select, collection: Squawk::PRIORITIES.invert, hint: "“Ground Aircraft” makes the aircraft not airworthy until resolved." %>
   <%= f.field :issue_reported, as: :textarea, label: "Issue", required: true, autofocus: true %>
   <%= f.field :component_id, as: :select, label: "Component (optional)", collection: component_options(aircraft) %>
-  <%= f.field :attachment, as: :file, label: "Photo / attachment" %>
+  <%= f.field :attachments, as: :file, multiple: true, label: squawk.attachments.attached? ? "Add photos / files" : "Photos / files",
+        hint: "Select several at once. Images, PDFs or text, up to 50 MB each." %>
+  <% if squawk.persisted? && squawk.attachments.attached? %>
+    <div>
+      <p class="label">Remove attached files</p>
+      <% squawk.attachments.each do |file| %>
+        <label class="flex items-center gap-2 text-sm"><%= check_box_tag "remove_attachment_ids[]", file.id, false, id: "remove_attachment_#{file.id}" %> <%= file.filename %></label>
+      <% end %>
+    </div>
+  <% end %>
   <% if squawk.persisted? %><%= f.field :notes, as: :textarea, rows: 3 %><% end %>
   <div class="flex gap-2">
     <%= f.submit squawk.new_record? ? "Report Squawk" : "Save" %>

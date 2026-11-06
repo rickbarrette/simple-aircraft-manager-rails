@@ -9,7 +9,7 @@ class AircraftController < ApplicationController
 
   def show
     @airworthiness = @aircraft.airworthiness
-    @active_squawks = @aircraft.squawks.active.by_priority.includes(:component, :reported_by)
+    @active_squawks = @aircraft.squawks.active.by_priority.includes(:component, :reported_by).with_attached_attachments
     @recent_events = @aircraft.events.includes(:user).limit(8)
     @notes = @aircraft.notes.recent_first.includes(:user).limit(5)
     @oil = ConsumptionStats.new(@aircraft, "oil")

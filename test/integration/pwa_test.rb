@@ -23,9 +23,11 @@ class PwaTest < ActionDispatch::IntegrationTest
   test "signed-in and shared pages link the manifest and register the worker" do
     sign_in create_user
     get root_path
-    assert_select "link[rel=manifest][href='/manifest.json']"
+    assert_select "link[rel=manifest][href='/manifest.json'][crossorigin=use-credentials]" # behind an auth proxy (Authentik) the manifest needs cookies
     assert_select "meta[name=theme-color]"
     assert_select "link[rel=apple-touch-icon][href='/apple-touch-icon.png']"
+    assert_select "link[rel=icon][href='/favicon.svg']"
+    assert_includes Rails.public_path.join("favicon.svg").read, "✈️"
 
     token = create_aircraft(owner: create_user("o2@example.com")).share_tokens.create!(privilege: "status")
     get shared_path(token.token)

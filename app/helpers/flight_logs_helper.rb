@@ -13,6 +13,25 @@ module FlightLogsHelper
     "#{number_with_delimiter(number_with_precision(value, precision: precision))} #{unit}"
   end
 
+  CHART_COLOR = "#3366CC".freeze # Chartkick's first color, for single-series charts
+
+  # The charts shown for a recording; shared by the page and the interactive viewer.
+  def engine_chart_groups(recording)
+    [
+      [ "CHT", recording.cht_keys, "°F", CYLINDER_COLORS ],
+      [ "EGT", recording.egt_keys, "°F", CYLINDER_COLORS ],
+      [ "RPM", [ :rpm ], "rpm" ],
+      [ "Manifold pressure", [ :map ], "inHg" ],
+      [ "Fuel flow", [ :fuel_flow ], "gph" ],
+      [ "Oil temp", [ :oil_t ], "°F" ],
+      [ "Oil pressure", [ :oil_p ], "psi" ],
+      [ "Volts", [ :volts ], "V" ]
+    ].filter_map do |title, keys, unit, colors|
+      keys = keys.select { recording.channels.key?(_1) }
+      { title: title, keys: keys, unit: unit, colors: colors || [ CHART_COLOR ] } if keys.any?
+    end
+  end
+
   def engine_chart(recording, *keys, ytitle:, colors: nil)
     series = recording.chart(*keys)
     return if series.empty?

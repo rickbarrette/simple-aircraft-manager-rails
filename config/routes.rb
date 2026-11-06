@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     resources :notes, except: :show
     resources :flight_logs, only: %i[index new create show destroy] do
       member do
+        get :engine_data, action: :engine_data_series
         patch :engine_data, action: :attach_engine_data
         delete :engine_data, action: :remove_engine_data
       end

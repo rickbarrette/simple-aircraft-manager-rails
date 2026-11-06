@@ -75,4 +75,20 @@ class EngineDataParserTest < ActiveSupport::TestCase
     assert_raises(EngineDataParser::Error) { EngineDataParser.new("lat,lon\n1,2\n").parse }
     assert_raises(EngineDataParser::Error) { EngineDataParser.new("CGR-30P\nLocal Time: 2025/07/14 08:00:00\nTIME,RPM;***\n").parse }
   end
+
+  test "detail series for the chart viewer: ms offsets, compact values, thinned to a limit" do
+    full = recording.detail
+    assert_equal (recording.started_at.to_r * 1000).round, full[:started_at]
+    assert_equal recording.samples, full[:times].size
+    assert_equal 0, full[:times].first
+    assert_equal ((recording.ended_at - recording.started_at) * 1000).round, full[:times].last
+    assert_equal(-4.hours.to_i, full[:utc_offset])
+    rpm = full[:channels][:rpm]
+    assert_equal [ "RPM", "RPM" ], [ rpm[:label], rpm[:unit] ]
+    assert rpm[:values].compact.all?(Integer), "whole numbers are sent as integers"
+
+    thin = recording.detail(max_points: 4)
+    assert_operator thin[:times].size, :<=, 4
+    assert_equal thin[:times].size, thin[:channels][:cht1][:values].size
+  end
 end

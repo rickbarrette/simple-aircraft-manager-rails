@@ -1,7 +1,7 @@
 class FlightLogsController < ApplicationController
   include AircraftScoped
   before_action :require_owner!, only: :destroy
-  before_action :set_flight_log, only: %i[show attach_engine_data remove_engine_data]
+  before_action :set_flight_log, only: %i[show engine_data_series attach_engine_data remove_engine_data]
   before_action :require_engine_data_access!, only: %i[attach_engine_data remove_engine_data]
   helper_method :manage_engine_data?
 
@@ -23,6 +23,15 @@ class FlightLogsController < ApplicationController
     end
     @air_trail_connection = @flight_log.user&.air_trail_connection
     @air_trail_sync = @flight_log.air_trail_syncs.first
+  end
+
+  # JSON for the interactive engine chart viewer (loaded when a chart is clicked).
+  def engine_data_series
+    recording = EngineDataParser.parse_attachment(@flight_log.engine_data) or return head(:not_found)
+    return unless stale?(etag: [ @flight_log.engine_data.blob.key, EngineDataParser::CACHE_VERSION ], public: false)
+    render json: recording.detail.merge(groups: helpers.engine_chart_groups(recording))
+  rescue EngineDataParser::Error, ActiveStorage::FileNotFoundError => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   def new

@@ -12,6 +12,7 @@ class EngineDataParser
   RUNNING_RPM = 300      # below this the engine is off (or starting)
   MAX_GAP_SECONDS = 10   # don't integrate fuel flow across a hole in the data
   CHART_POINTS = 600
+  DETAIL_POINTS = 6000   # the interactive chart viewer's resolution
   CACHE_VERSION = 1      # bump when parsing changes, to re-read cached recordings
 
   # Column name (before ";", whitespace squeezed) → channel. First match wins,
@@ -92,6 +93,22 @@ class EngineDataParser
         ch = channels[key] or next
         { name: ch.label, data: idx.filter_map { |i| [ times[i], ch.values[i] ] unless ch.values[i].nil? } }
       end
+    end
+
+    # Higher-resolution data for the interactive viewer: times in ms after the
+    # start, values rounded and with whole numbers as integers to keep it small.
+    def detail(max_points: DETAIL_POINTS)
+      step = [ (samples.to_f / max_points).ceil, 1 ].max
+      idx = (0...samples).step(step).to_a
+      start = times.first
+      {
+        started_at: (start.to_r * 1000).round,
+        utc_offset: utc_offset,
+        times: idx.map { ((times[_1] - start) * 1000).round },
+        channels: channels.transform_values do |ch|
+          { label: ch.label, unit: ch.unit, values: idx.map { |i| (v = ch.values[i]) && (v == v.round ? v.round : v.round(2)) } }
+        end
+      }
     end
 
     private

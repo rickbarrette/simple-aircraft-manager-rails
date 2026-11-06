@@ -68,4 +68,48 @@ class EngineDataFlowTest < ActionDispatch::IntegrationTest
     get aircraft_flight_log_path(@aircraft, flight)
     assert_includes response.body, "This recording is from <strong>N12345</strong>"
   end
+
+  test "charts open an interactive viewer fed by a JSON series" do
+    flight = @aircraft.flight_logs.create!(date: Date.new(2025, 7, 14), tach_time: 0.1, user: @pilot, engine_data: upload)
+    sign_in @other_pilot # anyone with access to the aircraft can explore the charts
+
+    get aircraft_flight_log_path(@aircraft, flight)
+    url = engine_data_aircraft_flight_log_path(@aircraft, flight, format: :json)
+    assert_select "[data-controller=engine-chart][data-engine-chart-url-value='#{url}']" do
+      assert_select "figure[role=button][data-action*='engine-chart#open']", minimum: 4
+      assert_select "figure[data-engine-chart-group-param='0'] figcaption", text: /CHT/
+      assert_select "dialog[data-engine-chart-target=dialog] canvas[data-engine-chart-target=canvas]"
+    end
+
+    get url
+    assert_response :success
+    data = response.parsed_body
+    assert_equal data["times"].size, data["channels"]["rpm"]["values"].size
+    assert_equal 0, data["times"].first
+    assert data["times"].each_cons(2).all? { _1 <= _2 }, "times ascend"
+    assert_kind_of Integer, data["started_at"]
+    assert_equal %w[CHT EGT RPM], data["groups"].first(3).map { _1["title"] }
+    cht = data["groups"].first
+    assert_equal %w[cht1 cht2 cht3 cht4], cht["keys"]
+    assert_equal "°F", cht["unit"]
+    data["groups"].flat_map { _1["keys"] }.each { assert data["channels"].key?(_1), "#{_1} has data" }
+
+    etag = response.headers["ETag"]
+    get url, headers: { "If-None-Match" => etag }
+    assert_response :not_modified
+  end
+
+  test "the series stays private to people with access to the aircraft" do
+    flight = @aircraft.flight_logs.create!(date: Date.new(2025, 7, 14), tach_time: 0.1, user: @pilot, engine_data: upload)
+    sign_in create_user
+    get engine_data_aircraft_flight_log_path(@aircraft, flight, format: :json)
+    assert_response :not_found
+  end
+
+  test "a flight without engine data has no series" do
+    flight = @aircraft.flight_logs.create!(date: Date.new(2025, 7, 14), tach_time: 0.1, user: @pilot)
+    sign_in @pilot
+    get engine_data_aircraft_flight_log_path(@aircraft, flight, format: :json)
+    assert_response :not_found
+  end
 end

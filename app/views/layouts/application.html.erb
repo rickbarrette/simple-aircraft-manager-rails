@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html class="h-full bg-slate-100">
+<html class="h-full bg-page">
   <head>
+    <%= render "shared/theme_script" %>
     <title><%= [content_for(:title), "Simple Aircraft Manager"].compact.join(" · ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +17,7 @@
   </head>
 
   <body class="min-h-full text-slate-800">
-    <header class="bg-slate-900 text-white">
+    <header class="bg-header text-white">
       <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <%= link_to root_path, class: "flex items-center gap-2 font-semibold tracking-tight" do %>
           <span class="text-xl">✈</span> Simple Aircraft Manager
@@ -29,15 +30,16 @@
                 <summary class="flex cursor-pointer list-none items-center gap-1 hover:text-sky-300 [&::-webkit-details-marker]:hidden">
                   Admin <span aria-hidden="true" class="text-xs">▾</span>
                 </summary>
-                <div class="absolute right-0 z-30 mt-2 w-48 rounded-md bg-white py-1 text-slate-700 shadow-lg ring-1 ring-slate-200">
+                <div class="absolute right-0 z-30 mt-2 w-48 rounded-md bg-surface py-1 text-slate-700 shadow-lg ring-1 ring-slate-200">
                   <% [ [ "Users", admin_users_path ], [ "Component Types", admin_component_types_path ], [ "Airports", admin_airports_path ] ].each do |label, path| %>
                     <%= link_to label, path, class: [ "block px-4 py-2 text-sm hover:bg-slate-100", ("font-semibold text-sky-700" if current_page?(path)) ] %>
                   <% end %>
                 </div>
               </details>
             <% end %>
-            <%= link_to current_user.display_name, edit_profile_path, class: "text-slate-300 hover:text-sky-300 hidden sm:inline" %>
-            <%= button_to "Sign out", session_path, method: :delete, class: "rounded bg-slate-700 px-2 py-1 hover:bg-slate-600" %>
+            <%= link_to current_user.display_name, edit_profile_path, class: "text-white/70 hover:text-sky-300 hidden sm:inline" %>
+            <%= render "shared/theme_toggle" %>
+            <%= button_to "Sign out", session_path, method: :delete, class: "rounded bg-white/10 px-2 py-1 hover:bg-white/20" %>
           </nav>
         <% end %>
       </div>

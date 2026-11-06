@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html class="h-full bg-slate-100">
+<html class="h-full bg-page">
   <head>
+    <%= render "shared/theme_script" %>
     <title><%= [content_for(:title), "Simple Aircraft Manager"].compact.join(" · ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
@@ -11,8 +12,8 @@
     <%= javascript_importmap_tags %>
   </head>
   <body class="min-h-full text-slate-800">
-    <header class="bg-slate-900 text-white">
-      <div class="mx-auto max-w-7xl px-4 py-3 font-semibold"><span class="text-xl">✈</span> Simple Aircraft Manager</div>
+    <header class="bg-header text-white">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3"><span class="font-semibold"><span class="text-xl">✈</span> Simple Aircraft Manager</span><%= render "shared/theme_toggle" %></div>
     </header>
     <main class="mx-auto max-w-7xl px-4 py-6">
       <%= render "shared/flash" %>

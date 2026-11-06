@@ -1,25 +1,36 @@
 @import "tailwindcss";
 
+/* Semantic colors that differ by theme (dark values are set further down). */
+@theme {
+  --color-page: oklch(96.8% 0.007 247.896);        /* slate-100 */
+  --color-surface: oklch(100% 0 0);                /* white: cards, inputs, menus */
+  --color-header: oklch(20.8% 0.042 265.755);      /* slate-900: top bar, dark in both themes */
+  --color-accent: oklch(50% 0.134 242.749);        /* sky-700: primary buttons */
+  --color-accent-hover: oklch(44.3% 0.11 240.79);  /* sky-800 */
+}
+
 @utility btn { @apply inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium shadow-sm transition cursor-pointer disabled:opacity-50; }
-@utility btn-primary { @apply btn bg-sky-700 text-white hover:bg-sky-800; }
-@utility btn-secondary { @apply btn bg-white text-slate-700 ring-1 ring-slate-300 ring-inset hover:bg-slate-50; }
-@utility btn-danger { @apply btn bg-white text-red-700 ring-1 ring-red-300 ring-inset hover:bg-red-50; }
+@utility btn-primary { @apply btn bg-accent text-white hover:bg-accent-hover; }
+@utility btn-secondary { @apply btn bg-surface text-slate-700 ring-1 ring-slate-300 ring-inset hover:bg-slate-50; }
+@utility btn-danger { @apply btn bg-surface text-red-700 ring-1 ring-red-300 ring-inset hover:bg-red-50; }
 @utility btn-sm { @apply px-2 py-1 text-xs; }
 @utility link { @apply text-sky-700 hover:underline; }
 
-@utility card { @apply rounded-lg bg-white shadow-sm ring-1 ring-slate-200; }
+@utility card { @apply rounded-lg bg-surface shadow-sm ring-1 ring-slate-200; }
 @utility card-header { @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3; }
 @utility card-title { @apply text-base font-semibold text-slate-900; }
 @utility card-body { @apply p-4; }
 
 @utility label { @apply block text-sm font-medium text-slate-700 mb-1; }
-@utility input { @apply block w-full rounded-md border-0 px-2.5 py-1.5 text-sm text-slate-900 shadow-sm ring-1 ring-slate-300 ring-inset placeholder:text-slate-400 focus:ring-2 focus:ring-sky-600 focus:outline-none bg-white; }
+@utility input { @apply block w-full rounded-md border-0 px-2.5 py-1.5 text-sm text-slate-900 shadow-sm ring-1 ring-slate-300 ring-inset placeholder:text-slate-400 focus:ring-2 focus:ring-sky-600 focus:outline-none bg-surface; }
 @utility hint { @apply mt-1 text-xs text-slate-500; }
 @utility field-error { @apply mt-1 text-xs text-red-600; }
 
 @utility table {
   @apply min-w-full text-sm;
-  & th { @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50; }
+  & th { @apply px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50; }
+  /* Left by default, but let text-right/text-center on a header win (numeric columns). */
+  & th:not(.text-right, .text-center) { text-align: left; }
   & td { @apply px-3 py-2 align-top text-slate-700; }
   & tbody tr { @apply border-t border-slate-100; }
   & tbody tr:hover { @apply bg-slate-50; }
@@ -34,3 +45,65 @@
 
 @utility tab { @apply whitespace-nowrap border-b-2 border-transparent px-3 py-2 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700; }
 @utility tab-active { @apply border-sky-700 text-sky-700; }
+
+/* ---------------------------------------------------------------------------
+   Dark theme: remap the palette instead of adding dark: variants everywhere.
+   Grays flip (light backgrounds become dark, dark text becomes light),
+   pale color tints become dim translucent ones, and dark colored text
+   (e.g. red-700) becomes its light counterpart. Set by the theme script in
+   the layout (<html data-theme="dark">).
+   ------------------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-page: oklch(15.5% 0.035 264);
+  --color-surface: oklch(20.8% 0.042 265.755);
+  --color-header: oklch(12.9% 0.042 264.695);
+  --color-accent: oklch(50% 0.134 242.749);        /* same blue: white text stays ≥ 4.5:1 */
+  --color-accent-hover: oklch(54% 0.15 242);
+
+  --color-slate-50: oklch(24.5% 0.042 262);
+  --color-slate-100: oklch(26.5% 0.042 261);
+  --color-slate-200: oklch(31% 0.042 259);
+  --color-slate-300: oklch(42% 0.043 257.3);
+  --color-slate-400: oklch(58% 0.045 257);
+  --color-slate-500: oklch(68% 0.04 256.8);
+  --color-slate-600: oklch(77% 0.03 255);
+  --color-slate-700: oklch(86.9% 0.022 252.894);
+  --color-slate-800: oklch(92.9% 0.013 255.508);
+  --color-slate-900: oklch(96.8% 0.007 247.896);
+  --color-slate-950: oklch(98.4% 0.003 247.858);
+
+  --color-red-50: color-mix(in oklab, oklch(63.7% 0.237 25.331) 14%, transparent);
+  --color-red-100: color-mix(in oklab, oklch(63.7% 0.237 25.331) 22%, transparent);
+  --color-red-200: color-mix(in oklab, oklch(63.7% 0.237 25.331) 35%, transparent);
+  --color-red-600: oklch(70.4% 0.191 22.216);      /* error text: readable on dark cards */
+  --color-red-700: oklch(80.8% 0.114 19.571);
+  --color-red-800: oklch(88.5% 0.062 18.334);
+  --color-red-900: oklch(93.6% 0.032 17.717);
+
+  --color-amber-50: color-mix(in oklab, oklch(76.9% 0.188 70.08) 12%, transparent);
+  --color-amber-100: color-mix(in oklab, oklch(76.9% 0.188 70.08) 20%, transparent);
+  --color-amber-200: color-mix(in oklab, oklch(76.9% 0.188 70.08) 32%, transparent);
+  --color-amber-700: oklch(87.9% 0.169 91.605);
+  --color-amber-800: oklch(92.4% 0.12 95.746);
+  --color-amber-900: oklch(96.2% 0.059 95.617);
+
+  --color-emerald-50: color-mix(in oklab, oklch(69.6% 0.17 162.48) 13%, transparent);
+  --color-emerald-100: color-mix(in oklab, oklch(69.6% 0.17 162.48) 21%, transparent);
+  --color-emerald-200: color-mix(in oklab, oklch(69.6% 0.17 162.48) 33%, transparent);
+  --color-emerald-700: oklch(84.5% 0.143 164.978);
+  --color-emerald-800: oklch(90.5% 0.093 164.15);
+  --color-emerald-900: oklch(95% 0.052 163.051);
+
+  --color-sky-50: color-mix(in oklab, oklch(68.5% 0.169 237.323) 14%, transparent);
+  --color-sky-100: color-mix(in oklab, oklch(68.5% 0.169 237.323) 22%, transparent);
+  --color-sky-200: color-mix(in oklab, oklch(68.5% 0.169 237.323) 35%, transparent);
+  --color-sky-700: oklch(82.8% 0.111 230.318);
+  --color-sky-800: oklch(90.1% 0.058 230.902);
+  --color-sky-900: oklch(95.1% 0.026 236.824);
+
+  --color-blue-50: color-mix(in oklab, oklch(62.3% 0.214 259.815) 14%, transparent);
+  --color-blue-100: color-mix(in oklab, oklch(62.3% 0.214 259.815) 22%, transparent);
+  --color-blue-700: oklch(80.9% 0.105 251.813);
+}

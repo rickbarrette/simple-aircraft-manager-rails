@@ -1,0 +1,11 @@
+<%# Applies the saved theme before the page paints (no light flash in dark mode).
+    "system" (default) follows the OS setting. Set by theme_controller.js. %>
+<script>
+  (function () {
+    try {
+      var choice = localStorage.getItem("theme") || "system";
+      var dark = choice === "dark" || (choice === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    } catch (e) {}
+  })();
+</script>

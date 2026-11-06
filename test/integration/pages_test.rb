@@ -116,6 +116,7 @@ class PagesTest < ActionDispatch::IntegrationTest
 
   test "flights tab shows flying stats" do
     get aircraft_flight_logs_path(@a)
+    assert_select "th.text-right", text: "Fuel (gal)" # numeric headers align with their columns
     assert_select "h2", text: "Flight hours by month"
     assert_select "dt", text: "Airports visited"
   end

@@ -3,7 +3,7 @@ class FlightLogsController < ApplicationController
   before_action :require_owner!, only: :destroy
 
   def index
-    @flight_logs = @aircraft.flight_logs.recent_first.includes(:user)
+    @flight_logs = @aircraft.flight_logs.recent_first.includes(:user).with_attached_track_log
     @stats = FlightStats.new(@aircraft)
   end
 

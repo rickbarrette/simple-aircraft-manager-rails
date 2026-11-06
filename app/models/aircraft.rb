@@ -23,6 +23,7 @@ class Aircraft < ApplicationRecord
   has_many :major_records, dependent: :destroy
   has_many :flight_logs, dependent: :destroy
   has_many :consumable_records, dependent: :destroy
+  has_many :oil_analyses, dependent: :destroy
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
 

@@ -24,6 +24,7 @@ class PagesTest < ActionDispatch::IntegrationTest
     @major = @a.major_records.create!(record_type: "alteration", title: "LED lights", date_performed: Date.current)
     @flight = @a.flight_logs.create!(date: Date.current, tach_time: 1.2)
     @cr = @a.consumable_records.create!(record_type: "oil", date: Date.current, quantity_added: 1, flight_hours: 1000)
+    @oa = @a.oil_analyses.create!(sample_date: Date.current, iron: 30, iron_avg: 35)
     @token = @a.share_tokens.create!(privilege: "maintenance", label: "Mechanic")
     @a.log_event!("aircraft", "Created", user: @owner)
     sign_in @owner
@@ -39,6 +40,7 @@ class PagesTest < ActionDispatch::IntegrationTest
       aircraft_notes_path(a), new_aircraft_note_path(a), edit_aircraft_note_path(a, @note),
       aircraft_flight_logs_path(a), new_aircraft_flight_log_path(a), aircraft_flight_log_path(a, @flight),
       aircraft_consumable_records_path(a), new_aircraft_consumable_record_path(a, type: "fuel"), edit_aircraft_consumable_record_path(a, @cr),
+      aircraft_oil_analyses_path(a), new_aircraft_oil_analysis_path(a), aircraft_oil_analysis_path(a, @oa), edit_aircraft_oil_analysis_path(a, @oa),
       aircraft_logbook_entries_path(a), aircraft_logbook_entries_path(a, q: "oil", log_type: "AC"),
       new_aircraft_logbook_entry_path(a), aircraft_logbook_entry_path(a, @entry), edit_aircraft_logbook_entry_path(a, @entry),
       aircraft_documents_path(a), new_aircraft_document_path(a), aircraft_document_path(a, @doc), edit_aircraft_document_path(a, @doc),

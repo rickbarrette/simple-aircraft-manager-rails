@@ -6,6 +6,7 @@ class Component < ApplicationRecord
   belongs_to :component_type
   has_many :child_components, class_name: "Component", foreign_key: :parent_component_id, dependent: :destroy
   has_many :squawks, dependent: :nullify
+  has_many :oil_analyses, dependent: :nullify
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
 

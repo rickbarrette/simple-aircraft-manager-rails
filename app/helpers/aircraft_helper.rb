@@ -7,6 +7,7 @@ module AircraftHelper
       [ "Squawks", aircraft_squawks_path(aircraft), %w[squawks] ],
       [ "Flights", aircraft_flight_logs_path(aircraft), %w[flight_logs flight_imports air_trail_exports airport_codes] ],
       [ "Oil & Fuel", aircraft_consumable_records_path(aircraft), %w[consumable_records] ],
+      [ "Oil Analysis", aircraft_oil_analyses_path(aircraft), %w[oil_analyses] ],
       [ "Logbook", aircraft_logbook_entries_path(aircraft), %w[logbook_entries] ],
       [ "Inspections", aircraft_inspections_path(aircraft), %w[inspections inspection_types inspection_records] ],
       [ "ADs", aircraft_airworthiness_directives_path(aircraft), %w[airworthiness_directives ad_compliances ad_imports] ],

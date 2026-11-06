@@ -4,7 +4,7 @@ class AircraftEvent < ApplicationRecord
     "squawk" => "Squawk", "note" => "Note", "oil" => "Oil", "fuel" => "Fuel",
     "logbook" => "Logbook", "ad" => "Airworthiness Directive", "inspection" => "Inspection",
     "document" => "Document", "aircraft" => "Aircraft", "role" => "Role",
-    "major_record" => "Major Repair/Alteration"
+    "major_record" => "Major Repair/Alteration", "oil_analysis" => "Oil Analysis"
   }.freeze
 
   belongs_to :aircraft

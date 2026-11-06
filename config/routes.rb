@@ -36,6 +36,9 @@ Rails.application.routes.draw do
       post :confirm
     end
     resources :consumable_records, path: "consumables", except: :show
+    resources :oil_analyses, path: "oil_analysis" do
+      collection { post :import }
+    end
     resources :logbook_entries
     resources :documents
     resources :document_collections, except: %i[index show]

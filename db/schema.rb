@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_06_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_160000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -423,6 +423,51 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_150000) do
     t.index ["stc_document_id"], name: "index_major_records_on_stc_document_id"
   end
 
+  create_table "oil_analyses", force: :cascade do |t|
+    t.integer "aircraft_id", null: false
+    t.integer "component_id"
+    t.date "sample_date", null: false
+    t.date "analysis_date"
+    t.string "lab"
+    t.string "sample_number"
+    t.decimal "engine_hours", precision: 8, scale: 1
+    t.decimal "oil_hours", precision: 6, scale: 1
+    t.decimal "filter_hours", precision: 6, scale: 1
+    t.decimal "oil_added", precision: 6, scale: 2
+    t.string "status", default: "normal", null: false
+    t.text "lab_comments"
+    t.text "notes"
+    t.decimal "iron", precision: 8, scale: 1
+    t.decimal "iron_avg", precision: 8, scale: 1
+    t.decimal "copper", precision: 8, scale: 1
+    t.decimal "copper_avg", precision: 8, scale: 1
+    t.decimal "nickel", precision: 8, scale: 1
+    t.decimal "nickel_avg", precision: 8, scale: 1
+    t.decimal "chromium", precision: 8, scale: 1
+    t.decimal "chromium_avg", precision: 8, scale: 1
+    t.decimal "silver", precision: 8, scale: 1
+    t.decimal "silver_avg", precision: 8, scale: 1
+    t.decimal "magnesium", precision: 8, scale: 1
+    t.decimal "magnesium_avg", precision: 8, scale: 1
+    t.decimal "aluminum", precision: 8, scale: 1
+    t.decimal "aluminum_avg", precision: 8, scale: 1
+    t.decimal "lead", precision: 8, scale: 1
+    t.decimal "lead_avg", precision: 8, scale: 1
+    t.decimal "silicon", precision: 8, scale: 1
+    t.decimal "silicon_avg", precision: 8, scale: 1
+    t.decimal "titanium", precision: 8, scale: 1
+    t.decimal "titanium_avg", precision: 8, scale: 1
+    t.decimal "tin", precision: 8, scale: 1
+    t.decimal "tin_avg", precision: 8, scale: 1
+    t.decimal "molybdenum", precision: 8, scale: 1
+    t.decimal "molybdenum_avg", precision: 8, scale: 1
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aircraft_id", "sample_date"], name: "index_oil_analyses_on_aircraft_id_and_sample_date"
+    t.index ["aircraft_id"], name: "index_oil_analyses_on_aircraft_id"
+    t.index ["component_id"], name: "index_oil_analyses_on_component_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -512,6 +557,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_150000) do
   add_foreign_key "major_records", "documents", column: "form_337_document_id", on_delete: :nullify
   add_foreign_key "major_records", "documents", column: "stc_document_id", on_delete: :nullify
   add_foreign_key "major_records", "logbook_entries", on_delete: :nullify
+  add_foreign_key "oil_analyses", "aircraft"
+  add_foreign_key "oil_analyses", "components"
   add_foreign_key "sessions", "users"
   add_foreign_key "share_tokens", "aircraft"
   add_foreign_key "share_tokens", "users", column: "created_by_id", on_delete: :nullify

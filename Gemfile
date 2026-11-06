@@ -73,3 +73,5 @@ gem "csv", "~> 3.3"
 gem "caxlsx", "~> 4.5", group: :test
 
 gem "webmock", "~> 3.34", group: :test
+
+gem "pdf-reader", "~> 2.16"

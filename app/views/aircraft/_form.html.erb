@@ -7,6 +7,7 @@
     <%= f.field :serial_number %>
     <%= f.field :purchased, as: :date %>
     <%= f.field :status, as: :select, collection: Aircraft::STATUSES.invert %>
+    <%= f.field :icao_type, label: "ICAO type", placeholder: "C150", maxlength: 4, hint: "Type designator, used for AirTrail." %>
   </div>
   <%= f.field :description, as: :textarea, rows: 3 %>
   <div class="grid gap-4 sm:grid-cols-4">

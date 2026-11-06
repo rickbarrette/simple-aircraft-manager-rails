@@ -2,7 +2,7 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <% if @stats.any? %><%= render "flight_logs/stats", stats: @stats %><% end %>
 <section class="card">
-  <div class="card-header"><h2 class="card-title">Flight Log</h2><div class="flex gap-2"><% if owner? %><%= link_to "Import from spreadsheet", new_aircraft_flight_import_path(@aircraft), class: "btn-secondary" %><% end %><%= link_to "+ Log Flight", new_aircraft_flight_log_path(@aircraft), class: "btn-primary" %></div></div>
+  <div class="card-header"><h2 class="card-title">Flight Log</h2><div class="flex gap-2"><%= link_to "Export for AirTrail", new_aircraft_air_trail_export_path(@aircraft), class: "btn-secondary" %><% if owner? %><%= link_to "Standardize airport codes", aircraft_airport_codes_path(@aircraft), class: "btn-secondary" %><%= link_to "Import from spreadsheet", new_aircraft_flight_import_path(@aircraft), class: "btn-secondary" %><% end %><%= link_to "+ Log Flight", new_aircraft_flight_log_path(@aircraft), class: "btn-primary" %></div></div>
   <% if @flight_logs.any? %>
     <div class="overflow-x-auto">
       <table class="table">

@@ -1,6 +1,9 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
+require "webmock/minitest"
+WebMock.disable_net_connect!(allow_localhost: true)
+Dir[File.expand_path("support/**/*.rb", __dir__)].each { require _1 }
 
 module ActiveSupport
   class TestCase

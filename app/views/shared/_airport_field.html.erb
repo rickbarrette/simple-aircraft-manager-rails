@@ -1,0 +1,11 @@
+<%# Airport code input with autocomplete. locals: f, attribute, label, aircraft %>
+<div class="relative" data-controller="airport-autocomplete"
+     data-airport-autocomplete-url-value="<%= airport_search_path(aircraft_id: aircraft.id) %>">
+  <%= f.label attribute, label, class: "label" %>
+  <%= f.text_field attribute, class: "input font-mono uppercase placeholder:normal-case placeholder:font-sans", placeholder: local_assigns[:placeholder], maxlength: 10,
+        data: { airport_autocomplete_target: "input",
+                action: "input->airport-autocomplete#search keydown->airport-autocomplete#keydown blur->airport-autocomplete#blur" } %>
+  <ul data-airport-autocomplete-target="list" role="listbox" hidden
+      class="absolute z-20 mt-1 max-h-72 w-[min(28rem,90vw)] overflow-auto rounded-md bg-white py-1 shadow-lg ring-1 ring-slate-200"></ul>
+  <p class="hint min-h-4" data-airport-autocomplete-target="hint"></p>
+</div>

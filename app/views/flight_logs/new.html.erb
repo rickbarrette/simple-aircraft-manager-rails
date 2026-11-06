@@ -4,8 +4,8 @@
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-3">
     <%= f.field :date, as: :date, required: true %>
-    <%= f.field :departure_location, label: "From", placeholder: "KPVD" %>
-    <%= f.field :destination_location, label: "To", placeholder: "KBID" %>
+    <%= render "shared/airport_field", f: f, attribute: :departure_location, label: "From", aircraft: @aircraft, placeholder: "KOQU" %>
+    <%= render "shared/airport_field", f: f, attribute: :destination_location, label: "To", aircraft: @aircraft, placeholder: "Code or name" %>
   </div>
   <fieldset class="grid gap-4 sm:grid-cols-3">
     <legend class="mb-2 text-sm font-semibold">Tach (required)</legend>

@@ -3,6 +3,11 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resource :setup, only: %i[new create], controller: "setup"
   resource :profile, only: %i[edit update]
+  resource :air_trail_connection, path: "profile/airtrail", only: %i[show create update destroy] do
+    post :test
+    post :sync
+    post :map_airport
+  end
 
   resources :aircraft do
     member do
@@ -20,6 +25,8 @@ Rails.application.routes.draw do
     end
     resources :notes, except: :show
     resources :flight_logs, only: %i[index new create show destroy]
+    resource :air_trail_export, path: "airtrail_export", only: %i[new create]
+    resource :airport_codes, only: %i[show update]
     resource :flight_import, only: %i[new create show] do
       post :confirm
     end
@@ -43,12 +50,17 @@ Rails.application.routes.draw do
     resources :events, only: :index
   end
 
+  get "airports/search", to: "airports#search", as: :airport_search
+
   # Public read-only share links (no login).
   get "shared/:token", to: "shared#show", as: :shared
 
   namespace :admin do
     resources :users, except: :show
     resources :component_types, except: :show
+    resources :airports, except: :show do
+      collection { post :refresh }
+    end
   end
 
   get "up" => "rails/health#show", as: :rails_health_check

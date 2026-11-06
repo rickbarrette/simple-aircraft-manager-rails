@@ -9,7 +9,17 @@
     <dt class="text-slate-500">Oil added</dt><dd><%= @flight_log.oil_added ? "#{@flight_log.oil_added} qt #{@flight_log.oil_added_type}" : "—" %></dd>
     <dt class="text-slate-500">Fuel added</dt><dd><%= @flight_log.fuel_added ? "#{@flight_log.fuel_added} gal #{@flight_log.fuel_added_type}" : "—" %></dd>
     <dt class="text-slate-500">Pilot</dt><dd><%= @flight_log.user&.display_name || "—" %></dd>
-    <dt class="text-slate-500">Track log</dt><dd><%= @flight_log.track_log.attached? ? link_to(@flight_log.track_log.filename, rails_blob_path(@flight_log.track_log, disposition: :attachment), class: "link") : "—" %></dd>
+    <dt class="text-slate-500">Track log</dt><dd class="col-span-3"><%= @flight_log.track_log.attached? ? link_to(@flight_log.track_log.filename, rails_blob_path(@flight_log.track_log, disposition: :attachment), class: "link") : "—" %>
+      <% if @track %><span class="text-xs text-slate-500"> · <%= number_with_delimiter(@track.points) %> GPS points<%= " · max #{number_with_delimiter(@track.max_altitude_ft)} ft" if @track.max_altitude_ft %></span>
+      <% elsif @track_error %><span class="text-xs text-amber-700"> · <%= @track_error %></span><% end %></dd>
+    <% if @air_trail_sync || @air_trail_connection %>
+      <dt class="text-slate-500">AirTrail</dt>
+      <dd class="col-span-3 text-xs">
+        <% if @air_trail_sync&.status == "synced" %><span class="badge-green">Synced</span> <%= time_ago_in_words(@air_trail_sync.synced_at) %> ago
+        <% elsif @air_trail_sync&.status == "error" %><span class="badge-red">Not synced</span> <%= @air_trail_sync.last_error %>
+        <% else %><span class="badge-gray">Pending</span><% end %>
+      </dd>
+    <% end %>
   </dl>
   <% if @flight_log.notes.present? %><div class="border-t border-slate-100 px-4 py-3 text-sm"><%= simple_format @flight_log.notes %></div><% end %>
 </section>

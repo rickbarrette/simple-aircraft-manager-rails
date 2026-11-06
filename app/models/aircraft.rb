@@ -28,6 +28,8 @@ class Aircraft < ApplicationRecord
 
   validates :tail_number, presence: true
   validates :status, inclusion: { in: STATUSES.keys }
+  validates :icao_type, format: { with: /\A[A-Z0-9]{1,4}\z/, message: "must be an ICAO type designator like C150" }, allow_blank: true
+  normalizes :icao_type, with: ->(t) { t.strip.upcase.presence }
   validate :picture_is_image
 
   scope :ordered, -> { order(:tail_number) }

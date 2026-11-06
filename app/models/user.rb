@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :aircraft_roles, dependent: :destroy
   has_many :aircraft, through: :aircraft_roles
+  has_one :air_trail_connection, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 

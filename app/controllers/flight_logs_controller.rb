@@ -9,11 +9,21 @@ class FlightLogsController < ApplicationController
 
   def show
     @flight_log = @aircraft.flight_logs.find(params[:id])
+    begin
+      @track = TrackParser.parse_attachment(@flight_log.track_log)
+    rescue TrackParser::Error => e
+      @track_error = "Couldn't read track: #{e.message}"
+    end
+    @air_trail_connection = @flight_log.user&.air_trail_connection
+    @air_trail_sync = @flight_log.air_trail_syncs.first
   end
 
   def new
+    # Aircraft almost always depart from where they last landed.
+    last = @aircraft.flight_logs.where.not(destination_location: [ nil, "" ]).recent_first.first
     @flight_log = @aircraft.flight_logs.new(date: Date.current, tach_out: @aircraft.tach_time,
-                                            hobbs_out: @aircraft.hobbs_time)
+                                            hobbs_out: @aircraft.hobbs_time,
+                                            departure_location: last&.destination_location)
   end
 
   def create

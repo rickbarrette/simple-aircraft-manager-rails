@@ -7,3 +7,11 @@
   <%= f.field :password_confirmation, as: :password, label: "Confirm new password" %>
   <%= f.submit "Save" %>
 <% end %>
+
+<section class="card card-body mt-5 max-w-md">
+  <h2 class="card-title">Integrations</h2>
+  <p class="mt-1 text-sm text-slate-600">
+    <%= link_to "AirTrail sync", air_trail_connection_path, class: "link" %>:
+    <%= current_user.air_trail_connection&.enabled? ? "on" : "off" %>. Push the flights you log to your AirTrail flight map automatically.
+  </p>
+</section>

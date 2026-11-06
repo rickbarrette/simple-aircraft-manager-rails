@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_06_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_150000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -60,6 +60,50 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_120000) do
     t.index ["logbook_entry_id"], name: "index_ad_compliances_on_logbook_entry_id"
   end
 
+  create_table "air_trail_airports", force: :cascade do |t|
+    t.integer "air_trail_connection_id", null: false
+    t.string "code", null: false
+    t.integer "remote_id"
+    t.string "remote_icao"
+    t.boolean "manual", default: false, null: false
+    t.datetime "looked_up_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["air_trail_connection_id", "code"], name: "idx_air_trail_airports_unique", unique: true
+    t.index ["air_trail_connection_id"], name: "index_air_trail_airports_on_air_trail_connection_id"
+  end
+
+  create_table "air_trail_connections", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "base_url", null: false
+    t.text "api_key", null: false
+    t.boolean "enabled", default: true, null: false
+    t.string "remote_user_id"
+    t.string "remote_username"
+    t.string "status"
+    t.text "last_error"
+    t.datetime "checked_at"
+    t.datetime "backfilled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_air_trail_connections_on_user_id", unique: true
+  end
+
+  create_table "air_trail_syncs", force: :cascade do |t|
+    t.integer "air_trail_connection_id", null: false
+    t.integer "flight_log_id", null: false
+    t.integer "remote_id"
+    t.string "payload_digest"
+    t.string "status", default: "pending", null: false
+    t.text "last_error"
+    t.datetime "synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["air_trail_connection_id", "flight_log_id"], name: "idx_air_trail_syncs_unique", unique: true
+    t.index ["air_trail_connection_id"], name: "index_air_trail_syncs_on_air_trail_connection_id"
+    t.index ["flight_log_id"], name: "index_air_trail_syncs_on_flight_log_id"
+  end
+
   create_table "aircraft", force: :cascade do |t|
     t.string "tail_number", null: false
     t.string "make"
@@ -75,6 +119,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_120000) do
     t.boolean "airworthiness_enforcement", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "icao_type"
   end
 
   create_table "aircraft_airworthiness_directives", id: false, force: :cascade do |t|
@@ -122,6 +167,46 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_120000) do
     t.index ["aircraft_id", "user_id"], name: "index_aircraft_roles_on_aircraft_id_and_user_id", unique: true
     t.index ["aircraft_id"], name: "index_aircraft_roles_on_aircraft_id"
     t.index ["user_id"], name: "index_aircraft_roles_on_user_id"
+  end
+
+  create_table "airport_updates", force: :cascade do |t|
+    t.string "status", default: "queued", null: false
+    t.string "source_url"
+    t.integer "created_count", default: 0, null: false
+    t.integer "updated_count", default: 0, null: false
+    t.integer "removed_count", default: 0, null: false
+    t.text "error"
+    t.integer "requested_by_id"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requested_by_id"], name: "index_airport_updates_on_requested_by_id"
+  end
+
+  create_table "airports", force: :cascade do |t|
+    t.string "ident", null: false
+    t.string "airtrail_code", null: false
+    t.string "gps_code"
+    t.string "local_code"
+    t.string "iata"
+    t.string "name", null: false
+    t.string "kind"
+    t.string "municipality"
+    t.string "region"
+    t.string "country"
+    t.float "latitude"
+    t.float "longitude"
+    t.integer "elevation_ft"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "custom", default: false, null: false
+    t.index ["airtrail_code"], name: "index_airports_on_airtrail_code"
+    t.index ["custom"], name: "index_airports_on_custom"
+    t.index ["gps_code"], name: "index_airports_on_gps_code"
+    t.index ["iata"], name: "index_airports_on_iata"
+    t.index ["ident"], name: "index_airports_on_ident", unique: true
+    t.index ["local_code"], name: "index_airports_on_local_code"
   end
 
   create_table "airworthiness_directives", force: :cascade do |t|
@@ -394,12 +479,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_120000) do
   add_foreign_key "ad_compliances", "components"
   add_foreign_key "ad_compliances", "inspection_records", on_delete: :nullify
   add_foreign_key "ad_compliances", "logbook_entries", on_delete: :nullify
+  add_foreign_key "air_trail_airports", "air_trail_connections"
+  add_foreign_key "air_trail_connections", "users"
+  add_foreign_key "air_trail_syncs", "air_trail_connections"
+  add_foreign_key "air_trail_syncs", "flight_logs"
   add_foreign_key "aircraft_events", "aircraft"
   add_foreign_key "aircraft_events", "users", on_delete: :nullify
   add_foreign_key "aircraft_notes", "aircraft"
   add_foreign_key "aircraft_notes", "users", on_delete: :nullify
   add_foreign_key "aircraft_roles", "aircraft"
   add_foreign_key "aircraft_roles", "users"
+  add_foreign_key "airport_updates", "users", column: "requested_by_id", on_delete: :nullify
   add_foreign_key "airworthiness_directives", "documents", on_delete: :nullify
   add_foreign_key "components", "aircraft"
   add_foreign_key "components", "component_types"

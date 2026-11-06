@@ -25,8 +25,16 @@
           <nav class="flex items-center gap-4 text-sm">
             <%= link_to "Fleet", root_path, class: "hover:text-sky-300" %>
             <% if current_user.admin? %>
-              <%= link_to "Users", admin_users_path, class: "hover:text-sky-300" %>
-              <%= link_to "Component Types", admin_component_types_path, class: "hover:text-sky-300 hidden sm:inline" %>
+              <details class="relative" data-controller="dropdown" data-action="click@window->dropdown#closeOutside keydown.esc@window->dropdown#close">
+                <summary class="flex cursor-pointer list-none items-center gap-1 hover:text-sky-300 [&::-webkit-details-marker]:hidden">
+                  Admin <span aria-hidden="true" class="text-xs">▾</span>
+                </summary>
+                <div class="absolute right-0 z-30 mt-2 w-48 rounded-md bg-white py-1 text-slate-700 shadow-lg ring-1 ring-slate-200">
+                  <% [ [ "Users", admin_users_path ], [ "Component Types", admin_component_types_path ], [ "Airports", admin_airports_path ] ].each do |label, path| %>
+                    <%= link_to label, path, class: [ "block px-4 py-2 text-sm hover:bg-slate-100", ("font-semibold text-sky-700" if current_page?(path)) ] %>
+                  <% end %>
+                </div>
+              </details>
             <% end %>
             <%= link_to current_user.display_name, edit_profile_path, class: "text-slate-300 hover:text-sky-300 hidden sm:inline" %>
             <%= button_to "Sign out", session_path, method: :delete, class: "rounded bg-slate-700 px-2 py-1 hover:bg-slate-600" %>

@@ -82,6 +82,38 @@ class PagesTest < ActionDispatch::IntegrationTest
     assert_select "a[href='https://drs.faa.gov/browse/excelExternalWindow/ABC.0001']", minimum: 2 # status + history
   end
 
+  test "new flight pre-fills From with the last flight's destination and offers airport search" do
+    @a.flight_logs.create!(date: Date.current - 1, tach_time: 1.0, departure_location: "KOQU", destination_location: "kbid")
+    get new_aircraft_flight_log_path(@a)
+    assert_select "input[name='flight_log[departure_location]'][value='KBID']"
+    assert_select "div[data-controller='airport-autocomplete'][data-airport-autocomplete-url-value='#{airport_search_path(aircraft_id: @a.id)}']", count: 2
+
+    AirportData.sync!(StringIO.new("ident,type,name,latitude_deg,longitude_deg,elevation_ft,iso_country,iso_region,municipality,gps_code,iata_code,local_code\nKBID,small_airport,Block Island State Airport,41.1,-71.5,108,US,US-RI,Block Island,KBID,BID,BID\n88LL,small_airport,Block Airport,41.9,-89.1,800,US,US-IL,Pearl City,88LL,,88LL\n"))
+    get airport_search_path(q: "block", aircraft_id: @a.id)
+    assert_equal %w[KBID 88LL], response.parsed_body.map { _1["code"] } # flown-to airport first
+  end
+
+  test "owner standardizes airport codes from the Flights tab" do
+    AirportData.sync!(StringIO.new("ident,type,name,latitude_deg,longitude_deg,elevation_ft,iso_country,iso_region,municipality,gps_code,iata_code,local_code\nK1B9,small_airport,Mansfield Municipal Airport,42,-71,122,US,US-MA,Mansfield,1B9,,1B9\n"))
+    @a.flight_logs.create!(date: Date.current, tach_time: 1, departure_location: "1B9", destination_location: "1B9")
+    get aircraft_flight_logs_path(@a)
+    assert_select "a[href='#{aircraft_airport_codes_path(@a)}']"
+    get aircraft_airport_codes_path(@a)
+    assert_select "input[name='codes[]'][value='1B9'][checked]"
+    patch aircraft_airport_codes_path(@a), params: { codes: [ "1B9" ] }
+    assert_redirected_to aircraft_flight_logs_path(@a)
+    assert_equal [ "K1B9", "K1B9" ], @a.flight_logs.last.slice(:departure_location, :destination_location).values
+
+    # a typo'd code: suggestion pre-filled, fixed only when ticked
+    @a.flight_logs.create!(date: Date.current, tach_time: 1, departure_location: "K1B9", destination_location: "1K9B")
+    get aircraft_airport_codes_path(@a)
+    assert_select "input[name='fixes[1K9B]']"
+    patch aircraft_airport_codes_path(@a), params: { fixes: { "1K9B" => "1B9" } } # not ticked
+    assert_equal "1K9B", @a.flight_logs.last.destination_location
+    patch aircraft_airport_codes_path(@a), params: { fix: [ "1K9B" ], fixes: { "1K9B" => "1B9" } }
+    assert_equal "K1B9", @a.flight_logs.last.destination_location
+  end
+
   test "flights tab shows flying stats" do
     get aircraft_flight_logs_path(@a)
     assert_select "h2", text: "Flight hours by month"

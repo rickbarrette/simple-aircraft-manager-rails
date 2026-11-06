@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="ForeFlight" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk><name>KOQU-KBID</name><trkseg>
+    <trkpt lat="41.597139" lon="-71.412028"><ele>5.2</ele><time>2026-10-24T14:00:00Z</time></trkpt>
+    <trkpt lat="41.420000" lon="-71.500000"><ele>762.0</ele><time>2026-10-24T14:10:00Z</time></trkpt>
+    <trkpt lat="41.168056" lon="-71.577778"><ele>33.5</ele><time>2026-10-24T14:25:00Z</time></trkpt>
+  </trkseg></trk>
+</gpx>

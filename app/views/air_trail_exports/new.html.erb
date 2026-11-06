@@ -1,0 +1,43 @@
+<% content_for :title, "Export for AirTrail" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<div class="grid gap-5 lg:grid-cols-3">
+  <%= form_with url: aircraft_air_trail_export_path(@aircraft), class: "card card-body space-y-4 lg:col-span-2", data: { turbo: false } do |f| %>
+    <h2 class="card-title">Export flights for AirTrail</h2>
+    <% if @export.errors.any? %>
+      <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200"><ul class="list-disc pl-5"><% @export.errors.each do |e| %><li><%= e %></li><% end %></ul></div>
+    <% end %>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <%= label_tag :username, "Your AirTrail username", class: "label" %>
+        <%= text_field_tag :username, params[:username].presence || @export.as_json[:users].first[:username], class: "input", required: true, autocomplete: "off" %>
+        <p class="hint">AirTrail assigns the flights to the account with this username (you can also pick the account while importing).</p>
+      </div>
+      <div>
+        <%= label_tag :aircraft_type, "Aircraft type (ICAO, optional)", class: "label" %>
+        <%= text_field_tag :aircraft_type, params[:aircraft_type].presence || @aircraft.icao_type, class: "input", placeholder: "C150", maxlength: 4 %>
+        <p class="hint">ICAO type designator, e.g. C150, C172, PA28.</p>
+      </div>
+    </div>
+    <fieldset class="space-y-1 text-sm">
+      <legend class="label">Flights</legend>
+      <label class="flex items-center gap-2"><%= radio_button_tag :scope, "all", params[:scope] != "mine" %> All <%= @aircraft.tail_number %> flights</label>
+      <label class="flex items-center gap-2"><%= radio_button_tag :scope, "mine", params[:scope] == "mine" %> Only flights I logged</label>
+    </fieldset>
+    <% all = AirTrailExport.new(@aircraft, username: "preview") %>
+    <p class="text-sm text-slate-600">
+      <%= pluralize(all.exportable.size, "flight") %> ready to export<% if all.skipped.positive? %>; <%= all.skipped %> skipped because the From or To airport is missing or isn't a code AirTrail can look up<% end %>.
+    </p>
+    <%= f.submit "Download AirTrail file", class: "btn-primary" %>
+  <% end %>
+  <section class="card card-body space-y-2 text-sm text-slate-700">
+    <h3 class="font-semibold">Importing into AirTrail</h3>
+    <ol class="list-decimal space-y-1 pl-4 text-xs">
+      <li>In AirTrail, open <strong>Settings → Import</strong> and choose <strong>AirTrail</strong> as the source.</li>
+      <li>Select the downloaded file.</li>
+      <li>Map any airports AirTrail doesn't recognize (small private fields may need this).</li>
+    </ol>
+    <p class="text-xs">Each flight is imported with you in the pilot seat, the tail number as the registration, and its tach/Hobbs time in the note. Duration comes from Hobbs time (or tach). GPS track logs (GPX, KML or CSV) are included.</p>
+    <p class="text-xs">Prefer automatic? <%= link_to "Set up AirTrail sync", air_trail_connection_path, class: "link" %> to push new flights as you log them.</p>
+    <p class="text-xs">Re-importing later is safe with AirTrail's de-duplication left on; repeat legs on the same day and route are numbered #2, #3… so they aren't merged.</p>
+  </section>
+</div>

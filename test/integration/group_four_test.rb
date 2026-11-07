@@ -137,6 +137,22 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "2026-01-01: 1500.0 lb @ 39.50 in"
     get aircraft_report_path(@a)
     assert_includes response.body, "Empty weight <strong>1,500.0 lb</strong>"
+
+    # Garmin Pilot / POH moment envelope (lb-in/1000), converted to CG and shown back as entered
+    patch aircraft_loading_setup_path(@a), params: { setup: { fuel_lb_per_gal: "6", envelope_unit: "moment", stations: {
+      "0" => { name: "Front seats", arm: "37" } },
+      envelope: { "0" => { weight: "1500", cg: "52.5" }, "1" => { weight: "2300", cg: "88.55" }, "2" => { weight: "2300", cg: "108.79" }, "3" => { weight: "1500", cg: "70.95" } } } }
+    setup = @a.reload.loading_setup
+    assert setup.moment?
+    assert_in_delta 35.0, setup.envelope[0].last, 0.001
+    assert_in_delta 47.3, setup.envelope[2].last, 0.001
+    assert_equal [ 2300, 108.79 ], setup.entered_envelope[2].map(&:to_f)
+    get edit_aircraft_loading_setup_path(@a)
+    assert_select "input[name='setup[envelope][2][cg]'][value='108.79']"
+    assert_includes response.body, "47.3 in"
+    patch aircraft_loading_setup_path(@a), params: { setup: { fuel_lb_per_gal: "6", envelope_unit: "moment", stations: { "0" => { name: "Front seats", arm: "37" } },
+      envelope: { "0" => { weight: "0", cg: "1" }, "1" => { weight: "2300", cg: "88" }, "2" => { weight: "2300", cg: "108" } } } }
+    assert_response :unprocessable_entity
   end
 
   FR_RESPONSE = { results: [

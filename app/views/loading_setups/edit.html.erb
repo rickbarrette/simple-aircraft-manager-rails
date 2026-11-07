@@ -1,7 +1,7 @@
 <% content_for :title, "#{@aircraft.tail_number} Loading setup" %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <% stations = @setup.stations + Array.new([ 8 - @setup.stations.size, 2 ].max) { nil } %>
-<% points = @setup.envelope + Array.new([ 10 - @setup.envelope.size, 2 ].max) { nil } %>
+<% points = @setup.entered_envelope + Array.new([ 10 - @setup.envelope.size, 2 ].max) { nil } %>
 <%= form_with url: aircraft_loading_setup_path(@aircraft), method: :patch, class: "card card-body max-w-3xl space-y-5" do %>
   <div>
     <h2 class="card-title">Loading setup</h2>
@@ -31,11 +31,17 @@
   <fieldset>
     <legend class="label">CG envelope</legend>
     <p class="hint !mt-0 mb-2">The corners of the normal-category envelope, in order around it (e.g. forward limit at low weight, forward limit at gross, aft limit at gross, aft limit at low weight).</p>
-    <div class="grid max-w-sm grid-cols-2 gap-2 text-xs text-slate-500"><span>Weight (lb)</span><span>CG (in)</span></div>
+    <div class="mb-3 max-w-xs">
+      <%= label_tag "setup[envelope_unit]", "Envelope values are", class: "label" %>
+      <%= select_tag "setup[envelope_unit]", options_for_select(LoadingSetup::ENVELOPE_UNITS.invert, @setup.envelope_unit), class: "input" %>
+      <p class="hint">Use the same units as your source: a POH “moment envelope” chart or Garmin Pilot give moment in lb-in/1000 (e.g. 2300 lb at 104.5). Moments are converted to CG (moment × 1000 ÷ weight) when saved. Changing this and saving reads the numbers below in the new units, so it also fixes moments typed in as CG.</p>
+    </div>
+    <div class="grid max-w-md grid-cols-3 gap-2 text-xs text-slate-500"><span>Weight (lb)</span><span><%= @setup.moment? ? "Moment (lb-in/1000)" : "CG (in)" %></span><span><%= "= CG (in)" if @setup.moment? %></span></div>
     <% points.each_with_index do |pt, i| %>
-      <div class="mt-1 grid max-w-sm grid-cols-2 gap-2">
+      <div class="mt-1 grid max-w-md grid-cols-3 items-center gap-2">
         <%= text_field_tag "setup[envelope][#{i}][weight]", pt&.first&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Envelope point #{i + 1} weight" %>
-        <%= text_field_tag "setup[envelope][#{i}][cg]", pt&.last&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Envelope point #{i + 1} CG" %>
+        <%= text_field_tag "setup[envelope][#{i}][cg]", pt&.last&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Envelope point #{i + 1} #{@setup.moment? ? 'moment' : 'CG'}" %>
+        <span class="text-sm text-slate-600"><%= "#{@setup.envelope[i].last.round(2)} in" if @setup.moment? && @setup.envelope[i] %></span>
       </div>
     <% end %>
   </fieldset>

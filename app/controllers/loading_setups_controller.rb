@@ -9,10 +9,10 @@ class LoadingSetupsController < ApplicationController
   end
 
   def update
-    permitted = params.fetch(:setup, {}).permit(:fuel_lb_per_gal, stations: %i[name arm max fuel], envelope: %i[weight cg])
+    permitted = params.fetch(:setup, {}).permit(:fuel_lb_per_gal, :envelope_unit, stations: %i[name arm max fuel], envelope: %i[weight cg])
     @setup = LoadingSetup.from_params(permitted.to_h)
     if @setup.valid?
-      @aircraft.update!(loading_stations: @setup.stations_json, cg_envelope: @setup.envelope)
+      @aircraft.update!(loading_stations: @setup.stations_json, cg_envelope: @setup.envelope.map { |w, cg| [ w.to_f, cg.to_f ] })
       log_event("aircraft", "Loading stations and CG envelope updated")
       redirect_to aircraft_weight_balance_records_path(@aircraft), notice: "Loading setup saved."
     else

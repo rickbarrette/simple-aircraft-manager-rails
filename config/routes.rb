@@ -108,6 +108,7 @@ Rails.application.routes.draw do
   end
 
   get "airports/search", to: "airports#search", as: :airport_search
+  get "help/records", to: "help#records", as: :records_help
 
   # Public read-only share links (no login).
   # Invited signers (outside mechanics) sign one entry.
@@ -127,6 +128,12 @@ Rails.application.routes.draw do
     end
     get "about", to: "about#show"
     resource :settings, only: %i[edit update]
+    resource :procedures, only: %i[show update] do
+      get :draft
+      post :adopt
+      get "revisions/:id", action: :revision, as: :revision
+    end
+    resources :audits, only: %i[index new create show]
     resources :logbook_templates, except: :show do
       collection { post :restore }
     end

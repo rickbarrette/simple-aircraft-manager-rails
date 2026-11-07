@@ -16,5 +16,9 @@ Your certificates:
 - <%= c.expired? ? "Expired" : "Expires" %> <%= c.expires_on %>: <%= c.kind_label %> <%= c.number %>
 <% end %>
 <% end %>
+<% if @audit_due %>
+
+Records audit due <%= @audit_due %>: <%= new_admin_audit_url %>
+<% end %>
 
 Based on the records in Simple Aircraft Manager. Turn these emails off on your profile: <%= edit_profile_url %>

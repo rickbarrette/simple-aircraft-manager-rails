@@ -1,0 +1,115 @@
+<%# The procedures document (AC 120-78B 2.2.11, 3.2.8), generated from the system's setup.
+    Locals: policy, number, adopted_at, adopted_by, revisions, summary. %>
+<% info = SystemInfo.new %>
+<% aircraft = Aircraft.ordered.includes(:roles) %>
+<% users = User.order(:email_address).includes(:certificates, aircraft_roles: :aircraft) %>
+<% h2 = "mt-6 text-base font-semibold" %>
+<% p_ = "mt-1 text-sm leading-relaxed" %>
+<article class="text-slate-900">
+  <header class="border-b-2 border-slate-800 pb-3">
+    <p class="text-xs uppercase tracking-wide text-slate-500">Standalone procedures document · AC 120-78B paragraphs 2.2.11 and 3.2.8</p>
+    <h1 class="text-2xl font-bold">Electronic Signature and Recordkeeping Procedures</h1>
+    <p class="text-sm text-slate-600"><%= policy.operator_name.presence || "[Operator]" %> · Simple Aircraft Manager</p>
+    <p class="mt-1 text-sm"><strong>Revision <%= number %></strong><%= adopted_at ? " · adopted #{adopted_at.to_date.iso8601} by #{adopted_by&.display_name}" : " · not yet adopted" %></p>
+  </header>
+
+  <h2 class="<%= h2 %>">1. Purpose and scope</h2>
+  <p class="<%= p_ %>">These procedures describe how <%= policy.operator_name.presence || "[Operator]" %> keeps the maintenance records required by 14 CFR 91.417 electronically in Simple Aircraft Manager, and how entries are signed electronically under 14 CFR 43.9 and 43.11. They follow FAA AC 120-78B. Under its paragraph 1.9.5, use of electronic signatures and recordkeeping under part 91 (other than subpart K) needs no FAA approval, acceptance or authorization; the FAA recommends following the AC, and these procedures do.</p>
+  <table class="mt-2 w-full text-sm">
+    <thead><tr class="border-b border-slate-300 text-left text-xs uppercase text-slate-500"><th class="py-1">Aircraft</th><th>Serial number</th><th>Electronic records since</th><th>Earlier records</th></tr></thead>
+    <tbody>
+      <% aircraft.each do |a| %>
+        <tr class="border-b border-slate-100"><td class="py-1"><%= a.tail_number %> <%= [ a.make, a.model ].compact_blank.join(" ") %></td><td><%= a.serial_number.presence || "—" %></td>
+          <td><%= a.electronic_records_since || "not set" %></td><td>Paper logbooks<%= " (scans held as legacy records)" if a.documents.where(legacy_record: true).exists? %></td></tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="<%= p_ %>">Records kept electronically: logbook entries (maintenance, preventive maintenance, inspections, alterations), inspection status and history, airworthiness directive compliance, component times and life limits, major repairs and alterations with their Form 337s, weight and balance, and supporting documents. Paper logbooks from before the date above remain the record for that period and are kept.</p>
+
+  <h2 class="<%= h2 %>">2. Regulatory compliance</h2>
+  <p class="<%= p_ %>">Each logbook entry carries what 14 CFR 43.9 requires (description of the work, date, the name, certificate number and kind of certificate of the person approving return to service, and their signature) and, for inspections, what 43.11 requires (type and extent of inspection, aircraft time in service, and the airworthiness statement or discrepancy list). The app flags entries missing any of these. Records include the key elements of AC 120-78B 3.1.1: the event, when (date, and the signature's time), where (location), who, the signature, and the make, model and serial of the aircraft, engine, propeller and components. The status required by 91.417(a)(2) is produced by the maintenance status report. Records are made available under 91.417(c) and transferred under 91.419 as described in sections 9 and 10.</p>
+
+  <h2 class="<%= h2 %>">3. System description</h2>
+  <ul class="<%= p_ %> list-disc pl-5">
+    <li><strong>Software:</strong> Simple Aircraft Manager, version <%= info.revision %> (Ruby <%= RUBY_VERSION %>, Rails <%= Rails.version %>, SQLite <%= SQLite3::SQLITE_VERSION %>).</li>
+    <li><strong>Hosting and network:</strong> <%= policy.hosting_description.presence || "[describe the server, location and network]" %> Access is over HTTPS<%= " with single sign-on (#{Sso.label})" if Sso.enabled? %>.</li>
+    <li><strong>Data:</strong> one SQLite database plus uploaded files (stored once per identical file) on the server's storage volume.</li>
+    <li><strong>Backups:</strong> every night the app makes a verified copy of the database in the storage volume (SQLite integrity check and record counts compared) and keeps the newest <%= Setting.integer("backups_kept") %>. Off-site: <%= policy.offsite_backup_description.presence || "[describe the off-site backup]" %></li>
+  </ul>
+
+  <h2 class="<%= h2 %>">4. Responsible personnel</h2>
+  <p class="<%= p_ %>"><%= policy.responsible_name.presence || "[Name]" %><%= ", #{policy.responsible_title}" if policy.responsible_title.present? %>, has authority and overall responsibility for the electronic signature process and the recordkeeping system, for controlling access to it (accounts, roles, disabling accounts), and for the quality-control audits. Administrators: <%= users.select(&:admin?).reject(&:disabled?).map(&:display_name).to_sentence.presence || "none" %>.</p>
+
+  <h2 class="<%= h2 %>">5. Defined users and roles</h2>
+  <p class="<%= p_ %>">Owners keep an aircraft's records; pilots can view them and record flights, squawks and preventive maintenance. A user may sign entries with a current certificate on their profile: mechanic certificates (A&amp;P, IA, airframe, powerplant, repair station, repairman) for maintenance and inspection entries; a pilot certificate for preventive maintenance only. Disabled accounts can't sign in or sign.</p>
+  <table class="mt-2 w-full text-sm">
+    <thead><tr class="border-b border-slate-300 text-left text-xs uppercase text-slate-500"><th class="py-1">User</th><th>Roles</th><th>Certificates</th><th>May sign</th></tr></thead>
+    <tbody>
+      <% users.each do |u| %>
+        <% current = u.certificates.reject(&:expired?) %>
+        <tr class="border-b border-slate-100 align-top"><td class="py-1"><%= u.display_name %><div class="text-xs text-slate-500"><%= u.email_address %></div></td>
+          <td class="text-xs"><%= [ ("Administrator" if u.admin?), *u.aircraft_roles.map { "#{_1.role.capitalize}, #{_1.aircraft.tail_number}" } ].compact.join("; ").presence || "—" %><%= " (DISABLED)" if u.disabled? %></td>
+          <td class="text-xs"><%= u.certificates.map { "#{_1.short_label} #{_1.number}#{" exp. #{_1.expires_on}" if _1.expires_on}" }.join("; ").presence || "—" %></td>
+          <td class="text-xs"><%= if u.disabled? || current.empty? then "No"
+                                  elsif current.any?(&:mechanic?) then "Maintenance and inspection entries"
+                                  else "Preventive maintenance entries" end %></td></tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="<%= p_ %>">People outside these users (e.g. a mechanic who did the work) sign through a one-time email invitation from an owner, with their own account and certificate, for that entry only; or they sign on paper (section 11).</p>
+
+  <h2 class="<%= h2 %>">6. Electronic signature process</h2>
+  <ol class="<%= p_ %> list-decimal pl-5">
+    <li>The signer opens the entry and chooses Sign. The entry is shown in full exactly as it will be certified (AC 2.2.4).</li>
+    <li>They choose one of their own current certificates. The statement they will certify is shown with it, under the heading “Certified by” (2.2.2): for maintenance, “I certify that the work described in this entry was performed in accordance with 14 CFR Part 43, and I approve it for return to service with respect to that work”; for inspections, the 43.11(a)(5) statement; for preventive maintenance by a pilot, the corresponding statement.</li>
+    <li>They prove who they are again: their password, or signing in again with single sign-on within the last five minutes (2.2.6), and confirm that they are signing with intent to sign (2.1.2.4–5).</li>
+    <li>The system records the signer, the certificate (kind and number), the statement, the time (UTC), how they authenticated, their network address and browser, a SHA-256 fingerprint of the entry's content and a readable copy of it, and a server seal (HMAC) over the signature record (2.1.2.6, 2.2.5). The signer is told on screen and by email (2.2.3).</li>
+    <li>Once signed, the entry and its components can't be edited or deleted (2.1.2.7–8, 2.2.7). A correction is made as a new entry that, once signed, supersedes the original; the original and its signature are kept and marked superseded (2.2.8).</li>
+    <li>When someone no longer needs access, the responsible person disables their account: they can no longer sign in or sign, and their past signatures stay valid (2.2.6.4).</li>
+  </ol>
+  <p class="<%= p_ %>">Signed records are archived in the database, its nightly verified copies and the off-site backup, and can be exported with their signatures (2.2.9).</p>
+
+  <h2 class="<%= h2 %>">7. Recordkeeping system controls</h2>
+  <ul class="<%= p_ %> list-disc pl-5">
+    <li><strong>Controlled access (3.2.1):</strong> personal accounts; roles per aircraft; sessions end after 30 days unused; rate-limited sign-in; changing an email or password needs the current password.</li>
+    <li><strong>Record preservation (3.2.2):</strong> every change to a maintenance record is kept with who, when and what changed, in a hash chain per aircraft that can't be edited; signed entries are locked.</li>
+    <li><strong>Confidential information (3.2.3):</strong> records are visible only to the aircraft's users, and to share links an owner creates (scoped and optionally expiring).</li>
+    <li><strong>Data corruption (3.2.4):</strong> nightly, the history chains and every signature's seal and fingerprint are checked; administrators are emailed on any problem.</li>
+    <li><strong>Outages (3.2.5):</strong> entries are made on paper and signed in ink during an outage (section 13); the database is restored from the latest verified copy or the off-site backup.</li>
+    <li><strong>Software revision control (3.2.6):</strong> the software is updated by deploying a new version built from its source repository; each version and when it ran is recorded by the system. Before an update that changes how records are entered, displayed or accessed, the responsible person reviews it, and these procedures are revised if they're affected.</li>
+    <li><strong>Backups (3.2.7):</strong> see section 3.</li>
+  </ul>
+
+  <h2 class="<%= h2 %>">8. Quality control and auditing</h2>
+  <p class="<%= p_ %>">Every <%= policy.audit_interval_months %> months the responsible person carries out and records an audit in the system (3.2.8.5). The app checks that the integrity check and backups are passing, the procedures are adopted, signatures are intact, and lists expired certificates and software versions since the last audit. The auditor restores the off-site backup somewhere separate and opens it, compares <%= policy.audit_sample_size %> randomly chosen entries with their work orders or source documents, reviews the users and roles (disabling accounts no longer needed), and confirms the paper logbooks are kept. Audit results are kept in the system.<%= " Last audit: #{AuditRun.latest.performed_at.to_date}." if AuditRun.latest %></p>
+
+  <h2 class="<%= h2 %>">9. Making records available to the FAA and NTSB</h2>
+  <p class="<%= p_ %>">On request (14 CFR 91.417(c), 49 CFR 830), the responsible person provides the records package for the aircraft: every logbook entry as a PDF with its electronic signature, a signature register, the full change history, the maintenance status report and the data archive, with a README. Printed copies are produced the same way. Direct access to the system can be offered but isn't required (3.2.8.6).</p>
+
+  <h2 class="<%= h2 %>">10. Transfer of records</h2>
+  <p class="<%= p_ %>"><strong>At sale (91.419, 3.2.8.12):</strong> the buyer receives the records package and the data archive, which another installation of the system can import, together with the paper logbooks. <strong>To another system (3.2.8.9):</strong> records are exported as the data archive and the records package; both systems run side by side until the transfer is checked.</p>
+
+  <h2 class="<%= h2 %>">11. Continuity</h2>
+  <p class="<%= p_ %>"><strong>Legacy records (3.2.8.10):</strong> records before the dates in section 1 are the paper logbooks, which are kept; scans are held as legacy records for reference. <strong>Maintenance providers (3.2.8.11):</strong> a provider signs electronically through an invitation, or signs a printed entry in ink; the signed paper is kept with the logbooks and scanned into the system.</p>
+
+  <h2 class="<%= h2 %>">12. Changes to the system and these procedures</h2>
+  <p class="<%= p_ %>">These procedures are revised when the system or its use changes. Each revision is numbered, dated and adopted in the system by an administrator; earlier revisions are kept. Under AC 120-78B 1.9.5 no submission to the FAA is required for part 91 operations (3.2.8.13).</p>
+
+  <h2 class="<%= h2 %>">13. User instructions and training</h2>
+  <p class="<%= p_ %>">Every user who keeps or signs records reads these instructions (also in the system under “How electronic records work”) before signing (2.2.12, 3.2.9).</p>
+  <div class="mt-2 rounded border border-slate-200 p-3"><%= render "help/records_content" %></div>
+
+  <% if policy.additional_procedures.present? %>
+    <h2 class="<%= h2 %>">14. Additional procedures</h2>
+    <div class="<%= p_ %> whitespace-pre-wrap"><%= policy.additional_procedures %></div>
+  <% end %>
+
+  <h2 class="<%= h2 %>">Revision history</h2>
+  <table class="mt-2 w-full text-sm">
+    <thead><tr class="border-b border-slate-300 text-left text-xs uppercase text-slate-500"><th class="py-1">Revision</th><th>Adopted</th><th>By</th><th>Summary</th></tr></thead>
+    <tbody>
+      <% revisions.each do |r| %><tr class="border-b border-slate-100"><td class="py-1"><%= r.number %></td><td><%= r.adopted_at.to_date %></td><td><%= r.adopted_by&.display_name %></td><td><%= r.summary %></td></tr><% end %>
+      <tr><td class="py-1"><%= number %></td><td><%= adopted_at&.to_date || "—" %></td><td><%= adopted_by&.display_name %></td><td><%= summary.presence || "This revision" %></td></tr>
+    </tbody>
+  </table>
+</article>

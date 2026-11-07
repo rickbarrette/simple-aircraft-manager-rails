@@ -93,7 +93,10 @@
         [ "Checked", check ? "#{number_with_delimiter(check.versions_checked)} history entries, #{number_with_delimiter(check.signatures_checked)} signatures" : nil ],
         [ "Last backup", backup ? "#{l(backup.created_at, format: :short)} · #{backup.ok ? number_to_human_size(backup.bytes) : 'FAILED'}" : "not run yet" ],
         [ "Backup check", backup&.message ],
-        [ "Backups kept", "#{Setting.integer('backups_kept')} (in storage/backups)" ]
+        [ "Backups kept", "#{Setting.integer('backups_kept')} (in storage/backups)" ],
+        [ "Procedures", (r = ProceduresRevision.current) ? "Revision #{r.number}, adopted #{r.adopted_at.to_date}" : tag.span("not adopted", class: "badge-orange") ],
+        [ "Last audit", AuditRun.latest ? "#{AuditRun.latest.performed_at.to_date} · #{AuditRun.latest.passed ? 'passed' : 'items not passed'}" : "none yet" ],
+        [ "Next audit due", AuditRun.due_soon? ? tag.span(AuditRun.next_due.to_s, class: "badge-orange") : AuditRun.next_due.to_s ]
       ] %>
   <% if check && !check.ok %>
     <ul class="list-disc space-y-1 px-8 pb-3 text-sm text-red-700"><% check.problems.each do |p| %><li><%= p %></li><% end %></ul>

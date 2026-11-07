@@ -8,15 +8,18 @@ class ReminderMailer < ApplicationMailer
 
   def self.expiring_certificates_for(user) = user.certificates.expiring.to_a
 
-  def self.anything_for?(user) = items_for(user).any? || expiring_certificates_for(user).any?
+  def self.audit_due_for?(user) = user.admin? && AuditRun.due_soon?
+
+  def self.anything_for?(user) = items_for(user).any? || expiring_certificates_for(user).any? || audit_due_for?(user)
 
   def weekly(user)
     @user = user
     @items = self.class.items_for(user)
     @certificates = self.class.expiring_certificates_for(user)
+    @audit_due = self.class.audit_due_for?(user) && AuditRun.next_due
     overdue = @items.sum { |_, issues, _| issues.count { _1.severity.in?(%w[RED LIMITED]) } }
     subject = overdue.positive? ? "#{overdue} #{'item'.pluralize(overdue)} overdue" : "Maintenance coming due"
-    subject = "Certificate expiring" if @items.empty?
+    subject = (@certificates.any? ? "Certificate expiring" : "Records audit due") if @items.empty?
     mail subject: [ subject, @items.map { _1.first.tail_number }.to_sentence.presence ].compact.join(": "), to: user.email_address
   end
 end

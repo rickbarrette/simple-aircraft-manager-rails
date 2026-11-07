@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_030000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -292,6 +292,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_020000) do
     t.datetime "first_seen_at", null: false
     t.datetime "last_seen_at", null: false
     t.index ["revision"], name: "index_app_revisions_on_revision", unique: true
+  end
+
+  create_table "audit_runs", force: :cascade do |t|
+    t.integer "performed_by_id"
+    t.datetime "performed_at", null: false
+    t.boolean "passed", null: false
+    t.json "results", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["performed_by_id"], name: "index_audit_runs_on_performed_by_id"
   end
 
   create_table "backup_runs", force: :cascade do |t|
@@ -612,6 +623,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_020000) do
     t.index ["component_id"], name: "index_oil_analyses_on_component_id"
   end
 
+  create_table "procedures_revisions", force: :cascade do |t|
+    t.integer "number", null: false
+    t.integer "adopted_by_id"
+    t.datetime "adopted_at", null: false
+    t.text "summary"
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["adopted_by_id"], name: "index_procedures_revisions_on_adopted_by_id"
+    t.index ["number"], name: "index_procedures_revisions_on_number", unique: true
+  end
+
   create_table "record_versions", force: :cascade do |t|
     t.integer "aircraft_id"
     t.string "item_type", null: false
@@ -625,6 +648,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_020000) do
     t.datetime "created_at", null: false
     t.index ["aircraft_id"], name: "index_record_versions_on_aircraft_id"
     t.index ["item_type", "item_id"], name: "index_record_versions_on_item_type_and_item_id"
+  end
+
+  create_table "recordkeeping_policies", force: :cascade do |t|
+    t.string "operator_name"
+    t.string "responsible_name"
+    t.string "responsible_title"
+    t.text "hosting_description"
+    t.text "offsite_backup_description"
+    t.integer "audit_interval_months", default: 6, null: false
+    t.integer "audit_sample_size", default: 5, null: false
+    t.text "additional_procedures"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -763,6 +799,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_020000) do
   add_foreign_key "aircraft_roles", "users"
   add_foreign_key "airport_updates", "users", column: "requested_by_id", on_delete: :nullify
   add_foreign_key "airworthiness_directives", "documents", on_delete: :nullify
+  add_foreign_key "audit_runs", "users", column: "performed_by_id", on_delete: :nullify
   add_foreign_key "components", "aircraft"
   add_foreign_key "components", "component_types"
   add_foreign_key "components", "components", column: "parent_component_id"
@@ -797,6 +834,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_020000) do
   add_foreign_key "major_records", "logbook_entries", on_delete: :nullify
   add_foreign_key "oil_analyses", "aircraft"
   add_foreign_key "oil_analyses", "components"
+  add_foreign_key "procedures_revisions", "users", column: "adopted_by_id", on_delete: :nullify
   add_foreign_key "sessions", "users"
   add_foreign_key "share_tokens", "aircraft"
   add_foreign_key "share_tokens", "users", column: "created_by_id", on_delete: :nullify

@@ -22,6 +22,9 @@ class RecordsPackage
       add(zip, "signatures.csv", signatures_csv(entries))
       add(zip, "record-history.csv", history_csv)
       add(zip, "status-report.html", status_report_html)
+      if (revision = ProceduresRevision.current)
+        add(zip, "recordkeeping-procedures.html", standalone_html(revision.content, "Recordkeeping procedures, revision #{revision.number}"))
+      end
       archive = Tempfile.new([ "archive", ".sam.zip" ])
       AircraftArchive::Exporter.new(@aircraft, source: @source).write_to(archive.path)
       zip.put_next_entry("#{@aircraft.tail_number.downcase}.sam.zip")
@@ -55,6 +58,7 @@ class RecordsPackage
       - record-history.csv    Every change to the maintenance records (created, changed, deleted), with who and when.
       - status-report.html    Maintenance status per 14 CFR 91.417(a)(2): times, life-limited parts, inspections, ADs, alterations.
       - #{@aircraft.tail_number.downcase}.sam.zip        All records and files as data, to load into another system.
+      - recordkeeping-procedures.html  How these electronic records and signatures are kept (AC 120-78B), current adopted revision.
 
       Signatures
       Each electronic signature records who signed, with which certificate, what they certified, when, and a SHA-256
@@ -91,8 +95,14 @@ class RecordsPackage
 
   # The status report as one self-contained HTML file (styles inlined).
   def status_report_html
-    html = ApplicationController.render("maintenance_reports/show", layout: "report",
-                                        assigns: { report: MaintenanceReport.new(@aircraft) })
+    inline_styles(ApplicationController.render("maintenance_reports/show", layout: "report", assigns: { report: MaintenanceReport.new(@aircraft) }))
+  end
+
+  def standalone_html(body, title)
+    inline_styles(ApplicationController.render(html: body.html_safe, layout: "report", assigns: {}).sub(%r{<title>.*?</title>}m, "<title>#{ERB::Util.h(title)}</title>"))
+  end
+
+  def inline_styles(html)
     css = %w[tailwind.css application.css].filter_map { Rails.application.assets.load_path.find(_1)&.content }.join("\n")
     html.gsub(%r{<link rel="stylesheet"[^>]*>\s*}, "").sub("</head>", "<style>#{css}</style></head>")
         .gsub(%r{<script\b[^>]*>.*?</script>}m, "").gsub(%r{<link rel="modulepreload"[^>]*>\s*}, "")

@@ -1,0 +1,20 @@
+<% content_for :title, "Records audits" %>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div>
+    <h1 class="text-2xl font-bold">Records audits</h1>
+    <p class="text-sm text-slate-600">Quality-control audits of the electronic records (AC 120-78B 3.2.8.5), every <%= RecordkeepingPolicy.current.audit_interval_months %> months. Next due <strong class="<%= AuditRun.due_soon? ? 'text-amber-700' : '' %>"><%= AuditRun.next_due %></strong>.</p>
+  </div>
+  <%= link_to "Start an audit", new_admin_audit_path, class: "btn-primary" %>
+</div>
+<section class="card">
+  <% if @audits.any? %>
+    <ul class="divide-y divide-slate-100 text-sm">
+      <% @audits.each do |a| %>
+        <li class="flex items-center justify-between px-4 py-2">
+          <span><%= link_to a.performed_at.to_date, admin_audit_path(a), class: "link" %> · <%= a.performed_by&.display_name %></span>
+          <span class="<%= a.passed ? 'badge-green' : 'badge-orange' %>"><%= a.passed ? "Passed" : "Items not passed" %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %><%= empty_state "No audits yet." %><% end %>
+</section>

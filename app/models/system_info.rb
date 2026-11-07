@@ -48,6 +48,7 @@ class SystemInfo
       "Single sign-on" => Sso.enabled? ? "#{Sso.label}#{', password sign-in off' unless Sso.password_login?}" : "not configured",
       "AI logbook transcription" => ENV["ANTHROPIC_API_KEY"].present? ? "on (#{LogbookTranscriber::MODEL})" : "no API key",
       "Email" => MailSettings.configured? ? ActionMailer::Base.delivery_method.to_s.upcase : "not configured",
+      "Upload limit" => "#{Setting.max_upload_mb} MB per file",
       "HTTPS enforced" => Rails.application.config.force_ssl ? "yes" : "no",
       "File storage" => ActiveStorage::Blob.service.class.name.demodulize.delete_suffix("Service")
     }

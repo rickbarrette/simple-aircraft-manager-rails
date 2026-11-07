@@ -3,7 +3,7 @@
 <% file_classes = "block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
 <%= form_with url: bulk_aircraft_documents_path(@aircraft), multipart: true, class: "card card-body max-w-3xl space-y-4",
       data: { controller: "bulk-upload", bulk_upload_url_value: rails_direct_uploads_path,
-              bulk_upload_max_bytes_value: UploadValidation::MAX_SIZE, action: "submit->bulk-upload#submit" } do %>
+              bulk_upload_max_bytes_value: UploadValidation.max_size, action: "submit->bulk-upload#submit" } do %>
   <div>
     <h2 class="card-title">Bulk upload</h2>
     <p class="text-sm text-slate-500">Each file becomes its own document, named after the file. Give files the same name to combine them, in order, as the pages of one document.</p>
@@ -44,7 +44,7 @@
              data-bulk-upload-target="folder" data-action="change->bulk-upload#add">
     </div>
   </div>
-  <p class="hint !mt-1">Images, PDFs or text, up to <%= UploadValidation::MAX_SIZE / 1.megabyte %> MB each and <%= DocumentsController::MAX_BULK_FILES %> at a time.</p>
+  <p class="hint !mt-1">Images, PDFs or text, up to <%= Setting.max_upload_mb %> MB each and <%= DocumentsController::MAX_BULK_FILES %> at a time.</p>
 
   <div data-bulk-upload-target="panel" hidden class="space-y-2">
     <div class="flex flex-wrap items-center justify-between gap-2">

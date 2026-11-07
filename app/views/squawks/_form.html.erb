@@ -4,7 +4,7 @@
   <%= f.field :issue_reported, as: :textarea, label: "Issue", required: true, autofocus: true %>
   <%= f.field :component_id, as: :select, label: "Component (optional)", collection: component_options(aircraft) %>
   <%= f.field :attachments, as: :file, multiple: true, label: squawk.attachments.attached? ? "Add photos / files" : "Photos / files",
-        hint: "Select several at once. Images, PDFs or text, up to 50 MB each." %>
+        hint: "Select several at once. Images, PDFs or text, up to #{Setting.max_upload_mb} MB each." %>
   <% if squawk.persisted? && squawk.attachments.attached? %>
     <div>
       <p class="label">Remove attached files</p>

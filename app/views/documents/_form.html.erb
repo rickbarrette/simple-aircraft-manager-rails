@@ -10,7 +10,7 @@
   </div>
   <%= f.field :description, as: :textarea, rows: 2 %>
   <%= f.field :pages, as: :file, multiple: true, label: document.persisted? ? "Add files" : "Files",
-        hint: "Images, PDFs or text. Each file is a page in the viewer, in upload order." %>
+        hint: "Images, PDFs or text, up to #{Setting.max_upload_mb} MB each. Each file is a page in the viewer, in upload order." %>
   <% if document.persisted? && document.pages.any? %>
     <div>
       <p class="label">Remove existing files</p>

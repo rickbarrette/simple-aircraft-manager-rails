@@ -1,0 +1,26 @@
+<% content_for :title, "Settings" %>
+<h1 class="mb-4 text-2xl font-bold">Settings</h1>
+<%= form_with url: admin_settings_path, method: :patch, class: "card card-body max-w-xl space-y-4" do |f| %>
+  <% if @errors.present? %>
+    <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert">
+      <ul class="list-disc pl-5"><% @errors.each do |e| %><li><%= e %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <h2 class="card-title">Uploads</h2>
+  <% upload = Setting::INTEGERS["max_upload_mb"] %>
+  <div>
+    <%= label_tag "settings[max_upload_mb]", upload[:label], class: "label" %>
+    <%= number_field_tag "settings[max_upload_mb]", @values["max_upload_mb"], id: "settings_max_upload_mb",
+          min: upload[:in].min, max: upload[:in].max, step: 1, required: true, class: "input w-32" %>
+    <p class="hint">
+      The largest single file anyone can upload: documents, squawk photos and bulk uploads. Default <%= upload[:default] %> MB, up to <%= upload[:in].max %> MB.
+    </p>
+    <p class="hint">
+      A proxy in front of the app can have its own, smaller limit. Cloudflare's proxy stops at 100 MB on its free plan; nginx needs <code>client_max_body_size</code>.
+      Logbook transcription with Claude reads PDFs up to <%= LogbookTranscriber::MAX_PDF_BYTES / 1.megabyte %> MB and images up to <%= LogbookTranscriber::MAX_IMAGE_BYTES / 1.megabyte %> MB, whatever this is set to.
+    </p>
+  </div>
+
+  <div class="flex gap-2"><%= f.submit "Save Settings", class: "btn-primary" %><%= link_to "Cancel", admin_about_path, class: "btn-secondary" %></div>
+<% end %>

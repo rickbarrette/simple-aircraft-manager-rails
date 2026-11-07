@@ -88,6 +88,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     get "about", to: "about#show"
+    resource :settings, only: %i[edit update]
     post "about/test_email", to: "about#test_email", as: :test_email
     resources :users, except: :show
     resources :component_types, except: :show

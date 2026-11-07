@@ -21,7 +21,7 @@ module AircraftArchive
   OPTIONAL_KEYS = %w[features].freeze # and flight_logs before schema v2
 
   MANIFEST_MAX_BYTES = 50.megabytes
-  FILE_MAX_BYTES = 512.megabytes
+  FILE_MAX_BYTES = 1.gigabyte # the most Admin → Settings allows for uploads
   ARCHIVE_MAX_BYTES = 10.gigabytes # uncompressed
   MAX_RATIO = 100                  # compression ratio above this looks like a zip bomb
 

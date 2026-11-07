@@ -21,6 +21,11 @@
         <span><%= c %> <%= c.model %><%= " S/N #{c.serial_number}" if c.serial_number.present? %>:
           <%= hours(@entry.component_hours_at_entry) %> total, <%= hours(@entry.component_since_overhaul_at_entry) %> <%= c.since_overhaul_abbreviation %></span>
       <% end %>
+      <% @entry.parts.each do |part| %>
+        <% pc = part.component %>
+        <span><%= pc %> <%= pc.model %><%= " S/N #{pc.serial_number}" if pc.serial_number.present? %>:
+          <%= hours(part.hours_at_entry) %> total, <%= hours(part.since_overhaul_at_entry) %> <%= pc.since_overhaul_abbreviation.downcase %></span>
+      <% end %>
     </div>
     <div class="whitespace-pre-wrap rounded bg-slate-50 p-3 font-mono text-sm"><%= @entry.text %></div>
     <div class="text-sm text-slate-600">

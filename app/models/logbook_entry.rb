@@ -23,6 +23,9 @@ class LogbookEntry < ApplicationRecord
   belongs_to :document, optional: true
   # For engine / propeller logs: which one, and its times at this entry.
   belongs_to :component, optional: true
+  # Sub-components it also covers (the oil filter on the engine…).
+  has_many :parts, -> { includes(component: :component_type).order(:id) }, class_name: "LogbookEntryPart",
+                   dependent: :destroy, autosave: true
   has_many :inspection_records, dependent: :nullify
   has_many :ad_compliances, dependent: :nullify
   has_many :squawks, dependent: :nullify
@@ -45,6 +48,18 @@ class LogbookEntry < ApplicationRecord
   end
 
   def to_s = "#{date} — #{LOG_TYPES[log_type]}"
+
+  # From the form: { component_id => { "include" => "1", "hours" => …, "since" => … } }.
+  # Only the aircraft's sub-components of the entry's component are kept.
+  def assign_parts(params, aircraft)
+    allowed = component ? component.descendant_ids.to_set & aircraft.component_ids.to_set : Set.new
+    wanted = params.to_h.select { |id, p| p["include"] == "1" && allowed.include?(id.to_i) }
+    parts.each { |part| part.mark_for_destruction unless wanted.key?(part.component_id.to_s) }
+    wanted.each do |id, p|
+      part = parts.find { _1.component_id == id.to_i } || parts.build(component_id: id.to_i)
+      part.assign_attributes(hours_at_entry: p["hours"].presence, since_overhaul_at_entry: p["since"].presence)
+    end
+  end
   def certificate_label = CERTIFICATE_TYPES[signoff_certificate_type]
   def inspection_result_label = INSPECTION_RESULTS[inspection_result]
 

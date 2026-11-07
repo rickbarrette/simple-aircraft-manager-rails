@@ -6,7 +6,8 @@ Prawn::Fonts::AFM.hide_m17n_warning = true # text is reduced to what the built-i
 # want (aircraft, date, airframe total time, the work, the signer's name and
 # certificate) and a blank line for the signature, which must be signed by
 # hand. Engine and propeller entries add the component's serial number, total
-# time and time since overhaul (blanks to fill in when no component is linked).
+# time and time since overhaul (blanks to fill in when no component is linked),
+# and a line for each sub-component the entry covers (an oil filter…).
 #
 # Labels: one entry per label; long entries shrink to fit, then continue on
 # the next label. Pages: entries follow one another, each in a box with its
@@ -170,6 +171,14 @@ class LogbookEntryPdf
                  "#{component.since_overhaul_abbreviation}: #{blank_or_hours(entry.component_since_overhaul_at_entry)}" ].join("     ")
     elsif noun
       lines << "#{noun}: ______________  S/N __________     #{noun} total time: ________     SMOH / SFOH: ________"
+    end
+    entry.parts.each do |part|
+      c = part.component
+      name = c.component_type&.name || "Part"
+      model = [ c.manufacturer, c.model ].compact_blank.join(" ")
+      lines << [ "#{name}: #{model}#{"  S/N #{c.serial_number}" if c.serial_number.present?}",
+                 "Total time: #{blank_or_hours(part.hours_at_entry)}",
+                 "#{c.since_overhaul_abbreviation}: #{blank_or_hours(part.since_overhaul_at_entry)}" ].join("     ")
     end
     lines
   end

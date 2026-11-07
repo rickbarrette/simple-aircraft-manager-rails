@@ -54,6 +54,7 @@ class SquawksController < ApplicationController
       case params[:logbook]
       when "new"
         @entry = @aircraft.logbook_entries.new(resolution_entry_params.merge(entry_type: "MAINTENANCE"))
+        @entry.assign_parts(params.fetch(:logbook_entry, {}).permit(parts: {})[:parts]&.to_h || {}, @aircraft)
         return render(:resolution, status: :unprocessable_entity) unless @entry.save
         log_event("logbook", "Logbook entry added: #{@entry.date}")
         @entry

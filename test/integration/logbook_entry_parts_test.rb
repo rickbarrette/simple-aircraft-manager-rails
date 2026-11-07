@@ -1,0 +1,66 @@
+require "test_helper"
+require "pdf-reader"
+
+# Sub-components on a logbook entry: the oil filter on the engine, with its
+# times at the entry.
+class LogbookEntryPartsTest < ActionDispatch::IntegrationTest
+  setup do
+    @owner = create_user("owner@example.com")
+    @a = create_aircraft(owner: @owner, tail_number: "N12345", tach_time: 4210.3)
+    @engine = create_component(@a, component_type: component_type("Engine"), manufacturer: "Continental", model: "O-470-R",
+                                   serial_number: "100001-R", hours_in_service: 2655.9, hours_since_overhaul: 94.7, overhaul_kind: "major")
+    @filter = create_component(@a, component_type: component_type("Oil filter"), manufacturer: "Challenger", model: "CP48108C",
+                                   serial_number: "10000000", parent_component: @engine, hours_in_service: 120.5, hours_since_overhaul: 20.5)
+    @prop = create_component(@a, component_type: component_type("Propeller"), manufacturer: "McCauley", model: "2A34C203")
+    @elsewhere = create_component(create_aircraft, component_type: component_type("Oil filter"))
+    sign_in @owner
+  end
+
+  def entry_params(**extra)
+    { date: "2026-08-20", log_type: "ENG", entry_type: "MAINTENANCE", text: "Changed oil; cleaned the filter.", aircraft_hours_at_entry: 4200.3,
+      component_id: @engine.id, component_hours_at_entry: 2645.9, component_since_overhaul_at_entry: 84.7 }.merge(extra)
+  end
+
+  test "the engine's sub-components are offered and saved with their times" do
+    get new_aircraft_logbook_entry_path(@a)
+    assert_select "[data-component-times-target=part][data-ancestors='#{@engine.id}'][data-total='120.5'][data-since='20.5'][hidden]" do
+      assert_select "input[name='logbook_entry[parts][#{@filter.id}][include]']"
+      assert_select "label", text: "Since service"
+    end
+
+    post aircraft_logbook_entries_path(@a), params: { logbook_entry: entry_params(parts: {
+      @filter.id => { include: "1", hours: "110.5", since: "10.5" },
+      @prop.id => { include: "1", hours: "1" },              # not under the engine: ignored
+      @elsewhere.id => { include: "1", hours: "1" } }) }     # another aircraft's: ignored
+    entry = @a.logbook_entries.sole
+    assert_equal [ [ @filter, 110.5, 10.5 ] ], entry.parts.map { [ _1.component, _1.hours_at_entry.to_f, _1.since_overhaul_at_entry.to_f ] }
+
+    get aircraft_logbook_entry_path(@a, entry)
+    assert_includes response.body, "110.5 total, 10.5 since service"
+    get edit_aircraft_logbook_entry_path(@a, entry)
+    assert_select "input[name='logbook_entry[parts][#{@filter.id}][include]'][checked]"
+    assert_select "[data-component-times-target=part][data-ancestors='#{@engine.id}']:not([hidden])"
+
+    patch aircraft_logbook_entry_path(@a, entry), params: { logbook_entry: { parts: { @filter.id => { include: "1", hours: "111", since: "11" } } } }
+    assert_equal [ 111, 11 ], entry.parts.reload.sole.then { [ _1.hours_at_entry.to_i, _1.since_overhaul_at_entry.to_i ] }
+    patch aircraft_logbook_entry_path(@a, entry), params: { logbook_entry: { text: "Changed oil.", parts: { @filter.id => { include: "0" } } } }
+    assert_empty entry.parts.reload
+  end
+
+  test "printouts add a line per sub-component; archives carry them" do
+    entry = @a.logbook_entries.create!(entry_params.merge(component: @engine))
+    entry.parts.create!(component: @filter, hours_at_entry: 110.5, since_overhaul_at_entry: 10.5)
+    get aircraft_logbook_print_path(@a, format: :pdf), params: { ids: [ entry.id ], layout: "letter" }
+    text = PDF::Reader.new(StringIO.new(response.body)).pages.map(&:text).join(" ").gsub(/\s+/, " ")
+    assert_includes text, "Engine: Continental O-470-R S/N 100001-R Engine total time: 2,645.9 SMOH: 84.7"
+    assert_includes text, "Oil filter: Challenger CP48108C S/N 10000000 Total time: 110.5 Since service: 10.5"
+
+    path = File.join(Dir.mktmpdir, "a.sam.zip")
+    AircraftArchive::Exporter.new(@a, source: "sam.example.com").write_to(path)
+    copy = AircraftArchive::Importer.new(path, owner: @owner, tail_number: "N54321").run[:aircraft]
+    copied = copy.logbook_entries.sole
+    assert_equal [ "Engine", 2645.9 ], [ copied.component.component_type.name, copied.component_hours_at_entry.to_f ]
+    assert_equal [ [ "Oil filter", 110.5, 10.5 ] ], copied.parts.map { [ _1.component.component_type.name, _1.hours_at_entry.to_f, _1.since_overhaul_at_entry.to_f ] }
+    assert_equal copied.component, copied.parts.sole.component.parent_component
+  end
+end

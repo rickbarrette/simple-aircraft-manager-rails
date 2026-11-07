@@ -18,7 +18,7 @@ class LogbookPrintsController < ApplicationController
 
   def set_entries
     ids = Array(params[:ids]).map(&:to_i).first(200)
-    @entries = @aircraft.logbook_entries.where(id: ids).includes(:component, inspection_records: :inspection_type).order(:date, :id).to_a
+    @entries = @aircraft.logbook_entries.where(id: ids).includes(:component, :parts, inspection_records: :inspection_type).order(:date, :id).to_a
     redirect_to aircraft_logbook_entries_path(@aircraft), alert: "Choose the entries to print." if @entries.empty?
   end
 end

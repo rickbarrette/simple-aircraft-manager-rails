@@ -55,7 +55,7 @@ module AircraftArchive
         document_images: a.documents.includes(pages_attachments: :blob).flat_map do |d|
           d.pages.map { |page| { id: id(page), document_id: id(d), notes: "", image: file(page, "health/documents") } }
         end,
-        logbook_entries: a.logbook_entries.map { logbook_hash(_1) },
+        logbook_entries: a.logbook_entries.includes(:parts).map { logbook_hash(_1) },
         squawks: a.squawks.includes(:reported_by, attachments_attachments: :blob).map { squawk_hash(_1) },
         inspection_types: inspection_types.map { inspection_type_hash(_1, component_ids) },
         inspection_records: a.inspection_records.map do |r|
@@ -148,9 +148,11 @@ module AircraftArchive
         inspection_result: e.inspection_result, verified: e.verified, transcription_confidence: e.transcription_confidence,
         log_image_id: id(e.document_id),
         aircraft_hours_at_entry: dec(e.aircraft_hours_at_entry), entry_type: e.entry_type, page_number: e.page_number,
-        components: [ id(e.component_id) ].compact,
-        component_hours: e.component_id ? { id(e.component_id) => dec(e.component_hours_at_entry) }.compact : {},
-        component_since_overhaul: e.component_id ? { id(e.component_id) => dec(e.component_since_overhaul_at_entry) }.compact : {},
+        components: [ id(e.component_id), *e.parts.map { id(_1.component_id) } ].compact,
+        component_hours: { id(e.component_id) => dec(e.component_hours_at_entry) }.merge(e.parts.to_h { [ id(_1.component_id), dec(_1.hours_at_entry) ] })
+                                                                                  .reject { |k, v| k.nil? || v.nil? },
+        component_since_overhaul: { id(e.component_id) => dec(e.component_since_overhaul_at_entry) }
+                                    .merge(e.parts.to_h { [ id(_1.component_id), dec(_1.since_overhaul_at_entry) ] }).reject { |k, v| k.nil? || v.nil? },
         related_documents: [] }
     end
 

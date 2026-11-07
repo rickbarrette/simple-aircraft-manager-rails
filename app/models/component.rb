@@ -15,6 +15,7 @@ class Component < ApplicationRecord
   has_many :inspection_records, dependent: :nullify
   has_many :major_records, dependent: :nullify
   has_many :logbook_entries, dependent: :nullify
+  has_many :logbook_entry_parts, dependent: :destroy
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
 
@@ -30,7 +31,20 @@ class Component < ApplicationRecord
   end
 
   def status_label = STATUSES[status]
-  def since_overhaul_abbreviation = OVERHAUL_ABBREVIATIONS.fetch(overhaul_kind, "TSO")
+  # SMOH / SFOH / SNEW when the overhaul type is known; engines and
+  # propellers otherwise "TSO", and other parts (filters…) "since service".
+  def since_overhaul_abbreviation
+    OVERHAUL_ABBREVIATIONS.fetch(overhaul_kind) { engine? || propeller? ? "TSO" : "Since service" }
+  end
+
+  # Its sub-components, and theirs.
+  def descendant_ids
+    child_components.flat_map { [ _1.id, *_1.descendant_ids ] }
+  end
+
+  def ancestor_ids
+    parent_component ? [ parent_component_id, *parent_component.ancestor_ids ] : []
+  end
   def engine? = component_type&.name.to_s.match?(/engine/i)
   def propeller? = component_type&.name.to_s.match?(/propell?er|\bprop\b/i)
 

@@ -16,3 +16,33 @@
         data: { component_times_target: "since", action: "input->component-times#markManual" },
         hint: "Worked out from the component's current times and the airframe total time above; edit them if they differ." %>
 </div>
+<%# Sub-components of the chosen component (oil filter, magnetos…): tick to include them with their times. %>
+<% children = comps.select(&:parent_component_id) %>
+<% if children.any? %>
+  <% parts = f.object.parts.index_by(&:component_id) %>
+  <% selected = f.object.component %>
+  <fieldset class="space-y-2" data-component-times-target="partsBox" <%= "hidden" unless selected && (children.map(&:id) & selected.descendant_ids).any? %>>
+    <legend class="label">Sub-components</legend>
+    <% children.each do |c| %>
+      <% part = parts[c.id] %>
+      <% ancestors = c.ancestor_ids %>
+      <% field = "#{f.object_name}[parts][#{c.id}]" %>
+      <div class="grid items-end gap-2 sm:grid-cols-[1fr_9rem_9rem]" data-component-times-target="part" data-ancestors="<%= ancestors.join(' ') %>"
+           data-total="<%= c.hours_in_service.to_f %>" data-since="<%= c.hours_since_overhaul.to_f %>"
+           <%= "hidden" unless selected && ancestors.include?(selected.id) %>>
+        <label class="flex items-center gap-2 text-sm">
+          <%= check_box_tag "#{field}[include]", "1", part.present?, id: "part_#{c.id}_include", class: "h-4 w-4 shrink-0 rounded border-slate-300",
+                            data: { action: "component-times#partToggled" } %>
+          <span><%= c %> · <%= c.manufacturer %> <%= c.model %><%= " · S/N #{c.serial_number}" if c.serial_number.present? %></span>
+        </label>
+        <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_hours">Total time</label>
+          <%= number_field_tag "#{field}[hours]", part&.hours_at_entry, id: "part_#{c.id}_hours", step: 0.1, class: "input",
+                               data: { role: "hours", action: "input->component-times#partEdited" } %></div>
+        <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_since"><%= c.since_overhaul_abbreviation.capitalize %></label>
+          <%= number_field_tag "#{field}[since]", part&.since_overhaul_at_entry, id: "part_#{c.id}_since", step: 0.1, class: "input",
+                               data: { role: "since", action: "input->component-times#partEdited" } %></div>
+      </div>
+    <% end %>
+    <p class="hint">Their times are worked out the same way as the component's. Sub-components are set up on the Components tab (a part's "Parent component").</p>
+  </fieldset>
+<% end %>

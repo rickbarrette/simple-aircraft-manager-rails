@@ -32,6 +32,7 @@ class LogbookEntriesController < ApplicationController
 
   def create
     @entry = @aircraft.logbook_entries.new(entry_params)
+    @entry.assign_parts(parts_params, @aircraft)
     if @entry.save
       log_event("logbook", "Logbook entry added (#{@entry.date})")
       redirect_to aircraft_logbook_entries_path(@aircraft), notice: "Logbook entry added."
@@ -43,7 +44,9 @@ class LogbookEntriesController < ApplicationController
   def edit; end
 
   def update
-    if @entry.update(entry_params)
+    @entry.assign_attributes(entry_params)
+    @entry.assign_parts(parts_params, @aircraft)
+    if @entry.save
       log_event("logbook", "Logbook entry updated (#{@entry.date})")
       redirect_to aircraft_logbook_entry_path(@aircraft, @entry), notice: "Logbook entry updated."
     else
@@ -58,6 +61,11 @@ class LogbookEntriesController < ApplicationController
   end
 
   private
+
+  # Sub-components ticked on the form: { component_id => { include, hours, since } }.
+  def parts_params
+    params.fetch(:logbook_entry, {}).permit(parts: {})[:parts]&.to_h || {}
+  end
 
   def set_entry = @entry = @aircraft.logbook_entries.find(params[:id])
 

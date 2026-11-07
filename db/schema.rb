@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_250000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -458,6 +458,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_250000) do
     t.index ["document_id"], name: "index_logbook_entries_on_document_id"
   end
 
+  create_table "logbook_entry_parts", force: :cascade do |t|
+    t.integer "logbook_entry_id", null: false
+    t.integer "component_id", null: false
+    t.decimal "hours_at_entry", precision: 8, scale: 1
+    t.decimal "since_overhaul_at_entry", precision: 8, scale: 1
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["component_id"], name: "index_logbook_entry_parts_on_component_id"
+    t.index ["logbook_entry_id", "component_id"], name: "index_logbook_entry_parts_on_logbook_entry_id_and_component_id", unique: true
+    t.index ["logbook_entry_id"], name: "index_logbook_entry_parts_on_logbook_entry_id"
+  end
+
   create_table "logbook_imports", force: :cascade do |t|
     t.integer "aircraft_id", null: false
     t.integer "user_id"
@@ -682,6 +694,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_250000) do
   add_foreign_key "logbook_entries", "aircraft"
   add_foreign_key "logbook_entries", "components", on_delete: :nullify
   add_foreign_key "logbook_entries", "documents", on_delete: :nullify
+  add_foreign_key "logbook_entry_parts", "components", on_delete: :cascade
+  add_foreign_key "logbook_entry_parts", "logbook_entries", on_delete: :cascade
   add_foreign_key "logbook_imports", "aircraft"
   add_foreign_key "logbook_imports", "documents", on_delete: :nullify
   add_foreign_key "logbook_imports", "users", on_delete: :nullify

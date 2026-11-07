@@ -222,7 +222,6 @@ module AircraftArchive
     end
 
     def import_logbook
-      dropped = 0
       m("logbook_entries").each do |data|
         e = @aircraft.logbook_entries.new(
           log_type: LogbookEntry::LOG_TYPES.key?(data["log_type"]) ? data["log_type"] : "AC",
@@ -237,19 +236,22 @@ module AircraftArchive
           aircraft_hours_at_entry: num(data["aircraft_hours_at_entry"]), page_number: data["page_number"],
           document_id: @map[:document][data["log_image_id"].to_s]
         )
-        # One component per entry here (the original allows several): the first, with its times.
-        if (ref = Array(data["components"]).first) && (component_id = @map[:component][ref.to_s])
-          e.component_id = component_id
+        # The first component is the entry's; the rest are its sub-components, each with its times.
+        refs = Array(data["components"]).select { @map[:component][_1.to_s] }
+        if (ref = refs.first)
+          e.component_id = @map[:component][ref.to_s]
           e.component_hours_at_entry = num(hash_value(data["component_hours"], ref))
           e.component_since_overhaul_at_entry = num(hash_value(data["component_since_overhaul"], ref))
-          dropped += 1 if Array(data["components"]).size > 1
+        end
+        refs.drop(1).uniq.each do |r|
+          e.parts.build(component_id: @map[:component][r.to_s], hours_at_entry: num(hash_value(data["component_hours"], r)),
+                        since_overhaul_at_entry: num(hash_value(data["component_since_overhaul"], r)))
         end
         e.save!(validate: false)
         @map[:logbook][data["id"].to_s] = e.id
 
         tick("logbook_entries")
       end
-      warn("#{dropped} logbook #{dropped == 1 ? 'entry was' : 'entries were'} linked to several components; only the first is kept here.") if dropped.positive?
     end
 
     def import_squawks

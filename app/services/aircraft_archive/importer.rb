@@ -177,7 +177,7 @@ module AircraftArchive
         c = @aircraft.components.new(
           component_type_id: type_id, parent_component_id: @map[:component][data["parent_component_id"].to_s],
           manufacturer: data["manufacturer"].to_s, model: data["model"].to_s, serial_number: data["serial_number"].to_s,
-          install_location: data["install_location"].to_s, notes: data["notes"].to_s,
+          install_location: data["install_location"].to_s, notes: data["notes"].to_s, expires_on: date(data["expires_on"]),
           status: Component::STATUSES.key?(data["status"]) ? data["status"] : "SPARE",
           date_in_service: date(data["date_in_service"]) || Date.new(1900, 1, 1), hours_in_service: num(data["hours_in_service"]) || 0,
           hours_since_overhaul: num(data["hours_since_overhaul"]) || 0, overhaul_date: date(data["overhaul_date"]),
@@ -201,7 +201,8 @@ module AircraftArchive
       m("documents").each do |data|
         d = @aircraft.documents.new(name: data["name"].to_s.presence || "Untitled", description: data["description"].to_s,
                                     doc_type: data["doc_type"].presence, visibility: visibility(data["visibility"]),
-                                    document_collection_id: @map[:collection][data["collection_id"].to_s])
+                                    document_collection_id: @map[:collection][data["collection_id"].to_s],
+                                    expires_on: date(data["expires_on"]))
         d.doc_type = "OTHER" unless Document::TYPES.key?(d.doc_type)
         d.save!(validate: false)
         @map[:document][data["id"].to_s] = d.id

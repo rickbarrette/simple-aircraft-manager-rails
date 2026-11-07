@@ -94,18 +94,20 @@ To back up or move a single aircraft with all its files, use **Access & Sharing 
 | Area | Notes |
 |---|---|
 | Fleet dashboard | Every aircraft you can access, with airworthiness status and its top issues. |
-| Airworthiness | RED/ORANGE/GREEN from AD compliance, grounding squawks, inspection recurrency, and replacement-critical components. Warnings start 10 hours or 30 days ahead. Logic: `app/services/airworthiness.rb`, `app/services/compliance.rb`. |
-| Hours | Absolute tach/hobbs updates or per-flight logs. Both apply the delta to every in-service component. Downward corrections are clamped at 0. |
+| Airworthiness | Grounded / limited (e.g. "VFR only" for an overdue 91.411 check) / due soon / current, from AD compliance, grounding squawks, inspections, replacement-critical and expiring parts, and expiring documents (an expired registration grounds). Warnings start 10 hours or 30 days ahead. The pilot in command still decides airworthiness (91.7). Logic: `app/services/airworthiness.rb`, `app/services/compliance.rb`. |
+| Hours | Absolute tach/hobbs updates or per-flight logs. Both apply the delta to every in-service component. Downward corrections are clamped at 0. Each aircraft picks tach or Hobbs as its maintenance clock (time in service). |
 | Flight import | Owners can import historical flights from `.xlsx` or `.csv` (Date, From, To, Tach, Hobbs, Oil Added, Fuel Added). Each flight's time is derived from the previous row's reading. A preview flags typos such as a tach going backwards, and rows already imported are skipped. History only: component hours aren't changed unless you choose to advance the aircraft's meters. |
-| Airworthiness enforcement | Optional per aircraft. It blocks flight logs and hours updates while the aircraft is RED. |
+| Airworthiness enforcement | Optional per aircraft. It blocks flight logs and hours updates while the aircraft is grounded (not for limitations). |
 | Components | Tree of parent and child parts, TBO and replacement limits, and service/replace reset. Owners can create new component types inline. |
-| Squawks | Four priorities. "Ground Aircraft" makes the aircraft RED. Supports attachments, resolve, and reopen. |
-| ADs and bulletins | Shared across aircraft and applicable to the airframe or to specific components. Hour- and month-based recurrence (due at end of month), conditional and non-mandatory types, per-aircraft "not applicable" determinations, and compliance history. |
+| Squawks | Four priorities. "Ground Aircraft" grounds the aircraft. Inoperative items can be deferred under 91.213(d) after confirming each condition; resolving can record the fix as a logbook entry. Attachments, reopen. |
+| ADs and bulletins | Shared across aircraft and applicable to the airframe or to specific components. Hour- and month-based recurrence (due at end of month), conditional and non-mandatory types, per-aircraft "not applicable" determinations, and compliance history with method of compliance and the revision complied with. |
 | AD import | Import ADs from an FAA DRS export (`.xlsx` recommended: its AD numbers link to each AD's DRS page, which the import keeps; `.csv` works without links). ADs are matched by number, so nothing is duplicated. The preview suggests Track, Not applicable or Skip for each AD, and flags superseded or non-current ADs, model mismatches, appliance or STC-only ADs, and repetitive actions. |
-| Inspections | Shared inspection types with hour, month, and day recurrence, plus history. |
-| Logbook | Maintenance entries with search and a link to a scanned document page. |
-| Documents | Collections, multi-file documents with a page viewer, and per-document share visibility. |
+| Inspections | Shared inspection types with hour, month, and day recurrence, plus history. Each says what overdue means (grounded, no IFR, no transponder, advisory); an annual can also count as the 100-hour, and the 100-hour's 10-hour overrun is credited (91.409(b)). One click adds the standard Part 91 set. |
+| Logbook | Maintenance entries with search and a link to a scanned document page. Records the signer's certificate kind and number and an inspection's result, and flags what 43.9 / 43.11 needs that's missing. |
+| Documents | Collections, multi-file documents with a page viewer, per-document share visibility, bulk upload, and expiration dates (registration, insurance…). |
 | Major repairs and alterations | Form 337, STC, and ICA tracking. |
+| Status report | A printable maintenance status (91.417(a)(2)): total times, life-limited parts, time since overhaul, inspections, ADs with method and revision, major alterations, open discrepancies. Also on maintenance share links. |
+| Reminders | A Monday email to owners when something is overdue or coming due (needs SMTP; users can turn it off). |
 | Oil and fuel | Records, trend charts, and averages (last 20 intervals, IQR outlier filtering, manual exclusion). |
 | Activity log | Every write is recorded as an `AircraftEvent`. |
 | Access | Admin, owner, and pilot roles, plus share links (Status or Maintenance privilege, optional expiry, at most 10 per aircraft). |

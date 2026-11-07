@@ -18,7 +18,7 @@
           <tr>
             <td><%= squawk_priority_badge(s) %></td>
             <td><%= s.issue_reported %><%= render "squawks/attachments", squawk: s %></td>
-            <td class="text-xs text-slate-600"><%= s.notes %></td>
+            <td class="text-xs text-slate-600"><%= s.notes %><% if s.logbook_entry %><div><%= link_to "Logbook #{s.logbook_entry.date}", aircraft_logbook_entry_path(@aircraft, s.logbook_entry), class: "link" %></div><% end %></td>
             <td class="text-xs text-slate-500"><%= s.resolved_at&.to_date %></td>
             <td class="text-right"><% if owner? %><%= button_to "Reopen", reopen_aircraft_squawk_path(@aircraft, s), method: :patch, class: "btn-secondary btn-sm" %><% end %></td>
           </tr>

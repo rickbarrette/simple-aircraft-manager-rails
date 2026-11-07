@@ -1,0 +1,24 @@
+<% content_for :title, "#{@aircraft.tail_number} Standard inspections" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= form_with url: aircraft_standard_inspections_path(@aircraft), class: "card card-body max-w-3xl space-y-4" do %>
+  <div>
+    <h2 class="card-title">Standard inspections</h2>
+    <p class="mt-1 text-sm text-slate-600">The recurring inspections and checks Part 91 calls for. Pick the ones that apply to how <%= @aircraft.tail_number %> is flown. Each is added with its interval and what being overdue means; you can change them afterwards.</p>
+  </div>
+  <ul class="divide-y divide-slate-100 rounded-md ring-1 ring-slate-200">
+    <% StandardInspections::TEMPLATES.each do |t| %>
+      <% existing = StandardInspections.existing_for(t, @aircraft) %>
+      <li class="flex items-start gap-3 px-3 py-3">
+        <%= check_box_tag "templates[]", t.key, t.checked && !existing, id: "template_#{t.key}", disabled: existing.present?, class: "mt-1 h-4 w-4 shrink-0 rounded border-slate-300" %>
+        <label for="template_<%= t.key %>" class="min-w-0 flex-1 text-sm">
+          <span class="font-medium"><%= t.name %></span>
+          <span class="text-slate-500">· <%= [ (t.months && "every #{t.months} calendar months"), (t.days && "every #{t.days} days"), (t.hours && "every #{t.hours} hours") ].compact.join %></span>
+          <span class="block text-xs text-slate-500"><%= t.who %>. Overdue: <%= InspectionType::EFFECT_SUMMARIES[t.effect] %>.</span>
+          <% if existing %><span class="block text-xs text-emerald-700">Already tracked as “<%= existing.name %>”</span><% end %>
+        </label>
+      </li>
+    <% end %>
+  </ul>
+  <p class="hint">With both an annual and a 100-hour, the annual also counts as the 100-hour (91.409(b)).</p>
+  <div class="flex gap-2"><%= submit_tag "Add selected", class: "btn-primary" %><%= link_to "Cancel", aircraft_inspections_path(@aircraft), class: "btn-secondary" %></div>
+<% end %>

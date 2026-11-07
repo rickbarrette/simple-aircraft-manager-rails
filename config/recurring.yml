@@ -19,3 +19,6 @@ production:
   dedupe_storage:
     command: "ActiveStorage::Blob.service.try(:sweep)"
     schedule: every day at 4:30am
+  weekly_reminders:
+    class: WeeklyReminderJob
+    schedule: every monday at 12pm

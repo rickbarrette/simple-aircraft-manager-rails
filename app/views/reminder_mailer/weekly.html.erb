@@ -1,0 +1,13 @@
+<p>Here's what needs attention on your aircraft.</p>
+<% @items.each do |aircraft, issues| %>
+  <h3 style="margin: 16px 0 4px;"><%= link_to aircraft.tail_number, aircraft_url(aircraft) %> <span style="font-weight: normal; color: #64748b;"><%= aircraft.airworthiness.label %></span></h3>
+  <ul style="margin: 0; padding-left: 20px;">
+    <% issues.each do |issue| %>
+      <li><strong><%= { "RED" => "Overdue", "LIMITED" => "Overdue", "ORANGE" => "Due soon", "INFO" => "Deferred" }[issue.severity] %>:</strong>
+        <%= issue.title %> <span style="color: #64748b;"><%= issue.description %></span></li>
+    <% end %>
+  </ul>
+<% end %>
+<p style="color: #64748b; font-size: 12px; margin-top: 20px;">
+  Based on the records in Simple Aircraft Manager. Turn these emails off on your <%= link_to "profile", edit_profile_url %>.
+</p>

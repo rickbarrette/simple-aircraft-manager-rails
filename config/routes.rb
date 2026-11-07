@@ -32,8 +32,12 @@ Rails.application.routes.draw do
     end
     resources :squawks, except: :show do
       member do
+        get :resolution
         patch :resolve
         patch :reopen
+        get :deferral
+        patch :defer
+        patch :undefer
       end
     end
     resources :notes, except: :show do
@@ -66,6 +70,7 @@ Rails.application.routes.draw do
     resources :document_collections, except: %i[index show]
     resources :inspections, only: :index
     resources :inspection_types, except: %i[index show]
+    resource :standard_inspections, only: %i[new create]
     resources :inspection_records, except: %i[index show]
     resources :airworthiness_directives, path: "ads", except: :show do
       collection { post :attach }
@@ -92,6 +97,7 @@ Rails.application.routes.draw do
     get "about", to: "about#show"
     resource :settings, only: %i[edit update]
     post "about/test_email", to: "about#test_email", as: :test_email
+    post "about/test_reminder", to: "about#test_reminder", as: :test_reminder
     resources :users, except: :show
     resources :component_types, except: :show
     resources :airports, except: :show do

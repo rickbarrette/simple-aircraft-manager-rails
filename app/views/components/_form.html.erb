@@ -27,7 +27,9 @@
     <legend class="mb-2 text-sm font-semibold text-slate-900">Limits</legend>
     <%= f.field :replacement_hours, as: :number, label: "Replace every (hrs)" %>
     <%= f.field :replacement_days, as: :number, label: "Replace every (days)" %>
-    <%= f.field :replacement_critical, as: :checkbox, label: "Replacement critical", hint: "Overdue replacement grounds the aircraft (oil, filters, ELT battery…)." %>
+    <%= f.field :replacement_critical, as: :checkbox, label: "Replacement critical", hint: "Overdue replacement or expiry grounds the aircraft (oil, filters, ELT battery…)." %>
+    <%= f.field :expires_on, as: :date, label: "Expires on",
+          hint: "The date marked on the part, e.g. an ELT battery's replacement date (14 CFR 91.207(c): also replace it after 1 hour of cumulative use)." %>
     <%= f.field :tbo_hours, as: :number, label: "TBO (hrs)" %>
     <%= f.field :tbo_days, as: :number, label: "TBO (days)" %>
     <div class="space-y-2">

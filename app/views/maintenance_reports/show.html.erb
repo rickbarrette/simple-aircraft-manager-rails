@@ -49,7 +49,7 @@
       <tbody>
         <% @report.life_limited.each do |c| %>
           <tr><td class="<%= td %>"><%= c %> <span class="text-slate-500"><%= c.model %></span></td><td class="<%= td %>"><%= c.serial_number.presence || "—" %></td>
-            <td class="<%= td %>"><%= [ (c.replacement_hours && "#{hours(c.replacement_hours)} hrs"), (c.replacement_days && "#{c.replacement_days} days") ].compact.join(" / ") %></td>
+            <td class="<%= td %>"><%= [ (c.replacement_hours && "#{hours(c.replacement_hours)} hrs"), (c.replacement_days && "#{c.replacement_days} days"), (c.expires_on && "expires #{c.expires_on}") ].compact.join(" / ") %></td>
             <td class="<%= td %> text-right tabular-nums"><%= hours(c.hours_since_overhaul) %> hrs</td>
             <td class="<%= td %>"><%= [ (c.hours_to_replacement && "#{hours(c.hours_to_replacement)} hrs"), (c.next_replacement_date && "by #{c.next_replacement_date}") ].compact.join(", ") %></td>
             <td class="<%= td %>"><%= life_badge(c.life_status) %></td></tr>

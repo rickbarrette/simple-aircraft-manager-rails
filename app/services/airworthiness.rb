@@ -15,6 +15,7 @@ class Airworthiness
 
   RED = "RED"
   LIMITED = "LIMITED"
+  INFO = "INFO" # listed for awareness; doesn't change the status (a deferred inoperative item)
   ORANGE = "ORANGE"
   GREEN = "GREEN"
   DISCLAIMER = "Based on the records in this app. Before each flight the pilot in command decides whether the aircraft is airworthy (14 CFR 91.7)."
@@ -52,6 +53,7 @@ class Airworthiness
     check_grounding_squawks
     check_inspections
     check_components
+    check_documents
 
     status =
       if @issues.any? { _1.severity == RED } then RED
@@ -84,8 +86,12 @@ class Airworthiness
   end
 
   def check_grounding_squawks
-    @aircraft.squawks.active.where(priority: 0).find_each do |squawk|
+    @aircraft.squawks.active.where(priority: 0, deferred_at: nil).find_each do |squawk|
       add("SQUAWK", RED, "Grounding Squawk", squawk.issue_reported.to_s.truncate(100).presence || "No description", squawk)
+    end
+    @aircraft.squawks.deferred.find_each do |squawk|
+      add("DEFERRED", INFO, "Inoperative: #{squawk.issue_reported.to_s.truncate(80)}",
+          "Deferred under 91.213(d) on #{squawk.deferred_at.to_date} by #{squawk.deferred_by_name}. Fix at the next inspection.", squawk)
     end
   end
 
@@ -120,13 +126,26 @@ class Airworthiness
     end
   end
 
+  def check_documents
+    @aircraft.documents.expiring.find_each do |doc|
+      grounds = Document::GROUNDING_EXPIRY_TYPES.include?(doc.doc_type)
+      if doc.expired?(@today)
+        add("DOCUMENT", grounds ? RED : ORANGE, "#{doc.name} - Expired",
+            "#{doc.type_label} expired #{doc.expires_on}.#{' The aircraft may not be flown without a current registration (91.203).' if grounds}", doc)
+      elsif @today + doc.expiry_warning_days >= doc.expires_on
+        add("DOCUMENT", ORANGE, "#{doc.name} - Expires Soon", "#{doc.type_label} expires #{doc.expires_on}.", doc)
+      end
+    end
+  end
+
   def check_components
-    @aircraft.components.in_use.where(replacement_critical: true).includes(:component_type).find_each do |c|
+    scope = @aircraft.components.in_use.where(replacement_critical: true).or(@aircraft.components.in_use.where.not(expires_on: nil))
+    scope.includes(:component_type).find_each do |c|
       overdue = false
       approaching = false
       desc = ""
 
-      if c.replacement_hours
+      if c.replacement_critical? && c.replacement_hours
         if c.hours_since_overhaul >= c.replacement_hours
           overdue = true
           desc = "Replace every #{c.replacement_hours} hrs. Current: #{c.hours_since_overhaul} hrs."
@@ -136,7 +155,7 @@ class Airworthiness
         end
       end
 
-      if (due = c.next_replacement_date)
+      if c.replacement_critical? && (due = c.next_replacement_date)
         if @today >= due
           overdue = true
           desc = "Replace every #{c.replacement_days} days. Last serviced #{c.overhaul_date}."
@@ -146,10 +165,23 @@ class Airworthiness
         end
       end
 
-      if overdue
-        add("COMPONENT", RED, "#{c} - Replacement Overdue", desc, c)
+      expired = false
+      if c.expires_on
+        if c.expired?(@today)
+          expired = true
+          desc = "Expired #{c.expires_on}."
+        elsif @today + DAYS_WARNING >= c.expires_on
+          approaching = true
+          desc = "Expires #{c.expires_on}."
+        end
+      end
+
+      if overdue || (expired && c.replacement_critical?)
+        add("COMPONENT", RED, "#{c} - #{expired ? 'Expired' : 'Replacement Overdue'}", desc, c)
+      elsif expired
+        add("COMPONENT", ORANGE, "#{c} - Expired", desc, c)
       elsif approaching
-        add("COMPONENT", ORANGE, "#{c} - Replacement Due Soon", desc, c)
+        add("COMPONENT", ORANGE, "#{c} - #{c.expires_on && desc.start_with?('Expires') ? 'Expires Soon' : 'Replacement Due Soon'}", desc, c)
       end
     end
   end

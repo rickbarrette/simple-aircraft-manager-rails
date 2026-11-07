@@ -1,0 +1,10 @@
+Here's what needs attention on your aircraft.
+<% @items.each do |aircraft, issues| %>
+
+<%= aircraft.tail_number %> (<%= aircraft.airworthiness.label %>): <%= aircraft_url(aircraft) %>
+<% issues.each do |issue| %>
+- <%= { "RED" => "Overdue", "LIMITED" => "Overdue", "ORANGE" => "Due soon", "INFO" => "Deferred" }[issue.severity] %>: <%= issue.title %>. <%= issue.description %>
+<% end %>
+<% end %>
+
+Based on the records in Simple Aircraft Manager. Turn these emails off on your profile: <%= edit_profile_url %>

@@ -23,6 +23,7 @@ class LogbookEntry < ApplicationRecord
   belongs_to :document, optional: true
   has_many :inspection_records, dependent: :nullify
   has_many :ad_compliances, dependent: :nullify
+  has_many :squawks, dependent: :nullify
 
   validates :date, :text, presence: true
   validates :log_type, inclusion: { in: LOG_TYPES.keys }

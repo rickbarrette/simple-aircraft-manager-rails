@@ -1,0 +1,48 @@
+<% content_for :title, "Defer inoperative item" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= form_with url: defer_aircraft_squawk_path(@aircraft, @squawk), method: :patch, class: "card card-body max-w-2xl space-y-4" do %>
+  <div>
+    <h2 class="card-title">Defer as inoperative (14 CFR 91.213(d))</h2>
+    <p class="mt-1 text-sm text-slate-600">Without a Minimum Equipment List, an aircraft may fly with an inoperative instrument or piece of equipment only if all of the following are true. Deferring stops this squawk grounding the aircraft. It stays open, and shows as inoperative, until it's fixed.</p>
+  </div>
+  <div class="rounded-md bg-slate-50 p-3 text-sm"><span class="font-medium">Item:</span> <%= @squawk.issue_reported %><%= " · #{@squawk.component}" if @squawk.component %></div>
+  <% if @squawk.errors.any? %>
+    <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert">
+      <ul class="list-disc pl-5"><% @squawk.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul>
+    </div>
+  <% end %>
+  <fieldset class="space-y-2">
+    <legend class="label">Confirm each one</legend>
+    <% Squawk::DEFERRAL_CHECKS.each do |key, text| %>
+      <label class="flex items-start gap-2 text-sm">
+        <%= check_box_tag "checks[]", key, Array(params[:checks]).include?(key), id: "check_#{key}", class: "mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300" %>
+        <span><%= text %></span>
+      </label>
+    <% end %>
+  </fieldset>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= label_tag :deferral_action, "What was done", class: "label" %>
+      <%= select_tag :deferral_action, options_for_select(Squawk::DEFERRAL_ACTIONS.invert, params[:deferral_action] || @squawk.deferral_action), class: "input" %>
+      <p class="hint">Deactivating or removing it is maintenance, recorded under Part 43 unless the pilot may do it as preventive maintenance.</p>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <div>
+        <%= label_tag :deferred_by_name, "Determined by", class: "label" %>
+        <%= text_field_tag :deferred_by_name, params[:deferred_by_name] || current_user.display_name, class: "input", required: true %>
+      </div>
+      <div>
+        <%= label_tag :deferred_by_role, "As", class: "label" %>
+        <%= select_tag :deferred_by_role, options_for_select(Squawk::DEFERRAL_ROLES.invert, params[:deferred_by_role]), class: "input" %>
+      </div>
+    </div>
+  </div>
+  <div>
+    <%= label_tag :deferral_notes, "Notes", class: "label" %>
+    <%= text_area_tag :deferral_notes, params[:deferral_notes], rows: 2, class: "input", placeholder: "e.g. breaker pulled and collared; equipment list reviewed" %>
+  </div>
+  <div class="flex gap-2">
+    <%= submit_tag "Defer item", class: "btn-primary" %>
+    <%= link_to "Cancel", aircraft_squawks_path(@aircraft), class: "btn-secondary" %>
+  </div>
+<% end %>

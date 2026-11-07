@@ -4,8 +4,14 @@ class Document < ApplicationRecord
   TYPES = {
     "LOG" => "Logbook", "ALTER" => "Alteration Record", "REPORT" => "Report",
     "ESTIMATE" => "Estimate", "DISC" => "Discrepancy List", "INVOICE" => "Receipt / Invoice",
-    "AIRCRAFT" => "Aircraft Record", "OTHER" => "Other"
+    "AIRCRAFT" => "Aircraft Record", "REGISTRATION" => "Registration Certificate",
+    "AIRWORTHINESS_CERT" => "Airworthiness Certificate", "INSURANCE" => "Insurance Policy",
+    "RADIO" => "Radio Station License", "OTHER" => "Other"
   }.freeze
+  # An expired registration means the aircraft may not be flown (14 CFR
+  # 91.203(a)(2)); renewal takes a while, so warn earlier.
+  GROUNDING_EXPIRY_TYPES = %w[REGISTRATION].freeze
+  EXPIRY_WARNING_DAYS = { "REGISTRATION" => 90 }.freeze
 
   belongs_to :aircraft
   belongs_to :document_collection, optional: true
@@ -19,9 +25,12 @@ class Document < ApplicationRecord
   normalizes :visibility, with: ->(v) { v.presence }
 
   scope :ordered, -> { order(:name) }
+  scope :expiring, -> { where.not(expires_on: nil) }
 
   def to_s = name
   def type_label = TYPES[doc_type]
+  def expired?(today = Date.current) = expires_on.present? && today > expires_on
+  def expiry_warning_days = EXPIRY_WARNING_DAYS.fetch(doc_type, 30)
 
   # nil visibility inherits from the collection; uncollected docs default to private.
   def effective_visibility

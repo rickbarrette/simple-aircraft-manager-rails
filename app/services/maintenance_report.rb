@@ -17,7 +17,7 @@ class MaintenanceReport
 
   # Parts with a mandatory replacement time (life limits).
   def life_limited
-    in_use.select { |c| c.replacement_critical? && (c.replacement_hours || c.replacement_days) }
+    in_use.select { |c| (c.replacement_critical? && (c.replacement_hours || c.replacement_days)) || c.expires_on }
   end
 
   # Items overhauled on a time basis.

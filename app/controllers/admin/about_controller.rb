@@ -1,9 +1,21 @@
 class Admin::AboutController < ApplicationController
   before_action :require_admin!
-  rate_limit to: 5, within: 1.minute, only: :test_email, with: -> { redirect_to admin_about_path, alert: "Try again in a minute." }
+  rate_limit to: 5, within: 1.minute, only: %i[test_email test_reminder], with: -> { redirect_to admin_about_path, alert: "Try again in a minute." }
 
   def show
     @info = SystemInfo.new
+  end
+
+  # This week's reminder for the current admin, now.
+  def test_reminder
+    return redirect_to(admin_about_path, alert: "Email isn't set up yet.") unless MailSettings.configured?
+    if ReminderMailer.items_for(current_user).empty?
+      return redirect_to admin_about_path, notice: "Nothing needs attention on the aircraft you own, so there's no reminder to send."
+    end
+    ReminderMailer.weekly(current_user).deliver_now
+    redirect_to admin_about_path, notice: "Reminder sent to #{current_user.email_address}."
+  rescue StandardError => e
+    redirect_to admin_about_path, alert: "Sending failed: #{e.class.name.demodulize}: #{e.message.to_s.squish.truncate(240)}"
   end
 
   # Sends right away (not via the job queue) so problems show up here.

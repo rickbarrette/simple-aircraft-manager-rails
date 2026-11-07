@@ -34,6 +34,9 @@ class Component < ApplicationRecord
     replacement_hours - hours_since_overhaul if replacement_hours
   end
 
+  # Past the date marked on the part (it may be used through that date).
+  def expired?(today = Date.current) = expires_on.present? && today > expires_on
+
   def next_replacement_date
     overhaul_date + replacement_days.days if replacement_days && overhaul_date
   end
@@ -49,6 +52,7 @@ class Component < ApplicationRecord
         statuses << rank(Date.current >= d, Date.current + Airworthiness::DAYS_WARNING >= d)
       end
     end
+    statuses << rank(expired?, Date.current + Airworthiness::DAYS_WARNING >= expires_on) if expires_on
     if tbo_critical? && tbo_hours && !on_condition?
       statuses << rank(hours_to_tbo <= 0, hours_to_tbo <= Airworthiness::HOURS_WARNING * 5)
     end

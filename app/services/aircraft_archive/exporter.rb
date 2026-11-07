@@ -50,7 +50,7 @@ module AircraftArchive
         end,
         documents: a.documents.map do |d|
           { id: id(d), aircraft_id: id(a), collection_id: id(d.document_collection_id), doc_type: d.doc_type, name: d.name,
-            description: d.description, visibility: d.visibility, components: [] }
+            description: d.description, visibility: d.visibility, expires_on: d.expires_on&.iso8601, components: [] }
         end,
         document_images: a.documents.includes(pages_attachments: :blob).flat_map do |d|
           d.pages.map { |page| { id: id(page), document_id: id(d), notes: "", image: file(page, "health/documents") } }
@@ -128,7 +128,7 @@ module AircraftArchive
     def component_hash(c)
       { id: id(c), aircraft_id: id(c.aircraft_id), parent_component_id: id(c.parent_component_id), component_type_id: id(c.component_type_id),
         manufacturer: c.manufacturer, model: c.model, serial_number: c.serial_number, install_location: c.install_location,
-        notes: c.notes, status: c.status, date_in_service: c.date_in_service&.iso8601, hours_in_service: dec(c.hours_in_service),
+        expires_on: c.expires_on&.iso8601, notes: c.notes, status: c.status, date_in_service: c.date_in_service&.iso8601, hours_in_service: dec(c.hours_in_service),
         hours_since_overhaul: dec(c.hours_since_overhaul), overhaul_date: c.overhaul_date&.iso8601, tbo_hours: c.tbo_hours,
         tbo_days: c.tbo_days, inspection_hours: c.inspection_hours, inspection_days: c.inspection_days,
         replacement_hours: c.replacement_hours, replacement_days: c.replacement_days, tbo_critical: c.tbo_critical,

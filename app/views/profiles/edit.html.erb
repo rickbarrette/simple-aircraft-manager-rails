@@ -3,6 +3,8 @@
   <%= f.errors_summary %>
   <%= f.field :name %>
   <%= f.field :email_address, as: :email, label: "Email" %>
+  <%= f.field :reminder_emails, as: :checkbox, label: "Weekly maintenance reminders",
+        hint: "A Monday email about overdue and upcoming inspections, ADs, parts and documents on aircraft you own. Only sent when something needs attention#{' (once email is set up)' unless MailSettings.configured?}." %>
   <%= f.field :password, as: :password, label: "New password", hint: "Leave blank to keep your current password.", autocomplete: "new-password" %>
   <%= f.field :password_confirmation, as: :password, label: "Confirm new password", autocomplete: "new-password" %>
   <div>

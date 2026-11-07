@@ -126,7 +126,7 @@ class DocumentsController < ApplicationController
   def set_document = @document = @aircraft.documents.find(params[:id])
 
   def document_params
-    p = params.require(:document).permit(:name, :description, :doc_type, :visibility, :document_collection_id, pages: [])
+    p = params.require(:document).permit(:name, :description, :doc_type, :visibility, :document_collection_id, :expires_on, pages: [])
     p[:pages]&.compact_blank!
     p.delete(:pages) if p[:pages].blank?
     p[:document_collection_id] = scoped_id(@aircraft.document_collections, p[:document_collection_id])

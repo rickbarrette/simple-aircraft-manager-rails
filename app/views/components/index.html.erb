@@ -34,7 +34,8 @@
                 <% if c.replacement_critical? && (c.replacement_hours || c.replacement_days) %>
                   Replace: <%= [c.replacement_hours && "#{c.replacement_hours} h", c.replacement_days && "#{c.replacement_days} d"].compact.join(" / ") %><br>
                 <% end %>
-                <% if c.tbo_critical? && c.tbo_hours %>TBO: <%= c.tbo_hours %> h<%= " (on condition)" if c.on_condition? %><% end %>
+                <% if c.tbo_critical? && c.tbo_hours %>TBO: <%= c.tbo_hours %> h<%= " (on condition)" if c.on_condition? %><br><% end %>
+                <% if c.expires_on %>Expires: <%= c.expires_on %><% end %>
               </td>
               <td><%= life_badge(c.life_status) %></td>
               <td class="whitespace-nowrap text-right">

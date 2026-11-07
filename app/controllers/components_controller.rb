@@ -78,7 +78,7 @@ class ComponentsController < ApplicationController
       :install_location, :notes, :status, :date_in_service, :hours_in_service,
       :hours_since_overhaul, :overhaul_date, :tbo_hours, :tbo_days, :inspection_hours,
       :inspection_days, :replacement_hours, :replacement_days, :tbo_critical, :on_condition,
-      :inspection_critical, :replacement_critical
+      :inspection_critical, :replacement_critical, :expires_on
     ).tap do |p|
       # Owners can create a component type inline instead of asking an admin.
       if (name = params[:new_component_type].to_s.strip).present?

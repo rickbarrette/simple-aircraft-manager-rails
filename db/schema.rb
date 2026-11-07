@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -295,6 +295,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_200000) do
     t.boolean "replacement_critical", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "expires_on"
     t.index ["aircraft_id"], name: "index_components_on_aircraft_id"
     t.index ["component_type_id"], name: "index_components_on_component_type_id"
     t.index ["parent_component_id"], name: "index_components_on_parent_component_id"
@@ -344,6 +345,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_200000) do
     t.string "visibility"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "expires_on"
     t.index ["aircraft_id"], name: "index_documents_on_aircraft_id"
     t.index ["document_collection_id"], name: "index_documents_on_document_collection_id"
   end
@@ -541,8 +543,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_200000) do
     t.datetime "resolved_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deferred_at"
+    t.string "deferred_by_name"
+    t.string "deferred_by_role"
+    t.string "deferral_action"
+    t.text "deferral_notes"
+    t.integer "logbook_entry_id"
     t.index ["aircraft_id"], name: "index_squawks_on_aircraft_id"
     t.index ["component_id"], name: "index_squawks_on_component_id"
+    t.index ["logbook_entry_id"], name: "index_squawks_on_logbook_entry_id"
     t.index ["reported_by_id"], name: "index_squawks_on_reported_by_id"
   end
 
@@ -555,6 +564,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_200000) do
     t.boolean "admin", default: false, null: false
     t.string "sso_uid"
     t.datetime "last_signed_in_at"
+    t.boolean "reminder_emails", default: true, null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["sso_uid"], name: "index_users_on_sso_uid", unique: true
   end
@@ -612,5 +622,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_200000) do
   add_foreign_key "share_tokens", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "squawks", "aircraft"
   add_foreign_key "squawks", "components", on_delete: :nullify
+  add_foreign_key "squawks", "logbook_entries", on_delete: :nullify
   add_foreign_key "squawks", "users", column: "reported_by_id", on_delete: :nullify
 end

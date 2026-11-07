@@ -6,6 +6,9 @@ class InspectionType < ApplicationRecord
     "no_transponder" => "Transponder can't be used (91.413)",
     "advisory" => "Advisory only"
   }.freeze
+  # In a sentence: "Overdue: no IFR."
+  EFFECT_SUMMARIES = { "grounds" => "grounds the aircraft", "no_ifr" => "no IFR", "no_transponder" => "transponder can't be used",
+                       "advisory" => "advisory only" }.freeze
   # Short form for the airworthiness status ("VFR only").
   LIMITATIONS = { "no_ifr" => "VFR only", "no_transponder" => "No transponder" }.freeze
 

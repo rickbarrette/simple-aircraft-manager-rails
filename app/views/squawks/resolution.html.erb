@@ -19,8 +19,9 @@
     <label class="flex items-center gap-2"><%= radio_button_tag :logbook, "none", choice == "none" %> No logbook entry (e.g. it wasn't a defect)</label>
   </fieldset>
 
-  <div class="space-y-4 rounded-md border border-slate-200 p-3">
+  <div class="space-y-4 rounded-md border border-slate-200 p-3" data-controller="signer">
     <p class="text-xs text-slate-500">For a new entry. 14 CFR 43.9: what was done, the date, and the name, certificate number and kind of certificate of whoever approved the return to service.</p>
+    <%= render "shared/sign_as" %>
     <%= fields_for :logbook_entry, @entry do |f| %>
       <div class="grid gap-4 sm:grid-cols-3">
         <%= f.field :date, as: :date %>
@@ -29,9 +30,10 @@
       </div>
       <%= f.field :text, as: :textarea, label: "Work performed", rows: 3 %>
       <div class="grid gap-4 sm:grid-cols-3">
-        <%= f.field :signoff_person, label: "Signed off by" %>
-        <%= f.field :signoff_certificate_type, as: :select, label: "Kind of certificate", include_blank: "—", collection: LogbookEntry::CERTIFICATE_TYPES.invert %>
-        <%= f.field :signoff_certificate_number, label: "Certificate number" %>
+        <%= f.field :signoff_person, label: "Signed off by", data: { signer_target: "name" } %>
+        <%= f.field :signoff_certificate_type, as: :select, label: "Kind of certificate", include_blank: "—", collection: LogbookEntry::CERTIFICATE_TYPES.invert,
+              data: { signer_target: "kind" } %>
+        <%= f.field :signoff_certificate_number, label: "Certificate number", data: { signer_target: "number" } %>
       </div>
     <% end %>
   </div>

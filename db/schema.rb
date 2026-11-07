@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_220000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_230000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -583,6 +583,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_220000) do
     t.index ["reported_by_id"], name: "index_squawks_on_reported_by_id"
   end
 
+  create_table "user_certificates", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "kind", null: false
+    t.string "number", null: false
+    t.date "expires_on"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_certificates_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "password_digest", null: false
@@ -672,6 +682,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_220000) do
   add_foreign_key "squawks", "components", on_delete: :nullify
   add_foreign_key "squawks", "logbook_entries", on_delete: :nullify
   add_foreign_key "squawks", "users", column: "reported_by_id", on_delete: :nullify
+  add_foreign_key "user_certificates", "users"
   add_foreign_key "weight_balance_records", "aircraft"
   add_foreign_key "weight_balance_records", "documents", on_delete: :nullify
   add_foreign_key "weight_balance_records", "major_records", on_delete: :nullify

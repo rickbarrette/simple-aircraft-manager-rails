@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   resource :setup, only: %i[new create], controller: "setup"
   resource :profile, only: %i[edit update]
+  resources :certificates, path: "profile/certificates", controller: "user_certificates", only: %i[create update destroy]
   resource :air_trail_connection, path: "profile/airtrail", only: %i[show create update destroy] do
     post :test
     post :sync

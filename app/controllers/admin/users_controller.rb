@@ -3,7 +3,7 @@ class Admin::UsersController < ApplicationController
   before_action :set_user, only: %i[edit update destroy]
 
   def index
-    @users = User.order(:email_address).includes(aircraft_roles: :aircraft)
+    @users = User.order(:email_address).includes(:certificates, aircraft_roles: :aircraft)
   end
 
   def new

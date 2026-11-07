@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :aircraft_roles, dependent: :destroy
   has_many :aircraft, through: :aircraft_roles
   has_one :air_trail_connection, dependent: :destroy
+  has_many :certificates, -> { ordered }, class_name: "UserCertificate", dependent: :destroy
 
   # Emailed sign-in links: valid 15 minutes, and spent by the next sign-in of
   # any kind (or an email change), so each link works once. last_signed_in_at

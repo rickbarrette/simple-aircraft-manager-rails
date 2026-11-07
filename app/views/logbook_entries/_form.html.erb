@@ -1,4 +1,4 @@
-<%= form_with model: [aircraft, entry], class: "card card-body space-y-4 max-w-3xl", data: { controller: "entry-template" } do |f| %>
+<%= form_with model: [aircraft, entry], class: "card card-body space-y-4 max-w-3xl", data: { controller: "entry-template signer" } do |f| %>
   <%= f.errors_summary %>
   <% if entry.new_record? %>
     <div>
@@ -20,11 +20,12 @@
   </div>
   <%= f.field :text, as: :textarea, label: "Entry text", rows: 8, data: { entry_template_target: "text" } %>
   <p class="hint !mt-1">A maintenance entry needs a description of the work, the date, and the name, signature, certificate number and kind of certificate of whoever approved the return to service (14 CFR 43.9). An inspection entry also needs the type and extent of the inspection, the aircraft's time in service, and the result (43.11).</p>
+  <%= render "shared/sign_as" %>
   <div class="grid gap-4 sm:grid-cols-3">
-    <%= f.field :signoff_person, label: "Signed off by", placeholder: "Name" %>
+    <%= f.field :signoff_person, label: "Signed off by", placeholder: "Name", data: { signer_target: "name" } %>
     <%= f.field :signoff_certificate_type, as: :select, label: "Kind of certificate", include_blank: "—",
-          collection: LogbookEntry::CERTIFICATE_TYPES.invert, data: { entry_template_target: "certificate" } %>
-    <%= f.field :signoff_certificate_number, label: "Certificate number", placeholder: "e.g. 1234567" %>
+          collection: LogbookEntry::CERTIFICATE_TYPES.invert, data: { entry_template_target: "certificate", signer_target: "kind" } %>
+    <%= f.field :signoff_certificate_number, label: "Certificate number", placeholder: "e.g. 1234567", data: { signer_target: "number" } %>
   </div>
   <div class="grid gap-4 sm:grid-cols-2">
     <%= f.field :inspection_result, as: :select, label: "Inspection result", include_blank: "— Not an inspection —",

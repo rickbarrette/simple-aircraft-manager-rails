@@ -9,8 +9,8 @@ class Admin::AboutController < ApplicationController
   # This week's reminder for the current admin, now.
   def test_reminder
     return redirect_to(admin_about_path, alert: "Email isn't set up yet.") unless MailSettings.configured?
-    if ReminderMailer.items_for(current_user).empty?
-      return redirect_to admin_about_path, notice: "Nothing needs attention on the aircraft you own, so there's no reminder to send."
+    unless ReminderMailer.anything_for?(current_user)
+      return redirect_to admin_about_path, notice: "Nothing needs attention on the aircraft you own or your certificates, so there's no reminder to send."
     end
     ReminderMailer.weekly(current_user).deliver_now
     redirect_to admin_about_path, notice: "Reminder sent to #{current_user.email_address}."

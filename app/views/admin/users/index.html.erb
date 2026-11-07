@@ -4,7 +4,7 @@
   <thead><tr><th>Name</th><th>Email</th><th>Aircraft</th><th>Last sign-in</th><th></th></tr></thead>
   <tbody><% @users.each do |u| %><tr>
     <td><%= u.name %> <% if u.admin? %><span class="badge-blue">Admin</span><% end %><% if u.sso_uid? %> <span class="badge-gray" title="Signs in with <%= Sso.label %>"><%= Sso.label %></span><% end %></td>
-    <td><%= u.email_address %></td>
+    <td><%= u.email_address %><% if u.certificates.any? %><div class="text-xs text-slate-500"><%= u.certificates.map { "#{_1.short_label} #{_1.number}" }.join(", ") %></div><% end %></td>
     <td class="text-xs"><%= u.aircraft_roles.map { "#{_1.aircraft.tail_number} (#{_1.role})" }.join(", ").presence || "—" %></td>
     <td class="text-xs text-slate-500"><%= u.last_signed_in_at ? "#{time_ago_in_words(u.last_signed_in_at)} ago" : "never" %></td>
     <td class="text-right"><%= link_to "Edit", edit_admin_user_path(u), class: "btn-secondary btn-sm" %></td>

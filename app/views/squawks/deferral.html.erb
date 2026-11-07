@@ -33,7 +33,8 @@
       </div>
       <div>
         <%= label_tag :deferred_by_role, "As", class: "label" %>
-        <%= select_tag :deferred_by_role, options_for_select(Squawk::DEFERRAL_ROLES.invert, params[:deferred_by_role]), class: "input" %>
+        <%= select_tag :deferred_by_role, options_for_select(Squawk::DEFERRAL_ROLES.invert,
+              params[:deferred_by_role] || (current_user.certificates.any?(&:mechanic?) ? "mechanic" : "pilot")), class: "input" %>
       </div>
     </div>
   </div>

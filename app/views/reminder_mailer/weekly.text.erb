@@ -1,4 +1,4 @@
-Here's what needs attention on your aircraft.
+Here's what needs attention<%= " on your aircraft" if @items.any? %>.
 <% @items.each do |aircraft, issues, alerts| %>
 
 <%= aircraft.tail_number %> (<%= aircraft.airworthiness.label %>): <%= aircraft_url(aircraft) %>
@@ -7,6 +7,13 @@ Here's what needs attention on your aircraft.
 <% end %>
 <% if alerts.any? %>
 - New ADs that may apply: <%= alerts.map { _1.ad_number || _1.fr_document_number }.to_sentence %>. Review: <%= aircraft_airworthiness_directives_url(aircraft, anchor: "new-ads") %>
+<% end %>
+<% end %>
+<% if @certificates.any? %>
+
+Your certificates:
+<% @certificates.each do |c| %>
+- <%= c.expired? ? "Expired" : "Expires" %> <%= c.expires_on %>: <%= c.kind_label %> <%= c.number %>
 <% end %>
 <% end %>
 

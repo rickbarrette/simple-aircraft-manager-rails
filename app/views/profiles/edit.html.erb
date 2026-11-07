@@ -5,7 +5,7 @@
   <%= f.field :email_address, as: :email, label: "Email" %>
   <%= f.field :reminder_emails, as: :checkbox, label: "Weekly maintenance reminders",
         hint: "A Monday email about overdue and upcoming inspections, ADs, parts and documents on aircraft you own, and certificates of yours about to expire. Only sent when something needs attention#{' (once email is set up)' unless MailSettings.configured?}." %>
-  <%= f.field :password, as: :password, label: "New password", hint: "Leave blank to keep your current password.", autocomplete: "new-password" %>
+  <%= f.field :password, as: :password, label: "New password", hint: "Leave blank to keep your current password. At least #{User::PASSWORD_MIN} characters; not one known from a data breach.", autocomplete: "new-password" %>
   <%= f.field :password_confirmation, as: :password, label: "Confirm new password", autocomplete: "new-password" %>
   <div>
     <%= label_tag "user[current_password]", "Current password", class: "label" %>
@@ -30,6 +30,21 @@
     <% end %>
   </section>
 <% end %>
+
+<section class="card card-body mt-5 max-w-md" id="two-factor">
+  <h2 class="card-title">Two-factor sign-in</h2>
+  <% if @user.otp_enabled? %>
+    <p class="mt-1 text-sm text-slate-600"><span class="badge-green">On</span> since <%= @user.otp_enabled_at.to_date %>: signing in with your password or an emailed link also asks for a code from your authenticator app. <%= @user.recovery_codes_left %> recovery codes left.</p>
+    <%= form_with url: two_factor_path, class: "mt-3 flex flex-wrap items-end gap-2" do |f| %>
+      <div><%= label_tag :code, "Current code or a recovery code", class: "label" %><%= text_field_tag :code, nil, required: true, autocomplete: "one-time-code", class: "input w-44" %></div>
+      <%= button_tag "New recovery codes", type: "submit", formaction: recovery_codes_two_factor_path, class: "btn-secondary btn-sm" %>
+      <%= button_tag "Turn off", type: "submit", name: "_method", value: "delete", class: "btn-secondary btn-sm", data: { turbo_confirm: "Turn off two-factor sign-in?" } %>
+    <% end %>
+  <% else %>
+    <p class="mt-1 text-sm text-slate-600">Add a code from an authenticator app on your phone to password and emailed-link sign-in, so a stolen password alone can't get in.<%= " (Signing in with #{Sso.label} uses its own second factor.)" if Sso.enabled? %></p>
+    <div class="mt-3"><%= link_to "Set up", new_two_factor_path, class: "btn-secondary btn-sm" %></div>
+  <% end %>
+</section>
 
 <section class="card card-body mt-5 max-w-md" id="certificates">
   <h2 class="card-title">Certificates</h2>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_040000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_050000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -792,6 +792,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_040000) do
     t.datetime "last_signed_in_at"
     t.boolean "reminder_emails", default: true, null: false
     t.datetime "disabled_at"
+    t.integer "failed_sign_ins", default: 0, null: false
+    t.datetime "locked_until"
+    t.text "otp_secret"
+    t.datetime "otp_enabled_at"
+    t.integer "otp_last_used_at"
+    t.json "otp_recovery_codes"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["sso_uid"], name: "index_users_on_sso_uid", unique: true
   end

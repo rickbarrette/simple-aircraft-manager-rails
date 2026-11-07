@@ -26,7 +26,7 @@ DEMO=1 bin/rails db:seed     # optional: demo aircraft N12345
 bin/dev                      # http://localhost:3000
 ```
 
-With demo data, sign in as `admin@example.com` / `password123` (admin, owner of N12345) or `pilot@example.com` / `password123` (pilot).
+With demo data, sign in as `admin@example.com` / `demo-password-123` (admin, owner of N12345) or `pilot@example.com` / `demo-password-123` (pilot).
 Without demo data, the first visit asks you to create the admin account.
 
 Run the tests: `bin/rails test`
@@ -69,6 +69,7 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 | `OIDC_AUTO_CREATE_USERS` | `true` creates an account for anyone the provider lets in. New accounts start with no aircraft. Default off: an admin adds users first. |
 | `OIDC_TRUST_EMAIL` | `true` links existing accounts by email even if the provider doesn't mark it verified. Only use it if users can't edit their own email at the provider. |
 | `OIDC_ADMIN_GROUP` | Optional. Members of this provider group become admins and others lose admin, synced at each sign-in. |
+| `PWNED_PASSWORDS_CHECK` | `false` turns off the check of new passwords against Have I Been Pwned (only the first 5 characters of the password's SHA-1 are sent). Use it if the server has no outbound internet access; the check also allows the password if the service can't be reached. |
 | `PASSWORD_LOGIN` | `false` hides email/password sign-in, emailed sign-in links and password resets once SSO works. It's ignored while SSO isn't configured, so you can't lock yourself out. |
 | `APP_REPOSITORY_URL` | Optional. The source code link on Admin → About, for a fork. |
 | `APP_REVISION`, `APP_BUILT_AT` | Set as Docker build arguments (see the `Dockerfile`) so Admin → About shows the version and the records keep a software version history. |
@@ -129,6 +130,7 @@ To back up or move a single aircraft with all its files, use **Access & Sharing 
 | Oil and fuel | Records, trend charts, and averages (last 20 intervals, IQR outlier filtering, manual exclusion). |
 | Activity log | Every write is recorded as an `AircraftEvent`. |
 | Access | Admin, owner, and pilot roles, plus share links (Current Status or Maintenance Detail, optional expiry, at most 10 per aircraft). Admins can disable accounts; a disabled account can't sign in or sign entries, and its past signatures stay. |
+| Sign-in security | Passwords of at least 12 characters, checked against known breaches (Have I Been Pwned, k-anonymity). 10 failed sign-ins in a row lock an account for 15 minutes from any address, and the user is emailed; admins can unlock. Optional authenticator-app (TOTP) codes with recovery codes for password and emailed-link sign-in and for signing entries; admins can reset them. Rate limits per address on every sign-in form. |
 | Help | The [user guide](docs/guide/README.md), shown in the app under **Help**. |
 
 ### Roles

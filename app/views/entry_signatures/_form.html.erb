@@ -32,6 +32,12 @@
             <%= password_field_tag :password, nil, class: "input", autocomplete: "current-password" %>
             <p class="hint">Proves it's you signing, not someone at your keyboard.<%= " Or sign in again with #{Sso.label} below." if Sso.enabled? && current_user.sso_uid? %></p>
           </div>
+          <% if current_user.otp_enabled? %>
+            <div class="max-w-xs">
+              <%= label_tag :otp_code, "Authenticator code", class: "label" %>
+              <%= text_field_tag :otp_code, nil, class: "input w-32 tracking-widest", autocomplete: "one-time-code", inputmode: "numeric", maxlength: 20 %>
+            </div>
+          <% end %>
         <% end %>
         <% if Sso.enabled? && current_user.sso_uid? %>
           <% fresh = session[:reauthenticated_at] && Time.zone.at(session[:reauthenticated_at]) > EntrySigner::REAUTH_WINDOW.ago %>

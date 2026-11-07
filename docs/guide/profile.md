@@ -4,9 +4,21 @@ Open your name in the top bar (☰ → **Profile** on a phone).
 
 ## Details and password
 
-Change your name, email and password. Leave the password blank to keep the current one.
+Change your name, email and password. Leave the password blank to keep the current one. A password needs at least 12 characters, and one that has appeared in a known data breach is refused (checked with Have I Been Pwned, which never receives the password itself).
 
 **Weekly maintenance reminders**: on Mondays the app emails owners about anything overdue or coming due on their aircraft, and certificates about to expire. Untick it to stop them. (Emails need the administrator to have set up email.)
+
+## Two-factor sign-in
+
+**Set up** adds a code from an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, 1Password, Authy…) to password and emailed-link sign-in, so a stolen password alone can't get in. It also asks for the code when you sign a logbook entry with your password.
+
+1. Scan the QR code with the app (or type in the key shown under it).
+2. Enter the code the app shows and choose **Turn on**.
+3. Save the **recovery codes**: each one signs you in once if you lose your phone. They're shown only once.
+
+To make new recovery codes or turn it off, enter a current code (or a recovery code) on your profile. If you've lost both your phone and your recovery codes, ask the administrator to reset it.
+
+Signing in with single sign-on doesn't ask for this code: the sign-on provider handles its own second factor.
 
 ## Certificates
 

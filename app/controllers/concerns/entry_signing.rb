@@ -11,10 +11,20 @@ module EntrySigning
     session[:after_reauth] = signing_page_path # where single sign-on returns after signing in again
   end
 
-  # Password re-entered now, or single sign-on completed in the last few minutes.
+  # Password re-entered now (with an authenticator code too, if the user has
+  # one), or single sign-on completed in the last few minutes. Wrong
+  # passwords and codes count toward the account lockout.
   def reauthenticated_method
     if params[:password].present?
-      return "password" if current_user.authenticate_password(params[:password])
+      return if current_user.locked?
+      unless current_user.authenticate_password(params[:password])
+        current_user.register_failed_sign_in!
+        return
+      end
+      return "password" unless current_user.otp_enabled?
+      return "password_totp" if current_user.verify_second_factor(params[:otp_code])
+      current_user.register_failed_sign_in!
+      return
     elsif current_user.sso_uid? && (at = session[:reauthenticated_at]) && Time.zone.at(at) > EntrySigner::REAUTH_WINDOW.ago
       return "sso"
     end
@@ -27,7 +37,11 @@ module EntrySigning
     unless params[:confirm] == "1"
       return signing_failed(entry, "Tick the box to confirm you're signing this entry.")
     end
-    return signing_failed(entry, "Re-enter your password (or sign in again with #{Sso.label}) to sign.") unless method
+    unless method
+      return signing_failed(entry, "This account is locked for a few minutes after too many failed tries.") if current_user.reload.locked?
+      return signing_failed(entry, "Re-enter your password#{' and a current authenticator code' if current_user.otp_enabled?} (or sign in again with #{Sso.label}) to sign.")
+    end
+    current_user.clear_failed_sign_ins!
 
     signature = EntrySigner.new(entry, user: current_user, certificate: certificate, auth_method: method, request: request).sign!
     session.delete(:reauthenticated_at)

@@ -84,3 +84,5 @@ gem "omniauth_openid_connect", "~> 0.8"
 gem "omniauth-rails_csrf_protection", "~> 2.0"
 
 gem "prawn", "~> 2.5" # printable logbook entries
+gem "rotp", "~> 6.3" # authenticator app (TOTP) codes
+gem "rqrcode", "~> 3.1" # QR code for setting up the authenticator

@@ -10,3 +10,6 @@
   </section>
 <% end %>
 <%= render "entry_signatures/form", entry: @entry, url: invited_signing_path(params[:token]), cancel_path: root_path %>
+<% unless current_user.otp_enabled? %>
+  <p class="mx-auto mt-4 max-w-3xl text-sm text-slate-600">Recommended: <%= link_to "add an authenticator app", new_two_factor_path(return_to: request.path), class: "link" %> to your account, so your signature can't be made with a stolen password alone.</p>
+<% end %>

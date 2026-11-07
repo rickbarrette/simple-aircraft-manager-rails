@@ -12,12 +12,12 @@ end
 if ENV["DEMO"].present?
   admin = User.find_or_create_by!(email_address: "admin@example.com") do |u|
     u.name = "Demo Admin"
-    u.password = "password123"
+    u.password = "demo-password-123"
     u.admin = true
   end
   pilot = User.find_or_create_by!(email_address: "pilot@example.com") do |u|
     u.name = "Demo Pilot"
-    u.password = "password123"
+    u.password = "demo-password-123"
   end
 
   Current.session = admin.sessions.first_or_create!(user_agent: "seed", ip_address: "127.0.0.1")
@@ -87,5 +87,5 @@ if ENV["DEMO"].present?
     e.signoff_person = "J. Mechanic A&P/IA 1234567"
   end
 
-  puts "Demo data loaded. Sign in as admin@example.com / password123 (or pilot@example.com)."
+  puts "Demo data loaded. Sign in as admin@example.com / demo-password-123 (or pilot@example.com)."
 end

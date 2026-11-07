@@ -14,24 +14,24 @@ class SecurityHardeningTest < ActionDispatch::IntegrationTest
 
     patch profile_path, params: { user: { password: "newpassword1", password_confirmation: "newpassword1", current_password: "wrong" } }
     assert_response :unprocessable_entity
-    assert @user.reload.authenticate("password123")
+    assert @user.reload.authenticate("test-password-123")
 
     patch profile_path, params: { user: { name: "Jane Pilot", email_address: "jane@example.com" } } # no sensitive change
     assert_redirected_to root_path
     assert_equal "Jane Pilot", @user.reload.name
 
-    patch profile_path, params: { user: { email_address: "jane2@example.com", current_password: "password123" } }
+    patch profile_path, params: { user: { email_address: "jane2@example.com", current_password: "test-password-123" } }
     assert_redirected_to root_path
     assert_equal "jane2@example.com", @user.reload.email_address
   end
 
   test "a new password signs out other sessions; so does the button" do
     other = open_session
-    other.post session_path, params: { email_address: @user.email_address, password: "password123" }
+    other.post session_path, params: { email_address: @user.email_address, password: "test-password-123" }
     sign_in @user
     assert_equal 2, @user.sessions.count
 
-    patch profile_path, params: { user: { password: "newpassword1", password_confirmation: "newpassword1", current_password: "password123" } }
+    patch profile_path, params: { user: { password: "newpassword1", password_confirmation: "newpassword1", current_password: "test-password-123" } }
     assert_redirected_to root_path
     assert_equal 1, @user.sessions.count
     other.get root_path
@@ -48,7 +48,7 @@ class SecurityHardeningTest < ActionDispatch::IntegrationTest
   test "a password reset signs out every session; a blank password is refused" do
     sign_in @user
     token = @user.password_reset_token
-    put password_path(token), params: { password: "brandnew99", password_confirmation: "brandnew99" }
+    put password_path(token), params: { password: "brandnew9999", password_confirmation: "brandnew9999" }
     assert_redirected_to new_session_path
     assert_equal 0, @user.sessions.count
 

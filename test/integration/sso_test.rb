@@ -105,7 +105,7 @@ class SsoTest < ActionDispatch::IntegrationTest
     ENV["PASSWORD_LOGIN"] = "false"
     get new_session_path
     assert_select "input[name=password]", 0
-    post session_path, params: { email_address: "jane@example.com", password: "password123" }
+    post session_path, params: { email_address: "jane@example.com", password: "test-password-123" }
     assert_redirected_to new_session_path
     assert_match "Sign in with Authentik", flash[:alert]
     post passwords_path, params: { email_address: "jane@example.com" }

@@ -8,6 +8,8 @@ Admins see the **Admin** menu (on a phone, under ☰). Admins can see and edit e
 
 - **+ New User**: name, email and a starting password. Tick **Administrator** to make them an admin. Then add them to aircraft from each aircraft's **Access & Sharing** tab (or they add their own aircraft).
 - **Edit** to change details or reset a password when email isn't set up.
+- **Locked** marks an account locked for 15 minutes after 10 failed sign-ins in a row (the user is emailed). **Unlock** clears it straight away, once you know it was really them.
+- **2FA** marks someone using an authenticator app. **Reset 2FA** turns it off for a user who lost their phone and recovery codes. Confirm it's really them first (call them); they can then set it up again.
 - **Disable** someone who no longer needs access: they're signed out and can't sign in or sign entries, and their past signatures stay. **Enable** reverses it. Users who have signed entries can't be deleted, only disabled.
 
 With single sign-on, accounts can be created automatically at first sign-in, and admin rights can follow a group at the provider (see the main README).

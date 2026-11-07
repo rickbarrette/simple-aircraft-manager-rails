@@ -7,7 +7,8 @@
 # by this server, so the signature record can't be altered unnoticed either.
 class EntrySignature < ApplicationRecord
   include Versioned
-  AUTH_METHODS = { "password" => "password re-entered", "sso" => "single sign-on, signed in again" }.freeze
+  AUTH_METHODS = { "password" => "password re-entered", "password_totp" => "password and authenticator code re-entered",
+                   "sso" => "single sign-on, signed in again" }.freeze
   # "Certified by" conveys the intent to sign (2.2.2).
   LABEL = "Certified by".freeze
 

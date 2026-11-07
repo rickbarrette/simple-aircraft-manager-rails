@@ -26,9 +26,7 @@ class SignInLinksController < ApplicationController
 
   def consume
     return redirect_to new_session_path, alert: "This account is disabled." if @user.disabled?
-    reset_session # fresh session id after signing in
-    start_new_session_for @user # also spends the link
-    redirect_to root_path, notice: "Signed in."
+    begin_sign_in @user, return_to: root_path, notice: "Signed in." # signing in also spends the link
   end
 
   private

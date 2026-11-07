@@ -5,7 +5,7 @@
     <%= f.errors_summary %>
     <%= f.field :name %>
     <%= f.field :email_address, as: :email, label: "Email", required: true %>
-    <%= f.field :password, as: :password, required: true, hint: "At least 8 characters." %>
+    <%= f.field :password, as: :password, required: true, hint: "At least #{User::PASSWORD_MIN} characters; not one known from a data breach." %>
     <%= f.field :password_confirmation, as: :password, required: true %>
     <%= f.submit "Create Admin Account", class: "btn-primary w-full justify-center" %>
   <% end %>

@@ -1,6 +1,6 @@
 class Admin::UsersController < ApplicationController
   before_action :require_admin!
-  before_action :set_user, only: %i[edit update destroy disable enable]
+  before_action :set_user, only: %i[edit update destroy disable enable unlock reset_two_factor]
 
   def index
     @users = User.order(:email_address).includes(:certificates, aircraft_roles: :aircraft)
@@ -39,6 +39,19 @@ class Admin::UsersController < ApplicationController
 
   # Ends their access and their ability to sign (AC 120-78B 2.2.6.4) while
   # keeping their account, so the signatures they made stay attributed.
+  def unlock
+    @user.unlock!
+    redirect_to admin_users_path, notice: "#{@user.email_address} unlocked."
+  end
+
+  # For a user who lost their authenticator: they sign in with their password
+  # alone and can set it up again.
+  def reset_two_factor
+    @user.disable_otp!
+    Rails.logger.info("[auth] #{current_user.email_address} turned off two-factor for #{@user.email_address}")
+    redirect_to admin_users_path, notice: "Two-factor turned off for #{@user.email_address}. Ask them to set it up again from their profile."
+  end
+
   def disable
     return redirect_to admin_users_path, alert: "You can't disable yourself." if @user == current_user
     @user.update!(disabled_at: Time.current)

@@ -3,7 +3,13 @@ Rails.application.routes.draw do
   # (overrides Active Storage's open endpoint at the same path).
   post "rails/active_storage/direct_uploads", to: "direct_uploads#create"
 
-  resource :session
+  resource :session do
+    get :two_factor
+    post :two_factor, action: :verify_two_factor
+  end
+  resource :two_factor, path: "profile/two_factor", only: %i[new create destroy] do
+    post :recovery_codes
+  end
   resources :sign_in_links, path: "session/link", param: :token, only: %i[new create show] do
     post :consume, on: :member
   end
@@ -126,6 +132,8 @@ Rails.application.routes.draw do
       member do
         patch :disable
         patch :enable
+        patch :unlock
+        patch :reset_two_factor
       end
     end
     get "about", to: "about#show"

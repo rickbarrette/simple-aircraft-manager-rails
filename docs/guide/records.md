@@ -11,7 +11,7 @@ On the aircraft's **Logbook** tab, choose **+ New Entry** (owners). Give the dat
 1. Add your certificate (kind and number) once, on your [profile](profile.md).
 2. Open the entry and choose **Sign**. Read the entry as shown: your signature covers exactly that.
 3. Pick the certificate you're signing with. The statement you'll certify is shown with it (return to service, or the inspection statement).
-4. Re-enter your password, or sign in again with single sign-on, tick the confirmation and choose **Sign entry**. You'll see a confirmation and get an email.
+4. Re-enter your password (and your authenticator code, if you've set one up), or sign in again with single sign-on, tick the confirmation and choose **Sign entry**. You'll see a confirmation and get an email.
 
 Never share your password or let someone else sign while you're signed in: a signature is yours alone. If you think someone has, tell the administrator straight away.
 

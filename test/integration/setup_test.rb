@@ -4,7 +4,7 @@ class SetupTest < ActionDispatch::IntegrationTest
   test "first run creates admin, then setup is closed" do
     get root_path
     assert_redirected_to new_setup_path
-    post setup_path, params: { user: { name: "Ricky", email_address: "a@b.com", password: "password123", password_confirmation: "password123" } }
+    post setup_path, params: { user: { name: "Ricky", email_address: "a@b.com", password: "test-password-123", password_confirmation: "test-password-123" } }
     assert_redirected_to root_path
     assert User.last.admin?
     get new_setup_path

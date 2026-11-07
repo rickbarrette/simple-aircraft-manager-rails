@@ -8,6 +8,10 @@ Depending on how the app is set up, you can sign in with:
 - **Email me a sign-in link.** Enter your email and use the link sent to you. It works once, for a short time.
 - **Single sign-on** (for example *Sign in with Authentik*), if your organization uses it.
 
+If you've set up an authenticator app (see [Your profile](profile.md#two-factor-sign-in)), signing in with a password or an emailed link then asks for its 6-digit code.
+
+After 10 failed tries in a row (wrong passwords or codes), an account is locked for 15 minutes and its owner is emailed. Wait, or ask the administrator to unlock it.
+
 The very first visit to a new installation asks for the administrator account instead.
 
 ## Roles

@@ -4,13 +4,14 @@ require "rails/test_help"
 require "webmock/minitest"
 WebMock.disable_net_connect!(allow_localhost: true)
 Dir[File.expand_path("support/**/*.rb", __dir__)].each { require _1 }
+PwnedPasswords.checker = ->(password) { password == "breached-password-1" } # no network in tests
 
 module ActiveSupport
   class TestCase
     parallelize(workers: :number_of_processors)
 
     def create_user(email = "user#{SecureRandom.hex(3)}@example.com", admin: false)
-      User.create!(email_address: email, password: "password123", name: email.split("@").first, admin: admin)
+      User.create!(email_address: email, password: "test-password-123", name: email.split("@").first, admin: admin)
     end
 
     def create_aircraft(owner: nil, pilot: nil, **attrs)
@@ -33,7 +34,7 @@ end
 
 class ActionDispatch::IntegrationTest
   def sign_in(user)
-    post session_path, params: { email_address: user.email_address, password: "password123" }
+    post session_path, params: { email_address: user.email_address, password: "test-password-123" }
     follow_redirect!
   end
 end

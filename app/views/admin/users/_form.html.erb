@@ -2,7 +2,7 @@
   <%= f.errors_summary %>
   <%= f.field :name %>
   <%= f.field :email_address, as: :email, label: "Email", required: true %>
-  <%= f.field :password, as: :password, hint: (user.persisted? ? "Leave blank to keep current password." : "At least 8 characters."), autocomplete: "new-password" %>
+  <%= f.field :password, as: :password, hint: (user.persisted? ? "Leave blank to keep current password." : "At least #{User::PASSWORD_MIN} characters; not one known from a data breach."), autocomplete: "new-password" %>
   <%= f.field :password_confirmation, as: :password %>
   <%= f.field :admin, as: :checkbox, label: "Administrator", hint: "Admins can see and edit every aircraft and manage users." %>
   <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", admin_users_path, class: "btn-secondary" %></div>

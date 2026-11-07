@@ -62,7 +62,7 @@
   <ol class="<%= p_ %> list-decimal pl-5">
     <li>The signer opens the entry and chooses Sign. The entry is shown in full exactly as it will be certified (AC 2.2.4).</li>
     <li>They choose one of their own current certificates. The statement they will certify is shown with it, under the heading “Certified by” (2.2.2): for maintenance, “I certify that the work described in this entry was performed in accordance with 14 CFR Part 43, and I approve it for return to service with respect to that work”; for inspections, the 43.11(a)(5) statement; for preventive maintenance by a pilot, the corresponding statement.</li>
-    <li>They prove who they are again: their password, or signing in again with single sign-on within the last five minutes (2.2.6), and confirm that they are signing with intent to sign (2.1.2.4–5).</li>
+    <li>They prove who they are again: their password (with a code from their authenticator app, if they use one), or signing in again with single sign-on within the last five minutes (2.2.6), and confirm that they are signing with intent to sign (2.1.2.4–5).</li>
     <li>The system records the signer, the certificate (kind and number), the statement, the time (UTC), how they authenticated, their network address and browser, a SHA-256 fingerprint of the entry's content and a readable copy of it, and a server seal (HMAC) over the signature record (2.1.2.6, 2.2.5). The signer is told on screen and by email (2.2.3).</li>
     <li>Once signed, the entry and its components can't be edited or deleted (2.1.2.7–8, 2.2.7). A correction is made as a new entry that, once signed, supersedes the original; the original and its signature are kept and marked superseded (2.2.8).</li>
     <li>When someone no longer needs access, the responsible person disables their account: they can no longer sign in or sign, and their past signatures stay valid (2.2.6.4).</li>
@@ -71,7 +71,7 @@
 
   <h2 class="<%= h2 %>">7. Recordkeeping system controls</h2>
   <ul class="<%= p_ %> list-disc pl-5">
-    <li><strong>Controlled access (3.2.1):</strong> personal accounts; roles per aircraft; sessions end after 30 days unused; rate-limited sign-in; changing an email or password needs the current password.</li>
+    <li><strong>Controlled access (3.2.1):</strong> personal accounts; roles per aircraft; passwords of at least 12 characters, refused if known from a data breach; optional authenticator-app codes; accounts locked for 15 minutes after 10 failed sign-ins (the user is emailed); rate-limited sign-in; sessions end after 30 days unused; changing an email or password needs the current password.</li>
     <li><strong>Record preservation (3.2.2):</strong> every change to a maintenance record is kept with who, when and what changed, in a hash chain per aircraft that can't be edited; signed entries are locked.</li>
     <li><strong>Confidential information (3.2.3):</strong> records are visible only to the aircraft's users, and to share links an owner creates (scoped and optionally expiring).</li>
     <li><strong>Data corruption (3.2.4):</strong> nightly, the history chains and every signature's seal and fingerprint are checked; administrators are emailed on any problem.</li>

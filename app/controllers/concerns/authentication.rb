@@ -58,6 +58,29 @@ module Authentication
       end
     end
 
+    # Password or emailed-link sign-in: straight in, or first the
+    # authenticator code if the user has one set up (SSO skips this; the
+    # provider handles its own second factor).
+    OTP_PENDING_FOR = 5.minutes
+
+    def begin_sign_in(user, return_to:, notice: nil)
+      reset_session # fresh session id after signing in
+      if user.otp_enabled?
+        session[:otp_user_id] = user.id
+        session[:otp_started_at] = Time.current.to_i
+        session[:return_to_after_authenticating] = return_to
+        redirect_to two_factor_session_path
+      else
+        start_new_session_for user
+        redirect_to return_to, notice: notice
+      end
+    end
+
+    def pending_otp_user
+      return unless (id = session[:otp_user_id]) && Time.zone.at(session[:otp_started_at].to_i) > OTP_PENDING_FOR.ago
+      User.active.find_by(id: id)
+    end
+
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_id)

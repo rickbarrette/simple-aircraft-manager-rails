@@ -15,7 +15,7 @@ class ElectronicSignaturesTest < ActionDispatch::IntegrationTest
   end
 
   def sign(entry = @entry, **params)
-    post aircraft_logbook_entry_signature_path(@a, entry), params: { certificate_id: @ap.id, password: "password123", confirm: "1" }.merge(params)
+    post aircraft_logbook_entry_signature_path(@a, entry), params: { certificate_id: @ap.id, password: "test-password-123", confirm: "1" }.merge(params)
   end
 
   test "signing: review, certificate, password, confirmation; then the record shows who certified what and when" do
@@ -114,14 +114,14 @@ class ElectronicSignaturesTest < ActionDispatch::IntegrationTest
     assert_match "preventive maintenance", @entry.certification_statement("PILOT")
 
     sign_in @owner # signing with someone else's certificate
-    post aircraft_logbook_entry_signature_path(@a, @entry), params: { certificate_id: @ap.id, password: "password123", confirm: "1" }
+    post aircraft_logbook_entry_signature_path(@a, @entry), params: { certificate_id: @ap.id, password: "test-password-123", confirm: "1" }
     assert_includes response.body, "That certificate isn&#39;t yours"
     get new_aircraft_logbook_entry_signature_path(@a, @entry)
     assert_select "input[type=radio][value='#{pilot_cert.id}']:not([disabled])"
 
     @mech.update!(disabled_at: Time.current)
     assert_raises(EntrySigner::Error) { EntrySigner.new(@entry, user: @mech, certificate: @ap, auth_method: "password").sign! }
-    post session_path, params: { email_address: "mech@example.com", password: "password123" }
+    post session_path, params: { email_address: "mech@example.com", password: "test-password-123" }
     assert_equal "This account is disabled.", flash[:alert]
   end
 

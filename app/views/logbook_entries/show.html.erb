@@ -4,10 +4,22 @@
     <h2 class="card-title"><%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log — <%= fmt_date(@entry.date) %></h2>
     <div class="flex gap-2">
       <%= link_to "Print for logbook", new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "btn-secondary btn-sm" %>
-      <% if owner? %><%= link_to "Edit", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
+      <% if @entry.signed? %>
+        <% if owner? && !@entry.superseded? && !@entry.superseded_by %><%= link_to "Correct this entry", new_aircraft_logbook_entry_path(@aircraft, supersedes: @entry.id), class: "btn-secondary btn-sm" %><% end %>
+      <% else %>
+        <%= link_to "Sign", new_aircraft_logbook_entry_signature_path(@aircraft, @entry), class: "btn-primary btn-sm" %>
+        <% if owner? %>
+          <%= link_to "Ask someone to sign", new_aircraft_logbook_entry_signing_invitation_path(@aircraft, @entry), class: "btn-secondary btn-sm" %>
+          <%= link_to "Edit", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %>
+        <% end %>
+      <% end %>
     </div>
   </div>
   <div class="card-body space-y-3">
+    <% if @entry.signed? %><%= render "logbook_entries/signature", entry: @entry %>
+    <% elsif LogbookEntry::RECORD_TYPES.include?(@entry.entry_type) %>
+      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200">Not signed electronically.<%= " Pending correction of the #{@entry.supersedes.date} entry." if @entry.supersedes %> Sign it here, or print it and sign the paper copy.</p>
+    <% end %>
     <% unless @entry.verified? %>
       <div class="flex flex-wrap items-center justify-between gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
         <span>Transcribed by Claude<%= " (#{@entry.transcription_confidence} confidence)" if @entry.transcription_confidence %> and not yet checked. Compare it with the scan<%= @entry.document ? "" : " or the paper logbook" %> before relying on it.</span>

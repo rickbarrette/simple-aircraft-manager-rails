@@ -1,0 +1,12 @@
+<% content_for :title, "Sign logbook entry" %>
+<% if @certificates.empty? %>
+  <section class="card card-body mb-5 max-w-3xl space-y-3">
+    <h2 class="card-title">Add your certificate</h2>
+    <%= form_with model: UserCertificate.new, url: certificates_path(return_to: request.path), class: "grid gap-2 sm:grid-cols-[1fr_10rem_auto]" do |f| %>
+      <%= f.select :kind, UserCertificate::KINDS.invert, {}, class: "input", "aria-label": "Kind of certificate" %>
+      <%= f.text_field :number, class: "input", placeholder: "Number", required: true, "aria-label": "Certificate number" %>
+      <%= f.submit "Add", class: "btn-secondary" %>
+    <% end %>
+  </section>
+<% end %>
+<%= render "entry_signatures/form", entry: @entry, url: invited_signing_path(params[:token]), cancel_path: root_path %>

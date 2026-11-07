@@ -8,7 +8,9 @@ class SessionsController < ApplicationController
   def create
     return redirect_to new_session_path, alert: "Sign in with #{Sso.label}." unless Sso.password_login?
 
-    if user = User.authenticate_by(params.permit(:email_address, :password))
+    if (user = User.authenticate_by(params.permit(:email_address, :password))) && user.disabled?
+      redirect_to new_session_path, alert: "This account is disabled."
+    elsif user
       return_to = after_authentication_url
       reset_session # fresh session id after signing in
       start_new_session_for user

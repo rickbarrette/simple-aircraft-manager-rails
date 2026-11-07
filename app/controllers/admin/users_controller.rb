@@ -1,6 +1,6 @@
 class Admin::UsersController < ApplicationController
   before_action :require_admin!
-  before_action :set_user, only: %i[edit update destroy]
+  before_action :set_user, only: %i[edit update destroy disable enable]
 
   def index
     @users = User.order(:email_address).includes(:certificates, aircraft_roles: :aircraft)
@@ -37,8 +37,25 @@ class Admin::UsersController < ApplicationController
     end
   end
 
+  # Ends their access and their ability to sign (AC 120-78B 2.2.6.4) while
+  # keeping their account, so the signatures they made stay attributed.
+  def disable
+    return redirect_to admin_users_path, alert: "You can't disable yourself." if @user == current_user
+    @user.update!(disabled_at: Time.current)
+    @user.sessions.destroy_all
+    redirect_to admin_users_path, notice: "#{@user.email_address} disabled: signed out, can't sign in or sign entries. Their past signatures are kept."
+  end
+
+  def enable
+    @user.update!(disabled_at: nil)
+    redirect_to admin_users_path, notice: "#{@user.email_address} enabled."
+  end
+
   def destroy
     return redirect_to admin_users_path, alert: "You can't delete yourself." if @user == current_user
+    if @user.entry_signatures.exists?
+      return redirect_to admin_users_path, alert: "#{@user.email_address} has signed logbook entries; disable the account instead of deleting it."
+    end
     @user.destroy!
     redirect_to admin_users_path, notice: "User deleted."
   end

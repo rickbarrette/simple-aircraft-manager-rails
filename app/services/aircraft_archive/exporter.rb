@@ -55,7 +55,7 @@ module AircraftArchive
         document_images: a.documents.includes(pages_attachments: :blob).flat_map do |d|
           d.pages.map { |page| { id: id(page), document_id: id(d), notes: "", image: file(page, "health/documents") } }
         end,
-        logbook_entries: a.logbook_entries.includes(:parts).map { logbook_hash(_1) },
+        logbook_entries: a.logbook_entries.includes(:parts, :signature).map { logbook_hash(_1) },
         squawks: a.squawks.includes(:reported_by, attachments_attachments: :blob).map { squawk_hash(_1) },
         inspection_types: inspection_types.map { inspection_type_hash(_1, component_ids) },
         inspection_records: a.inspection_records.map do |r|
@@ -131,6 +131,15 @@ module AircraftArchive
         picture: file(a.picture, "aircraft_pictures"), icao_type: a.icao_type }
     end
 
+    # Carried as a record of the signature; the importing system can't re-check
+    # this server's seal, so it marks the signature as imported.
+    def signature_hash(sig)
+      { signer_name: sig.signer_name, signer_email: sig.signer_email, certificate_kind: sig.certificate_kind,
+        certificate_number: sig.certificate_number, statement: sig.statement, signed_at: sig.signed_at.utc.iso8601(6),
+        content_digest: sig.content_digest, content_snapshot: sig.content_snapshot, auth_method: sig.auth_method,
+        origin: sig.origin.presence || @source }
+    end
+
     def component_hash(c)
       { id: id(c), aircraft_id: id(c.aircraft_id), parent_component_id: id(c.parent_component_id), component_type_id: id(c.component_type_id),
         manufacturer: c.manufacturer, model: c.model, serial_number: c.serial_number, install_location: c.install_location,
@@ -153,7 +162,8 @@ module AircraftArchive
                                                                                   .reject { |k, v| k.nil? || v.nil? },
         component_since_overhaul: { id(e.component_id) => dec(e.component_since_overhaul_at_entry) }
                                     .merge(e.parts.to_h { [ id(_1.component_id), dec(_1.since_overhaul_at_entry) ] }).reject { |k, v| k.nil? || v.nil? },
-        related_documents: [] }
+        related_documents: [], supersedes_id: id(e.supersedes_id), superseded_at: e.superseded_at&.iso8601,
+        signature: e.signature && signature_hash(e.signature) }
     end
 
     def squawk_hash(s)

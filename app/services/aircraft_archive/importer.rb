@@ -247,8 +247,11 @@ module AircraftArchive
           e.parts.build(component_id: @map[:component][r.to_s], hours_at_entry: num(hash_value(data["component_hours"], r)),
                         since_overhaul_at_entry: num(hash_value(data["component_since_overhaul"], r)))
         end
+        e.superseded_at = time(data["superseded_at"])
         e.save!(validate: false)
         @map[:logbook][data["id"].to_s] = e.id
+        (@supersedes ||= []) << [ e.id, data["supersedes_id"].to_s ] if data["supersedes_id"].present?
+        import_signature(e, data["signature"]) if data["signature"].is_a?(Hash)
 
         tick("logbook_entries")
       end
@@ -383,6 +386,22 @@ module AircraftArchive
         tick("major_records")
       end
       import_weight_balance
+      Array(@supersedes).each do |entry_id, ref|
+        target = @map[:logbook][ref]
+        LogbookEntry.where(id: entry_id).update_all(supersedes_id: target) if target
+      end
+    end
+
+    def import_signature(entry, sig)
+      kind = LogbookEntry::CERTIFICATE_TYPES.key?(sig["certificate_kind"]) ? sig["certificate_kind"] : "OTHER"
+      EntrySignature.new(
+        logbook_entry: entry, signer_name: sig["signer_name"].to_s.presence || "Unknown", signer_email: sig["signer_email"],
+        certificate_kind: kind, certificate_number: sig["certificate_number"].to_s.presence || "unknown",
+        statement: sig["statement"].to_s.presence || "—", signed_at: time(sig["signed_at"]) || Time.current,
+        content_digest: sig["content_digest"].to_s.presence || "unknown", content_snapshot: sig["content_snapshot"].to_s.presence || "{}",
+        auth_method: EntrySignature::AUTH_METHODS.key?(sig["auth_method"]) ? sig["auth_method"] : "imported",
+        origin: sig["origin"].to_s.presence || "another system"
+      ).save!(validate: false)
     end
 
     def import_weight_balance

@@ -4,10 +4,11 @@ class UserCertificatesController < ApplicationController
 
   def create
     certificate = current_user.certificates.new(certificate_params)
+    back = safe_return_to || edit_profile_path(anchor: "certificates")
     if certificate.save
-      redirect_to edit_profile_path(anchor: "certificates"), notice: "#{certificate.kind_label} certificate added."
+      redirect_to back, notice: "#{certificate.kind_label} certificate added."
     else
-      redirect_to edit_profile_path(anchor: "certificates"), alert: "Certificate not added: #{certificate.errors.full_messages.to_sentence}."
+      redirect_to back, alert: "Certificate not added: #{certificate.errors.full_messages.to_sentence}."
     end
   end
 
@@ -25,6 +26,9 @@ class UserCertificatesController < ApplicationController
   end
 
   private
+
+  # Only back to a signing invitation page (no open redirects).
+  def safe_return_to = params[:return_to].to_s.match?(%r{\A/sign/[\w-]+\z}) ? params[:return_to] : nil
 
   def set_certificate = @certificate = current_user.certificates.find(params[:id])
 

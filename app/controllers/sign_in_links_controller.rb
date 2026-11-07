@@ -14,7 +14,7 @@ class SignInLinksController < ApplicationController
   end
 
   def create
-    if (user = User.find_by(email_address: params[:email_address].to_s))
+    if (user = User.active.find_by(email_address: params[:email_address].to_s))
       SessionsMailer.sign_in_link(user).deliver_later
     end
     # Same answer either way, so this can't be used to find accounts.
@@ -25,6 +25,7 @@ class SignInLinksController < ApplicationController
   end
 
   def consume
+    return redirect_to new_session_path, alert: "This account is disabled." if @user.disabled?
     reset_session # fresh session id after signing in
     start_new_session_for @user # also spends the link
     redirect_to root_path, notice: "Signed in."

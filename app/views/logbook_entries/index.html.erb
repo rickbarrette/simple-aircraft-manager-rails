@@ -31,7 +31,8 @@
               <td class="max-w-xl"><%= e.text.truncate(220) %> <%= "📄" if e.document %>
                 <% unless e.verified? %><span class="badge-orange" title="Transcribed by Claude<%= " (#{e.transcription_confidence} confidence)" if e.transcription_confidence %>; check it against the scan">Unverified</span><% end %></td>
               <td class="text-xs text-slate-500"><%= e.signoff_person %><%= " ##{e.signoff_certificate_number}" if e.signoff_certificate_number %><% if e.signoff_location.present? %><br><%= e.signoff_location %><% end %>
-                <% if (missing = e.missing_record_items).any? %><br><span class="badge-orange" title="Missing: <%= missing.to_sentence %>">Incomplete</span><% end %></td>
+                <% if e.signature %><br><span class="<%= e.superseded? ? 'badge-orange' : 'badge-green' %>" title="Signed electronically by <%= e.signature.signer_name %>"><%= e.superseded? ? "Superseded" : "Signed" %></span>
+                <% elsif (missing = e.missing_record_items).any? %><br><span class="badge-orange" title="Missing: <%= missing.to_sentence %>">Incomplete</span><% end %></td>
             </tr>
           <% end %>
         </tbody>

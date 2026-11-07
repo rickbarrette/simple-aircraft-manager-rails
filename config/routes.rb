@@ -64,6 +64,8 @@ Rails.application.routes.draw do
     resource :logbook_print, path: "logbook/print", only: %i[new show]
     resources :logbook_entries do
       member { patch :verify }
+      resource :signature, controller: "entry_signatures", only: %i[new create]
+      resources :signing_invitations, only: %i[new create]
     end
     resources :documents do
       collection do
@@ -106,10 +108,21 @@ Rails.application.routes.draw do
   get "airports/search", to: "airports#search", as: :airport_search
 
   # Public read-only share links (no login).
+  # Invited signers (outside mechanics) sign one entry.
+  get "sign/:token", to: "invited_signings#show", as: :invited_signing
+  post "sign/:token", to: "invited_signings#create"
+  post "sign/:token/account", to: "invited_signings#account", as: :account_invited_signing
+
   get "shared/:token", to: "shared#show", as: :shared
   get "shared/:token/report", to: "shared#report", as: :shared_report
 
   namespace :admin do
+    resources :users, only: [] do
+      member do
+        patch :disable
+        patch :enable
+      end
+    end
     get "about", to: "about#show"
     resource :settings, only: %i[edit update]
     resources :logbook_templates, except: :show do

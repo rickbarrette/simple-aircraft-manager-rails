@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -375,6 +375,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
     t.index ["document_collection_id"], name: "index_documents_on_document_collection_id"
   end
 
+  create_table "entry_signatures", force: :cascade do |t|
+    t.integer "logbook_entry_id", null: false
+    t.integer "user_id"
+    t.string "signer_name", null: false
+    t.string "signer_email"
+    t.string "certificate_kind", null: false
+    t.string "certificate_number", null: false
+    t.text "statement", null: false
+    t.datetime "signed_at", null: false
+    t.string "content_digest", null: false
+    t.text "content_snapshot", null: false
+    t.string "seal"
+    t.string "auth_method", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.string "origin"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["logbook_entry_id"], name: "index_entry_signatures_on_logbook_entry_id"
+    t.index ["logbook_entry_id"], name: "index_entry_signatures_one_per_entry", unique: true
+    t.index ["user_id"], name: "index_entry_signatures_on_user_id"
+  end
+
   create_table "flight_logs", force: :cascade do |t|
     t.integer "aircraft_id", null: false
     t.integer "user_id"
@@ -453,9 +476,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
     t.integer "component_id"
     t.decimal "component_hours_at_entry", precision: 8, scale: 1
     t.decimal "component_since_overhaul_at_entry", precision: 8, scale: 1
+    t.integer "supersedes_id"
+    t.datetime "superseded_at"
     t.index ["aircraft_id"], name: "index_logbook_entries_on_aircraft_id"
     t.index ["component_id"], name: "index_logbook_entries_on_component_id"
     t.index ["document_id"], name: "index_logbook_entries_on_document_id"
+    t.index ["supersedes_id"], name: "index_logbook_entries_on_supersedes_id"
   end
 
   create_table "logbook_entry_parts", force: :cascade do |t|
@@ -589,6 +615,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
     t.index ["token"], name: "index_share_tokens_on_token", unique: true
   end
 
+  create_table "signing_invitations", force: :cascade do |t|
+    t.integer "logbook_entry_id", null: false
+    t.integer "invited_by_id"
+    t.integer "user_id"
+    t.string "email", null: false
+    t.string "token_digest", null: false
+    t.text "message"
+    t.datetime "expires_at", null: false
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invited_by_id"], name: "index_signing_invitations_on_invited_by_id"
+    t.index ["logbook_entry_id"], name: "index_signing_invitations_on_logbook_entry_id"
+    t.index ["token_digest"], name: "index_signing_invitations_on_token_digest", unique: true
+    t.index ["user_id"], name: "index_signing_invitations_on_user_id"
+  end
+
   create_table "squawks", force: :cascade do |t|
     t.integer "aircraft_id", null: false
     t.integer "component_id"
@@ -632,6 +675,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
     t.string "sso_uid"
     t.datetime "last_signed_in_at"
     t.boolean "reminder_emails", default: true, null: false
+    t.datetime "disabled_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["sso_uid"], name: "index_users_on_sso_uid", unique: true
   end
@@ -684,6 +728,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
   add_foreign_key "document_collections", "aircraft"
   add_foreign_key "documents", "aircraft"
   add_foreign_key "documents", "document_collections"
+  add_foreign_key "entry_signatures", "logbook_entries"
+  add_foreign_key "entry_signatures", "users", on_delete: :nullify
   add_foreign_key "flight_logs", "aircraft"
   add_foreign_key "flight_logs", "users", on_delete: :nullify
   add_foreign_key "inspection_records", "aircraft"
@@ -694,6 +740,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
   add_foreign_key "logbook_entries", "aircraft"
   add_foreign_key "logbook_entries", "components", on_delete: :nullify
   add_foreign_key "logbook_entries", "documents", on_delete: :nullify
+  add_foreign_key "logbook_entries", "logbook_entries", column: "supersedes_id", on_delete: :nullify
   add_foreign_key "logbook_entry_parts", "components", on_delete: :cascade
   add_foreign_key "logbook_entry_parts", "logbook_entries", on_delete: :cascade
   add_foreign_key "logbook_imports", "aircraft"
@@ -710,6 +757,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_000000) do
   add_foreign_key "sessions", "users"
   add_foreign_key "share_tokens", "aircraft"
   add_foreign_key "share_tokens", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "signing_invitations", "logbook_entries", on_delete: :cascade
+  add_foreign_key "signing_invitations", "users", column: "invited_by_id", on_delete: :nullify
+  add_foreign_key "signing_invitations", "users", on_delete: :nullify
   add_foreign_key "squawks", "aircraft"
   add_foreign_key "squawks", "components", on_delete: :nullify
   add_foreign_key "squawks", "logbook_entries", on_delete: :nullify

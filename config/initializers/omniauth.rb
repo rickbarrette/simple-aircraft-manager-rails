@@ -11,6 +11,8 @@ Rails.application.config.middleware.use OmniAuth::Builder do
              scope: %i[openid email profile],
              response_type: :code,
              pkce: true,
+             # "prompt=login" makes the provider ask again (signing an entry).
+             allow_authorize_params: %i[prompt],
              client_options: {
                identifier: ENV["OIDC_CLIENT_ID"],
                secret: ENV["OIDC_CLIENT_SECRET"],

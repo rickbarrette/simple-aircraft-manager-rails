@@ -1,0 +1,19 @@
+<% content_for :title, "Sign a logbook entry" %>
+<div class="mx-auto max-w-md space-y-4">
+  <h1 class="text-2xl font-bold">Sign a logbook entry</h1>
+  <p class="text-sm text-slate-600">You've been asked to sign the <%= @entry.date %> <%= LogbookEntry::LOG_TYPES[@entry.log_type].downcase %> log entry for <%= @entry.aircraft.tail_number %>. First, sign in as <strong><%= @invitation.email %></strong>.</p>
+  <div class="card card-body space-y-3">
+    <%= link_to "I have an account: sign in", new_session_path, class: "btn-primary w-full justify-center" %>
+  </div>
+  <% if Sso.password_login? && !User.exists?(email_address: @invitation.email) %>
+    <%= form_with url: account_invited_signing_path(params[:token]), class: "card card-body space-y-3" do %>
+      <h2 class="card-title">Or create an account</h2>
+      <% if @account_errors.present? %><div class="rounded-md bg-red-50 p-2 text-sm text-red-700"><%= @account_errors.to_sentence %></div><% end %>
+      <div><label class="label">Email</label><input class="input" value="<%= @invitation.email %>" disabled></div>
+      <div><%= label_tag :name, "Your name", class: "label" %><%= text_field_tag :name, params[:name], class: "input", required: true %></div>
+      <div><%= label_tag :password, "Password", class: "label" %><%= password_field_tag :password, nil, class: "input", required: true, autocomplete: "new-password" %></div>
+      <div><%= label_tag :password_confirmation, "Confirm password", class: "label" %><%= password_field_tag :password_confirmation, nil, class: "input", required: true, autocomplete: "new-password" %></div>
+      <%= submit_tag "Create account", class: "btn-secondary" %>
+    <% end %>
+  <% end %>
+</div>

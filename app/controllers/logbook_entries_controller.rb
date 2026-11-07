@@ -2,11 +2,12 @@ class LogbookEntriesController < ApplicationController
   include AircraftScoped
   before_action :require_owner!, except: %i[index show]
   before_action :set_entry, only: %i[show edit update destroy verify]
+  before_action :require_unsigned, only: %i[edit update destroy]
 
   def index
     @query = params[:q]
     @log_type = params[:log_type].presence
-    scope = @aircraft.logbook_entries.search(@query).recent_first.includes(:document)
+    scope = @aircraft.logbook_entries.search(@query).recent_first.includes(:document, :signature)
     scope = scope.where(log_type: @log_type) if @log_type
     @unverified_only = params[:unverified] == "1"
     scope = scope.unverified if @unverified_only
@@ -27,15 +28,17 @@ class LogbookEntriesController < ApplicationController
 
   def new
     LogbookTemplate.ensure_defaults!
-    @entry = @aircraft.logbook_entries.new(date: Date.current, aircraft_hours_at_entry: @aircraft.current_hours)
+    @entry = (original = correctable(params[:supersedes])) ? correction_of(original) : @aircraft.logbook_entries.new(date: Date.current, aircraft_hours_at_entry: @aircraft.current_hours)
   end
 
   def create
     @entry = @aircraft.logbook_entries.new(entry_params)
+    @entry.supersedes = correctable(params.dig(:logbook_entry, :supersedes_id))
     @entry.assign_parts(parts_params, @aircraft)
     if @entry.save
-      log_event("logbook", "Logbook entry added (#{@entry.date})")
-      redirect_to aircraft_logbook_entries_path(@aircraft), notice: "Logbook entry added."
+      log_event("logbook", "Logbook entry #{@entry.supersedes ? 'correction ' : ''}added (#{@entry.date})")
+      redirect_to aircraft_logbook_entry_path(@aircraft, @entry),
+                  notice: @entry.supersedes ? "Correction saved. Sign it to supersede the original entry." : "Logbook entry added."
     else
       render :new, status: :unprocessable_entity
     end
@@ -61,6 +64,29 @@ class LogbookEntriesController < ApplicationController
   end
 
   private
+
+  # Signed entries are locked (AC 120-78B 2.1.2.8): changes go in a correction.
+  def require_unsigned
+    return unless @entry.signed?
+    redirect_to aircraft_logbook_entry_path(@aircraft, @entry), alert: "This entry is signed, so it can't be changed or deleted. Make a correction entry instead."
+  end
+
+  # A signed, not yet superseded entry of this aircraft.
+  def correctable(id)
+    return if id.blank?
+    entry = @aircraft.logbook_entries.find_by(id: id)
+    entry if entry&.signed? && !entry.superseded?
+  end
+
+  # A new entry starting from the signed one it corrects; signed afresh.
+  def correction_of(original)
+    copy = @aircraft.logbook_entries.new(original.attributes.slice(*%w[date log_type entry_type text aircraft_hours_at_entry signoff_location
+                                                                         inspection_result component_id component_hours_at_entry
+                                                                         component_since_overhaul_at_entry document_id page_number]))
+    copy.supersedes = original
+    original.parts.each { copy.parts.build(component_id: _1.component_id, hours_at_entry: _1.hours_at_entry, since_overhaul_at_entry: _1.since_overhaul_at_entry) }
+    copy
+  end
 
   # Sub-components ticked on the form: { component_id => { include, hours, since } }.
   def parts_params

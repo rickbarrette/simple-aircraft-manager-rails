@@ -31,7 +31,7 @@ module Authentication
     def find_session_by_cookie
       session = Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
       return unless session
-      if session.updated_at < SESSION_IDLE_TIMEOUT.ago
+      if session.updated_at < SESSION_IDLE_TIMEOUT.ago || session.user.disabled?
         session.destroy
         cookies.delete(:session_id)
         return
@@ -50,6 +50,7 @@ module Authentication
     end
 
     def start_new_session_for(user)
+      raise ArgumentError, "disabled account" if user.disabled?
       user.update_column(:last_signed_in_at, Time.current)
       user.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
         Current.session = session

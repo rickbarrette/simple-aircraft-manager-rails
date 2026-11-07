@@ -1,0 +1,4 @@
+<% content_for :title, "Sign logbook entry" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= render "entry_signatures/form", entry: @entry, url: aircraft_logbook_entry_signature_path(@aircraft, @entry),
+                                    cancel_path: aircraft_logbook_entry_path(@aircraft, @entry) %>

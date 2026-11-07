@@ -1,0 +1,11 @@
+<% content_for :title, "Ask someone to sign" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= form_with model: @invitation, url: aircraft_logbook_entry_signing_invitations_path(@aircraft, @entry), class: "card card-body max-w-2xl space-y-4" do |f| %>
+  <h2 class="card-title">Ask someone to sign</h2>
+  <p class="text-sm text-slate-600">For a mechanic who did the work: they get a one-time link by email, sign in or create their own account, add their certificate, and sign this entry with their own password. They see only this entry.</p>
+  <%= f.errors_summary %>
+  <div class="rounded-md bg-slate-50 p-3 text-sm"><%= @entry.date %> · <%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log · <%= @entry.text.truncate(160) %></div>
+  <%= f.field :email, as: :email, label: "Their email", required: true %>
+  <%= f.field :message, as: :textarea, rows: 2, label: "Message (optional)" %>
+  <div class="flex gap-2"><%= f.submit "Send invitation" %><%= link_to "Cancel", aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary" %></div>
+<% end %>

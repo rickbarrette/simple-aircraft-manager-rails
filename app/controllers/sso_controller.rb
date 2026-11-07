@@ -14,6 +14,7 @@ class SsoController < ApplicationController
   def callback
     auth = request.env["omniauth.auth"]
     return failure unless auth && auth.provider.to_s == Sso::PROVIDER.to_s && auth.uid.present?
+    return reauthenticated(auth) if authenticated? && current_user.sso_uid.present? && current_user.sso_uid == auth.uid.to_s
     return link(auth) if authenticated?
 
     user = User.find_by(sso_uid: auth.uid) || link_by_email(auth) || create_user(auth)
@@ -22,6 +23,8 @@ class SsoController < ApplicationController
       return redirect_to new_session_path, alert: "There's no account for #{email || 'that sign-in'} here yet. " \
                                                   "Ask an administrator to add you, or sign in with your password and link #{Sso.label} from your profile."
     end
+
+    return redirect_to new_session_path, alert: "This account is disabled." if user.disabled?
 
     sync_admin(user, auth)
     return_to = session[:return_to_after_authenticating]
@@ -53,6 +56,12 @@ class SsoController < ApplicationController
 
   def require_sso
     raise ActiveRecord::RecordNotFound unless Sso.enabled?
+  end
+
+  # Signed in again (e.g. to sign a logbook entry): note when, and go back.
+  def reauthenticated(auth)
+    session[:reauthenticated_at] = Time.current.to_i
+    redirect_to session.delete(:after_reauth).presence || edit_profile_path, notice: "Signed in again with #{Sso.label}."
   end
 
   def link(auth)

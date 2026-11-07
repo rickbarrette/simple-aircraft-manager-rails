@@ -195,6 +195,7 @@ class LogbookEntryPdf
   def signature_block_height(small) = (small + 3) * 3 + 6
 
   def signature_block(entry, w, height, small, more:)
+    return electronic_signature_block(entry, w, height, small, more: more) if entry.signature
     @pdf.bounding_box([ 0, height ], width: w, height: height) do
       if more
         @pdf.text_box "Continued on the next #{more}.", at: [ 0, height ], width: w, height: small + 2, size: small,
@@ -212,6 +213,24 @@ class LogbookEntryPdf
     end
   end
 
+  # Signed entries: who certified it, when, and the fingerprint to check it by.
+  def electronic_signature_block(entry, w, height, small, more:)
+    sig = entry.signature
+    @pdf.bounding_box([ 0, height ], width: w, height: height) do
+      top = height
+      if more
+        @pdf.text_box "Continued on the next #{more}.", at: [ 0, top ], width: w, height: small + 2, size: small, style: :italic, overflow: :truncate
+      end
+      top -= small + 3
+      @pdf.text_box clean("#{EntrySignature::LABEL} #{sig.signer_name}, #{sig.certificate_label} #{sig.certificate_number}" \
+                          "#{'  (SUPERSEDED BY A CORRECTION)' if entry.superseded?}"),
+                    at: [ 0, top ], width: w, height: small + 2, size: small, style: :bold, overflow: :shrink_to_fit, min_font_size: 5
+      top -= small + 3
+      @pdf.text_box clean("Signed electronically #{sig.signed_at.utc.strftime('%Y-%m-%d %H:%M UTC')}  ·  fingerprint #{sig.content_digest.first(16)}"),
+                    at: [ 0, top ], width: w, height: small + 2, size: small - 1, overflow: :shrink_to_fit, min_font_size: 5
+    end
+  end
+
   def certificate(entry)
     kind = { "AP" => "A&P", "IA" => "A&P/IA", "A" => "A", "P" => "P", "REPAIR_STATION" => "Repair station", "REPAIRMAN" => "Repairman",
              "PILOT" => "Pilot", "OTHER" => "" }[entry.signoff_certificate_type].to_s
@@ -223,6 +242,7 @@ class LogbookEntryPdf
   # result is recorded but whose text doesn't already certify it.
   def body_text(entry)
     text = entry.text.to_s.strip
+    return "#{text}\n\n#{entry.signature.statement}" if entry.signature
     return text unless entry.entry_type == "INSPECTION" && entry.inspection_result.present? && !text.match?(/I certify/i)
     type = inspection_kind(entry, text)
     statement =

@@ -44,6 +44,13 @@ docker compose up -d --build  # http://<host>:3000
 
 Data lives in the `sam_storage` volume. Set `FORCE_SSL=false` if you serve plain HTTP on a LAN. Set it to `true` when a TLS reverse proxy such as Caddy, Traefik, or Cloudflare Tunnel sits in front.
 
+Other examples in the repository:
+
+- [`docker-compose.image.yml`](docker-compose.image.yml): runs a published image (set the image name to yours) without cloning the source, with a health check and update steps.
+- [`docker-compose.traefik.yml`](docker-compose.traefik.yml): behind Traefik with HTTPS, with optional Authentik forward auth (see [Running behind Authentik](docs/authentik.md)).
+
+[`.env.example`](.env.example) lists every setting, grouped and commented. After starting or updating, `docker compose exec web bin/rails sam:doctor` checks the installation.
+
 ### Option B: Kamal (any VPS, automatic TLS)
 
 Edit `config/deploy.yml` with your server IP, registry, and domain, then run `bin/kamal setup`. Kamal Proxy handles Let's Encrypt certificates. Background jobs run inside Puma (`SOLID_QUEUE_IN_PUMA`).

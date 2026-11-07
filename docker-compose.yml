@@ -1,6 +1,8 @@
-# Simplest self-hosting: one container, SQLite + uploads in a named volume.
+# Simplest self-hosting, built from this checkout: one container, SQLite and
+# uploads in a named volume. To run a published image instead, see
+# docker-compose.image.yml; behind Traefik (and Authentik), docker-compose.traefik.yml.
 #
-#   cp .env.example .env   # set SECRET_KEY_BASE (bin/rails secret) and APP_HOST
+#   cp .env.example .env   # set SECRET_KEY_BASE (bin/rails secret), APP_HOST, FORCE_SSL
 #   docker compose up -d --build
 #   open http://localhost:3000  → create the admin account
 services:
@@ -14,5 +16,10 @@ services:
       SOLID_QUEUE_IN_PUMA: "true"   # background jobs run inside the web process
     volumes:
       - sam_storage:/rails/storage  # databases + uploaded files: back this up
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 volumes:
   sam_storage:

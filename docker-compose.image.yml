@@ -1,0 +1,30 @@
+# Run a published image, without cloning the source.
+#
+#   1. Put this file and a .env (copied from .env.example) in a folder.
+#   2. Set the image below to the one you use. To publish your own:
+#        docker build -t your-registry/simple-aircraft-manager-rails:latest \
+#          --build-arg APP_REVISION=$(git rev-parse --short HEAD) --build-arg APP_BUILT_AT=$(date -u +%FT%TZ) .
+#        docker push your-registry/simple-aircraft-manager-rails:latest
+#   3. docker compose -f docker-compose.image.yml up -d
+#   4. Open http://<server>:3000 and create the admin account.
+#
+# Updating: docker compose -f docker-compose.image.yml pull && docker compose -f docker-compose.image.yml up -d
+# (database changes are applied when the container starts). Then: docker compose exec web bin/rails sam:doctor
+services:
+  web:
+    image: your-registry/simple-aircraft-manager-rails:latest
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    env_file: .env
+    environment:
+      SOLID_QUEUE_IN_PUMA: "true"   # nightly backup, reminders and AD search run in the web process
+    volumes:
+      - sam_storage:/rails/storage  # databases, uploaded files and nightly backups: back this up
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  sam_storage:

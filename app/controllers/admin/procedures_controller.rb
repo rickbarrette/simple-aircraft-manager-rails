@@ -28,6 +28,9 @@ class Admin::ProceduresController < ApplicationController
 
   def adopt
     policy = RecordkeepingPolicy.current
+    if policy.unfilled_fields.any?
+      return redirect_to(admin_procedures_path, alert: "Fill in the [bracketed] blanks first: #{policy.unfilled_fields.to_sentence}.")
+    end
     return redirect_to(admin_procedures_path, alert: "Fill in the operator, responsible person, hosting and off-site backup (or connect Google Drive) first.") unless policy.complete?
     number = (ProceduresRevision.maximum(:number) || 0) + 1
     revision = ProceduresRevision.create!(number: number, adopted_by: current_user, adopted_at: Time.current,

@@ -79,6 +79,7 @@ If the server is lost:
 If the app replaces the paper logbooks, AC 120-78B asks for a written procedures document. **Recordkeeping Procedures** generates one from the app's setup:
 
 1. Fill in the **details** the app can't know: the owner/operator, the person responsible for the records, how the app is hosted, how it's backed up off-site (described automatically when Google Drive is connected), and how often to audit and how many entries to sample.
+   **Insert suggested text** under *Hosting and network* and *Additional procedures* fills the box with a starting draft: what the app knows from its settings (HTTPS, how people sign in, the password and lockout rules, the date electronic records began) and common procedures for a Part 91 owner (who signs, outside signers, share links, retention, paper records, sale). Replace each [bracketed] blank with your own details and change anything that isn't how you work; a revision can't be adopted while a blank is left.
 2. **Preview the draft** and read it through.
 3. **Adopt** it as a revision, with a note of what changed. Adopted revisions can't be changed; print one or save it as a PDF with the records.
 

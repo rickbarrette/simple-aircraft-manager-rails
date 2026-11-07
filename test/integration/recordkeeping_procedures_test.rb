@@ -104,4 +104,33 @@ class RecordkeepingProceduresTest < ActionDispatch::IntegrationTest
     get records_help_path
     assert_response :success
   end
+
+  test "suggested text is offered from the installation's settings, and blanks block adoption" do
+    sign_in @admin
+    get admin_procedures_path
+    hosting = css_select("[data-controller=insert-text]").first["data-insert-text-text-value"]
+    assert_includes hosting, "at least #{User::PASSWORD_MIN} characters"
+    assert_includes hosting, "[location"
+    additional = css_select("[data-controller=insert-text]").last["data-insert-text-text-value"]
+    assert_includes additional, "**Retention (14 CFR 91.417(b)).**"
+    assert_includes additional, "[the date electronic records began]"
+    @a.update!(electronic_records_since: Date.new(2026, 11, 1))
+    assert_includes ProceduresTemplates.additional, "before November 1, 2026"
+
+    fill_policy
+    patch admin_procedures_path, params: { recordkeeping_policy: { hosting_description: hosting, additional_procedures: "See [the guide](https://example.com/guide)." } }
+    policy = RecordkeepingPolicy.current
+    assert_equal [ "Hosting and network" ], policy.unfilled_fields # a Markdown link isn't a blank
+    refute policy.complete?
+    get admin_procedures_path
+    assert_includes response.body, "Fill in the [bracketed] blanks in: Hosting and network"
+    post adopt_admin_procedures_path
+    assert_equal 0, ProceduresRevision.count
+    assert_includes flash[:alert], "Hosting and network"
+
+    fill_policy
+    post adopt_admin_procedures_path
+    assert_equal 1, ProceduresRevision.count
+    assert_includes ProceduresRevision.current.content, "sign in with their own email and password"
+  end
 end

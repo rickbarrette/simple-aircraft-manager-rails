@@ -11,9 +11,12 @@
       <%= f.field :responsible_name, label: "Responsible person", placeholder: "Jane Pilot" %>
       <%= f.field :responsible_title, label: "Their role", placeholder: "Owner" %>
     </div>
-    <%= f.field :hosting_description, as: :textarea, rows: 8, label: "Hosting and network",
-          hint: "Leave a blank line between paragraphs. Markdown works: **bold**, lists.",
-          placeholder: "Self-hosted on a server at the owner's home, behind a firewall and an authenticating proxy." %>
+    <div data-controller="insert-text" data-insert-text-text-value="<%= ProceduresTemplates.hosting %>">
+      <%= f.field :hosting_description, as: :textarea, rows: 8, label: "Hosting and network",
+            hint: "Leave a blank line between paragraphs. Markdown works: **bold**, lists.", data: { insert_text_target: "field" },
+            placeholder: "Where the server is, who can administer it, how it's reached and protected, how updates are installed." %>
+      <button type="button" class="btn-secondary btn-sm mt-2" data-action="insert-text#insert">Insert suggested text</button>
+    </div>
     <%= f.field :offsite_backup_description, as: :textarea, rows: 2, label: (OffsiteConnection.connected? ? "Off-site backup (optional: Google Drive is connected)" : "Off-site backup"),
           hint: (OffsiteConnection.connected? ? "The Google Drive backup is described automatically; add anything else here." : "Or set up the built-in Google Drive backup under Admin → Off-site Backup."),
           placeholder: "The storage volume is backed up nightly with restic to an encrypted off-site repository; retention 30 days." %>
@@ -21,8 +24,12 @@
       <%= f.field :audit_interval_months, as: :number, min: 1, max: 24, label: "Audit every (months)" %>
       <%= f.field :audit_sample_size, as: :number, min: 1, max: 50, label: "Entries sampled per audit" %>
     </div>
-    <%= f.field :additional_procedures, as: :textarea, rows: 12, label: "Additional procedures (optional)",
-          hint: "Leave a blank line between items. Markdown works: **bold** headings, lists." %>
+    <div data-controller="insert-text" data-insert-text-text-value="<%= ProceduresTemplates.additional %>">
+      <%= f.field :additional_procedures, as: :textarea, rows: 12, label: "Additional procedures (optional)",
+            hint: "Leave a blank line between items. Markdown works: **bold** headings, lists.", data: { insert_text_target: "field" } %>
+      <button type="button" class="btn-secondary btn-sm mt-2" data-action="insert-text#insert">Insert suggested text</button>
+    </div>
+    <p class="hint">Suggested text is filled in from this installation's settings, with [bracketed] blanks for what only you know. Edit it to match how you actually work, then save. A revision can't be adopted while a blank is left.</p>
     <%= f.submit "Save" %>
   <% end %>
 
@@ -38,6 +45,7 @@
       <p class="text-sm"><%= link_to "Preview the draft", draft_admin_procedures_path, class: "link", target: "_blank" %> (generated from the current setup).</p>
       <%= form_with url: adopt_admin_procedures_path, class: "flex flex-wrap items-end gap-2" do %>
         <div class="min-w-0 flex-1"><%= label_tag :summary, "What changed", class: "label" %><%= text_field_tag :summary, nil, class: "input", placeholder: current ? "e.g. new mechanic added" : "Initial issue" %></div>
+        <% if @policy.unfilled_fields.any? %><p class="w-full text-sm text-amber-800">Fill in the [bracketed] blanks in: <%= @policy.unfilled_fields.to_sentence %>.</p><% end %>
         <%= submit_tag "Adopt as revision #{(current&.number || 0) + 1}", class: "btn-primary", disabled: !@policy.complete?,
                        title: (@policy.complete? ? nil : "Fill in the operator, responsible person, hosting and off-site backup (or connect Google Drive) first") %>
       <% end %>

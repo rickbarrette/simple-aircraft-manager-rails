@@ -14,6 +14,25 @@ Admins see the **Admin** menu (on a phone, under ☰). Admins can see and edit e
 
 With single sign-on, accounts can be created automatically at first sign-in, and admin rights can follow a group at the provider (see the main README).
 
+## Account recovery from the command line
+
+If nobody can sign in to fix an account in the app (a forgotten admin password, a lockout, a lost phone with no recovery codes, the only admin disabled), run these on the server. With Docker Compose, put `docker compose exec web` in front; in Portainer, open the container's **Console** and run them there. Anyone who can run commands on the server already has the data, so they ask for nothing else. Each one is written to the log.
+
+| Command | What it does |
+|---|---|
+| `bin/rails users:list` | Lists accounts, with admin, disabled, locked, 2FA and SSO status |
+| `bin/rails "users:reset_password[jane@example.com]"` | Sets a new generated password and shows it once; also unlocks the account and signs it out everywhere. `PASSWORD=...` in front sets your own instead (it then stays in your shell history) |
+| `bin/rails "users:sign_in_link[jane@example.com]"` | Prints a one-time sign-in link (15 minutes), for when email isn't working. Two-factor still asks for the code |
+| `bin/rails "users:unlock[jane@example.com]"` | Clears a lockout after failed sign-ins |
+| `bin/rails "users:reset_two_factor[jane@example.com]"` | Turns off the authenticator app |
+| `bin/rails "users:enable[jane@example.com]"` / `users:disable[…]` | Enables or disables an account |
+| `bin/rails "users:make_admin[jane@example.com]"` | Makes an existing account an admin (with `OIDC_ADMIN_GROUP` set, the next single sign-on sets it from the group again) |
+| `bin/rails "users:create_admin[jane@example.com,Jane Pilot]"` | Creates a new admin account with a generated password |
+
+Keep the quotes around commands with brackets: some shells treat `[` specially.
+
+If single sign-on is broken and `PASSWORD_LOGIN=false` is set, remove that setting and restart first, so password sign-in (and sign-in links) work again.
+
 ## Component Types, Airports, Logbook Templates
 
 - **Component Types**: the list of types used for components (owners can also add new types while adding a component).

@@ -85,6 +85,10 @@ Other OIDC providers (Keycloak, Google, Entra ID…) work the same way.
 
 To keep the whole app behind Authentik's forward auth (proxy provider) while share links and outside mechanics' signing invitations still work, see [Running behind Authentik](docs/authentik.md): it has the unauthenticated URL list and what each one exposes.
 
+### Account recovery
+
+Locked out of the admin account? On the server, `bin/rails users:list`, then for example `bin/rails "users:reset_password[admin@example.com]"` (a new password, shown once) or `bin/rails "users:sign_in_link[admin@example.com]"` (a one-time link). With Docker: `docker compose exec web bin/rails …`. All commands (unlock, two-factor reset, enable, make or create an admin) are listed in the [administration guide](docs/guide/administration.md#account-recovery-from-the-command-line).
+
 ### Backups
 
 SQLite runs in WAL mode, so a plain file copy taken while the app is running can be inconsistent. Use the SQLite backup command instead:

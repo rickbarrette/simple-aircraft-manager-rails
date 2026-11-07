@@ -14,7 +14,7 @@ class LogbookEntriesController < ApplicationController
   def show; end
 
   def new
-    @entry = @aircraft.logbook_entries.new(date: Date.current, aircraft_hours_at_entry: @aircraft.tach_time)
+    @entry = @aircraft.logbook_entries.new(date: Date.current, aircraft_hours_at_entry: @aircraft.current_hours)
   end
 
   def create

@@ -13,7 +13,7 @@
       <% if rows.none?(&:url) %><p class="rounded-md bg-amber-50 px-3 py-2 text-amber-900 ring-1 ring-amber-200">This file has no links to the AD documents. DRS's <strong>Excel</strong> export includes them; import that file instead (or afterwards) to get clickable AD numbers.</p><% end %>
       <p>Choose what to do with each AD. The suggestions are based on the FAA data and your aircraft's model (<%= @aircraft.model.presence || "not set" %>); you make the call.</p>
       <ul class="list-disc space-y-1 pl-5 text-xs text-slate-600">
-        <li><strong>Track</strong>: adds the AD. Until you record compliance, it counts against airworthiness, so <%= @aircraft.tail_number %> will show <span class="badge-red">Not Airworthy</span> for each tracked AD without a compliance record.</li>
+        <li><strong>Track</strong>: adds the AD. Until you record compliance, it counts against airworthiness, so <%= @aircraft.tail_number %> will show <span class="badge-red">Grounded</span> while any tracked AD has no compliance record.</li>
         <li><strong>Not applicable</strong>: adds the AD with an N/A record (e.g. the equipment isn't installed). You can edit the reason afterwards.</li>
         <li><strong>Update</strong> (ADs already tracked): refreshes the FAA details: subject, summary, dates, supersession and DRS link. Compliance records aren't touched.</li>
         <li><strong>Skip</strong>: not imported, or left exactly as is.</li>

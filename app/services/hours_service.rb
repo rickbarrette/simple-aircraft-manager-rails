@@ -1,5 +1,6 @@
 # Flight-activity writes: absolute hours updates and flight logs. Both cascade
-# the tach delta to every IN-USE component.
+# the time-in-service delta (tach or Hobbs, per the aircraft's maintenance
+# clock) to every IN-USE component.
 class HoursService
   def initialize(aircraft, user: Current.user)
     @aircraft = aircraft
@@ -17,19 +18,22 @@ class HoursService
   def update_hours!(tach_time:, hobbs_time: nil)
     enforce_airworthiness!
     tach = BigDecimal(tach_time.to_s)
-    delta = tach - @aircraft.tach_time
+    hobbs = BigDecimal(hobbs_time.to_s) if hobbs_time.present?
     old = @aircraft.tach_time
+    tach_delta = tach - old
+    # On Hobbs time, components follow the Hobbs change (when one is given).
+    delta = @aircraft.hobbs? && hobbs ? hobbs - @aircraft.hobbs_time : tach_delta
 
     Aircraft.transaction do
       @aircraft.tach_time = tach
-      @aircraft.hobbs_time = BigDecimal(hobbs_time.to_s) if hobbs_time.present?
+      @aircraft.hobbs_time = hobbs if hobbs
       @aircraft.save!
       cascade_to_components(delta, clamp: true)
       @aircraft.log_event!("hours",
-        "Hours #{delta >= 0 ? 'updated' : 'corrected'} to #{tach}",
-        user: @user, notes: "Previous: #{old}, delta: #{delta >= 0 ? '+' : ''}#{delta}")
+        "Hours #{tach_delta >= 0 ? 'updated' : 'corrected'} to #{tach}",
+        user: @user, notes: "Previous: #{old}, delta: #{tach_delta >= 0 ? '+' : ''}#{tach_delta}")
     end
-    delta
+    tach_delta
   end
 
   # Persist a flight log and apply its side effects atomically.
@@ -43,7 +47,7 @@ class HoursService
       @aircraft.tach_time += flight.tach_time
       @aircraft.hobbs_time += flight.hobbs_time if flight.hobbs_time
       @aircraft.save!
-      cascade_to_components(flight.tach_time)
+      cascade_to_components(@aircraft.hobbs? && flight.hobbs_time ? flight.hobbs_time : flight.tach_time)
 
       { "oil" => [ flight.oil_added, flight.oil_level_after, flight.oil_added_type ],
         "fuel" => [ flight.fuel_added, flight.fuel_level_after, flight.fuel_added_type ] }.each do |type, (qty, level, kind)|

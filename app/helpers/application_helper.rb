@@ -8,14 +8,23 @@ module ApplicationHelper
     value ? l(value.to_date, format: :long) : "—"
   end
 
+  AIRWORTHINESS_COLORS = { "RED" => "red", "LIMITED" => "blue", "ORANGE" => "orange", "GREEN" => "green" }.freeze
+
   def airworthiness_badge(status, large: false)
-    color = { "RED" => "red", "ORANGE" => "orange", "GREEN" => "green" }[status.status]
-    tag.span(status.label, class: [ "badge-#{color}", ("text-sm px-3 py-1" if large) ])
+    tag.span(status.label, class: [ "badge-#{AIRWORTHINESS_COLORS[status.status]}", ("text-sm px-3 py-1" if large) ],
+                           title: Airworthiness::DISCLAIMER)
   end
 
   def airworthiness_dot(status)
-    color = { "RED" => "bg-red-500", "ORANGE" => "bg-amber-400", "GREEN" => "bg-emerald-500" }[status.status]
+    color = { "RED" => "bg-red-500", "LIMITED" => "bg-sky-500", "ORANGE" => "bg-amber-400", "GREEN" => "bg-emerald-500" }[status.status]
     tag.span(class: "inline-block h-3 w-3 rounded-full #{color}", title: status.label)
+  end
+
+  # Badge class (or text class) for one airworthiness issue.
+  def issue_badge_class(issue) = "badge-#{AIRWORTHINESS_COLORS[issue.severity]}"
+
+  def issue_text_class(issue)
+    { "RED" => "text-red-700", "LIMITED" => "text-sky-700" }.fetch(issue.severity, "text-amber-700")
   end
 
   COMPLIANCE_BADGES = {

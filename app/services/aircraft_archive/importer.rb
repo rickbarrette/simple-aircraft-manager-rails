@@ -139,6 +139,7 @@ module AircraftArchive
         tail_number: (@tail_number.presence || a["tail_number"]).to_s.strip.upcase,
         make: a["make"].to_s, model: a["model"].to_s, serial_number: a["serial_number"].to_s, description: a["description"].to_s,
         purchased: date(a["purchased"]), status: Aircraft::STATUSES.key?(a["status"]) ? a["status"] : "AVAILABLE",
+        time_basis: Aircraft::TIME_BASES.key?(a["time_basis"]) ? a["time_basis"] : "tach",
         tach_time: num(a["tach_time"] || a["flight_time"]) || 0, tach_time_offset: num(a["tach_time_offset"]) || 0,
         hobbs_time: num(a["hobbs_time"]) || 0, hobbs_time_offset: num(a["hobbs_time_offset"]) || 0,
         icao_type: a["icao_type"].to_s.upcase.presence&.then { _1.match?(/\A[A-Z0-9]{1,4}\z/) ? _1 : nil }
@@ -256,7 +257,9 @@ module AircraftArchive
         if type
           warn("Inspection type “#{name}” already existed here and was reused.") if type.recurring != (data["recurring"] == true)
         else
-          type = InspectionType.new(name: name, recurring: data["recurring"] == true, required: data["required"] != false,
+          effect = InspectionType::EFFECTS.key?(data["effect"]) ? data["effect"] : (data["required"] == false ? "advisory" : "grounds")
+          type = InspectionType.new(name: name, recurring: data["recurring"] == true, effect: effect,
+                                    required: effect != "advisory", hours_tolerance: num(data["hours_tolerance"]) || 0,
                                     recurring_hours: num(data["recurring_hours"]), recurring_days: data["recurring_days"],
                                     recurring_months: data["recurring_months"])
           type.save!(validate: false)
@@ -265,6 +268,11 @@ module AircraftArchive
         type.aircraft << @aircraft if Array(data["applicable_aircraft"]).any? && !type.aircraft.include?(@aircraft)
         components(data["applicable_component"]).each { |c| type.components << c unless type.components.include?(c) }
         @map[:inspection_type][data["id"].to_s] = type.id
+        (@satisfies ||= []) << [ type, data["satisfies"].to_s ] if data["satisfies"].present?
+      end
+      Array(@satisfies).each do |type, ref|
+        target = @map[:inspection_type][ref]
+        type.update_column(:satisfies_id, target) if target && type.satisfies_id.nil? && target != type.id
       end
       m("inspection_records").each do |data|
         type_id = @map[:inspection_type][data["inspection_type_id"].to_s]

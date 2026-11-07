@@ -10,12 +10,12 @@
       </div>
       <div class="card-body">
         <% if @airworthiness.issues.empty? %>
-          <p class="text-sm text-emerald-700">No open issues. All tracked ADs, inspections, components and squawks are current.</p>
+          <p class="text-sm text-emerald-700">Nothing overdue or due soon. All tracked ADs, inspections, components and squawks are current.</p>
         <% else %>
           <ul class="divide-y divide-slate-100">
             <% @airworthiness.issues.each do |issue| %>
               <li class="flex items-start gap-3 py-2">
-                <span class="<%= issue.severity == 'RED' ? 'badge-red' : 'badge-orange' %> mt-0.5"><%= issue.category %></span>
+                <span class="<%= issue_badge_class(issue) %> mt-0.5"><%= issue.category %></span>
                 <div>
                   <div class="text-sm font-medium"><%= issue.title %></div>
                   <div class="text-xs text-slate-500"><%= issue.description %></div>
@@ -25,8 +25,9 @@
           </ul>
         <% end %>
         <% if @aircraft.airworthiness_enforcement? %>
-          <p class="hint mt-3">Airworthiness enforcement is on: flights and hours updates are blocked while the status is red.</p>
+          <p class="hint mt-3">Airworthiness enforcement is on: flights and hours updates are blocked while the aircraft shows Grounded.</p>
         <% end %>
+        <p class="hint mt-3"><%= Airworthiness::DISCLAIMER %></p>
       </div>
     </section>
 

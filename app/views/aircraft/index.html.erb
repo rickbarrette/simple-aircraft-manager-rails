@@ -39,7 +39,7 @@
           <% if aw.issues.any? %>
             <ul class="mt-3 space-y-1 text-xs">
               <% aw.issues.first(3).each do |issue| %>
-                <li class="<%= issue.severity == 'RED' ? 'text-red-700' : 'text-amber-700' %>">• <%= issue.title %></li>
+                <li class="<%= issue_text_class(issue) %>">• <%= issue.title %></li>
               <% end %>
               <% if aw.issues.size > 3 %><li class="text-slate-500">+ <%= aw.issues.size - 3 %> more</li><% end %>
             </ul>

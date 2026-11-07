@@ -16,7 +16,7 @@ class AdCompliance < ApplicationRecord
   # + interval). Only fills a blank/zero value, so a typed-in reading wins.
   def fill_next_due
     return if closed? || airworthiness_directive.nil?
-    base = aircraft_hours_at_compliance || aircraft&.tach_time
+    base = aircraft_hours_at_compliance || aircraft&.current_hours
     due = Compliance.next_due(airworthiness_directive.due_rule, date: date_complied, hours: base)
     self.next_due_at_time = due[:hours] if due[:hours]
   end
@@ -35,7 +35,7 @@ class AdCompliance < ApplicationRecord
   def next_due_is_a_future_reading
     due = next_due_at_time.to_d
     return if closed? || due <= 0
-    base = aircraft_hours_at_compliance || aircraft&.tach_time
+    base = aircraft_hours_at_compliance || aircraft&.current_hours
     return unless base && due <= base
     errors.add(:next_due_at_time, "must be a tach reading after the compliance hours (#{base}). " \
                                   "For “every 100 hours” enter #{base + 100}, not 100")

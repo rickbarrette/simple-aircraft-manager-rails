@@ -51,7 +51,7 @@ if ENV["DEMO"].present?
   end
 
   annual = InspectionType.find_or_create_by!(name: "Annual Inspection") { _1.recurring = true; _1.recurring_months = 12 }
-  xpdr = InspectionType.find_or_create_by!(name: "Transponder (91.413)") { _1.recurring = true; _1.recurring_months = 24 }
+  xpdr = InspectionType.find_or_create_by!(name: "Transponder (91.413)") { _1.recurring = true; _1.recurring_months = 24; _1.effect = "no_transponder" }
   [ annual, xpdr ].each { |t| t.aircraft << ac unless t.aircraft.include?(ac) }
   ac.inspection_records.find_or_create_by!(inspection_type: annual) { _1.date = 11.months.ago.to_date; _1.aircraft_hours = 4150 }
   ac.inspection_records.find_or_create_by!(inspection_type: xpdr) { _1.date = 10.months.ago.to_date; _1.aircraft_hours = 4160 }

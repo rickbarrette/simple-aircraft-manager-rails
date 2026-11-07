@@ -65,7 +65,15 @@ module Compliance
     result
   end
 
-  def inspection_status(type, last_record, current_hours, today = Date.current)
+  # `records` are those that count for the type (InspectionType#records_for).
+  # Calendar intervals run from the latest one's date. Hour intervals run from
+  # the hours at the latest one, except that an inspection done late, within
+  # the type's hours_tolerance, is counted from when it was due (91.409(b):
+  # the 100-hour's 10-hour allowance counts toward the next 100 hours). Done
+  # early, there's no credit: the next is counted from when it was done.
+  def inspection_status(type, records, current_hours, today = Date.current)
+    records = records.to_a
+    last_record = records.max_by { [ _1.date, _1.created_at || Time.at(0) ] }
     return Result.new(rank: OVERDUE) unless last_record
     return Result.new(rank: COMPLIANT) unless type.recurring?
 
@@ -84,19 +92,30 @@ module Compliance
       end
     end
 
-    interval = type.recurring_hours.to_d
-    if interval > 0 && (hours_at = last_record.hours_at_inspection)
-      since = current_hours - hours_at
-      result.next_due_hours = hours_at + interval
-      if since >= interval
+    if (due_hours = next_due_hours(type, records))
+      result.next_due_hours = due_hours
+      if current_hours >= due_hours
         rank = OVERDUE
-      elsif since + Airworthiness::HOURS_WARNING >= interval
+      elsif current_hours + Airworthiness::HOURS_WARNING >= due_hours
         rank = [ rank, DUE_SOON ].max
       end
     end
 
     result.rank = rank
     result
+  end
+
+  def next_due_hours(type, records)
+    interval = type.recurring_hours.to_d
+    return unless interval.positive?
+    tolerance = type.hours_tolerance.to_d
+    due = nil
+    records.select(&:hours_at_inspection).sort_by { [ _1.date, _1.hours_at_inspection ] }.each do |r|
+      hours = r.hours_at_inspection.to_d
+      base = due && hours > due && hours - due <= tolerance ? due : hours
+      due = base + interval
+    end
+    due
   end
 
   # Rows for the ADs tab: every applicable AD with its latest compliance and status.
@@ -123,11 +142,12 @@ module Compliance
   def inspection_rows(aircraft)
     hours = aircraft.current_hours
     aircraft.applicable_inspection_types.ordered.map do |type|
-      latest = type.inspection_records.for_aircraft(aircraft).recent_first.first
+      records = type.records_for(aircraft).to_a
+      latest = records.max_by { [ _1.date, _1.created_at || Time.at(0) ] }
       if latest.nil?
         InspectionRow.new(type: type, latest: nil, status: "never_completed")
       else
-        res = inspection_status(type, latest, hours)
+        res = inspection_status(type, records, hours)
         InspectionRow.new(type: type, latest: latest, status: res.label,
                           next_due_date: res.next_due_date, next_due_hours: res.next_due_hours)
       end

@@ -6,7 +6,7 @@ class AdCompliancesController < ApplicationController
   def new
     ad = @aircraft.applicable_ads.find_by(id: params[:ad_id])
     @compliance = AdCompliance.new(aircraft: @aircraft, airworthiness_directive: ad, date_complied: Date.current,
-                                   aircraft_hours_at_compliance: @aircraft.tach_time,
+                                   aircraft_hours_at_compliance: @aircraft.current_hours,
                                    not_applicable: params[:not_applicable] == "1")
     @compliance.compliance_notes = "Not applicable: " if @compliance.not_applicable?
     @compliance.fill_next_due

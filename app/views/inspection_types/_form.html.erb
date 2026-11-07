@@ -1,14 +1,21 @@
 <%= form_with model: inspection_type, url: inspection_type.new_record? ? aircraft_inspection_types_path(aircraft) : aircraft_inspection_type_path(aircraft, inspection_type), class: "card card-body space-y-4 max-w-2xl" do |f| %>
   <%= f.errors_summary %>
   <%= f.field :name, required: true, placeholder: "Annual Inspection" %>
-  <div class="flex gap-6">
-    <%= f.field :required, as: :checkbox, label: "Required for airworthiness" %>
-    <%= f.field :recurring, as: :checkbox, label: "Recurring" %>
-  </div>
+  <%= f.field :effect, as: :select, label: "When overdue", collection: InspectionType::EFFECTS.invert,
+        hint: "An overdue pitot-static check (91.411) only rules out IFR, and an overdue transponder check (91.413) only rules out using the transponder. Neither grounds the aircraft." %>
+  <%= f.field :recurring, as: :checkbox, label: "Recurring" %>
   <div class="grid gap-4 sm:grid-cols-3">
     <%= f.field :recurring_hours, as: :number, step: 0.1, label: "Every (hours)" %>
     <%= f.field :recurring_months, as: :number, label: "Every (calendar months)", hint: "Due end of month." %>
     <%= f.field :recurring_days, as: :number, label: "Every (days)" %>
+  </div>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :hours_tolerance, as: :number, step: 0.1, min: 0, label: "Overrun allowance (hours)",
+          hint: "For the 100-hour: 10. Done late within this, the next one counts from when it was due (91.409(b))." %>
+    <% others = aircraft.applicable_inspection_types.ordered.where.not(id: inspection_type.id) %>
+    <%= f.field :satisfies_id, as: :select, label: "Also counts as", include_blank: "— Nothing else —",
+          collection: others.map { [ _1.name, _1.id ] },
+          hint: "An annual also counts as the 100-hour (91.409(b))." %>
   </div>
   <%= render "shared/applicability_fields", aircraft: aircraft, record: inspection_type, applies_to_airframe: @applies_to_airframe %>
   <% if inspection_type.persisted? && inspection_type.aircraft.count > 1 %>

@@ -10,7 +10,8 @@
         <tbody>
           <% @rows.each do |row| %>
             <tr>
-              <td class="font-medium"><%= row.type.name %><%= tag.span(" optional", class: "text-xs text-slate-400") unless row.type.required? %></td>
+              <td class="font-medium"><%= row.type.name %><%= tag.span(" #{row.type.advisory? ? 'advisory' : row.type.limitation.to_s.downcase + ' if overdue'}", class: "text-xs text-slate-400") if row.type.advisory? || row.type.limitation %>
+                <% if row.type.satisfies %><div class="text-xs text-slate-500">Also counts as <%= row.type.satisfies.name %></div><% end %></td>
               <td class="text-xs"><%= row.type.interval_description %></td>
               <td class="text-xs"><%= row.latest ? "#{row.latest.date} @ #{hours(row.latest.hours_at_inspection)} h" : "—" %></td>
               <td class="text-xs"><%= [row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} h"].compact.join(" / ").presence || "—" %></td>

@@ -119,7 +119,7 @@ module AircraftArchive
 
     def aircraft_hash(a)
       { id: id(a), tail_number: a.tail_number, make: a.make, model: a.model, serial_number: a.serial_number,
-        description: a.description, purchased: a.purchased&.iso8601, status: a.status, tach_time: dec(a.tach_time),
+        description: a.description, purchased: a.purchased&.iso8601, status: a.status, time_basis: a.time_basis, tach_time: dec(a.tach_time),
         tach_time_offset: dec(a.tach_time_offset), hobbs_time: dec(a.hobbs_time), hobbs_time_offset: dec(a.hobbs_time_offset),
         picture: file(a.picture, "aircraft_pictures"), icao_type: a.icao_type }
     end
@@ -150,7 +150,8 @@ module AircraftArchive
     end
 
     def inspection_type_hash(t, component_ids)
-      { id: id(t), name: t.name, recurring: t.recurring, required: t.required, recurring_hours: dec(t.recurring_hours),
+      { id: id(t), name: t.name, recurring: t.recurring, required: t.required, effect: t.effect,
+        hours_tolerance: dec(t.hours_tolerance), satisfies: t.satisfies_id && id(t.satisfies), recurring_hours: dec(t.recurring_hours),
         recurring_days: t.recurring_days, recurring_months: t.recurring_months,
         applicable_aircraft: t.aircraft_ids.include?(@aircraft.id) ? [ id(@aircraft) ] : [],
         applicable_component: (t.component_ids & component_ids).map { id(_1) } }

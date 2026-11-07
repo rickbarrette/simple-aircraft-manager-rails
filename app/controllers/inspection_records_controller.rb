@@ -5,7 +5,7 @@ class InspectionRecordsController < ApplicationController
 
   def new
     @record = InspectionRecord.new(aircraft: @aircraft, date: Date.current,
-                                   aircraft_hours: @aircraft.tach_time,
+                                   aircraft_hours: @aircraft.current_hours,
                                    inspection_type_id: params[:inspection_type_id])
   end
 

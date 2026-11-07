@@ -11,7 +11,7 @@ class MajorRecordsController < ApplicationController
 
   def new
     @record = @aircraft.major_records.new(record_type: params[:type] || "repair", date_performed: Date.current,
-                                          aircraft_hours: @aircraft.tach_time)
+                                          aircraft_hours: @aircraft.current_hours)
   end
 
   def create

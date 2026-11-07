@@ -28,7 +28,12 @@ class Aircraft < ApplicationRecord
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
 
+  # Which clock counts as time in service for maintenance (14 CFR 1.1 defines
+  # it as takeoff to landing; many owners use tach, some Hobbs).
+  TIME_BASES = { "tach" => "Tach", "hobbs" => "Hobbs" }.freeze
+
   validates :tail_number, presence: true
+  validates :time_basis, inclusion: { in: TIME_BASES.keys }
   validates :status, inclusion: { in: STATUSES.keys }
   validates :icao_type, format: { with: /\A[A-Z0-9]{1,4}\z/, message: "must be an ICAO type designator like C150" }, allow_blank: true
   normalizes :icao_type, with: ->(t) { t.strip.upcase.presence }
@@ -40,10 +45,14 @@ class Aircraft < ApplicationRecord
 
   def status_label = STATUSES[status]
 
-  # Hours used for compliance calculations (tach minus offset, as in the original).
+  # Time in service used for maintenance: the chosen clock minus its offset
+  # (as in the original, offsets cover a replaced meter).
   def current_hours
-    tach_time - tach_time_offset
+    hobbs? ? hobbs_time - hobbs_time_offset : tach_time - tach_time_offset
   end
+
+  def hobbs? = time_basis == "hobbs"
+  def time_basis_label = TIME_BASES[time_basis]
 
   def airworthiness
     @airworthiness ||= Airworthiness.new(self).call

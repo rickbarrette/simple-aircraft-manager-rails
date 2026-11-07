@@ -68,7 +68,7 @@ class AircraftController < ApplicationController
     params.require(:aircraft).permit(
       :tail_number, :make, :model, :serial_number, :description, :purchased, :status,
       :tach_time, :tach_time_offset, :hobbs_time, :hobbs_time_offset,
-      :airworthiness_enforcement, :picture, :icao_type
+      :airworthiness_enforcement, :picture, :icao_type, :time_basis
     )
   end
 end

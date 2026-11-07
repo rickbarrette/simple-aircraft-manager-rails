@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_190000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -120,6 +120,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_180000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "icao_type"
+    t.string "time_basis", default: "tach", null: false
   end
 
   create_table "aircraft_airworthiness_directives", id: false, force: :cascade do |t|
@@ -396,6 +397,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_180000) do
     t.integer "recurring_months", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "effect", default: "grounds", null: false
+    t.decimal "hours_tolerance", precision: 6, scale: 1, default: "0.0", null: false
+    t.integer "satisfies_id"
+    t.index ["satisfies_id"], name: "index_inspection_types_on_satisfies_id"
   end
 
   create_table "logbook_entries", force: :cascade do |t|
@@ -584,6 +589,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_180000) do
   add_foreign_key "inspection_records", "components"
   add_foreign_key "inspection_records", "inspection_types"
   add_foreign_key "inspection_records", "logbook_entries", on_delete: :nullify
+  add_foreign_key "inspection_types", "inspection_types", column: "satisfies_id", on_delete: :nullify
   add_foreign_key "logbook_entries", "aircraft"
   add_foreign_key "logbook_entries", "documents", on_delete: :nullify
   add_foreign_key "logbook_imports", "aircraft"

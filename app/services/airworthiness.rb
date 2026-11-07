@@ -1,22 +1,43 @@
-# Computes RED / ORANGE / GREEN airworthiness for an aircraft. Checks (in order):
-# AD compliance, grounding squawks, inspection recurrency, component replacement.
+# Summarizes an aircraft's records: AD compliance, grounding squawks,
+# inspection recurrency and component replacement.
+#
+#   RED     something that grounds the aircraft is overdue
+#   LIMITED it may fly with limitations (pitot-static overdue: VFR only;
+#           transponder check overdue: no transponder)
+#   ORANGE  something is due soon
+#   GREEN   nothing overdue or due soon
+#
+# This reflects only what's recorded here. Before each flight the pilot in
+# command decides whether the aircraft is airworthy (14 CFR 91.7).
 class Airworthiness
   HOURS_WARNING = BigDecimal("10")
   DAYS_WARNING = 30
 
   RED = "RED"
+  LIMITED = "LIMITED"
   ORANGE = "ORANGE"
   GREEN = "GREEN"
+  DISCLAIMER = "Based on the records in this app. Before each flight the pilot in command decides whether the aircraft is airworthy (14 CFR 91.7)."
 
-  Issue = Struct.new(:category, :severity, :title, :description, :item, keyword_init: true)
+  Issue = Struct.new(:category, :severity, :title, :description, :item, :limitation, keyword_init: true)
 
   Status = Struct.new(:status, :issues, keyword_init: true) do
     def red? = status == RED
+    def limited? = status == LIMITED
     def orange? = status == ORANGE
     def green? = status == GREEN
-    def can_fly? = green?
+    def can_fly? = !red?
     def red_issues = issues.select { |i| i.severity == RED }
-    def label = { RED => "Not Airworthy", ORANGE => "Attention Needed", GREEN => "Airworthy" }[status]
+    def limitations = issues.filter_map(&:limitation).uniq
+
+    def label
+      case status
+      when RED then "Grounded"
+      when LIMITED then limitations.join(" · ")
+      when ORANGE then "Due soon"
+      else "Current"
+      end
+    end
   end
 
   def initialize(aircraft, today: Date.current)
@@ -34,6 +55,7 @@ class Airworthiness
 
     status =
       if @issues.any? { _1.severity == RED } then RED
+      elsif @issues.any? { _1.severity == LIMITED } then LIMITED
       elsif @issues.any? { _1.severity == ORANGE } then ORANGE
       else GREEN
       end
@@ -42,8 +64,8 @@ class Airworthiness
 
   private
 
-  def add(category, severity, title, description, item)
-    @issues << Issue.new(category:, severity:, title:, description:, item:)
+  def add(category, severity, title, description, item, limitation: nil)
+    @issues << Issue.new(category:, severity:, title:, description:, item:, limitation:)
   end
 
   def check_ads
@@ -68,19 +90,33 @@ class Airworthiness
   end
 
   def check_inspections
-    @aircraft.applicable_inspection_types.where(required: true).find_each do |type|
-      last = type.inspection_records.for_aircraft(@aircraft).recent_first.first
-      res = Compliance.inspection_status(type, last, @hours, @today)
+    @aircraft.applicable_inspection_types.where.not(effect: "advisory").includes(:satisfied_by).find_each do |type|
+      records = type.records_for(@aircraft).to_a
+      res = Compliance.inspection_status(type, records, @hours, @today)
       case res.rank
       when Compliance::OVERDUE
-        if last
-          add("INSPECTION", RED, "#{type.name} - Overdue", "Inspection overdue.", type)
+        title = "#{type.name} - #{records.any? ? 'Overdue' : 'Never Completed'}"
+        if (limitation = type.limitation)
+          add("INSPECTION", LIMITED, title, "#{limitation} until it's done.", type, limitation: limitation)
         else
-          add("INSPECTION", RED, "#{type.name} - Never Completed", "Required inspection has no completion record.", type)
+          add("INSPECTION", RED, title, overdue_description(type, records, res), type)
         end
       when Compliance::DUE_SOON
         add("INSPECTION", ORANGE, "#{type.name} - Due Soon", "Inspection due soon.", type)
       end
+    end
+  end
+
+  # The 100-hour may be overflown by up to its tolerance only to reach a
+  # place where it can be done (91.409(b)); say so while that's still open.
+  def overdue_description(type, records, res)
+    return "Required inspection has no completion record." if records.empty?
+    over = res.next_due_hours && @hours - res.next_due_hours
+    if over && type.hours_tolerance.positive? && over <= type.hours_tolerance
+      "Inspection overdue. It may be flown up to #{type.hours_tolerance.to_s.sub(/\.0\z/, '')} hrs past due only to reach " \
+        "a place where it can be done; that time counts toward the next interval (91.409(b))."
+    else
+      "Inspection overdue."
     end
   end
 

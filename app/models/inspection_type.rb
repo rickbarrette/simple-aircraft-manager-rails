@@ -1,9 +1,26 @@
 class InspectionType < ApplicationRecord
+  # What it means for the aircraft when this inspection is overdue.
+  EFFECTS = {
+    "grounds" => "Grounds the aircraft",
+    "no_ifr" => "No IFR flight (e.g. pitot-static, 91.411)",
+    "no_transponder" => "Transponder can't be used (91.413)",
+    "advisory" => "Advisory only"
+  }.freeze
+  # Short form for the airworthiness status ("VFR only").
+  LIMITATIONS = { "no_ifr" => "VFR only", "no_transponder" => "No transponder" }.freeze
+
   has_and_belongs_to_many :aircraft
   has_and_belongs_to_many :components
   has_many :inspection_records, dependent: :destroy
+  belongs_to :satisfies, class_name: "InspectionType", optional: true
+  has_many :satisfied_by, class_name: "InspectionType", foreign_key: :satisfies_id, inverse_of: :satisfies, dependent: :nullify
 
   validates :name, presence: true
+  validates :effect, inclusion: { in: EFFECTS.keys }
+  validates :hours_tolerance, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  validate { errors.add(:satisfies, "can't be the inspection itself") if satisfies_id.present? && satisfies_id == id }
+  # `required` mirrors effect, for archives shared with the original app.
+  before_validation { self.required = effect != "advisory" }
 
   scope :ordered, -> { order(:name) }
 
@@ -15,6 +32,17 @@ class InspectionType < ApplicationRecord
   end
 
   def to_s = name
+  def effect_label = EFFECTS[effect]
+  def limitation = LIMITATIONS[effect]
+  def advisory? = effect == "advisory"
+
+  # Records that count for this inspection on the aircraft: its own, plus
+  # those of inspections that satisfy it (an annual for the 100-hour).
+  def records_for(aircraft)
+    InspectionRecord.for_aircraft(aircraft).where(inspection_type_id: [ id, *satisfied_by.ids ])
+  end
+
+  def latest_record_for(aircraft) = records_for(aircraft).recent_first.first
 
   def due_rule
     { hours: recurring_hours.to_f, months: recurring_months, days: recurring_days } if recurring?

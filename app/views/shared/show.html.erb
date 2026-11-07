@@ -17,9 +17,10 @@
   <section class="card">
     <div class="card-header"><h2 class="card-title">Airworthiness</h2><%= airworthiness_badge(@airworthiness, large: true) %></div>
     <div class="card-body">
-      <% if @airworthiness.issues.empty? %><p class="text-sm text-emerald-700">No open issues.</p><% else %>
-        <ul class="space-y-1 text-sm"><% @airworthiness.issues.each do |i| %><li><span class="<%= i.severity == 'RED' ? 'badge-red' : 'badge-orange' %>"><%= i.category %></span> <%= i.title %> <span class="text-xs text-slate-500"><%= i.description %></span></li><% end %></ul>
+      <% if @airworthiness.issues.empty? %><p class="text-sm text-emerald-700">Nothing overdue or due soon.</p><% else %>
+        <ul class="space-y-1 text-sm"><% @airworthiness.issues.each do |i| %><li><span class="<%= issue_badge_class(i) %>"><%= i.category %></span> <%= i.title %> <span class="text-xs text-slate-500"><%= i.description %></span></li><% end %></ul>
       <% end %>
+      <p class="hint mt-3"><%= Airworthiness::DISCLAIMER %></p>
     </div>
   </section>
 

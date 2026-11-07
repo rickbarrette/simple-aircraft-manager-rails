@@ -1,6 +1,19 @@
 <%= form_with model: note, url: note.new_record? ? aircraft_notes_path(aircraft) : aircraft_note_path(aircraft, note), class: "card card-body space-y-4 max-w-2xl" do |f| %>
   <%= f.errors_summary %>
-  <%= f.field :text, as: :textarea, label: "Note", rows: 5, autofocus: true %>
+  <div data-controller="markdown-editor" data-markdown-editor-url-value="<%= preview_aircraft_notes_path(aircraft) %>">
+    <div class="mb-1 flex items-end justify-between gap-2">
+      <%= f.label :text, "Note", class: "block text-sm font-medium text-slate-700" %>
+      <div class="flex gap-1 text-xs" role="tablist">
+        <button type="button" role="tab" data-markdown-editor-target="writeTab" data-action="markdown-editor#write" class="rounded px-2 py-1 font-medium">Write</button>
+        <button type="button" role="tab" data-markdown-editor-target="previewTab" data-action="markdown-editor#preview" class="rounded px-2 py-1 font-medium">Preview</button>
+      </div>
+    </div>
+    <%= f.text_area :text, rows: 8, autofocus: true, class: "input font-mono text-sm", data: { markdown_editor_target: "input" },
+          placeholder: "**Bold**, *italic*, - lists, - [ ] checklists, [links](https://…), | tables |" %>
+    <div data-markdown-editor-target="output" hidden class="min-h-[10rem] rounded-md p-3 text-sm ring-1 ring-slate-300"></div>
+    <% if note.errors[:text].any? %><p class="mt-1 text-sm text-red-600"><%= note.errors.full_messages_for(:text).to_sentence %></p><% end %>
+    <p class="hint mt-1">Markdown works: **bold**, *italic*, # headings, lists, - [ ] checklists, links, `code` and tables.</p>
+  </div>
   <%= f.field :public, as: :checkbox, label: "Show on share links" %>
   <div class="flex gap-2"><%= f.submit "Save Note" %><%= link_to "Cancel", aircraft_notes_path(aircraft), class: "btn-secondary" %></div>
 <% end %>

@@ -22,11 +22,30 @@
   <body class="min-h-full text-slate-800">
     <header class="bg-header text-white">
       <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
-        <%= link_to root_path, class: "flex items-center gap-2 font-semibold tracking-tight" do %>
-          <span class="text-xl">✈</span> Simple Aircraft Manager
+        <%= link_to root_path, class: "flex items-center gap-2 font-semibold tracking-tight whitespace-nowrap" do %>
+          <span class="text-xl">✈</span> <span class="hidden sm:inline">Simple Aircraft Manager</span><span class="sm:hidden" aria-label="Simple Aircraft Manager">SAM</span>
         <% end %>
         <% if current_user %>
-          <nav class="flex items-center gap-4 text-sm">
+          <%# Phones: Fleet, theme and one menu for the rest. %>
+          <nav class="flex items-center gap-1 text-sm sm:hidden" aria-label="Main">
+            <%= link_to "Fleet", root_path, class: "rounded px-3 py-2 hover:bg-white/10" %>
+            <%= render "shared/theme_toggle" %>
+            <details class="relative" data-controller="dropdown" data-action="click@window->dropdown#closeOutside keydown.esc@window->dropdown#close">
+              <summary class="flex cursor-pointer list-none items-center rounded px-3 py-2 text-lg leading-none hover:bg-white/10 [&::-webkit-details-marker]:hidden" aria-label="Menu">☰</summary>
+              <div class="absolute right-0 z-30 mt-2 w-56 rounded-md bg-surface py-1 text-slate-700 shadow-lg ring-1 ring-slate-200">
+                <p class="truncate px-4 pt-2 pb-1 text-xs text-slate-500"><%= current_user.email_address %></p>
+                <%= link_to "Profile", edit_profile_path, class: "block px-4 py-2.5 hover:bg-slate-100" %>
+                <% if current_user.admin? %>
+                  <p class="border-t border-slate-100 px-4 pt-2 pb-1 text-xs font-semibold text-slate-500">Admin</p>
+                  <% [ [ "Users", admin_users_path ], [ "Component Types", admin_component_types_path ], [ "Airports", admin_airports_path ] ].each do |label, path| %>
+                    <%= link_to label, path, class: "block px-4 py-2.5 hover:bg-slate-100" %>
+                  <% end %>
+                <% end %>
+                <div class="border-t border-slate-100"><%= button_to "Sign out", session_path, method: :delete, class: "block w-full px-4 py-2.5 text-left hover:bg-slate-100" %></div>
+              </div>
+            </details>
+          </nav>
+          <nav class="hidden items-center gap-4 text-sm sm:flex" aria-label="Main">
             <%= link_to "Fleet", root_path, class: "hover:text-sky-300" %>
             <% if current_user.admin? %>
               <details class="relative" data-controller="dropdown" data-action="click@window->dropdown#closeOutside keydown.esc@window->dropdown#close">

@@ -7,6 +7,11 @@ class NotesController < ApplicationController
     @notes = @aircraft.notes.recent_first.includes(:user)
   end
 
+  # Rendered Markdown for the editor's Preview tab.
+  def preview
+    render html: helpers.markdown(params[:text].to_s.first(50_000)).presence || helpers.tag.p("Nothing to preview.", class: "hint")
+  end
+
   def new
     @note = @aircraft.notes.new
   end

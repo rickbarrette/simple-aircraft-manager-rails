@@ -33,7 +33,7 @@
       <div class="card-header"><h2 class="card-title">Results (ppm)</h2>
         <span class="text-xs text-slate-500">Lab average for similar engines in (parentheses); <span class="font-semibold text-red-700">red</span> is <%= OilAnalysis::FLAG_RATIO %>× or more above it.</span></div>
       <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table table-keep">
           <thead>
             <tr><th>Element</th>
               <% recent.each do |a| %><th class="text-right whitespace-nowrap"><%= link_to fmt_date(a.sample_date), aircraft_oil_analysis_path(@aircraft, a), class: "link" %></th><% end %></tr>

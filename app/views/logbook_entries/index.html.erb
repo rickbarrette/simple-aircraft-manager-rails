@@ -4,8 +4,8 @@
   <div class="card-header">
     <h2 class="card-title">Maintenance Logbook</h2>
     <div class="flex flex-wrap items-center gap-2">
-      <%= form_with url: aircraft_logbook_entries_path(@aircraft), method: :get, class: "flex gap-2" do |f| %>
-        <%= f.search_field :q, value: @query, placeholder: "Search entries…", class: "input w-48" %>
+      <%= form_with url: aircraft_logbook_entries_path(@aircraft), method: :get, class: "flex w-full flex-wrap gap-2 sm:w-auto" do |f| %>
+        <%= f.search_field :q, value: @query, placeholder: "Search entries…", class: "input min-w-0 flex-1 sm:w-48 sm:flex-none" %>
         <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: "All logs", selected: @log_type }, class: "input w-32" %>
         <%= f.submit "Filter", class: "btn-secondary" %>
       <% end %>

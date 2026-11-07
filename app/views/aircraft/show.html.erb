@@ -90,7 +90,7 @@
         <ul class="divide-y divide-slate-100">
           <% @notes.each do |note| %>
             <li class="px-4 py-2 text-sm">
-              <div><%= note.text.truncate(200) %></div>
+              <div><%= markdown_excerpt note.text %></div>
               <div class="text-xs text-slate-500"><%= note.user&.display_name %> · <%= time_ago_in_words(note.created_at) %> ago <%= "· public" if note.public? %></div>
             </li>
           <% end %>

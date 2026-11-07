@@ -78,6 +78,7 @@ Rails.application.routes.draw do
     resources :aircraft_roles, path: "access", only: %i[index create update destroy]
     resources :share_tokens, only: %i[create destroy]
     resource :export, controller: "aircraft_exports", only: :show
+    resource :report, controller: "maintenance_reports", only: :show
     resources :events, only: :index
   end
 
@@ -85,6 +86,7 @@ Rails.application.routes.draw do
 
   # Public read-only share links (no login).
   get "shared/:token", to: "shared#show", as: :shared
+  get "shared/:token/report", to: "shared#report", as: :shared_report
 
   namespace :admin do
     get "about", to: "about#show"

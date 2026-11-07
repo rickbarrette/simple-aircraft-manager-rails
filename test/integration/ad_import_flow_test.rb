@@ -38,9 +38,9 @@ class AdImportFlowTest < ActionDispatch::IntegrationTest
     ad.aircraft << @aircraft
     sign_in @owner
     get new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id, not_applicable: 1)
-    assert_select "input[name='ad_compliance[not_applicable]'][checked]"
+    assert_select "select[name='ad_compliance[compliance_method]'] option[selected][value=not_applicable]"
     post aircraft_ad_compliances_path(@aircraft), params: { ad_compliance: {
-      airworthiness_directive_id: ad.id, date_complied: Date.current, not_applicable: "1",
+      airworthiness_directive_id: ad.id, date_complied: Date.current, compliance_method: "not_applicable",
       compliance_notes: "Not applicable: no BRS parachute installed" } }
     assert_equal "GREEN", @aircraft.reload.airworthiness.status
   end

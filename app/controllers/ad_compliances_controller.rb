@@ -7,7 +7,8 @@ class AdCompliancesController < ApplicationController
     ad = @aircraft.applicable_ads.find_by(id: params[:ad_id])
     @compliance = AdCompliance.new(aircraft: @aircraft, airworthiness_directive: ad, date_complied: Date.current,
                                    aircraft_hours_at_compliance: @aircraft.current_hours,
-                                   not_applicable: params[:not_applicable] == "1")
+                                   compliance_method: params[:not_applicable] == "1" ? "not_applicable" : "inspection")
+    @compliance.apply_method
     @compliance.compliance_notes = "Not applicable: " if @compliance.not_applicable?
     @compliance.fill_next_due
   end
@@ -46,7 +47,8 @@ class AdCompliancesController < ApplicationController
   def compliance_params
     p = params.require(:ad_compliance).permit(
       :airworthiness_directive_id, :date_complied, :compliance_notes, :permanent, :next_due_at_time,
-      :aircraft_hours_at_compliance, :logbook_entry_id, :inspection_record_id, :component_id, :not_applicable
+      :aircraft_hours_at_compliance, :logbook_entry_id, :inspection_record_id, :component_id,
+      :compliance_method, :ad_revision
     )
     p[:airworthiness_directive_id] = scoped_id(@aircraft.applicable_ads, p[:airworthiness_directive_id])
     p[:logbook_entry_id] = scoped_id(@aircraft.logbook_entries, p[:logbook_entry_id])

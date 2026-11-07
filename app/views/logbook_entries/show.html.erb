@@ -10,7 +10,19 @@
       <span>Aircraft hours: <%= hours(@entry.aircraft_hours_at_entry) %></span>
     </div>
     <div class="whitespace-pre-wrap rounded bg-slate-50 p-3 font-mono text-sm"><%= @entry.text %></div>
-    <div class="text-sm text-slate-600">Signed off: <%= @entry.signoff_person.presence || "—" %> <%= "(#{@entry.signoff_location})" if @entry.signoff_location.present? %></div>
+    <div class="text-sm text-slate-600">
+      Signed off: <%= @entry.signoff_person.presence || "—" %>
+      <%= ", #{@entry.certificate_label}" if @entry.certificate_label %><%= " ##{@entry.signoff_certificate_number}" if @entry.signoff_certificate_number %>
+      <%= "(#{@entry.signoff_location})" if @entry.signoff_location.present? %>
+    </div>
+    <% if @entry.inspection_result %><div class="text-sm text-slate-600">Result: <%= @entry.inspection_result_label %></div><% end %>
+    <% if (missing = @entry.missing_record_items).any? %>
+      <p class="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
+        Missing for <%= @entry.entry_type == "INSPECTION" ? "43.11" : "43.9" %>: <%= missing.to_sentence %>.
+        <%= link_to("Fill in", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "link") if owner? %>
+        (Check against the signed logbook.)
+      </p>
+    <% end %>
     <% if @entry.document %>
       <p class="text-sm">Scan: <%= link_to @entry.document.name, aircraft_document_path(@aircraft, @entry.document, page: @entry.page_number), class: "link" %><%= " (page #{@entry.page_number})" if @entry.page_number %></p>
     <% end %>

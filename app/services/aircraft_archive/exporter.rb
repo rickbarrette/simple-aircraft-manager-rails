@@ -66,6 +66,7 @@ module AircraftArchive
         ads: ads.map { ad_hash(_1, component_ids) },
         ad_compliances: a.ad_compliances.map do |c|
           { id: id(c), ad_id: id(c.airworthiness_directive_id), date_complied: c.date_complied&.iso8601, compliance_notes: c.compliance_notes,
+            compliance_method: c.compliance_method, ad_revision: c.ad_revision,
             permanent: c.permanent, next_due_at_time: dec(c.next_due_at_time), aircraft_hours_at_compliance: dec(c.aircraft_hours_at_compliance),
             logbook_entry_id: id(c.logbook_entry_id), inspection_record_id: id(c.inspection_record_id), aircraft_id: id(a),
             component_id: id(c.component_id), not_applicable: c.not_applicable }
@@ -136,7 +137,9 @@ module AircraftArchive
 
     def logbook_hash(e)
       { id: id(e), aircraft_id: id(e.aircraft_id), log_type: e.log_type, date: e.date&.iso8601, text: e.text,
-        signoff_person: e.signoff_person, signoff_location: e.signoff_location, log_image_id: id(e.document_id),
+        signoff_person: e.signoff_person, signoff_location: e.signoff_location,
+        signoff_certificate_type: e.signoff_certificate_type, signoff_certificate_number: e.signoff_certificate_number,
+        inspection_result: e.inspection_result, log_image_id: id(e.document_id),
         aircraft_hours_at_entry: dec(e.aircraft_hours_at_entry), component_hours: {}, entry_type: e.entry_type,
         page_number: e.page_number, components: [], related_documents: [] }
     end

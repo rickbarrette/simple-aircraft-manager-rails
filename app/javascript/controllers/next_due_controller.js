@@ -60,6 +60,7 @@ export default class extends Controller {
   }
 
   get isPermanent() {
-    return this.permanentTargets.some((el) => el.checked)
+    // A checkbox ticked, or the method select on terminating action / N/A.
+    return this.permanentTargets.some((el) => el.tagName === "SELECT" ? [ "terminating", "not_applicable" ].includes(el.value) : el.checked)
   }
 }

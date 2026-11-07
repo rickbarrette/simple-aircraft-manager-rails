@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_200000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -53,6 +53,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_190000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "not_applicable", default: false, null: false
+    t.string "compliance_method"
+    t.string "ad_revision"
     t.index ["aircraft_id"], name: "index_ad_compliances_on_aircraft_id"
     t.index ["airworthiness_directive_id"], name: "index_ad_compliances_on_airworthiness_directive_id"
     t.index ["component_id"], name: "index_ad_compliances_on_component_id"
@@ -416,6 +418,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_190000) do
     t.integer "page_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "signoff_certificate_type"
+    t.string "signoff_certificate_number"
+    t.string "inspection_result"
     t.index ["aircraft_id"], name: "index_logbook_entries_on_aircraft_id"
     t.index ["document_id"], name: "index_logbook_entries_on_document_id"
   end

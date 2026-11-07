@@ -69,6 +69,7 @@
             <td class="text-right"><%= hours(c.aircraft_hours_at_compliance) %></td>
             <td><%= c.not_applicable? ? "N/A" : c.permanent? ? "Permanent" : (c.next_due_at_time.to_f > 0 ? hours(c.next_due_at_time) : "—") %></td>
             <td class="max-w-md text-xs">
+              <div class="font-medium text-slate-700"><%= c.method_label %><%= " · #{c.ad_revision}" if c.ad_revision.present? %></div>
               <%= c.compliance_notes %>
               <% if c.logbook_entry || c.inspection_record %>
                 <div class="mt-1 flex flex-wrap gap-x-3">

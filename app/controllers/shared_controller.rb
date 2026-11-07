@@ -5,6 +5,15 @@ class SharedController < ApplicationController
   skip_before_action :redirect_to_setup
   layout "public"
 
+  # The maintenance status report, for "Maintenance Detail" links (mechanics,
+  # inspectors, buyers).
+  def report
+    @share = ShareToken.find_active(params[:token]) or raise ActiveRecord::RecordNotFound
+    raise ActiveRecord::RecordNotFound unless @share.maintenance?
+    @report = MaintenanceReport.new(@share.aircraft)
+    render "maintenance_reports/show", layout: "report"
+  end
+
   def show
     @share = ShareToken.find_active(params[:token]) or raise ActiveRecord::RecordNotFound
     @aircraft = @share.aircraft

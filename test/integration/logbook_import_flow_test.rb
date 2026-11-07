@@ -29,7 +29,8 @@ class LogbookImportFlowTest < ActionDispatch::IntegrationTest
 
   def entry(text, page_start, page_end = page_start, **extra)
     { date: "2026-01-05", log_type: "ENG", entry_type: "MAINTENANCE", text: text, aircraft_hours: 1990.5,
-      signoff_person: "J. Mechanic A&P 1234567", signoff_location: "KOQU", page_start: page_start, page_end: page_end,
+      signoff_person: "J. Mechanic", signoff_location: "KOQU", signoff_certificate_type: "AP",
+      signoff_certificate_number: "1234567", page_start: page_start, page_end: page_end,
       confidence: "high" }.merge(extra)
   end
 
@@ -93,6 +94,7 @@ class LogbookImportFlowTest < ActionDispatch::IntegrationTest
 
     entries = @a.logbook_entries.order(:id)
     assert_equal [ "Changed oil", "Annual inspection, found airworthy", "[date unreadable] Replaced [?] gasket" ], entries.map(&:text)
+    assert_equal [ "J. Mechanic", "AP", "1234567" ], entries.first.then { [ _1.signoff_person, _1.signoff_certificate_type, _1.signoff_certificate_number ] }
     assert_equal [ 1, 2, 3 ], entries.map(&:page_number)
     assert entries.all? { _1.document == document && _1.log_type == "ENG" }
     assert_equal [ "MAINTENANCE", "INSPECTION", "MAINTENANCE" ], entries.map(&:entry_type)

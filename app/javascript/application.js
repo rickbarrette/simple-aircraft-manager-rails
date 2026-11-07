@@ -56,3 +56,7 @@ document.addEventListener("click", (event) => {
 document.addEventListener("change", (event) => {
   if (event.target.matches?.("[data-submit-on-change]")) event.target.form?.requestSubmit()
 })
+
+document.addEventListener("click", (event) => {
+  if (event.target.closest?.("[data-print]")) window.print()
+})

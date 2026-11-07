@@ -121,6 +121,8 @@ class LogbookTranscriptionJob < ApplicationJob
       date: date, text: text, log_type: log_type,
       entry_type: LogbookEntry::ENTRY_TYPES.key?(entry["entry_type"]) ? entry["entry_type"] : "OTHER",
       signoff_person: entry["signoff_person"].presence, signoff_location: entry["signoff_location"].presence,
+      signoff_certificate_type: LogbookEntry::CERTIFICATE_TYPES.key?(entry["signoff_certificate_type"]) ? entry["signoff_certificate_type"] : nil,
+      signoff_certificate_number: entry["signoff_certificate_number"].to_s.strip.first(40).presence,
       aircraft_hours_at_entry: entry["aircraft_hours"].is_a?(Numeric) && entry["aircraft_hours"] >= 0 ? entry["aircraft_hours"] : nil,
       document: @document, page_number: page_number
     )

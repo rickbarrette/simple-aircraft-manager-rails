@@ -26,7 +26,11 @@ Fields:
 - log_type: AC (airframe), ENG (engine), PROP (propeller), or OTHER
 - text: the entry text verbatim, or a close paraphrase where wording is unclear; write [?] for illegible words
 - aircraft_hours: the tach/total time the entry records (a number), or null if none is written
-- signoff_person / signoff_location: a string, or null
+- signoff_person / signoff_location: a string, or null (the person's name only; certificate details go below)
+- signoff_certificate_type: the kind of certificate written with the signature: AP (A&P), IA (A&P with
+  Inspection Authorization), A (airframe only), P (powerplant only), REPAIR_STATION (repair station
+  number), REPAIRMAN, PILOT (pilot certificate, for owner preventive maintenance), OTHER, or null
+- signoff_certificate_number: the certificate or repair station number exactly as written, or null
 - page_start / page_end: page indices within this request
 - confidence: high (clearly legible), medium (some guesswork), low (mostly illegible)
 - unparseable_pages: pages too illegible to extract anything from

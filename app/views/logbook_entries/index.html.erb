@@ -24,7 +24,8 @@
               <td class="text-xs"><%= LogbookEntry::ENTRY_TYPES[e.entry_type] %></td>
               <td class="text-right tabular-nums"><%= hours(e.aircraft_hours_at_entry) %></td>
               <td class="max-w-xl"><%= e.text.truncate(220) %> <%= "📄" if e.document %></td>
-              <td class="text-xs text-slate-500"><%= e.signoff_person %><% if e.signoff_location.present? %><br><%= e.signoff_location %><% end %></td>
+              <td class="text-xs text-slate-500"><%= e.signoff_person %><%= " ##{e.signoff_certificate_number}" if e.signoff_certificate_number %><% if e.signoff_location.present? %><br><%= e.signoff_location %><% end %>
+                <% if (missing = e.missing_record_items).any? %><br><span class="badge-orange" title="Missing: <%= missing.to_sentence %>">Incomplete</span><% end %></td>
             </tr>
           <% end %>
         </tbody>

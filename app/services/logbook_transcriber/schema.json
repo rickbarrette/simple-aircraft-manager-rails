@@ -13,12 +13,14 @@
           "aircraft_hours": { "type": ["number", "null"] },
           "signoff_person": { "type": ["string", "null"] },
           "signoff_location": { "type": ["string", "null"] },
+          "signoff_certificate_type": { "type": ["string", "null"], "description": "AP, IA, A, P, REPAIR_STATION, REPAIRMAN, PILOT, OTHER, or null" },
+          "signoff_certificate_number": { "type": ["string", "null"] },
           "page_start": { "type": "integer" },
           "page_end": { "type": "integer" },
           "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
         },
         "required": ["date", "log_type", "entry_type", "text", "aircraft_hours", "signoff_person", "signoff_location",
-                     "page_start", "page_end", "confidence"],
+                     "signoff_certificate_type", "signoff_certificate_number", "page_start", "page_end", "confidence"],
         "additionalProperties": false
       }
     },

@@ -223,6 +223,9 @@ module AircraftArchive
           entry_type: LogbookEntry::ENTRY_TYPES.key?(data["entry_type"]) ? data["entry_type"] : LogbookEntry::ENTRY_TYPES.keys.first,
           date: date(data["date"]) || Date.new(1900, 1, 1), text: data["text"].to_s.presence || "—",
           signoff_person: data["signoff_person"], signoff_location: data["signoff_location"],
+          signoff_certificate_type: LogbookEntry::CERTIFICATE_TYPES.key?(data["signoff_certificate_type"]) ? data["signoff_certificate_type"] : nil,
+          signoff_certificate_number: data["signoff_certificate_number"].to_s.presence,
+          inspection_result: LogbookEntry::INSPECTION_RESULTS.key?(data["inspection_result"]) ? data["inspection_result"] : nil,
           aircraft_hours_at_entry: num(data["aircraft_hours_at_entry"]), page_number: data["page_number"],
           document_id: @map[:document][data["log_image_id"].to_s]
         )
@@ -318,11 +321,14 @@ module AircraftArchive
         c = @aircraft.ad_compliances.new(
           airworthiness_directive_id: ad_id, date_complied: date(data["date_complied"]) || Date.new(1900, 1, 1),
           compliance_notes: data["compliance_notes"].to_s, permanent: data["permanent"] == true,
+          compliance_method: AdCompliance::METHODS.key?(data["compliance_method"]) ? data["compliance_method"] : nil,
+          ad_revision: data["ad_revision"].to_s.presence,
           next_due_at_time: num(data["next_due_at_time"]) || 0, aircraft_hours_at_compliance: num(data["aircraft_hours_at_compliance"]),
           logbook_entry_id: @map[:logbook][data["logbook_entry_id"].to_s],
           inspection_record_id: @map[:inspection_record][data["inspection_record_id"].to_s],
           component_id: @map[:component][data["component_id"].to_s], not_applicable: data["not_applicable"] == true
         )
+        c.apply_method # older archives have only the permanent / not-applicable flags
         c.save!(validate: false)
         tick("ad_compliances")
       end

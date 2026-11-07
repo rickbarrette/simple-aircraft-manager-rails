@@ -5,6 +5,13 @@ class User < ApplicationRecord
   has_many :aircraft, through: :aircraft_roles
   has_one :air_trail_connection, dependent: :destroy
 
+  # Emailed sign-in links: valid 15 minutes, and spent by the next sign-in of
+  # any kind (or an email change), so each link works once. last_signed_in_at
+  # only moves forward; signing out can't bring a used link back.
+  generates_token_for :email_sign_in, expires_in: 15.minutes do
+    [ email_address, last_signed_in_at&.to_f ]
+  end
+
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   validates :email_address, presence: true, uniqueness: true,

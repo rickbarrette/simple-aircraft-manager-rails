@@ -46,6 +46,15 @@
     </section>
 
     <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">Email</h2>
+        <%= button_to "Send test email", admin_test_email_path, class: "btn-secondary btn-sm", disabled: !MailSettings.configured?,
+              data: { turbo_submits_with: "Sending…" }, title: "Sends to #{current_user.email_address}" %>
+      </div>
+      <%= render "pairs", pairs: MailSettings.summary %>
+    </section>
+
+    <section class="card">
       <div class="card-header"><h2 class="card-title">Background jobs</h2></div>
       <% if (j = info.jobs) %>
         <%= render "pairs", pairs: [

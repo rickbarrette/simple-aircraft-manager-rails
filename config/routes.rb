@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   post "rails/active_storage/direct_uploads", to: "direct_uploads#create"
 
   resource :session
+  resources :sign_in_links, path: "session/link", param: :token, only: %i[new create show] do
+    post :consume, on: :member
+  end
   # Single sign-on: POST /auth/oidc (handled by OmniAuth) comes back here.
   match "auth/:provider/callback", to: "sso#callback", via: %i[get post], as: :sso_callback
   get "auth/failure", to: "sso#failure"
@@ -85,6 +88,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     get "about", to: "about#show"
+    post "about/test_email", to: "about#test_email", as: :test_email
     resources :users, except: :show
     resources :component_types, except: :show
     resources :airports, except: :show do

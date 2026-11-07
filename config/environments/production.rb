@@ -63,16 +63,22 @@ Rails.application.configure do
     host: ENV.fetch("APP_HOST", "localhost"),
     protocol: ENV.fetch("FORCE_SSL", "true") == "true" ? "https" : "http"
   }
-  # Password-reset emails. Configure SMTP_ADDRESS (and friends) to enable.
+  # Email (password resets, sign-in links). Configure SMTP_ADDRESS (and friends)
+  # to enable; Admin → About has a test button.
   if ENV["SMTP_ADDRESS"].present?
+    smtp_port = ENV.fetch("SMTP_PORT", 587).to_i
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
       address: ENV["SMTP_ADDRESS"],
-      port: ENV.fetch("SMTP_PORT", 587).to_i,
-      user_name: ENV["SMTP_USERNAME"],
-      password: ENV["SMTP_PASSWORD"],
-      authentication: :plain,
-      enable_starttls_auto: true
+      port: smtp_port,
+      user_name: ENV["SMTP_USERNAME"].presence,
+      password: ENV["SMTP_PASSWORD"].presence,
+      authentication: (:plain if ENV["SMTP_USERNAME"].present?),
+      # Port 465 is TLS from the start; others upgrade with STARTTLS.
+      tls: ENV.fetch("SMTP_TLS") { smtp_port == 465 ? "true" : "false" } == "true",
+      enable_starttls_auto: true,
+      open_timeout: 10,
+      read_timeout: 15
     }.compact
   end
 

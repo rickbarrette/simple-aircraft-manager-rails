@@ -84,6 +84,7 @@ Rails.application.routes.draw do
   get "shared/:token", to: "shared#show", as: :shared
 
   namespace :admin do
+    get "about", to: "about#show"
     resources :users, except: :show
     resources :component_types, except: :show
     resources :airports, except: :show do

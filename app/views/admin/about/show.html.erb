@@ -1,0 +1,75 @@
+<% content_for :title, "About" %>
+<% info = @info %>
+
+<h1 class="mb-1 text-2xl font-bold">About</h1>
+<p class="mb-5 text-sm text-slate-500">Simple Aircraft Manager: what's running, and how it's set up.</p>
+
+<section class="card card-body mb-5">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-xs uppercase tracking-wide text-slate-500">Version</p>
+      <p class="font-mono text-2xl font-semibold" data-revision><%= info.revision %></p>
+    </div>
+    <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
+      <div><dt class="text-slate-500">Built</dt><dd class="font-medium"><%= info.built_at ? l(info.built_at.in_time_zone, format: :short) : "—" %></dd></div>
+      <div><dt class="text-slate-500">Started</dt><dd class="font-medium"><%= l(info.booted_at.in_time_zone, format: :short) %></dd></div>
+      <div><dt class="text-slate-500">Uptime</dt><dd class="font-medium"><%= distance_of_time_in_words(info.booted_at, Time.current) %></dd></div>
+    </dl>
+  </div>
+</section>
+
+<div class="grid gap-5 lg:grid-cols-2">
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">Runtime</h2></div>
+    <%= render "pairs", pairs: info.runtime %>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">Features</h2></div>
+    <%= render "pairs", pairs: info.features %>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">Key components</h2></div>
+    <%= render "pairs", pairs: info.key_gems %>
+  </section>
+
+  <div class="space-y-5">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Storage</h2></div>
+      <% s = info.storage %>
+      <%= render "pairs", pairs: [
+            [ "Uploaded files", "#{number_with_delimiter(s[:files])} (#{number_to_human_size(s[:bytes])})" ],
+            [ "Saved by storing duplicates once", number_to_human_size(s[:shared_bytes]) ],
+            [ "Free disk space", s[:free_bytes] && number_to_human_size(s[:free_bytes]) ]
+          ] + info.databases.map { |label, bytes| [ "#{label} database", bytes && number_to_human_size(bytes) ] } %>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Background jobs</h2></div>
+      <% if (j = info.jobs) %>
+        <%= render "pairs", pairs: [
+              [ "Workers running", j[:workers].zero? ? tag.span("none", class: "badge-red") : j[:workers] ],
+              [ "Waiting", j[:ready] ], [ "Scheduled", j[:scheduled] ],
+              [ "Failed", j[:failed].positive? ? tag.span(j[:failed], class: "badge-orange") : 0 ]
+            ] %>
+      <% else %>
+        <%= empty_state "Job queue not available." %>
+      <% end %>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Records</h2></div>
+      <%= render "pairs", pairs: info.record_counts.transform_values { number_with_delimiter(_1) } %>
+    </section>
+  </div>
+</div>
+
+<details class="card mt-5">
+  <summary class="card-header cursor-pointer"><span class="card-title">All gems (<%= info.all_gems.size %>)</span></summary>
+  <div class="grid gap-x-6 px-4 py-3 font-mono text-xs sm:grid-cols-2 lg:grid-cols-3">
+    <% info.all_gems.each do |name, version| %>
+      <div class="flex justify-between gap-2 py-0.5"><span class="truncate"><%= name %></span><span class="text-slate-500"><%= version %></span></div>
+    <% end %>
+  </div>
+</details>

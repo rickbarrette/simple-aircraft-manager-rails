@@ -6,11 +6,12 @@ The port aims to be **easy to host**. It runs as one process with one SQLite dat
 
 ## Stack
 
-- Rails 8.1, SQLite. Solid Queue, Solid Cache, and Solid Cable all use SQLite, so there are no extra services.
+- Ruby 4.0, Rails 8.1, SQLite. Solid Queue, Solid Cache, and Solid Cable all use SQLite, so there are no extra services. Background jobs (nightly backup and records check, weekly reminders and AD search) run in the web process.
 - Hotwire (Turbo and Stimulus) with importmap, so there is no Node build step. Tailwind CSS 4 runs through `tailwindcss-rails`.
-- Active Storage on local disk handles pictures, document pages, squawk attachments, and track logs.
+- Active Storage on local disk handles pictures, document pages, squawk attachments, and track logs. Identical files are stored once (hard links).
 - Chartkick and Chart.js draw the oil and fuel charts.
-- Authentication uses the Rails 8 built-in generator (sessions plus password reset).
+- Authentication uses the Rails 8 built-in generator (sessions plus password reset), emailed sign-in links, and optional OpenID Connect single sign-on (OmniAuth).
+- Prawn renders the printable logbook entries; Commonmarker renders Markdown notes and the user guide.
 
 ## User guide
 
@@ -25,14 +26,14 @@ DEMO=1 bin/rails db:seed     # optional: demo aircraft N12345
 bin/dev                      # http://localhost:3000
 ```
 
-With demo data, sign in as `admin@example.com` / `password123` (owner) or `pilot@example.com` / `password123` (pilot).
+With demo data, sign in as `admin@example.com` / `password123` (admin, owner of N12345) or `pilot@example.com` / `password123` (pilot).
 Without demo data, the first visit asks you to create the admin account.
 
 Run the tests: `bin/rails test`
 
 ## Hosting
 
-Everything persistent lives in `storage/`: the SQLite databases and the uploaded files. Back up that one directory.
+Everything persistent lives in `storage/`: the SQLite databases and the uploaded files. Back up that one directory (see [Backups](#backups)).
 
 ### Option A: Docker Compose (simplest)
 
@@ -57,18 +58,20 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 |---|---|
 | `SECRET_KEY_BASE` | Required in production (`bin/rails secret`). Alternatively provide `RAILS_MASTER_KEY`. |
 | `FORCE_SSL` | `true` (default) redirects to HTTPS and sets secure cookies. Use `false` for plain HTTP. |
-| `APP_HOST` | Host used in password-reset email links. |
+| `APP_HOST` | Host name the app is reached at, used in email links (password resets, sign-in links, signing invitations, reminders). |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | Optional. They enable email: password resets and **Email me a sign-in link**. Without them an admin resets passwords from **Users**. Check the setup with **Admin → About → Send test email**. |
 | `SMTP_TLS` | `true` for servers that use TLS from the start. That's the default on port 465; other ports upgrade with STARTTLS. |
 | `ANTHROPIC_API_KEY` | Optional. Lets Claude transcribe scanned logbook pages into entries (**Logbook → Import scans**). Without it, scans are only uploaded. |
 | `LOGBOOK_AI_MODEL`, `LOGBOOK_AI_EFFORT` | Optional. The Claude model and effort used for transcription (default `claude-opus-5-5`, `high`). |
-| `APP_URL` | Optional public base URL, e.g. `https://aircraft.example.com` (default `https://APP_HOST`). Used for the SSO callback. |
+| `APP_URL` | Optional public base URL, e.g. `https://aircraft.example.com` (default `https://APP_HOST`). Used for the SSO and Google Drive redirect URIs. |
 | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Optional. Turn on single sign-on with an OpenID Connect provider (see below). |
 | `OIDC_PROVIDER_NAME` | Button label, e.g. `Authentik` (default `SSO`). |
 | `OIDC_AUTO_CREATE_USERS` | `true` creates an account for anyone the provider lets in. New accounts start with no aircraft. Default off: an admin adds users first. |
 | `OIDC_TRUST_EMAIL` | `true` links existing accounts by email even if the provider doesn't mark it verified. Only use it if users can't edit their own email at the provider. |
 | `OIDC_ADMIN_GROUP` | Optional. Members of this provider group become admins and others lose admin, synced at each sign-in. |
 | `PASSWORD_LOGIN` | `false` hides email/password sign-in, emailed sign-in links and password resets once SSO works. It's ignored while SSO isn't configured, so you can't lock yourself out. |
+| `APP_REPOSITORY_URL` | Optional. The source code link on Admin → About, for a fork. |
+| `APP_REVISION`, `APP_BUILT_AT` | Set as Docker build arguments (see the `Dockerfile`) so Admin → About shows the version and the records keep a software version history. |
 
 ### Single sign-on (Authentik example)
 
@@ -89,11 +92,11 @@ for db in storage/production*.sqlite3; do sqlite3 "$db" ".backup 'backup/$(basen
 rsync -aH --exclude '*.sqlite3*' storage/ backup/  # uploaded files (-H keeps the hard links that store duplicates once)
 ```
 
+Alternatively, stop the container and copy the volume.
+
 The app also makes a verified copy of the main database every night in `storage/backups` (Admin → About shows the last one), so a backup of the storage volume always contains a consistent database snapshot.
 
-For an off-site copy without extra tools, **Admin → Off-site Backup** connects a Google Drive account: each night the verified database copy and any new uploaded files are copied there, and a restore test checks them. Setup and restoring are in the [administration guide](docs/guide/administration.md#off-site-backup-to-google-drive).
-
-Alternatively, stop the container and copy the volume.
+For an off-site copy without extra tools, **Admin → Off-site Backup** connects a Google Drive account: each night the verified database copy and any new uploaded files are copied there, and a restore test checks them. Setup and restoring are in the [administration guide](docs/guide/administration.md#off-site-backup-to-google-drive). Keep `SECRET_KEY_BASE` somewhere safe off the server: stored secrets (API keys, the Drive connection) and electronic signature seals depend on it.
 
 To back up or move a single aircraft with all its files, use **Access & Sharing → Download .sam.zip** (or `bin/rails "sam:export[N12345]"`). Import it from **Fleet → Import** (or `bin/rails "sam:import[file.sam.zip,owner@example.com]"`). The archive format is the original Simple Aircraft Manager's, so archives move between the two apps.
 
@@ -108,23 +111,25 @@ To back up or move a single aircraft with all its files, use **Access & Sharing 
 | Airworthiness enforcement | Optional per aircraft. It blocks flight logs and hours updates while the aircraft is grounded (not for limitations). |
 | Components | Tree of parent and child parts, TBO and replacement limits, and service/replace reset. Owners can create new component types inline. |
 | Squawks | Four priorities. "Ground Aircraft" grounds the aircraft. Inoperative items can be deferred under 91.213(d) after confirming each condition; resolving can record the fix as a logbook entry. Attachments, reopen. |
+| Notes | Per-aircraft notes in Markdown, with a preview; shown on share links. |
 | ADs and bulletins | Shared across aircraft and applicable to the airframe or to specific components. Hour- and month-based recurrence (due at end of month), conditional and non-mandatory types, per-aircraft "not applicable" determinations, and compliance history with method of compliance and the revision complied with. |
 | New ADs | Weekly search of the Federal Register for newly published ADs mentioning the aircraft, engine or propeller models (or your own terms). Review each: track it as an AD or dismiss it. |
 | AD import | Import ADs from an FAA DRS export (`.xlsx` recommended: its AD numbers link to each AD's DRS page, which the import keeps; `.csv` works without links). ADs are matched by number, so nothing is duplicated. The preview suggests Track, Not applicable or Skip for each AD, and flags superseded or non-current ADs, model mismatches, appliance or STC-only ADs, and repetitive actions. |
 | Inspections | Shared inspection types with hour, month, and day recurrence, plus history. Each says what overdue means (grounded, no IFR, no transponder, advisory); an annual can also count as the 100-hour, and the 100-hour's 10-hour overrun is credited (91.409(b)). One click adds the standard Part 91 set. |
-| Logbook | Maintenance entries with search and a link to a scanned document page. Records the signer's certificate kind and number and an inspection's result, and flags what 43.9 / 43.11 needs that's missing. Entries transcribed by Claude stay "unverified" until someone checks them against the scan. Entry templates (built-in pilot preventive maintenance per 43.3(g) and Part 43 Appendix A(c); admins add and edit their own under Admin → Logbook templates). Engine and propeller entries link the component and record its total time and time since overhaul (SMOH/SFOH/SNEW) at the entry, worked out from the entry's airframe total time; sub-components (an oil filter on the engine…) can be included with their own times. Print entries as a PDF on Avery 5163/5164 labels or half-letter/letter pages (boxed) to sign and put in the paper logbook. |
+| Logbook | Maintenance entries with search and a link to a scanned document page. Records the signer's certificate kind and number and an inspection's result, and flags what 43.9 / 43.11 needs that's missing. Entries transcribed by Claude stay "unverified" until someone checks them against the scan. Entry templates (built-in pilot preventive maintenance per 43.3(g) and Part 43 Appendix A(c); admins add and edit their own under Admin → Logbook templates). Engine and propeller entries link the component and record its total time and time since overhaul (SMOH/SFOH/SNEW) at the entry, worked out from the entry's airframe total time; sub-components (an oil filter on the engine…) can be included with their own times. Print entries as a PDF on Avery 5163/8163 or 5164/8164 labels or half-letter/letter pages (boxed) to sign and put in the paper logbook. |
 | Documents | Collections, multi-file documents with a page viewer, per-document share visibility, bulk upload, and expiration dates (registration, insurance…). |
 | Electronic signatures | Logbook entries can be signed electronically along the lines of AC 120-78B chapter 2: the signer reviews the entry, picks their certificate, re-enters their password (or signs in again with SSO) and confirms a "Certified by" statement. The signature records who, which certificate, the statement, the time and a SHA-256 fingerprint of the entry, sealed by the server; the signer gets an email. Signed entries are locked: a correction is a new signed entry that supersedes the original. Owners can invite an outside mechanic to sign one entry with their own account. Disabled accounts can't sign; their past signatures stay. |
 | Records integrity | Every change to maintenance records is kept (who, when, field by field) in a hash chain per aircraft (Activity → Record history). Nightly: a verified SQLite backup in `storage/backups` (how many are kept: Admin → Settings), then a check of the history chains and every signature; admins are emailed on a problem (Admin → About). Software versions are recorded. A records package (Access & Sharing) bundles every entry as a PDF with signatures, a signature register, the history, the status report and the `.sam.zip` for the FAA or a buyer. Scans of paper logbooks can be marked as legacy records, with an "electronic records since" date per aircraft. |
 | Off-site backup | Nightly copy of the verified database snapshot (newest 30 kept) and every new uploaded file to Google Drive, using your own Google OAuth client and the `drive.file` scope (the app sees only its own files). Restore test from the admin page; failures emailed to admins; `bin/rails offsite:restore_files` brings files back after a restore. |
 | Recordkeeping procedures and audits | Admin → Recordkeeping Procedures generates the procedures document AC 120-78B asks for (who is responsible, who may sign, signing, corrections, backups, access, audits, transfer, legacy records) from the system setup plus a few details you fill in; adopt it as numbered, unchangeable revisions, included in the records package. Admin → Records Audits is a periodic QC checklist (app checks plus a restore test, a sample of entries against source documents and a user review); admins get the due date in the weekly reminder. The users' instructions are the guide's [Electronic records and signing](docs/guide/records.md) page. |
 | Major repairs and alterations | Form 337, STC, and ICA tracking; an STC's ICA can become a tracked recurring inspection. |
-| Weight & balance | History of empty weight and CG (linked to the alteration that changed them) and a loading calculator: takeoff and landing weight and CG against max gross and the CG envelope. |
+| Weight & balance | History of empty weight and CG (linked to the alteration that changed them) and a loading calculator: takeoff and landing weight and CG against max gross and the CG envelope. The envelope can be entered as CG (inches) or as moment (lb-in/1000, as in POH moment charts and Garmin Pilot). |
 | Status report | A printable maintenance status (91.417(a)(2)): total times, life-limited parts, time since overhaul, inspections, ADs with method and revision, major alterations, open discrepancies. Also on maintenance share links. |
-| Reminders | A Monday email to owners when something is overdue or coming due (needs SMTP; users can turn it off). |
+| Reminders | A Monday email to owners when something is overdue or coming due, and to anyone whose certificate (e.g. an IA) is about to expire; admins also get the records audit due date (needs SMTP; users can turn it off). |
 | Oil and fuel | Records, trend charts, and averages (last 20 intervals, IQR outlier filtering, manual exclusion). |
 | Activity log | Every write is recorded as an `AircraftEvent`. |
-| Access | Admin, owner, and pilot roles, plus share links (Status or Maintenance privilege, optional expiry, at most 10 per aircraft). |
+| Access | Admin, owner, and pilot roles, plus share links (Current Status or Maintenance Detail, optional expiry, at most 10 per aircraft). Admins can disable accounts; a disabled account can't sign in or sign entries, and its past signatures stay. |
+| Help | The [user guide](docs/guide/README.md), shown in the app under **Help**. |
 
 ### Roles
 
@@ -132,11 +137,13 @@ To back up or move a single aircraft with all its files, use **Access & Sharing 
 |---|:-:|:-:|:-:|
 | View everything on the aircraft | ✓ | ✓ | ✓ |
 | Update hours, log flights, add squawks/notes/oil/fuel | ✓ | ✓ | ✓ |
+| Defer squawks (91.213(d)) | ✓ | ✓ | ✓ |
+| Sign logbook entries with their own certificate | ✓ | ✓ | ✓ |
 | Edit or delete squawks and notes, resolve squawks | ✓ | ✓ | |
 | Components, logbook, ADs, inspections, documents, major records | ✓ | ✓ | |
 | Edit or delete aircraft, manage people and share links | ✓ | ✓ | |
 | Create aircraft (creator becomes owner) | ✓ | ✓ | ✓ |
-| Manage users and component types | ✓ | | |
+| Users, component types, airports, templates, settings, off-site backup, procedures and audits | ✓ | | |
 
 Users who aren't on an aircraft get a 404 for it, identical to a missing record.
 
@@ -157,15 +164,15 @@ Users who aren't on an aircraft get a 404 for it, identical to a missing record.
 Differences from the original:
 - Integer primary keys instead of UUIDs. Share tokens are 32-character random strings.
 - Logbook entries and inspection records don't keep many-to-many links to components. An inspection record or AD compliance can reference one component.
-- Accounts are created by an admin, or by the first-run setup. The original's invitation codes aren't implemented yet.
+- Accounts are created by an admin, by the first-run setup, at first SSO sign-in (if `OIDC_AUTO_CREATE_USERS` is on), or by an outside mechanic accepting a signing invitation. The original's invitation codes aren't implemented yet.
 
 ### Not yet ported
 
-The MCP server for AI agents, OIDC single sign-on, invitation codes, per-aircraft feature switches, the plugin system, and the desktop builds.
+The MCP server for AI agents, invitation codes, per-aircraft feature switches, the plugin system, and the desktop builds.
 
 ### Added in this port
 
-AirTrail sync and export, an airport database, FAA DRS AD import, spreadsheet flight import, engine monitor data (CGR-30P/C) with interactive charts, AvLab and Blackstone oil analysis import with trends, multiple squawk attachments with a photo viewer, AI logbook transcription with Claude (images and PDFs), and an installable PWA.
+AirTrail sync and export, an airport database, FAA DRS AD import, spreadsheet flight import, engine monitor data (CGR-30P/C) with interactive charts, AvLab and Blackstone oil analysis import with trends, multiple squawk attachments with a photo viewer, AI logbook transcription with Claude (images and PDFs), printable logbook entries, electronic signatures and recordkeeping along the lines of AC 120-78B (record history, nightly integrity checks, records package, procedures and audits), off-site backup to Google Drive, a user guide, and an installable PWA.
 
 ## License
 

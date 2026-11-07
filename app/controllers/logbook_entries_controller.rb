@@ -26,6 +26,7 @@ class LogbookEntriesController < ApplicationController
   def show; end
 
   def new
+    LogbookTemplate.ensure_defaults!
     @entry = @aircraft.logbook_entries.new(date: Date.current, aircraft_hours_at_entry: @aircraft.current_hours)
   end
 

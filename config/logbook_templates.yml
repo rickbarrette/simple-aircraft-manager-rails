@@ -1,0 +1,95 @@
+# Built-in logbook templates: common preventive maintenance a pilot may do on
+# an aircraft they own or operate (14 CFR 43.3(g)), keyed to Part 43 Appendix A
+# paragraph (c). Descriptions are paraphrased; the rule sets each item's limits.
+# Admins can edit these and add their own (Admin -> Logbook templates).
+- name: "Oil and filter change"
+  log_type: ENG
+  reference: "Part 43 App. A (c)(6), (c)(23)"
+  text: "Drained engine oil and replaced the oil filter. Cut open and inspected the filter: no metal found. Refilled with __ qt of __. Ran engine and checked for leaks. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(6) and (c)(23)."
+  certificate_type: PILOT
+- name: "Tire removal, installation or repair"
+  reference: "Part 43 App. A (c)(1)"
+  text: "Removed and replaced the __ tire and tube. Inflated to __ psi. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(1)."
+  certificate_type: PILOT
+- name: "Servicing landing gear shock struts"
+  reference: "Part 43 App. A (c)(3)"
+  text: "Serviced the __ shock strut with __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(3)."
+  certificate_type: PILOT
+- name: "Servicing wheel bearings"
+  reference: "Part 43 App. A (c)(4)"
+  text: "Cleaned, inspected and repacked the __ wheel bearings with __ grease. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(4)."
+  certificate_type: PILOT
+- name: "Replacing safety wire or cotter keys"
+  reference: "Part 43 App. A (c)(5)"
+  text: "Replaced defective safety wire / cotter key at __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(5)."
+  certificate_type: PILOT
+- name: "Lubrication"
+  reference: "Part 43 App. A (c)(6)"
+  text: "Lubricated __ per the maintenance manual. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(6)."
+  certificate_type: PILOT
+- name: "Replenishing hydraulic fluid"
+  reference: "Part 43 App. A (c)(8)"
+  text: "Replenished the hydraulic reservoir with __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(8)."
+  certificate_type: PILOT
+- name: "Repairing upholstery"
+  reference: "Part 43 App. A (c)(11)"
+  text: "Repaired the upholstery of __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(11)."
+  certificate_type: PILOT
+- name: "Small repairs to fairings or cowlings"
+  reference: "Part 43 App. A (c)(12)"
+  text: "Made a small repair to the __ (non-structural, contour unchanged). Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(12)."
+  certificate_type: PILOT
+- name: "Replacing safety belts"
+  reference: "Part 43 App. A (c)(14)"
+  text: "Replaced the __ safety belt with P/N __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(14)."
+  certificate_type: PILOT
+- name: "Repairing landing light circuits"
+  reference: "Part 43 App. A (c)(16)"
+  text: "Troubleshot and repaired a broken circuit in the landing light wiring. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(16)."
+  certificate_type: PILOT
+- name: "Replacing light bulbs, reflectors or lenses"
+  reference: "Part 43 App. A (c)(17)"
+  text: "Replaced the __ position/landing light bulb with P/N __. Checked operation. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(17)."
+  certificate_type: PILOT
+- name: "Replacing a cowling"
+  reference: "Part 43 App. A (c)(19)"
+  text: "Removed and reinstalled the __ cowling. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(19)."
+  certificate_type: PILOT
+- name: "Cleaning or replacing spark plugs"
+  log_type: ENG
+  reference: "Part 43 App. A (c)(20)"
+  text: "Removed, cleaned, gapped and rotated the spark plugs. Reinstalled and torqued to __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(20)."
+  certificate_type: PILOT
+- name: "Replacing hose connections (not hydraulic)"
+  reference: "Part 43 App. A (c)(21)"
+  text: "Replaced the __ hose with P/N __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(21)."
+  certificate_type: PILOT
+- name: "Replacing prefabricated fuel lines"
+  reference: "Part 43 App. A (c)(22)"
+  text: "Replaced the prefabricated fuel line __ with P/N __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(22)."
+  certificate_type: PILOT
+- name: "Cleaning or replacing fuel/oil strainers or filters"
+  reference: "Part 43 App. A (c)(23)"
+  text: "Cleaned / replaced the __ strainer / filter element. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(23)."
+  certificate_type: PILOT
+- name: "Replacing or servicing the battery"
+  reference: "Part 43 App. A (c)(24)"
+  text: "Replaced the battery with P/N __ / serviced the battery. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(24)."
+  certificate_type: PILOT
+- name: "Replacing non-structural fasteners"
+  reference: "Part 43 App. A (c)(26)"
+  text: "Replaced non-structural standard fasteners at __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(26)."
+  certificate_type: PILOT
+- name: "Checking magnetic chip detectors"
+  log_type: ENG
+  reference: "Part 43 App. A (c)(29)"
+  text: "Removed, checked and reinstalled the magnetic chip detector: no particles found. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(29)."
+  certificate_type: PILOT
+- name: "Updating the navigation database"
+  reference: "Part 43 App. A (c)(31)"
+  text: "Updated the __ navigation database to cycle __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(31)."
+  certificate_type: PILOT
+- name: "Swapping a tray-mounted nav/com unit"
+  reference: "Part 43 App. A (c)(32)"
+  text: "Removed and reinstalled the tray-mounted __ unit. Checked operation. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(32)."
+  certificate_type: PILOT

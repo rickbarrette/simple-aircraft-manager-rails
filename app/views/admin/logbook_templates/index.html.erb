@@ -1,0 +1,27 @@
+<% content_for :title, "Logbook templates" %>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h1 class="text-2xl font-bold">Logbook templates</h1>
+  <div class="flex gap-2">
+    <%= button_to "Restore built-in templates", restore_admin_logbook_templates_path, class: "btn-secondary", title: "Add back any of the built-in preventive maintenance templates that were deleted" %>
+    <%= link_to "+ New Template", new_admin_logbook_template_path, class: "btn-primary" %>
+  </div>
+</div>
+<p class="mb-4 text-sm text-slate-600">Wording to start a logbook entry from: the "Template" list on a new entry. Use __ for blanks to fill in.</p>
+<section class="card">
+  <% if @templates.any? %>
+    <ul class="divide-y divide-slate-100">
+      <% @templates.each do |t| %>
+        <li class="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
+          <div class="min-w-0 flex-1 text-sm">
+            <div class="font-medium"><%= t.name %><% if t.reference.present? %> <span class="font-normal text-slate-500">— <%= t.reference %></span><% end %></div>
+            <div class="text-xs text-slate-500"><%= [ LogbookEntry::ENTRY_TYPES[t.entry_type], (t.log_type && "#{LogbookEntry::LOG_TYPES[t.log_type]} log"), (t.certificate_type && LogbookEntry::CERTIFICATE_TYPES[t.certificate_type]) ].compact.join(" · ") %></div>
+            <p class="mt-1 text-xs text-slate-600"><%= t.text.truncate(220) %></p>
+          </div>
+          <%= link_to "Edit", edit_admin_logbook_template_path(t), class: "btn-secondary btn-sm" %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <%= empty_state "No templates." %>
+  <% end %>
+</section>

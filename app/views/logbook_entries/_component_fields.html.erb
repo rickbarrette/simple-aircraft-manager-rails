@@ -10,7 +10,9 @@
           {}, class: "input", data: { component_times_target: "component", action: "component-times#componentChanged" } %>
     <p class="hint">For engine and propeller logs: printed with its serial number and times.</p>
   </div>
-  <%= f.field :component_hours_at_entry, as: :number, step: 0.1, label: "Component total time", data: { component_times_target: "total" } %>
-  <%= f.field :component_since_overhaul_at_entry, as: :number, step: 0.1, label: "Since overhaul", data: { component_times_target: "since" },
-        hint: "Filled in from the component; correct them for an older entry." %>
+  <%= f.field :component_hours_at_entry, as: :number, step: 0.1, label: "Component total time",
+        data: { component_times_target: "total", action: "input->component-times#markManual" } %>
+  <%= f.field :component_since_overhaul_at_entry, as: :number, step: 0.1, label: "Since overhaul",
+        data: { component_times_target: "since", action: "input->component-times#markManual" },
+        hint: "Worked out from the component's current times and the airframe total time above; edit them if they differ." %>
 </div>

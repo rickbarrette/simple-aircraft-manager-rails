@@ -112,6 +112,9 @@ Rails.application.routes.draw do
   namespace :admin do
     get "about", to: "about#show"
     resource :settings, only: %i[edit update]
+    resources :logbook_templates, except: :show do
+      collection { post :restore }
+    end
     post "about/test_email", to: "about#test_email", as: :test_email
     post "about/test_reminder", to: "about#test_reminder", as: :test_reminder
     resources :users, except: :show

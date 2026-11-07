@@ -6,7 +6,8 @@
 #   Setting.max_upload_bytes   # => 52428800
 class Setting < ApplicationRecord
   INTEGERS = {
-    "max_upload_mb" => { default: 50, in: 1..1024, label: "Maximum upload size (MB)" }
+    "max_upload_mb" => { default: 50, in: 1..1024, label: "Maximum upload size (MB)" },
+    "logbook_templates_seeded" => { default: 0, in: 0..1, label: "Built-in logbook templates added" } # internal flag
   }.freeze
 
   validates :key, presence: true, uniqueness: true, inclusion: { in: INTEGERS.keys }

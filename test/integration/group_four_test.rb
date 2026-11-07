@@ -34,14 +34,46 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     refute first.reload.verified?
   end
 
-  test "preventive maintenance templates fill in the entry with the Part 43 reference" do
+  test "built-in templates are added once, show their reference, and fill in the entry" do
     sign_in @owner
     get new_aircraft_logbook_entry_path(@a)
-    assert_select "select[data-entry-template-target=template] option", PreventiveMaintenance::ITEMS.size + 1
-    assert_select "option[value=spark_plugs][data-text*='Part 43 Appendix A paragraph (c)(20)']"
-    assert_select "option[value=oil_change][data-text*='14 CFR 43.3(g)']"
+    count = LogbookTemplate.defaults.size
+    assert_equal count, LogbookTemplate.count
+    assert_select "select[data-entry-template-target=template] option", count + 1
+    assert_select "option[data-log-type=ENG][data-certificate=PILOT][data-entry-type=MAINTENANCE]", text: "Oil and filter change — Part 43 App. A (c)(6), (c)(23)"
+    assert_select "option[data-text*='Part 43 Appendix A paragraph (c)(20)']", text: /Cleaning or replacing spark plugs/
     get edit_aircraft_logbook_entry_path(@a, @a.logbook_entries.create!(date: Date.current, text: "x"))
     assert_select "select[data-entry-template-target=template]", 0
+
+    LogbookTemplate.delete_all # deleting them sticks
+    get new_aircraft_logbook_entry_path(@a)
+    assert_equal 0, LogbookTemplate.count
+    assert_select "select[data-entry-template-target=template]", 0
+  end
+
+  test "admins add, edit and restore templates" do
+    sign_in @owner
+    get admin_logbook_templates_path
+    assert_redirected_to root_path
+
+    admin = create_user("admin@example.com", admin: true)
+    sign_in admin
+    get admin_logbook_templates_path
+    assert_select "a", text: "+ New Template"
+    oil = LogbookTemplate.find_by!(name: "Oil and filter change")
+    post admin_logbook_templates_path, params: { logbook_template: { name: "Annual sign-off", reference: "14 CFR 43.11", entry_type: "INSPECTION",
+      log_type: "AC", certificate_type: "IA", text: "Annual inspection completed IAW Part 43 Appendix D." } }
+    assert_redirected_to admin_logbook_templates_path
+    assert_equal [ "INSPECTION", "AC", "IA" ], LogbookTemplate.find_by!(name: "Annual sign-off").then { [ _1.entry_type, _1.log_type, _1.certificate_type ] }
+    post admin_logbook_templates_path, params: { logbook_template: { name: "", text: "", entry_type: "NOPE" } }
+    assert_response :unprocessable_entity
+
+    patch admin_logbook_template_path(oil), params: { logbook_template: { text: "Changed oil: __ qt of __." } }
+    assert_equal "Changed oil: __ qt of __.", oil.reload.text
+    delete admin_logbook_template_path(oil)
+    post restore_admin_logbook_templates_path
+    assert_equal "Restored 1 built-in template.", flash[:notice]
+    assert LogbookTemplate.exists?(name: "Oil and filter change")
   end
 
   test "an STC's ICA becomes a tracked inspection linked from its major record" do

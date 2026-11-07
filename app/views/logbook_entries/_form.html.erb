@@ -1,23 +1,26 @@
-<%= form_with model: [aircraft, entry], class: "card card-body space-y-4 max-w-3xl", data: { controller: "entry-template signer component-times" } do |f| %>
+<%= form_with model: [aircraft, entry], class: "card card-body space-y-4 max-w-3xl", data: { controller: "entry-template signer component-times", component_times_aircraft_hours_value: aircraft.current_hours.to_f } do |f| %>
   <%= f.errors_summary %>
-  <% if entry.new_record? %>
+  <% templates = entry.new_record? ? LogbookTemplate.ordered.to_a : [] %>
+  <% if templates.any? %>
     <div>
-      <%= label_tag :template, "Preventive maintenance template", class: "label" %>
+      <%= label_tag :template, "Template", class: "label" %>
       <select id="template" class="input" data-entry-template-target="template" data-action="entry-template#apply">
         <option value="">— Write it yourself —</option>
-        <% PreventiveMaintenance::ITEMS.each do |item| %>
-          <option value="<%= item.key %>" data-text="<%= PreventiveMaintenance.text_for(item) %>"><%= item.label %> (<%= item.paragraphs.join(", ") %>)</option>
+        <% templates.each do |t| %>
+          <option value="<%= t.id %>" data-text="<%= t.text %>" data-entry-type="<%= t.entry_type %>" data-log-type="<%= t.log_type %>"
+                  data-certificate="<%= t.certificate_type %>"><%= t.label %></option>
         <% end %>
       </select>
-      <p class="hint">For a pilot doing preventive maintenance on an aircraft they own or operate (14 CFR 43.3(g)). Fill in the blanks (__) and add your name and pilot certificate number. The item list is paraphrased from Part 43 Appendix A(c); the rule sets each item's limits.</p>
+      <p class="hint">Fill in the blanks (__). The built-in ones are for a pilot doing preventive maintenance on an aircraft they own or operate (14 CFR 43.3(g)); their wording is paraphrased from Part 43 Appendix A(c), which sets each item's limits.<% if current_user.admin? %> <%= link_to "Edit templates", admin_logbook_templates_path, class: "link" %><% end %></p>
     </div>
   <% end %>
   <div class="grid gap-4 sm:grid-cols-4">
     <%= f.field :date, as: :date %>
     <%= f.field :log_type, as: :select, label: "Logbook", collection: LogbookEntry::LOG_TYPES.invert,
-          data: { component_times_target: "logType", action: "component-times#logTypeChanged" } %>
+          data: { component_times_target: "logType", entry_template_target: "logType", action: "component-times#logTypeChanged" } %>
     <%= f.field :entry_type, as: :select, label: "Entry type", collection: LogbookEntry::ENTRY_TYPES.invert, data: { entry_template_target: "entryType" } %>
-    <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: "Airframe total time" %>
+    <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: "Airframe total time",
+          data: { component_times_target: "airframe", action: "input->component-times#airframeChanged" } %>
   </div>
   <%= render "logbook_entries/component_fields", f: f, aircraft: aircraft %>
   <%= f.field :text, as: :textarea, label: "Entry text", rows: 8, data: { entry_template_target: "text" } %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_040000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -597,6 +597,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_030000) do
     t.index ["stc_document_id"], name: "index_major_records_on_stc_document_id"
   end
 
+  create_table "offsite_connections", force: :cascade do |t|
+    t.string "provider", default: "google_drive", null: false
+    t.string "client_id"
+    t.text "client_secret"
+    t.text "refresh_token"
+    t.string "account_email"
+    t.string "folder_id"
+    t.string "database_folder_id"
+    t.string "files_folder_id"
+    t.integer "connected_by_id"
+    t.datetime "connected_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["connected_by_id"], name: "index_offsite_connections_on_connected_by_id"
+  end
+
+  create_table "offsite_files", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.string "drive_file_id", null: false
+    t.bigint "bytes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blob_id"], name: "index_offsite_files_on_blob_id", unique: true
+  end
+
+  create_table "offsite_runs", force: :cascade do |t|
+    t.string "kind", null: false
+    t.boolean "ok", null: false
+    t.text "message"
+    t.bigint "bytes"
+    t.integer "files_uploaded", default: 0, null: false
+    t.json "details"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kind", "created_at"], name: "index_offsite_runs_on_kind_and_created_at"
+  end
+
   create_table "oil_analyses", force: :cascade do |t|
     t.integer "aircraft_id", null: false
     t.integer "component_id"
@@ -832,6 +869,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_030000) do
   add_foreign_key "major_records", "documents", column: "stc_document_id", on_delete: :nullify
   add_foreign_key "major_records", "inspection_types", column: "ica_inspection_type_id", on_delete: :nullify
   add_foreign_key "major_records", "logbook_entries", on_delete: :nullify
+  add_foreign_key "offsite_connections", "users", column: "connected_by_id"
   add_foreign_key "oil_analyses", "aircraft"
   add_foreign_key "oil_analyses", "components"
   add_foreign_key "procedures_revisions", "users", column: "adopted_by_id", on_delete: :nullify

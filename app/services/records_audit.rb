@@ -28,6 +28,7 @@ class RecordsAudit
       Item.new("backup", "A verified database backup was made in the last 2 days", true,
                backup.present? && backup.ok && backup.created_at > 2.days.ago,
                backup ? "#{backup.created_at.to_date}: #{backup.message}" : "Never run"),
+      *offsite_items,
       Item.new("procedures", "The procedures document is adopted and its details filled in", true,
                revision.present? && @policy.complete?,
                revision ? "Revision #{revision.number}, adopted #{revision.adopted_at.to_date}" : "Not adopted yet"),
@@ -62,7 +63,17 @@ class RecordsAudit
     AuditRun.create!(performed_by: user, performed_at: Time.current, passed: results.all? { _1["passed"] }, results: results, notes: notes.to_s.strip.first(5000))
   end
 
+  # The latest automatic restore test (shown next to the manual restore item).
+  def restore_test = OffsiteConnection.connected? ? OffsiteRun.latest_restore_test : nil
+
   private
+
+  def offsite_items
+    return [] unless OffsiteConnection.connected?
+    run = OffsiteRun.latest_backup
+    [ Item.new("offsite", "The backup was copied off-site (Google Drive) in the last 2 days", true, run.present? && run.ok && run.recent?,
+               run ? "#{run.created_at.to_date}: #{run.message}" : "Never run") ]
+  end
 
   def since_label = @since ? @since.to_date.to_s : "the start"
   def signatures_since = EntrySignature.where(signed_at: (@since || Time.at(0))..)

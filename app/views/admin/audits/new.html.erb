@@ -19,6 +19,12 @@
       <% RecordsAudit::MANUAL.each do |key, title| %>
         <div class="space-y-2 rounded-md p-3 ring-1 ring-slate-200">
           <label class="flex items-start gap-2 text-sm font-medium"><%= check_box_tag "answers[#{key}][passed]", "1", false, class: "mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300" %><span><%= title %></span></label>
+          <% if key == "restore_test" && OffsiteConnection.connected? %>
+            <p class="ml-6 text-xs text-slate-600">
+              <% if (rt = @audit.restore_test) %>Last automatic restore test (<%= rt.created_at.to_date %>): <span class="<%= rt.ok ? 'badge-green' : 'badge-red' %>"><%= rt.ok ? "OK" : "Failed" %></span> <%= rt.message %><% else %>No automatic restore test yet.<% end %>
+              <%= link_to "Run one", admin_offsite_backup_path, class: "link", target: "_blank" %> (Admin → Off-site Backup → Test restore), then also open a copy downloaded from Google Drive yourself.
+            </p>
+          <% end %>
           <% if key == "sample" %>
             <ul class="ml-6 list-disc text-xs text-slate-600">
               <% sample.each do |e| %><li><%= hidden_field_tag "sample_ids[]", e.id, id: nil %><%= link_to "#{e.aircraft.tail_number} · #{e.date} · #{e.text.truncate(80)}", aircraft_logbook_entry_path(e.aircraft, e), class: "link", target: "_blank" %><%= " (signed)" if e.signature %></li><% end %>

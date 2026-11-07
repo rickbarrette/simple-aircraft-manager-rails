@@ -28,7 +28,14 @@
     <%= label_tag "settings[backups_kept]", kept[:label], class: "label" %>
     <%= number_field_tag "settings[backups_kept]", @values["backups_kept"], id: "settings_backups_kept", min: kept[:in].min, max: kept[:in].max,
           step: 1, required: true, class: "input w-32" %>
-    <p class="hint">A verified copy of the database is made nightly in storage/backups; this many of the newest are kept. Back up the whole storage volume off the server too.</p>
+    <p class="hint">A verified copy of the database is made nightly in storage/backups; this many of the newest are kept. Back up off the server too: <%= link_to "Off-site Backup", admin_offsite_backup_path, class: "link" %>.</p>
+  </div>
+  <% okept = Setting::INTEGERS["offsite_backups_kept"] %>
+  <div>
+    <%= label_tag "settings[offsite_backups_kept]", okept[:label], class: "label" %>
+    <%= number_field_tag "settings[offsite_backups_kept]", @values["offsite_backups_kept"], id: "settings_offsite_backups_kept", min: okept[:in].min, max: okept[:in].max,
+          step: 1, required: true, class: "input w-32" %>
+    <p class="hint">With off-site backup to Google Drive, this many of the newest nightly database copies are kept there. Uploaded files are copied once and kept.</p>
   </div>
 
   <div class="flex gap-2"><%= f.submit "Save Settings", class: "btn-primary" %><%= link_to "Cancel", admin_about_path, class: "btn-secondary" %></div>

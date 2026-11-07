@@ -28,7 +28,7 @@ class Admin::ProceduresController < ApplicationController
 
   def adopt
     policy = RecordkeepingPolicy.current
-    return redirect_to(admin_procedures_path, alert: "Fill in the operator, responsible person, hosting and off-site backup first.") unless policy.complete?
+    return redirect_to(admin_procedures_path, alert: "Fill in the operator, responsible person, hosting and off-site backup (or connect Google Drive) first.") unless policy.complete?
     number = (ProceduresRevision.maximum(:number) || 0) + 1
     revision = ProceduresRevision.create!(number: number, adopted_by: current_user, adopted_at: Time.current,
                                           summary: params[:summary].to_s.strip.first(500).presence || "Revision #{number}",

@@ -7,5 +7,8 @@ class RecordkeepingPolicy < ApplicationRecord
 
   def self.current = first || create!
 
-  def complete? = [ operator_name, responsible_name, hosting_description, offsite_backup_description ].all?(&:present?)
+  def complete? = [ operator_name, responsible_name, hosting_description ].all?(&:present?) && offsite_backup?
+
+  # Off-site backup is described, or done by the app to Google Drive.
+  def offsite_backup? = offsite_backup_description.present? || OffsiteConnection.connected?
 end

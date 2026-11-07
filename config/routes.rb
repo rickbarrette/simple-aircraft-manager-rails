@@ -136,6 +136,12 @@ Rails.application.routes.draw do
       get "revisions/:id", action: :revision, as: :revision
     end
     resources :audits, only: %i[index new create show]
+    resource :offsite_backup, only: %i[show update destroy] do
+      get :connect
+      get :callback
+      post :backup_now
+      post :restore_test
+    end
     resources :logbook_templates, except: :show do
       collection { post :restore }
     end

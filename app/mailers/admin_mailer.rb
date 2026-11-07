@@ -5,6 +5,11 @@ class AdminMailer < ApplicationMailer
     mail subject: "Records check needs attention", to: user.email_address
   end
 
+  def offsite_alert(user, run)
+    @run = run
+    mail subject: run.kind == "restore_test" ? "Off-site restore test failed" : "Off-site backup failed", to: user.email_address
+  end
+
   def test_email(user)
     @user = user
     mail subject: "Test email from Simple Aircraft Manager", to: user.email_address

@@ -1,0 +1,6 @@
+<%= @run.kind == "restore_test" ? "The off-site restore test failed." : "Copying the backup to Google Drive failed." %>
+
+<%= @run.message %>
+
+Check Admin → Off-site Backup: <%= admin_offsite_backup_url %>
+If Google Drive refused access, connect it again there.

@@ -26,6 +26,6 @@ The same pages are in the app under **Help** in the menu.
 
 ## Administrators
 
-- [Administration](administration.md): users, settings, templates, backups, recordkeeping procedures and audits
+- [Administration](administration.md): users, settings, templates, backups and off-site backup to Google Drive, recordkeeping procedures and audits
 
 Installing and hosting the app is covered in the project's main README.

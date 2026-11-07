@@ -2,7 +2,10 @@
 <section class="card max-w-4xl">
   <div class="card-header">
     <h2 class="card-title"><%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log — <%= fmt_date(@entry.date) %></h2>
-    <% if owner? %><%= link_to "Edit", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
+    <div class="flex gap-2">
+      <%= link_to "Print for logbook", new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "btn-secondary btn-sm" %>
+      <% if owner? %><%= link_to "Edit", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
+    </div>
   </div>
   <div class="card-body space-y-3">
     <% unless @entry.verified? %>

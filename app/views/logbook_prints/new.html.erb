@@ -1,0 +1,29 @@
+<% content_for :title, "Print logbook entries" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= form_with url: aircraft_logbook_print_path(@aircraft, format: :pdf), method: :get, class: "card card-body max-w-2xl space-y-4",
+              data: { turbo: false }, html: { target: "_blank" } do %>
+  <div>
+    <h2 class="card-title">Print for the logbook</h2>
+    <p class="mt-1 text-sm text-slate-600">A PDF of <%= pluralize(@entries.size, "entry") %> to print on adhesive labels or paper and put in <%= @aircraft.tail_number %>'s logbook. Each one has a blank line to sign by hand: a printed entry isn't valid until it's signed.</p>
+  </div>
+  <% @entries.each do |e| %><%= hidden_field_tag "ids[]", e.id, id: nil %><% end %>
+  <ul class="max-h-48 space-y-1 overflow-y-auto rounded-md bg-slate-50 p-3 text-sm">
+    <% @entries.each do |e| %>
+      <li><span class="font-medium"><%= e.date %></span> · <%= LogbookEntry::LOG_TYPES[e.log_type] %> · <%= e.text.truncate(90) %>
+        <% if (missing = e.missing_record_items).any? %><span class="text-xs text-amber-700">(missing <%= missing.to_sentence %>)</span><% end %></li>
+    <% end %>
+  </ul>
+  <fieldset class="space-y-2 text-sm">
+    <legend class="label">Paper</legend>
+    <% LogbookEntryPdf::LAYOUTS.each do |l| %>
+      <label class="flex items-center gap-2"><%= radio_button_tag :layout, l.key, @layout == l.key %> <%= l.label %></label>
+    <% end %>
+  </fieldset>
+  <div class="max-w-xs">
+    <%= label_tag :start_at, "Start at label", class: "label" %>
+    <%= number_field_tag :start_at, 1, min: 1, max: 10, class: "input w-24" %>
+    <p class="hint">On a partly used label sheet, the first free label, counting across then down.</p>
+  </div>
+  <p class="hint">Print at 100% (“Actual size”), not “Fit to page”, so labels line up. Try a plain sheet first and hold it against the labels.</p>
+  <div class="flex gap-2"><%= submit_tag "Open PDF", class: "btn-primary" %><%= link_to "Back", aircraft_logbook_entries_path(@aircraft), class: "btn-secondary" %></div>
+<% end %>

@@ -12,17 +12,19 @@
         <% end %>
         <%= f.submit "Filter", class: "btn-secondary" %>
       <% end %>
+      <% if @entries.any? %><button type="submit" form="print-entries" class="btn-secondary" title="Print the ticked entries on labels or pages for the paper logbook">Print selected</button><% end %>
       <% if owner? %><%= link_to "Import scans", new_aircraft_logbook_import_path(@aircraft), class: "btn-secondary" %><%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %><% end %>
     </div>
   </div>
   <% if @entries.any? %>
+    <%= form_with url: new_aircraft_logbook_print_path(@aircraft), method: :get, id: "print-entries" do %><% end %>
     <div class="overflow-x-auto">
       <table class="table">
-        <thead><tr><th>Date</th><th>Log</th><th>Type</th><th class="text-right">Hours</th><th>Entry</th><th>Signed off</th></tr></thead>
+        <thead><tr><th><input type="checkbox" class="mr-1 align-middle" aria-label="Select all entries" data-check-all> Date</th><th>Log</th><th>Type</th><th class="text-right">Hours</th><th>Entry</th><th>Signed off</th></tr></thead>
         <tbody>
           <% @entries.each do |e| %>
             <tr>
-              <td class="whitespace-nowrap"><%= link_to e.date, aircraft_logbook_entry_path(@aircraft, e), class: "link" %></td>
+              <td class="whitespace-nowrap"><input type="checkbox" name="ids[]" value="<%= e.id %>" form="print-entries" class="mr-1 align-middle" aria-label="Select the <%= e.date %> entry"><%= link_to e.date, aircraft_logbook_entry_path(@aircraft, e), class: "link" %></td>
               <td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
               <td class="text-xs"><%= LogbookEntry::ENTRY_TYPES[e.entry_type] %></td>
               <td class="text-right tabular-nums"><%= hours(e.aircraft_hours_at_entry) %></td>

@@ -60,6 +60,7 @@ Rails.application.routes.draw do
       collection { post :import }
     end
     resources :logbook_imports, path: "logbook/import", only: %i[new create show]
+    resource :logbook_print, path: "logbook/print", only: %i[new show]
     resources :logbook_entries do
       member { patch :verify }
     end

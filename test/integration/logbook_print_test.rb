@@ -30,7 +30,7 @@ class LogbookPrintTest < ActionDispatch::IntegrationTest
 
     reader = pdf(ids: [ @entry.id ], layout: "avery_5164")
     text = text_of(reader)
-    [ "N12345", "Cessna 172N", "S/N 17200001", "Aircraft log", "Date: Oct 1, 2026", "Total time: 1234.5 hrs (tach)",
+    [ "N12345", "Cessna 172N", "S/N 17200001", "Aircraft log", "Date: Oct 1, 2026", "Airframe total time: 1,234.5 (tach)",
       "Replaced left landing light lamp P/N 4509 — checked “OK”. ?", "Signature", "Sam Mechanic", "KOQU", "A&P No. 7654321" ].each do |s|
       assert_includes text, s
     end
@@ -73,6 +73,36 @@ class LogbookPrintTest < ActionDispatch::IntegrationTest
     assert_operator reader.page_count, :>, 1
     assert_includes text_of(reader), "N12345 · page 2 of #{reader.page_count}"
     assert_equal (1..3000).to_a, text_of(reader).scan(/\bw(\d+)\b/).flatten.map(&:to_i) # in order, nothing lost
+  end
+
+  test "engine entries print the engine's serial number, total time and time since overhaul; pages box each entry" do
+    engine = create_component(@a, component_type: component_type("Engine"), manufacturer: "Lycoming", model: "O-320-H2AD",
+                                  serial_number: "L-12345-27A", hours_in_service: 3200, hours_since_overhaul: 850, overhaul_kind: "factory_overhaul")
+    sign_in @owner
+    get new_aircraft_logbook_entry_path(@a)
+    assert_select "select[name='logbook_entry[component_id]'] option[value='#{engine.id}'][data-kind=ENG][data-total='3200.0'][data-since='850.0']"
+    post aircraft_logbook_entries_path(@a), params: { logbook_entry: {
+      date: "2026-10-03", log_type: "ENG", entry_type: "MAINTENANCE", text: "Changed oil", aircraft_hours_at_entry: 4210.3,
+      component_id: engine.id, component_hours_at_entry: 3150.5, component_since_overhaul_at_entry: 800.5 } }
+    entry = @a.logbook_entries.find_by!(text: "Changed oil")
+    assert_equal [ engine, 3150.5, 800.5 ], [ entry.component, entry.component_hours_at_entry.to_f, entry.component_since_overhaul_at_entry.to_f ]
+    get aircraft_logbook_entry_path(@a, entry)
+    assert_includes response.body, "3,150.5 total, 800.5 SFOH"
+
+    bare = @a.logbook_entries.create!(date: Date.new(2026, 10, 4), log_type: "PROP", text: "Dressed prop nicks")
+    reader = pdf(ids: [ entry.id, bare.id, @entry.id ], layout: "letter")
+    text = text_of(reader)
+    [ "Engine log", "Airframe total time: 4,210.3 (tach)", "Engine: Lycoming O-320-H2AD S/N L-12345-27A", "Engine total time: 3,150.5",
+      "SFOH: 800.5", "Propeller: ______________ S/N __________ Propeller total time: ________ SMOH / SFOH: ________" ].each do |s|
+      assert_includes text, s
+    end
+    airframe = text.split("N12345 · Cessna 172N · S/N 17200001").find { _1.include?("Replaced left landing light") }
+    refute_includes airframe, "S/N __________" # airframe entries don't get component blanks
+    assert_equal 3, reader.pages.first.raw_content.scan(/ re\b/).size # a box around each entry
+    assert_equal 0, pdf(ids: [ entry.id ], layout: "avery_5164").pages.first.raw_content.scan(/ re\b/).size # labels aren't boxed
+    elsewhere = create_component(create_aircraft, component_type: component_type("Engine"))
+    patch aircraft_logbook_entry_path(@a, entry), params: { logbook_entry: { component_id: elsewhere.id } }
+    assert_nil entry.reload.component # only this aircraft's components
   end
 
   test "pick several entries on the list; outsiders can't print" do

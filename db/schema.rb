@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_230000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_240000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -320,6 +320,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_230000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "expires_on"
+    t.string "overhaul_kind"
     t.index ["aircraft_id"], name: "index_components_on_aircraft_id"
     t.index ["component_type_id"], name: "index_components_on_component_type_id"
     t.index ["parent_component_id"], name: "index_components_on_parent_component_id"
@@ -449,7 +450,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_230000) do
     t.string "inspection_result"
     t.boolean "verified", default: true, null: false
     t.string "transcription_confidence"
+    t.integer "component_id"
+    t.decimal "component_hours_at_entry", precision: 8, scale: 1
+    t.decimal "component_since_overhaul_at_entry", precision: 8, scale: 1
     t.index ["aircraft_id"], name: "index_logbook_entries_on_aircraft_id"
+    t.index ["component_id"], name: "index_logbook_entries_on_component_id"
     t.index ["document_id"], name: "index_logbook_entries_on_document_id"
   end
 
@@ -663,6 +668,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_230000) do
   add_foreign_key "inspection_records", "logbook_entries", on_delete: :nullify
   add_foreign_key "inspection_types", "inspection_types", column: "satisfies_id", on_delete: :nullify
   add_foreign_key "logbook_entries", "aircraft"
+  add_foreign_key "logbook_entries", "components", on_delete: :nullify
   add_foreign_key "logbook_entries", "documents", on_delete: :nullify
   add_foreign_key "logbook_imports", "aircraft"
   add_foreign_key "logbook_imports", "documents", on_delete: :nullify

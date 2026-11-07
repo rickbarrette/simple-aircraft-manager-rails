@@ -157,13 +157,14 @@ class AircraftArchiveTest < ActiveSupport::TestCase
     assert_equal [ "N0000X", "Piper", 1234.5 ], [ a.tail_number, a.make, a.tach_time.to_f ]
     assert_equal engine_type, a.components.sole.component_type, "matched case-insensitively"
     assert_equal 2000, a.components.sole.tbo_hours
-    assert_equal "INSPECTION", a.logbook_entries.sole.entry_type
+    entry = a.logbook_entries.sole
+    assert_equal [ "INSPECTION", a.components.sole, 500 ], [ entry.entry_type, entry.component, entry.component_hours_at_entry.to_i ]
     squawk = a.squawks.sole
     assert_equal [ 0, "abc123.png" ], [ squawk.priority, squawk.attachments.sole.filename.to_s ]
     analysis = a.oil_analyses.sole
     assert_equal [ "monitor", 12.5, nil, a.components.sole ], [ analysis.status, analysis.value("iron"), analysis.sample_number, analysis.component ]
     assert a.flight_logs.sole.track_log.attached?
-    assert_equal [ "1 logbook entry was linked to components; those links aren't kept here." ], result[:warnings]
+    assert_empty result[:warnings] # the entry's component and its hours are kept
   end
 
   test "a file whose contents don't match its name is skipped with a note" do

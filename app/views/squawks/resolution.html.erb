@@ -19,15 +19,17 @@
     <label class="flex items-center gap-2"><%= radio_button_tag :logbook, "none", choice == "none" %> No logbook entry (e.g. it wasn't a defect)</label>
   </fieldset>
 
-  <div class="space-y-4 rounded-md border border-slate-200 p-3" data-controller="signer">
+  <div class="space-y-4 rounded-md border border-slate-200 p-3" data-controller="signer component-times">
     <p class="text-xs text-slate-500">For a new entry. 14 CFR 43.9: what was done, the date, and the name, certificate number and kind of certificate of whoever approved the return to service.</p>
     <%= render "shared/sign_as" %>
     <%= fields_for :logbook_entry, @entry do |f| %>
       <div class="grid gap-4 sm:grid-cols-3">
         <%= f.field :date, as: :date %>
-        <%= f.field :log_type, as: :select, label: "Logbook", collection: LogbookEntry::LOG_TYPES.invert %>
-        <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: "Aircraft hours" %>
+        <%= f.field :log_type, as: :select, label: "Logbook", collection: LogbookEntry::LOG_TYPES.invert,
+              data: { component_times_target: "logType", action: "component-times#logTypeChanged" } %>
+        <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: "Airframe total time" %>
       </div>
+      <%= render "logbook_entries/component_fields", f: f, aircraft: @aircraft %>
       <%= f.field :text, as: :textarea, label: "Work performed", rows: 3 %>
       <div class="grid gap-4 sm:grid-cols-3">
         <%= f.field :signoff_person, label: "Signed off by", data: { signer_target: "name" } %>

@@ -1,0 +1,16 @@
+<%# Engine / propeller (or other component) the entry is for, and its times at the entry. %>
+<% comps = aircraft.components.where.not(status: "DISPOSED").includes(:component_type).order(:install_location) %>
+<div class="grid gap-4 sm:grid-cols-3">
+  <div>
+    <%= f.label :component_id, "Component", class: "label" %>
+    <%= f.select :component_id, options_for_select([ [ "— None —", "" ] ] + comps.map { |c|
+          [ "#{c} · #{c.manufacturer} #{c.model}#{" · S/N #{c.serial_number}" if c.serial_number.present?}", c.id,
+            { "data-total" => c.hours_in_service.to_f, "data-since" => c.hours_since_overhaul.to_f,
+              "data-kind" => (c.engine? ? "ENG" : c.propeller? ? "PROP" : ""), "data-abbr" => c.since_overhaul_abbreviation } ] }, f.object.component_id),
+          {}, class: "input", data: { component_times_target: "component", action: "component-times#componentChanged" } %>
+    <p class="hint">For engine and propeller logs: printed with its serial number and times.</p>
+  </div>
+  <%= f.field :component_hours_at_entry, as: :number, step: 0.1, label: "Component total time", data: { component_times_target: "total" } %>
+  <%= f.field :component_since_overhaul_at_entry, as: :number, step: 0.1, label: "Since overhaul", data: { component_times_target: "since" },
+        hint: "Filled in from the component; correct them for an older entry." %>
+</div>

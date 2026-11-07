@@ -16,7 +16,11 @@
     <% end %>
     <div class="flex flex-wrap gap-4 text-sm text-slate-600">
       <span>Type: <%= LogbookEntry::ENTRY_TYPES[@entry.entry_type] %></span>
-      <span>Aircraft hours: <%= hours(@entry.aircraft_hours_at_entry) %></span>
+      <span>Airframe total time: <%= hours(@entry.aircraft_hours_at_entry) %></span>
+      <% if (c = @entry.component) %>
+        <span><%= c %> <%= c.model %><%= " S/N #{c.serial_number}" if c.serial_number.present? %>:
+          <%= hours(@entry.component_hours_at_entry) %> total, <%= hours(@entry.component_since_overhaul_at_entry) %> <%= c.since_overhaul_abbreviation %></span>
+      <% end %>
     </div>
     <div class="whitespace-pre-wrap rounded bg-slate-50 p-3 font-mono text-sm"><%= @entry.text %></div>
     <div class="text-sm text-slate-600">

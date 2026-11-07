@@ -36,7 +36,7 @@ class UserCertificatesTest < ActionDispatch::IntegrationTest
     @owner.certificates.create!(kind: "IA", number: "7654321", expires_on: 1.day.ago.to_date) # expired: not offered
     sign_in @owner
     get new_aircraft_logbook_entry_path(@a)
-    assert_select "form[data-controller='entry-template signer']"
+    assert_select "form[data-controller='entry-template signer component-times']"
     assert_select "select[data-signer-target=choice] option[data-kind=AP][data-number='7654321'][data-name='Sam Mechanic']"
     assert_select "select[data-signer-target=choice] option[data-kind=IA]", 0
     assert_select "input[name='logbook_entry[signoff_person]'][data-signer-target=name]"
@@ -44,7 +44,7 @@ class UserCertificatesTest < ActionDispatch::IntegrationTest
 
     squawk = @a.squawks.create!(priority: 1, issue_reported: "Nav light out")
     get resolution_aircraft_squawk_path(@a, squawk)
-    assert_select "[data-controller=signer] select[data-signer-target=choice]"
+    assert_select "[data-controller='signer component-times'] select[data-signer-target=choice]"
     get deferral_aircraft_squawk_path(@a, squawk)
     assert_select "select[name=deferred_by_role] option[selected][value=mechanic]"
 

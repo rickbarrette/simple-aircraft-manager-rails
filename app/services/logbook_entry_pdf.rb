@@ -3,10 +3,14 @@ Prawn::Fonts::AFM.hide_m17n_warning = true # text is reduced to what the built-i
 
 # Logbook entries as a PDF to print and put in the paper logbook: on
 # adhesive labels or on pages. Each entry carries what 14 CFR 43.9 / 43.11
-# want (aircraft, date, time in service, the work, the signer's name and
+# want (aircraft, date, airframe total time, the work, the signer's name and
 # certificate) and a blank line for the signature, which must be signed by
-# hand. On labels, long entries shrink to fit, then continue on the next
-# label; on pages, entries follow one another, each with its signature line.
+# hand. Engine and propeller entries add the component's serial number, total
+# time and time since overhaul (blanks to fill in when no component is linked).
+#
+# Labels: one entry per label; long entries shrink to fit, then continue on
+# the next label. Pages: entries follow one another, each in a box with its
+# signature line; one too long for a page continues in a box on the next.
 class LogbookEntryPdf
   IN = 72 # points per inch
 
@@ -23,10 +27,16 @@ class LogbookEntryPdf
                cols: 2, rows: 5, width: 4 * IN, height: 2 * IN, left: 0.156 * IN, top: 0.5 * IN,
                col_gap: 0.188 * IN, row_gap: 0, padding: 0.12 * IN),
     Layout.new(key: "half_letter", label: "Half-letter pages (5½ × 8½ in)", page: [ 5.5 * IN, 8.5 * IN ],
-               cols: 1, rows: 1, width: 5.5 * IN, height: 8.5 * IN, left: 0, top: 0, col_gap: 0, row_gap: 0, padding: 0.5 * IN),
+               cols: 1, rows: 1, width: 5.5 * IN, height: 8.5 * IN, left: 0, top: 0, col_gap: 0, row_gap: 0, padding: 0.4 * IN),
     Layout.new(key: "letter", label: "Letter pages (8½ × 11 in, also full-sheet labels)", page: [ 8.5 * IN, 11 * IN ],
-               cols: 1, rows: 1, width: 8.5 * IN, height: 11 * IN, left: 0, top: 0, col_gap: 0, row_gap: 0, padding: 0.75 * IN)
+               cols: 1, rows: 1, width: 8.5 * IN, height: 11 * IN, left: 0, top: 0, col_gap: 0, row_gap: 0, padding: 0.6 * IN)
   ].freeze
+
+  # Type sizes: [small (details), body, smallest body when shrinking].
+  LABEL_SIZES = [ 6.5, 8, 5.5 ].freeze
+  PAGE_SIZES = [ 9, 11, 11 ].freeze
+  BOX_PADDING = 8 # inside a page entry's box
+  BOX_GAP = 12    # between boxes
 
   def self.layout(key) = LAYOUTS.find { _1.key == key } || LAYOUTS.first
 
@@ -43,63 +53,32 @@ class LogbookEntryPdf
     info = { Title: "#{@aircraft.tail_number} logbook entries", Creator: "Simple Aircraft Manager" }
     if @layout.labels?
       @pdf = Prawn::Document.new(page_size: @layout.page, margin: 0, info: info)
-      @entries.each { |entry| place(entry) }
+      @entries.each { place_on_labels(_1) }
     else
       @pdf = Prawn::Document.new(page_size: @layout.page, margin: @layout.padding, info: info)
-      @entries.each_with_index { |entry, i| flow(entry, first: i.zero?) }
-      @pdf.number_pages clean("#{@aircraft.tail_number}  ·  page <page> of <total>"), at: [ 0, -@layout.padding / 2 ], width: @pdf.bounds.width,
-                                                                                  align: :right, size: 7, color: "777777"
+      @entries.each { place_on_pages(_1) }
+      @pdf.number_pages clean("#{@aircraft.tail_number}  ·  page <page> of <total>"), at: [ 0, -@layout.padding / 2 ],
+                                                                                  width: @pdf.bounds.width, align: :right, size: 7, color: "777777"
     end
     @pdf.render
   end
 
   private
 
-  # Pages: the entry's lines, then its signature block (kept together),
-  # then a rule before the next one.
-  def flow(entry, first:)
-    small = 9
-    w = @pdf.bounds.width
-    unless first
-      @pdf.move_down 10
-      @pdf.stroke_color "BBBBBB"
-      @pdf.stroke_horizontal_rule
-      @pdf.move_down 12
-    end
-    @pdf.start_new_page if @pdf.cursor < 90 # don't strand a heading at the foot of a page
-    @pdf.text clean(header_line), size: small, style: :bold
-    @pdf.text clean("#{LogbookEntry::LOG_TYPES[entry.log_type]} log  ·  #{facts(entry).join('     ')}"), size: small
-    @pdf.move_down 4
-    @pdf.text clean(body_text(entry)), size: 11, leading: 1.5
-    @pdf.move_down 10
-    height = signature_block_height(small) + 14
-    @pdf.start_new_page if @pdf.cursor < height
-    @pdf.bounding_box([ 0, @pdf.cursor ], width: w, height: height) { signature_block(entry, w, height, small, more: false) }
-  end
+  # ---- Labels ----
 
-  def header_line
-    [ @aircraft.tail_number, [ @aircraft.make, @aircraft.model ].compact_blank.join(" ").presence,
-      (@aircraft.serial_number.present? ? "S/N #{@aircraft.serial_number}" : nil) ].compact.join("  ·  ")
-  end
-
-  def facts(entry)
-    [ "Date: #{entry.date&.strftime('%b %-d, %Y')}",
-      (entry.aircraft_hours_at_entry && "Total time: #{format('%.1f', entry.aircraft_hours_at_entry)} hrs (#{@aircraft.time_basis})") ].compact
-  end
-
-  def place(entry)
+  def place_on_labels(entry)
     remaining = body_text(entry)
     continued = false
     loop do
-      box = next_box
-      remaining = draw(entry, box, remaining, continued: continued)
+      remaining = draw(entry, next_label, remaining, continued: continued, sizes: LABEL_SIZES, shrink: true, continue_note: "label")
       break if remaining.blank?
       continued = true
     end
   end
 
-  # The next free label (or page): [x, y_top, width, height] inside the padding.
-  def next_box
+  # The next free label: [x, y_top, width, height] inside its padding.
+  def next_label
     if @slot >= @layout.per_page
       @pdf.start_new_page
       @slot = 0
@@ -112,37 +91,109 @@ class LogbookEntryPdf
     [ x, y, @layout.width - 2 * @layout.padding, @layout.height - 2 * @layout.padding ]
   end
 
-  # Draws one label's worth; returns the body text that didn't fit.
-  def draw(entry, (x, y, w, h), body, continued:)
-    small = @layout.labels? ? 6.5 : 9
-    base = @layout.labels? ? 8 : 11
+  # ---- Pages ----
+
+  def place_on_pages(entry)
+    remaining = body_text(entry)
+    continued = false
+    w = @pdf.bounds.width
+    loop do
+      needed = box_height(entry, remaining, w)
+      # A new page if the box doesn't fit here but would on a fresh page, or
+      # too little of this page is left to be worth starting it.
+      @pdf.start_new_page if needed > @pdf.cursor && (needed <= @pdf.bounds.height || @pdf.cursor < 160)
+      h = [ needed, @pdf.cursor ].min
+      top = @pdf.cursor
+      @pdf.stroke_color "444444"
+      @pdf.line_width 0.75
+      @pdf.stroke_rectangle [ 0, top ], w, h
+      inner = [ BOX_PADDING, top - BOX_PADDING, w - 2 * BOX_PADDING, h - 2 * BOX_PADDING ]
+      remaining = draw(entry, inner, remaining, continued: continued, sizes: PAGE_SIZES, shrink: false, continue_note: "page")
+      @pdf.move_cursor_to([ top - h - BOX_GAP, 0 ].max)
+      break if remaining.blank?
+      @pdf.start_new_page
+      continued = true
+    end
+  end
+
+  def box_height(entry, body, width)
+    small, base, = PAGE_SIZES
+    body_h = @pdf.height_of(clean(body), width: width - 2 * BOX_PADDING, size: base, leading: 1.5)
+    head_h = (detail_lines(entry).size + 1) * (small + 3) + 2
+    head_h + body_h + 8 + signature_block_height(small) + 2 * BOX_PADDING
+  end
+
+  # ---- One entry in an area (a label, or the inside of a page box) ----
+
+  # Draws the entry into [x, y_top, w, h]; returns the body text that didn't fit.
+  def draw(entry, (x, y, w, h), body, continued:, sizes:, shrink:, continue_note:)
+    small, base, min = sizes
     leftover = nil
     @pdf.bounding_box([ x, y ], width: w, height: h) do
       @pdf.text_box clean(header_line), at: [ 0, h ], width: w * 0.68, height: small + 2, size: small, style: :bold, overflow: :truncate
       @pdf.text_box clean("#{LogbookEntry::LOG_TYPES[entry.log_type]} log#{' (continued)' if continued}"),
                     at: [ w * 0.68, h ], width: w * 0.32, height: small + 2, size: small, align: :right, overflow: :truncate
-      @pdf.text_box clean(facts(entry).join("     ")), at: [ 0, h - small - 3 ], width: w, height: small + 2, size: small, overflow: :truncate
+      line_y = h - small - 3
+      detail_lines(entry).each do |line|
+        @pdf.text_box clean(line), at: [ 0, line_y ], width: w, height: small + 2, size: small,
+                                   overflow: :shrink_to_fit, min_font_size: small - 1.5
+        line_y -= small + 3
+      end
 
       footer_h = signature_block_height(small)
-      body_top = h - 2 * (small + 3) - 2
-      body_h = body_top - footer_h - 4
-      leftover = @pdf.text_box(clean(body), at: [ 0, body_top ], width: w, height: body_h, size: base, min_font_size: [ base - 2.5, 5.5 ].max,
-                                            overflow: :shrink_to_fit, leading: 1)
-      signature_block(entry, w, footer_h, small, more: leftover.present?)
+      body_top = line_y - 2
+      fitting = { at: [ 0, body_top ], width: w, height: body_top - footer_h - 4, size: base }
+      fitting = shrink ? fitting.merge(leading: 1, overflow: :shrink_to_fit, min_font_size: min) : fitting.merge(leading: 1.5, overflow: :truncate)
+      leftover = @pdf.text_box(clean(body), **fitting)
+      signature_block(entry, w, footer_h, small, more: leftover.present? ? continue_note : nil)
     end
     leftover
   end
+
+  def header_line
+    [ @aircraft.tail_number, [ @aircraft.make, @aircraft.model ].compact_blank.join(" ").presence,
+      (@aircraft.serial_number.present? ? "S/N #{@aircraft.serial_number}" : nil) ].compact.join("  ·  ")
+  end
+
+  # Date and airframe total time; for engine / propeller entries (or any with
+  # a component) the component's serial number, total time and since overhaul.
+  def detail_lines(entry)
+    airframe = entry.aircraft_hours_at_entry ? "#{hrs(entry.aircraft_hours_at_entry)} (#{@aircraft.time_basis})" : "________"
+    lines = [ "Date: #{entry.date&.strftime('%b %-d, %Y')}     Airframe total time: #{airframe}" ]
+    component = entry.component
+    noun = component_noun(entry, component)
+    if component
+      model = [ component.manufacturer, component.model ].compact_blank.join(" ")
+      serial = component.serial_number.present? ? "  S/N #{component.serial_number}" : "  S/N __________"
+      lines << [ "#{noun}: #{model}#{serial}",
+                 "#{noun} total time: #{blank_or_hours(entry.component_hours_at_entry)}",
+                 "#{component.since_overhaul_abbreviation}: #{blank_or_hours(entry.component_since_overhaul_at_entry)}" ].join("     ")
+    elsif noun
+      lines << "#{noun}: ______________  S/N __________     #{noun} total time: ________     SMOH / SFOH: ________"
+    end
+    lines
+  end
+
+  def component_noun(entry, component)
+    return "Engine" if component&.engine? || (component.nil? && entry.log_type == "ENG")
+    return "Propeller" if component&.propeller? || (component.nil? && entry.log_type == "PROP")
+    component&.component_type&.name
+  end
+
+  def blank_or_hours(value) = value ? hrs(value) : "________"
+  def hrs(value) = ActiveSupport::NumberHelper.number_to_delimited(format("%.1f", value))
 
   def signature_block_height(small) = (small + 3) * 3 + 6
 
   def signature_block(entry, w, height, small, more:)
     @pdf.bounding_box([ 0, height ], width: w, height: height) do
       if more
-        @pdf.text_box "Continued on the next label.", at: [ 0, height ], width: w, height: small + 2,
-                                                                                         size: small, style: :italic, overflow: :truncate
+        @pdf.text_box "Continued on the next #{more}.", at: [ 0, height ], width: w, height: small + 2, size: small,
+                                                        style: :italic, overflow: :truncate
       end
       line_y = height - (small + 3) * 1.6
       @pdf.stroke_color "555555"
+      @pdf.line_width 0.5
       @pdf.stroke_horizontal_line 0, w * 0.62, at: line_y
       @pdf.text_box "Signature", at: [ 0, line_y - 1 ], width: w * 0.6, height: small, size: small - 1, overflow: :truncate
       @pdf.text_box clean(certificate(entry)), at: [ w * 0.64, line_y + small + 1 ], width: w * 0.36, height: small * 2 + 4,

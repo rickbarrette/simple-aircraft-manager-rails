@@ -21,6 +21,8 @@ class LogbookEntry < ApplicationRecord
 
   belongs_to :aircraft
   belongs_to :document, optional: true
+  # For engine / propeller logs: which one, and its times at this entry.
+  belongs_to :component, optional: true
   has_many :inspection_records, dependent: :nullify
   has_many :ad_compliances, dependent: :nullify
   has_many :squawks, dependent: :nullify
@@ -30,6 +32,7 @@ class LogbookEntry < ApplicationRecord
   validates :entry_type, inclusion: { in: ENTRY_TYPES.keys }
   validates :signoff_certificate_type, inclusion: { in: CERTIFICATE_TYPES.keys }, allow_blank: true
   validates :inspection_result, inclusion: { in: INSPECTION_RESULTS.keys }, allow_blank: true
+  validates :component_hours_at_entry, :component_since_overhaul_at_entry, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   normalizes :signoff_certificate_type, :inspection_result, :signoff_certificate_number, with: ->(v) { v.strip.presence }
 
   scope :recent_first, -> { order(date: :desc, created_at: :desc) }

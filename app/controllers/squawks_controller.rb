@@ -42,7 +42,11 @@ class SquawksController < ApplicationController
   def resolution
     @entry = @aircraft.logbook_entries.new(date: Date.current, entry_type: "MAINTENANCE", log_type: "AC",
                                            aircraft_hours_at_entry: @aircraft.current_hours,
-                                           text: "Corrected: #{@squawk.issue_reported}")
+                                           text: "Corrected: #{@squawk.issue_reported}", component: @squawk.component,
+                                           component_hours_at_entry: @squawk.component&.hours_in_service,
+                                           component_since_overhaul_at_entry: @squawk.component&.hours_since_overhaul)
+    @entry.log_type = "ENG" if @squawk.component&.engine?
+    @entry.log_type = "PROP" if @squawk.component&.propeller?
   end
 
   def resolve
@@ -95,8 +99,11 @@ class SquawksController < ApplicationController
   def set_squawk = @squawk = @aircraft.squawks.find(params[:id])
 
   def resolution_entry_params
-    params.require(:logbook_entry).permit(:date, :log_type, :text, :aircraft_hours_at_entry, :signoff_person,
-                                          :signoff_certificate_type, :signoff_certificate_number, :signoff_location)
+    p = params.require(:logbook_entry).permit(:date, :log_type, :text, :aircraft_hours_at_entry, :signoff_person,
+                                              :signoff_certificate_type, :signoff_certificate_number, :signoff_location,
+                                              :component_id, :component_hours_at_entry, :component_since_overhaul_at_entry)
+    p[:component_id] = scoped_id(@aircraft.components, p[:component_id]) if p.key?(:component_id)
+    p
   end
 
   # Adds uploads and drops ticked files in one change, so nothing is saved

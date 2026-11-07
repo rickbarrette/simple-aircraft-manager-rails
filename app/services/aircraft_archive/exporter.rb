@@ -147,8 +147,11 @@ module AircraftArchive
         signoff_certificate_type: e.signoff_certificate_type, signoff_certificate_number: e.signoff_certificate_number,
         inspection_result: e.inspection_result, verified: e.verified, transcription_confidence: e.transcription_confidence,
         log_image_id: id(e.document_id),
-        aircraft_hours_at_entry: dec(e.aircraft_hours_at_entry), component_hours: {}, entry_type: e.entry_type,
-        page_number: e.page_number, components: [], related_documents: [] }
+        aircraft_hours_at_entry: dec(e.aircraft_hours_at_entry), entry_type: e.entry_type, page_number: e.page_number,
+        components: [ id(e.component_id) ].compact,
+        component_hours: e.component_id ? { id(e.component_id) => dec(e.component_hours_at_entry) }.compact : {},
+        component_since_overhaul: e.component_id ? { id(e.component_id) => dec(e.component_since_overhaul_at_entry) }.compact : {},
+        related_documents: [] }
     end
 
     def squawk_hash(s)

@@ -104,6 +104,9 @@ module AircraftArchive
 
     def m(key) = Array(@manifest[key]).select { _1.is_a?(Hash) }
 
+    # {component id => value} as exported (keys may be strings or numbers).
+    def hash_value(hash, key) = hash.is_a?(Hash) ? (hash[key.to_s] || hash[key]) : nil
+
     def import_all
       import_aircraft
       import_component_types
@@ -219,7 +222,7 @@ module AircraftArchive
     end
 
     def import_logbook
-      linked = 0
+      dropped = 0
       m("logbook_entries").each do |data|
         e = @aircraft.logbook_entries.new(
           log_type: LogbookEntry::LOG_TYPES.key?(data["log_type"]) ? data["log_type"] : "AC",
@@ -234,12 +237,19 @@ module AircraftArchive
           aircraft_hours_at_entry: num(data["aircraft_hours_at_entry"]), page_number: data["page_number"],
           document_id: @map[:document][data["log_image_id"].to_s]
         )
+        # One component per entry here (the original allows several): the first, with its times.
+        if (ref = Array(data["components"]).first) && (component_id = @map[:component][ref.to_s])
+          e.component_id = component_id
+          e.component_hours_at_entry = num(hash_value(data["component_hours"], ref))
+          e.component_since_overhaul_at_entry = num(hash_value(data["component_since_overhaul"], ref))
+          dropped += 1 if Array(data["components"]).size > 1
+        end
         e.save!(validate: false)
         @map[:logbook][data["id"].to_s] = e.id
-        linked += 1 if Array(data["components"]).any? || data["component_hours"].present?
+
         tick("logbook_entries")
       end
-      warn("#{linked} logbook #{linked == 1 ? 'entry was' : 'entries were'} linked to components; those links aren't kept here.") if linked.positive?
+      warn("#{dropped} logbook #{dropped == 1 ? 'entry was' : 'entries were'} linked to several components; only the first is kept here.") if dropped.positive?
     end
 
     def import_squawks

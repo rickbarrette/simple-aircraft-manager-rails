@@ -1,5 +1,8 @@
 class Component < ApplicationRecord
   STATUSES = { "SPARE" => "Spare Part", "IN-USE" => "In Service", "DISPOSED" => "Disposed" }.freeze
+  # What "since overhaul" counts from, and how logbooks abbreviate it.
+  OVERHAUL_KINDS = { "major" => "Major overhaul", "factory_overhaul" => "Factory overhaul", "factory_new" => "Factory new or rebuilt (zero time)" }.freeze
+  OVERHAUL_ABBREVIATIONS = { "major" => "SMOH", "factory_overhaul" => "SFOH", "factory_new" => "SNEW" }.freeze
 
   belongs_to :aircraft, optional: true
   belongs_to :parent_component, class_name: "Component", optional: true
@@ -11,11 +14,13 @@ class Component < ApplicationRecord
   has_many :ad_compliances, dependent: :nullify
   has_many :inspection_records, dependent: :nullify
   has_many :major_records, dependent: :nullify
+  has_many :logbook_entries, dependent: :nullify
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
 
   validates :manufacturer, :model, :date_in_service, presence: true
   validates :status, inclusion: { in: STATUSES.keys }
+  validates :overhaul_kind, inclusion: { in: OVERHAUL_KINDS.keys }, allow_blank: true
   validate :parent_on_same_aircraft
 
   scope :in_use, -> { where(status: "IN-USE") }
@@ -25,6 +30,9 @@ class Component < ApplicationRecord
   end
 
   def status_label = STATUSES[status]
+  def since_overhaul_abbreviation = OVERHAUL_ABBREVIATIONS.fetch(overhaul_kind, "TSO")
+  def engine? = component_type&.name.to_s.match?(/engine/i)
+  def propeller? = component_type&.name.to_s.match?(/propell?er|\bprop\b/i)
 
   def hours_to_tbo
     tbo_hours - hours_since_overhaul if tbo_hours

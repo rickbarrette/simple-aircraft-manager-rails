@@ -63,8 +63,10 @@ class LogbookEntriesController < ApplicationController
   def entry_params
     p = params.require(:logbook_entry).permit(:log_type, :entry_type, :date, :text, :signoff_person,
                                               :signoff_location, :aircraft_hours_at_entry, :document_id, :page_number,
-                                              :signoff_certificate_type, :signoff_certificate_number, :inspection_result, :verified)
+                                              :signoff_certificate_type, :signoff_certificate_number, :inspection_result, :verified,
+                                              :component_id, :component_hours_at_entry, :component_since_overhaul_at_entry)
     p[:document_id] = scoped_id(@aircraft.documents, p[:document_id])
+    p[:component_id] = scoped_id(@aircraft.components, p[:component_id]) if p.key?(:component_id)
     p
   end
 end

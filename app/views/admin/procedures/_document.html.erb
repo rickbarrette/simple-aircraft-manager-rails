@@ -97,7 +97,7 @@
 
   <h2 class="<%= h2 %>">13. User instructions and training</h2>
   <p class="<%= p_ %>">Every user who keeps or signs records reads these instructions (also in the system under “How electronic records work”) before signing (2.2.12, 3.2.9).</p>
-  <div class="mt-2 rounded border border-slate-200 p-3"><%= render "help/records_content" %></div>
+  <div class="mt-2 rounded border border-slate-200 p-3"><%= guide_html(HelpGuide.find("records"), links: false, title: false) %></div>
 
   <% if policy.additional_procedures.present? %>
     <h2 class="<%= h2 %>">14. Additional procedures</h2>

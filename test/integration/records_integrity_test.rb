@@ -91,7 +91,8 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
       html = zip.text("status-report.html")
       assert_includes html, "Maintenance status · 14 CFR 91.417(a)(2)"
       refute_includes html, "<script"
-      assert_includes html, "<style>"
+      assert_match(/<head>\s*<meta charset="utf-8">/, html) # files opened from disk need it (em dashes etc.)
+    assert_includes html, "<style>"
     end
     assert @a.events.exists?(event_name: "Records package downloaded")
 
@@ -116,7 +117,8 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
     engine = create_component(@a, tbo_hours: 2000, hours_since_overhaul: 126, on_condition: true)
     path = Rails.root.join("tmp", "pkg-#{SecureRandom.hex(4)}.zip")
     RecordsPackage.new(@a, source: "test").write_to(path)
-    html = Zip::File.open(path) { |z| z.read("status-report.html").force_encoding("UTF-8") }
+    html, csv = Zip::File.open(path) { |z| [ z.read("status-report.html").force_encoding("UTF-8"), z.read("signatures.csv").force_encoding("UTF-8") ] }
+    assert csv.start_with?("\uFEFF"), "CSV has a byte order mark for Excel"
     File.delete(path)
     assert_includes html, "<style>"
     refute_includes html, "\\[</head>" # escaped "&" in CSS selectors left intact

@@ -37,7 +37,10 @@ class RecordsPackage
 
   private
 
+  # CSVs start with a UTF-8 byte order mark so Excel reads accents, dashes
+  # and quotes correctly (without it, it guesses another encoding).
   def add(zip, name, content)
+    content = "\uFEFF#{content}" if name.end_with?(".csv") && !content.start_with?("\uFEFF")
     zip.put_next_entry(name)
     zip.write(content)
   end

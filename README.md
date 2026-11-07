@@ -83,6 +83,8 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 
 Other OIDC providers (Keycloak, Google, Entra ID…) work the same way.
 
+To keep the whole app behind Authentik's forward auth (proxy provider) while share links and outside mechanics' signing invitations still work, see [Running behind Authentik](docs/authentik.md): it has the unauthenticated URL list and what each one exposes.
+
 ### Backups
 
 SQLite runs in WAL mode, so a plain file copy taken while the app is running can be inconsistent. Use the SQLite backup command instead:

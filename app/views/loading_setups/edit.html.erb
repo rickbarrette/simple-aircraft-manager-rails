@@ -12,16 +12,16 @@
   <% end %>
   <fieldset>
     <legend class="label">Stations</legend>
-    <div class="grid grid-cols-[1fr_6rem_6rem_auto] gap-2 text-xs text-slate-500"><span>Name</span><span>Arm (in)</span><span>Max</span><span>Fuel (gal)</span></div>
+    <div class="grid grid-cols-[1fr_5rem_5rem_3.5rem] gap-2 text-xs text-slate-500 sm:grid-cols-[1fr_6rem_6rem_4rem]"><span>Name</span><span>Arm (in)</span><span>Max (lb/gal)</span><span class="text-center">Fuel</span></div>
     <% stations.each_with_index do |st, i| %>
-      <div class="mt-1 grid grid-cols-[1fr_6rem_6rem_auto] items-center gap-2">
+      <div class="mt-1 grid grid-cols-[1fr_5rem_5rem_3.5rem] items-center gap-2 sm:grid-cols-[1fr_6rem_6rem_4rem]">
         <%= text_field_tag "setup[stations][#{i}][name]", st&.name, class: "input", placeholder: ("Front seats" if i.zero?), "aria-label": "Station #{i + 1} name" %>
         <%= text_field_tag "setup[stations][#{i}][arm]", st&.arm&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Station #{i + 1} arm" %>
         <%= text_field_tag "setup[stations][#{i}][max]", st&.max&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Station #{i + 1} maximum" %>
-        <%= check_box_tag "setup[stations][#{i}][fuel]", "1", st&.fuel, class: "mx-auto h-4 w-4", "aria-label": "Station #{i + 1} is fuel" %>
+        <%= check_box_tag "setup[stations][#{i}][fuel]", "1", st&.fuel, class: "mx-auto block h-4 w-4", "aria-label": "Station #{i + 1} is fuel" %>
       </div>
     <% end %>
-    <p class="hint">Tick "Fuel" for fuel tanks: their quantity is entered in gallons and the max is the usable capacity. Other maximums are in pounds.</p>
+    <p class="hint">Tick "Fuel" for fuel tanks: their quantity is entered in gallons and the max is the usable capacity in gallons. Other maximums are in pounds.</p>
   </fieldset>
   <div class="max-w-xs">
     <%= label_tag "setup[fuel_lb_per_gal]", "Fuel weight (lb per gallon)", class: "label" %>

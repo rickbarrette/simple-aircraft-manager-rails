@@ -55,6 +55,8 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 | `FORCE_SSL` | `true` (default) redirects to HTTPS and sets secure cookies. Use `false` for plain HTTP. |
 | `APP_HOST` | Host used in password-reset email links. |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | Optional. They enable password-reset emails. Without them an admin resets passwords from **Users**. |
+| `ANTHROPIC_API_KEY` | Optional. Lets Claude transcribe scanned logbook pages into entries (**Logbook → Import scans**). Without it, scans are only uploaded. |
+| `LOGBOOK_AI_MODEL`, `LOGBOOK_AI_EFFORT` | Optional. The Claude model and effort used for transcription (default `claude-opus-5-5`, `high`). |
 
 ### Backups
 
@@ -67,6 +69,8 @@ rsync -a --exclude '*.sqlite3*' storage/ backup/   # uploaded files
 ```
 
 Alternatively, stop the container and copy the volume.
+
+To back up or move a single aircraft with all its files, use **Access & Sharing → Download .sam.zip** (or `bin/rails "sam:export[N12345]"`). Import it from **Fleet → Import** (or `bin/rails "sam:import[file.sam.zip,owner@example.com]"`). The archive format is the original Simple Aircraft Manager's, so archives move between the two apps.
 
 ## Features
 
@@ -124,7 +128,11 @@ Differences from the original:
 
 ### Not yet ported
 
-AI logbook transcription, oil-analysis PDF import, the MCP server for AI agents, OIDC single sign-on, invitation codes, aircraft import/export, the plugin system, and the desktop builds.
+The MCP server for AI agents, OIDC single sign-on, invitation codes, per-aircraft feature switches, the plugin system, and the desktop builds.
+
+### Added in this port
+
+AirTrail sync and export, an airport database, FAA DRS AD import, spreadsheet flight import, engine monitor data (CGR-30P/C) with interactive charts, AvLab and Blackstone oil analysis import with trends, multiple squawk attachments with a photo viewer, AI logbook transcription with Claude (images and PDFs), and an installable PWA.
 
 ## License
 

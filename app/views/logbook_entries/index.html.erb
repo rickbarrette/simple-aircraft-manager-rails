@@ -9,7 +9,7 @@
         <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: "All logs", selected: @log_type }, class: "input w-32" %>
         <%= f.submit "Filter", class: "btn-secondary" %>
       <% end %>
-      <% if owner? %><%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %><% end %>
+      <% if owner? %><%= link_to "Import scans", new_aircraft_logbook_import_path(@aircraft), class: "btn-secondary" %><%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %><% end %>
     </div>
   </div>
   <% if @entries.any? %>

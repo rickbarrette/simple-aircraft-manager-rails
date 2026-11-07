@@ -7,6 +7,10 @@ class Component < ApplicationRecord
   has_many :child_components, class_name: "Component", foreign_key: :parent_component_id, dependent: :destroy
   has_many :squawks, dependent: :nullify
   has_many :oil_analyses, dependent: :nullify
+  # Records about this component outlive it (their foreign keys would otherwise block deleting it).
+  has_many :ad_compliances, dependent: :nullify
+  has_many :inspection_records, dependent: :nullify
+  has_many :major_records, dependent: :nullify
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
 

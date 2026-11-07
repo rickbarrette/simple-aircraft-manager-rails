@@ -3,10 +3,11 @@
   <div class="grid gap-4 sm:grid-cols-3">
     <%= f.field :sample_date, as: :date, required: true %>
     <%= f.field :analysis_date, as: :date %>
-    <%= f.field :status, as: :select, label: "Lab's verdict", collection: OilAnalysis::STATUSES.invert %>
+    <%= f.field :status, as: :select, label: "Lab's verdict", collection: [ [ "Not rated", "" ] ] + OilAnalysis::STATUSES.invert.to_a %>
     <%= f.field :component_id, as: :select, label: "Engine", collection: component_options(aircraft) %>
     <%= f.field :lab, placeholder: "AvLab, Blackstone…" %>
-    <%= f.field :sample_number, label: "Sample #" %>
+    <%= f.field :sample_number, label: "Sample / lab #" %>
+    <%= f.field :oil_type, label: "Oil", placeholder: "Aeroshell W100…", wrapper: { class: "sm:col-span-2" } %>
   </div>
   <fieldset class="grid gap-4 sm:grid-cols-4">
     <legend class="mb-2 text-sm font-semibold">Hours</legend>
@@ -15,19 +16,36 @@
     <%= f.field :filter_hours, as: :number, step: 0.1, label: "On filter" %>
     <%= f.field :oil_added, as: :number, step: 0.25, label: "Oil added (qt)" %>
   </fieldset>
+
   <fieldset>
     <legend class="mb-2 text-sm font-semibold">Results (ppm)</legend>
     <p class="hint mb-3">Leave blank what the lab didn't test (N/A). Enter "&lt; 0.1" as 0. The average is the lab's figure for similar engines, usually in (parentheses) under the result.</p>
     <div class="grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-      <% OilAnalysis::ELEMENTS.each do |el, (label, _)| %>
-        <div class="grid grid-cols-[6rem_1fr_1fr] items-center gap-2">
-          <%= f.label el, label, class: "text-sm font-medium text-slate-700" %>
-          <%= f.number_field el, step: 0.1, min: 0, class: "input", placeholder: "Result" %>
-          <%= f.number_field :"#{el}_avg", step: 0.1, min: 0, class: "input", placeholder: "Avg", "aria-label": "#{label} lab average" %>
+      <%= render partial: "element_input", collection: OilAnalysis::COMMON_ELEMENTS, as: :element, locals: { analysis: analysis } %>
+    </div>
+    <% extra = OilAnalysis::ELEMENTS.keys - OilAnalysis::COMMON_ELEMENTS %>
+    <details class="mt-3" <%= "open" if extra.any? { analysis.value(_1) || analysis.average(_1) } %>>
+      <summary class="cursor-pointer text-sm text-sky-700">More elements (Blackstone and other labs)</summary>
+      <div class="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+        <%= render partial: "element_input", collection: extra, as: :element, locals: { analysis: analysis } %>
+      </div>
+    </details>
+  </fieldset>
+
+  <details <%= "open" if analysis.oil_properties.any? %>>
+    <summary class="cursor-pointer text-sm font-semibold">Oil properties</summary>
+    <div class="mt-3 grid gap-x-4 gap-y-3 sm:grid-cols-3">
+      <% OilAnalysis::PROPERTIES.each do |key, (label, unit)| %>
+        <div>
+          <%= label_tag "oil_analysis_oil_properties_#{key}", [ label, (unit.presence && "(#{unit})") ].compact.join(" "), class: "label" %>
+          <%= number_field_tag "oil_analysis[oil_properties][#{key}]", analysis.property(key), id: "oil_analysis_oil_properties_#{key}", step: "any", min: 0, class: "input" %>
         </div>
       <% end %>
     </div>
-  </fieldset>
+  </details>
+
+  <%= f.field :excluded_from_averages, as: :checkbox, label: "Leave out of trends",
+        hint: "For a sample that isn't representative, e.g. right after an overhaul or a top end." %>
   <%= f.field :lab_comments, as: :textarea, rows: 2 %>
   <%= f.field :notes, as: :textarea, rows: 2 %>
   <%= f.field :report, as: :file, label: "Lab report (PDF)", accept: ".pdf,application/pdf,image/*" %>

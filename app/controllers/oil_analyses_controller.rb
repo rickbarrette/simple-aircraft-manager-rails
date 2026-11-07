@@ -31,8 +31,8 @@ class OilAnalysesController < ApplicationController
     end
   end
 
-  # Create records from a lab report PDF. AvLab reports include the two previous
-  # samples too, so samples already on file are skipped rather than duplicated.
+  # Create records from a lab report PDF (AvLab or Blackstone). Reports repeat
+  # earlier samples, so samples already on file are skipped rather than duplicated.
   def import
     file = params[:report]
     return redirect_to(new_aircraft_oil_analysis_path(@aircraft), alert: "Choose a lab report PDF.") if file.blank?
@@ -50,7 +50,7 @@ class OilAnalysesController < ApplicationController
     OilAnalysis.transaction do
       report.samples.each do |sample|
         record = existing_sample(sample) ||
-                 @aircraft.oil_analyses.create!(sample.except(:current).merge(lab: report.lab, component: engine)).tap { created << _1 }
+                 @aircraft.oil_analyses.create!(sample.except(:current).merge(lab: report.lab, oil_type: report.oil_type, component: engine)).tap { created << _1 }
         current_record = record if sample[:current]
       end
     end
@@ -108,9 +108,10 @@ class OilAnalysesController < ApplicationController
 
   def analysis_params
     params.require(:oil_analysis).permit(
-      :component_id, :sample_date, :analysis_date, :lab, :sample_number, :engine_hours, :oil_hours,
-      :filter_hours, :oil_added, :status, :lab_comments, :notes, :report,
-      *OilAnalysis::ELEMENTS.keys.flat_map { [ _1, :"#{_1}_avg" ] }
+      :component_id, :sample_date, :analysis_date, :lab, :sample_number, :oil_type, :engine_hours, :oil_hours,
+      :filter_hours, :oil_added, :status, :lab_comments, :notes, :report, :excluded_from_averages,
+      elements: OilAnalysis::ELEMENTS.keys, element_averages: OilAnalysis::ELEMENTS.keys,
+      oil_properties: OilAnalysis::PROPERTIES.keys
     ).tap { |p| p[:component_id] = scoped_id(@aircraft.components, p[:component_id]) if p.key?(:component_id) }
   end
 end

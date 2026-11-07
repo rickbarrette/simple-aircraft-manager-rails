@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "properties": {
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": { "type": ["string", "null"], "description": "YYYY-MM-DD, or null if unreadable" },
+          "log_type": { "type": "string", "enum": ["AC", "ENG", "PROP", "OTHER"] },
+          "entry_type": { "type": "string", "enum": ["MAINTENANCE", "INSPECTION", "FLIGHT", "HOURS_UPDATE", "OTHER"] },
+          "text": { "type": "string" },
+          "aircraft_hours": { "type": ["number", "null"] },
+          "signoff_person": { "type": ["string", "null"] },
+          "signoff_location": { "type": ["string", "null"] },
+          "page_start": { "type": "integer" },
+          "page_end": { "type": "integer" },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+        },
+        "required": ["date", "log_type", "entry_type", "text", "aircraft_hours", "signoff_person", "signoff_location",
+                     "page_start", "page_end", "confidence"],
+        "additionalProperties": false
+      }
+    },
+    "non_logbook_pages": { "type": "array", "items": { "type": "integer" } },
+    "unparseable_pages": { "type": "array", "items": { "type": "integer" } }
+  },
+  "required": ["entries", "non_logbook_pages", "unparseable_pages"],
+  "additionalProperties": false
+}

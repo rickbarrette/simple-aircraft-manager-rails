@@ -1,0 +1,32 @@
+<% content_for :title, "Import Aircraft" %>
+<div class="mx-auto max-w-2xl space-y-5">
+  <h1 class="text-2xl font-bold tracking-tight">Import an aircraft</h1>
+  <section class="card card-body space-y-4">
+    <p class="text-sm text-slate-600">
+      Upload a <strong>.sam.zip</strong> archive exported from Simple Aircraft Manager (this app or the original).
+      Everything in it is added as a new aircraft that you own: components, logbook, squawks, inspections, ADs,
+      documents, oil and fuel, oil analyses, flights and their files.
+    </p>
+    <% if @preview %>
+      <div class="rounded-md bg-slate-50 px-3 py-2 text-sm ring-1 ring-slate-200">
+        Archive: <strong><%= @preview.tail_number %></strong> <%= [ @preview.make, @preview.model ].compact_blank.join(" ") %>
+        <% if @preview.exported_at %><span class="text-slate-500">· exported <%= fmt_date(@preview.exported_at.to_date) %></span><% end %>
+      </div>
+    <% end %>
+    <%= form_with url: aircraft_imports_path, multipart: true, class: "space-y-4" do |f| %>
+      <div>
+        <%= f.label :archive, "Archive (.sam.zip)", class: "label" %>
+        <%= f.file_field :archive, accept: ".zip,application/zip", required: true,
+              class: "block text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
+        <% if @conflict %><p class="hint mt-1">Choose the file again along with the new tail number.</p><% end %>
+      </div>
+      <div class="max-w-xs">
+        <%= f.label :tail_number, "Tail number", class: "label" %>
+        <%= f.text_field :tail_number, value: (params[:tail_number] unless @conflict), class: "input uppercase",
+              placeholder: @preview&.tail_number || "From the archive", required: @conflict.present? %>
+        <p class="hint mt-1">Leave blank to use the archive's. Needed when that tail number is already here.</p>
+      </div>
+      <div class="flex gap-2"><%= f.submit "Import", class: "btn-primary" %><%= link_to "Cancel", root_path, class: "btn-secondary" %></div>
+    <% end %>
+  </section>
+</div>

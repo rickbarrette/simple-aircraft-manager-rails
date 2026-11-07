@@ -1,9 +1,18 @@
 module OilAnalysesHelper
-  STATUS_BADGES = { "normal" => "badge-green", "elevated" => "badge-orange", "high" => "badge-red" }.freeze
+  STATUS_BADGES = { "normal" => "badge-green", "monitor" => "badge-orange", "action_required" => "badge-red" }.freeze
   TREND_COLORS = %w[#0ea5e9 #f97316 #22c55e #a855f7 #eab308 #ec4899 #64748b].freeze
 
+  # The lab's verdict; Blackstone reports don't rate samples, so there may be none.
   def oil_status_badge(analysis)
-    tag.span OilAnalysis::STATUSES[analysis.status], class: STATUS_BADGES[analysis.status]
+    return tag.span("Not rated", class: "badge-gray") unless analysis.status
+    tag.span analysis.status_label, class: STATUS_BADGES[analysis.status]
+  end
+
+  def oil_property(analysis, key)
+    value = analysis.property(key) or return "—"
+    _, unit = OilAnalysis::PROPERTIES.fetch(key)
+    number = number_with_precision(value, precision: 2, strip_insignificant_zeros: true)
+    unit.present? ? "#{number} #{unit}" : number
   end
 
   def ppm(value)
@@ -28,8 +37,9 @@ module OilAnalysesHelper
     "#{sign}#{ppm(delta)}"
   end
 
+  # Samples marked "exclude from averages" (e.g. right after an overhaul) are left out.
   def oil_trend_series(analyses)
-    chronological = analyses.sort_by(&:sample_date)
+    chronological = analyses.reject(&:excluded_from_averages?).sort_by(&:sample_date)
     OilAnalysis::TREND_ELEMENTS.filter_map do |el|
       data = chronological.filter_map { |a| [ a.sample_date, a.value(el).to_f ] if a.value(el) }
       { name: OilAnalysis.element_label(el), data: data } if data.size >= 2

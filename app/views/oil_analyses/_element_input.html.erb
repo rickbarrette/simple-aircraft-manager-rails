@@ -1,0 +1,9 @@
+<%# One element's result and lab average. Locals: element, analysis %>
+<% label = OilAnalysis.element_label(element) %>
+<div class="grid grid-cols-[6rem_1fr_1fr] items-center gap-2">
+  <%= label_tag "oil_analysis_elements_#{element}", label, class: "text-sm font-medium text-slate-700" %>
+  <%= number_field_tag "oil_analysis[elements][#{element}]", analysis.value(element), id: "oil_analysis_elements_#{element}",
+        step: "any", min: 0, class: "input", placeholder: "Result" %>
+  <%= number_field_tag "oil_analysis[element_averages][#{element}]", analysis.average(element), id: "oil_analysis_element_averages_#{element}",
+        step: "any", min: 0, class: "input", placeholder: "Avg", "aria-label": "#{label} lab average" %>
+</div>

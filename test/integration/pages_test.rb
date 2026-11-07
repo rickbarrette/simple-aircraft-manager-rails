@@ -24,7 +24,7 @@ class PagesTest < ActionDispatch::IntegrationTest
     @major = @a.major_records.create!(record_type: "alteration", title: "LED lights", date_performed: Date.current)
     @flight = @a.flight_logs.create!(date: Date.current, tach_time: 1.2)
     @cr = @a.consumable_records.create!(record_type: "oil", date: Date.current, quantity_added: 1, flight_hours: 1000)
-    @oa = @a.oil_analyses.create!(sample_date: Date.current, iron: 30, iron_avg: 35)
+    @oa = @a.oil_analyses.create!(sample_date: Date.current, elements: { iron: 30 }, element_averages: { iron: 35 })
     @token = @a.share_tokens.create!(privilege: "maintenance", label: "Mechanic")
     @a.log_event!("aircraft", "Created", user: @owner)
     sign_in @owner

@@ -79,6 +79,11 @@ GEM
     addressable (2.9.2)
       public_suffix (>= 2.0.2, < 8.0)
     afm (1.0.1)
+    anthropic (2.6.0)
+      base64 (~> 0.1)
+      connection_pool (>= 2, < 4)
+      opentelemetry-api (>= 1.2.4, < 2)
+      standardwebhooks (~> 1.0)
     ast (2.4.3)
     base64 (0.3.0)
     bcrypt (3.1.22)
@@ -208,6 +213,8 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.7-x86_64-linux-musl)
       racc (~> 1.4)
+    opentelemetry-api (1.8.0)
+      logger
     ostruct (0.6.3)
     parallel (1.28.0)
     parser (3.3.13.0)
@@ -355,6 +362,7 @@ GEM
       net-sftp (>= 2.1.2)
       net-ssh (>= 2.8.0)
       ostruct
+    standardwebhooks (1.0.1)
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     tailwindcss-rails (4.7.0)
@@ -415,6 +423,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  anthropic (~> 2.6)
   bcrypt (~> 3.1.7)
   bootsnap
   brakeman
@@ -432,6 +441,7 @@ DEPENDENCIES
   rails (~> 8.1.0)
   roo (~> 2.10)
   rubocop-rails-omakase
+  rubyzip (>= 2.4, < 3)
   selenium-webdriver
   solid_cable
   solid_cache
@@ -461,6 +471,7 @@ CHECKSUMS
   activesupport (8.1.4.1) sha256=16ac4f341ca65c85a1fcdb8ac73f68891aae9e3c4a6f9c3a27daed8b00017ed7
   addressable (2.9.2) sha256=9117c7e7d6ee07230e75ce41fb9401ae55354dc654fcd0e862ba41d539e9a610
   afm (1.0.1) sha256=4fc98c6ea9cad60c25ae12bad517513b0d6fdbedc099e25be88bf47977b7d879
+  anthropic (2.6.0) sha256=0bbc1cf9b71c82dc72b552ccd0d5e253b76a55fd2d80f8ea4666a9d836a492cb
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bcrypt (3.1.22) sha256=1f0072e88c2d705d94aff7f2c5cb02eb3f1ec4b8368671e19112527489f29032
@@ -525,6 +536,7 @@ CHECKSUMS
   nokogiri (1.19.7-x86_64-darwin) sha256=508e81e8c5f84aaa240dce981bf1c43faae60808726f0ce7024ee92effc5cafe
   nokogiri (1.19.7-x86_64-linux-gnu) sha256=25865ccb462f714e712fdf8906fde07849cb6704a808e3d629d75baa5af5dd3b
   nokogiri (1.19.7-x86_64-linux-musl) sha256=464d1f3dfb0d53cf54c0c6a7e23e8e91cf68ec3cafc2b27dc4a7682f2d9bf546
+  opentelemetry-api (1.8.0) sha256=3af51183daf0f56a164bc1579782245be70a40678566b9a393cbe5af28ea87c6
   ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
   parallel (1.28.0) sha256=33e6de1484baf2524792d178b0913fc8eb94c628d6cfe45599ad4458c638c970
   parser (3.3.13.0) sha256=e02f9b63c2fe05b0c68f692ba4df89b3cb113b663964f75d988fbebfd6c3deca
@@ -574,6 +586,7 @@ CHECKSUMS
   sqlite3 (2.10.2-x86_64-linux-gnu) sha256=ca92731ab464df9cae503fa1a439a549e2724f6953c8c05a7769b59366e38f15
   sqlite3 (2.10.2-x86_64-linux-musl) sha256=b9f8fc62f3e0eb8966b41de251b492b4c8e9d1b23559beb6e150ad7f8d590941
   sshkit (1.25.1) sha256=be3f10b9d6eb0b44d5eaba3f7cbe41bc6bb894bce4339688ac20124391455b78
+  standardwebhooks (1.0.1) sha256=35db391599d9318747e1e75e77b96236b3fc25241b92387c9a8d31bd974f3d7d
   stimulus-rails (1.3.4) sha256=765676ffa1f33af64ce026d26b48e8ffb2e0b94e0f50e9119e11d6107d67cb06
   tailwindcss-rails (4.7.0) sha256=9b09bd677d7cd226fc8ff3f7d2d91c6dc6c3da75dd74dc4cab5f94711f69ba41
   tailwindcss-ruby (4.3.3) sha256=ee0a64030749862deb501acab4c4aaf5adbee13865746a33299d46d7b5d0952a

@@ -75,3 +75,5 @@ gem "caxlsx", "~> 4.5", group: :test
 gem "webmock", "~> 3.34", group: :test
 
 gem "pdf-reader", "~> 2.16"
+gem "rubyzip", ">= 2.4", "< 3" # aircraft archives (.sam.zip)
+gem "anthropic", "~> 2.6" # AI logbook transcription (Claude)

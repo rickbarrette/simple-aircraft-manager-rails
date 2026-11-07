@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_06_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_180800) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -138,6 +138,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_170000) do
     t.index ["aircraft_id", "created_at"], name: "index_aircraft_events_on_aircraft_id_and_created_at"
     t.index ["aircraft_id"], name: "index_aircraft_events_on_aircraft_id"
     t.index ["user_id"], name: "index_aircraft_events_on_user_id"
+  end
+
+  create_table "aircraft_imports", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "aircraft_id"
+    t.string "status", default: "queued", null: false
+    t.string "filename"
+    t.string "tail_number"
+    t.string "source"
+    t.json "counts", default: {}, null: false
+    t.json "warnings", default: [], null: false
+    t.text "error"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aircraft_id"], name: "index_aircraft_imports_on_aircraft_id"
+    t.index ["user_id"], name: "index_aircraft_imports_on_user_id"
   end
 
   create_table "aircraft_inspection_types", id: false, force: :cascade do |t|
@@ -397,6 +415,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_170000) do
     t.index ["document_id"], name: "index_logbook_entries_on_document_id"
   end
 
+  create_table "logbook_imports", force: :cascade do |t|
+    t.integer "aircraft_id", null: false
+    t.integer "user_id"
+    t.integer "document_id"
+    t.string "status", default: "queued", null: false
+    t.boolean "transcribe", default: true, null: false
+    t.string "log_type"
+    t.string "model"
+    t.integer "pages_total", default: 0, null: false
+    t.integer "pages_done", default: 0, null: false
+    t.integer "entries_created", default: 0, null: false
+    t.json "warnings", default: [], null: false
+    t.text "error"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aircraft_id"], name: "index_logbook_imports_on_aircraft_id"
+    t.index ["document_id"], name: "index_logbook_imports_on_document_id"
+    t.index ["user_id"], name: "index_logbook_imports_on_user_id"
+  end
+
   create_table "major_records", force: :cascade do |t|
     t.integer "aircraft_id", null: false
     t.integer "component_id"
@@ -434,35 +474,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_170000) do
     t.decimal "oil_hours", precision: 6, scale: 1
     t.decimal "filter_hours", precision: 6, scale: 1
     t.decimal "oil_added", precision: 6, scale: 2
-    t.string "status", default: "normal", null: false
+    t.string "status"
     t.text "lab_comments"
     t.text "notes"
-    t.decimal "iron", precision: 8, scale: 1
-    t.decimal "iron_avg", precision: 8, scale: 1
-    t.decimal "copper", precision: 8, scale: 1
-    t.decimal "copper_avg", precision: 8, scale: 1
-    t.decimal "nickel", precision: 8, scale: 1
-    t.decimal "nickel_avg", precision: 8, scale: 1
-    t.decimal "chromium", precision: 8, scale: 1
-    t.decimal "chromium_avg", precision: 8, scale: 1
-    t.decimal "silver", precision: 8, scale: 1
-    t.decimal "silver_avg", precision: 8, scale: 1
-    t.decimal "magnesium", precision: 8, scale: 1
-    t.decimal "magnesium_avg", precision: 8, scale: 1
-    t.decimal "aluminum", precision: 8, scale: 1
-    t.decimal "aluminum_avg", precision: 8, scale: 1
-    t.decimal "lead", precision: 8, scale: 1
-    t.decimal "lead_avg", precision: 8, scale: 1
-    t.decimal "silicon", precision: 8, scale: 1
-    t.decimal "silicon_avg", precision: 8, scale: 1
-    t.decimal "titanium", precision: 8, scale: 1
-    t.decimal "titanium_avg", precision: 8, scale: 1
-    t.decimal "tin", precision: 8, scale: 1
-    t.decimal "tin_avg", precision: 8, scale: 1
-    t.decimal "molybdenum", precision: 8, scale: 1
-    t.decimal "molybdenum_avg", precision: 8, scale: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "elements", default: {}, null: false
+    t.json "element_averages", default: {}, null: false
+    t.json "oil_properties", default: {}, null: false
+    t.string "oil_type"
+    t.boolean "excluded_from_averages", default: false, null: false
     t.index ["aircraft_id", "sample_date"], name: "index_oil_analyses_on_aircraft_id_and_sample_date"
     t.index ["aircraft_id"], name: "index_oil_analyses_on_aircraft_id"
     t.index ["component_id"], name: "index_oil_analyses_on_component_id"
@@ -530,6 +551,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_170000) do
   add_foreign_key "air_trail_syncs", "flight_logs"
   add_foreign_key "aircraft_events", "aircraft"
   add_foreign_key "aircraft_events", "users", on_delete: :nullify
+  add_foreign_key "aircraft_imports", "aircraft", on_delete: :nullify
+  add_foreign_key "aircraft_imports", "users"
   add_foreign_key "aircraft_notes", "aircraft"
   add_foreign_key "aircraft_notes", "users", on_delete: :nullify
   add_foreign_key "aircraft_roles", "aircraft"
@@ -552,6 +575,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_170000) do
   add_foreign_key "inspection_records", "logbook_entries", on_delete: :nullify
   add_foreign_key "logbook_entries", "aircraft"
   add_foreign_key "logbook_entries", "documents", on_delete: :nullify
+  add_foreign_key "logbook_imports", "aircraft"
+  add_foreign_key "logbook_imports", "documents", on_delete: :nullify
+  add_foreign_key "logbook_imports", "users", on_delete: :nullify
   add_foreign_key "major_records", "aircraft"
   add_foreign_key "major_records", "components", on_delete: :nullify
   add_foreign_key "major_records", "documents", column: "form_337_document_id", on_delete: :nullify

@@ -1,0 +1,58 @@
+<% content_for :title, "#{@aircraft.tail_number} Import Logbook Pages" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<% ai = LogbookImport.ai_available? %>
+<%= form_with url: aircraft_logbook_imports_path(@aircraft), multipart: true, class: "card card-body max-w-3xl space-y-5" do |f| %>
+  <div>
+    <h2 class="card-title">Import scanned logbook pages</h2>
+    <p class="hint mt-1">
+      The pages are saved as a document, in file-name order (name them page-001, page-002…).
+      <% if ai %>Claude can also read them and add each entry to the logbook for you.<% else %>
+      To have entries transcribed automatically, set an <code>ANTHROPIC_API_KEY</code> for the app.<% end %>
+    </p>
+  </div>
+
+  <div>
+    <%= f.label :pages, "Scanned pages", class: "label" %>
+    <%= f.file_field :pages, multiple: true, required: true, accept: "image/jpeg,image/png,image/gif,image/webp,application/pdf",
+          class: "block text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
+    <p class="hint mt-1">JPEG, PNG, WebP or PDF. For transcription, images up to 5 MB each and PDFs up to 30 MB.</p>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= f.label :collection_id, "Collection", class: "label" %>
+      <%= f.select :collection_id, [ [ "New collection…", "new" ] ] + @collections.map { [ _1.name, _1.id ] },
+            { selected: params[:collection_id] || @collections.find { _1.name.match?(/log/i) }&.id || "new" }, class: "input" %>
+    </div>
+    <div>
+      <%= f.label :collection_name, "New collection name", class: "label" %>
+      <%= f.text_field :collection_name, value: params[:collection_name], placeholder: "Airframe Log #2", class: "input" %>
+    </div>
+    <div>
+      <%= f.label :document_name, "Document name", class: "label" %>
+      <%= f.text_field :document_name, value: params[:document_name], placeholder: "Same as the collection", class: "input" %>
+    </div>
+    <div>
+      <%= f.label :doc_type, "Document type", class: "label" %>
+      <%= f.select :doc_type, Document::TYPES.invert, { selected: params[:doc_type] || "LOG" }, class: "input" %>
+    </div>
+  </div>
+
+  <fieldset class="space-y-3 rounded-md p-3 ring-1 ring-slate-200 <%= 'opacity-60' unless ai %>">
+    <label class="flex items-start gap-2 text-sm">
+      <%= f.check_box :transcribe, { checked: ai, disabled: !ai, class: "mt-0.5" }, "1", "0" %>
+      <span><strong>Transcribe with Claude</strong><br>
+        <span class="hint">Each entry becomes a logbook entry linked to its page. Handwriting isn't always read perfectly: review the new entries against the scans.</span></span>
+    </label>
+    <div class="max-w-xs">
+      <%= f.label :log_type, "Log", class: "label" %>
+      <%= f.select :log_type, [ [ "Detect for each entry", "" ] ] + LogbookEntry::LOG_TYPES.invert.to_a, { selected: params[:log_type] }, class: "input", disabled: !ai %>
+      <p class="hint mt-1">Pick one when the whole book is a single log (e.g. an engine log).</p>
+    </div>
+  </fieldset>
+
+  <div class="flex gap-2">
+    <%= f.submit ai ? "Upload & transcribe" : "Upload pages", class: "btn-primary" %>
+    <%= link_to "Cancel", aircraft_logbook_entries_path(@aircraft), class: "btn-secondary" %>
+  </div>
+<% end %>

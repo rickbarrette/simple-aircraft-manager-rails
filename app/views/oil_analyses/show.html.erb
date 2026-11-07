@@ -12,11 +12,26 @@
       <dt class="text-slate-500">Oil hrs</dt><dd><%= @analysis.oil_hours ? hours(@analysis.oil_hours) : "—" %></dd>
       <dt class="text-slate-500">Filter hrs</dt><dd><%= @analysis.filter_hours ? hours(@analysis.filter_hours) : "—" %></dd>
       <dt class="text-slate-500">Oil added</dt><dd><%= @analysis.oil_added ? "#{number_with_precision(@analysis.oil_added, precision: 2, strip_insignificant_zeros: true)} qt" : "—" %></dd>
+      <dt class="text-slate-500">Oil</dt><dd><%= @analysis.oil_type || "—" %></dd>
       <dt class="text-slate-500">Lab</dt><dd><%= @analysis.lab || "—" %></dd>
       <dt class="text-slate-500">Sample #</dt><dd><%= @analysis.sample_number || "—" %></dd>
       <dt class="text-slate-500">Analyzed</dt><dd><%= @analysis.analysis_date ? fmt_date(@analysis.analysis_date) : "—" %></dd>
       <dt class="text-slate-500">Report</dt><dd><%= @analysis.report.attached? ? link_to(@analysis.report.filename, rails_blob_path(@analysis.report, disposition: :inline), class: "link", target: "_blank", rel: "noopener") : "—" %></dd>
     </dl>
+    <% if @analysis.excluded_from_averages? %>
+      <p class="border-t border-slate-100 px-4 py-2 text-xs text-slate-500">Left out of trend charts.</p>
+    <% end %>
+    <% if @analysis.oil_properties.any? %>
+      <div class="border-t border-slate-100 px-4 py-3 text-sm">
+        <div class="mb-1 text-xs font-semibold text-slate-500">Oil properties</div>
+        <dl class="grid grid-cols-2 gap-x-4 gap-y-1">
+          <% OilAnalysis::PROPERTIES.each_key do |key| %>
+            <% next unless @analysis.property(key) %>
+            <dt class="text-slate-500"><%= OilAnalysis::PROPERTIES[key][0] %></dt><dd class="tabular-nums"><%= oil_property(@analysis, key) %></dd>
+          <% end %>
+        </dl>
+      </div>
+    <% end %>
     <% if @analysis.lab_comments.present? %>
       <div class="border-t border-slate-100 px-4 py-3 text-sm"><div class="mb-1 text-xs font-semibold text-slate-500">Lab comments</div><%= simple_format @analysis.lab_comments %></div>
     <% end %>
@@ -40,7 +55,7 @@
           <thead><tr><th>Element</th><th class="text-right">This sample</th><th class="text-right">Lab average</th><% if @previous %><th class="text-right">Previous</th><th class="text-right">Change</th><% end %><th>Usual source</th></tr></thead>
           <tbody>
             <% OilAnalysis::ELEMENTS.each do |el, (label, source)| %>
-              <% next unless @analysis.value(el) || @analysis.average(el) %>
+              <% next unless @analysis.value(el) %>
               <tr class="<%= "bg-red-50" if @analysis.flagged?(el) %>">
                 <td><%= label %></td>
                 <td class="text-right tabular-nums <%= "font-semibold text-red-700" if @analysis.flagged?(el) %>"><%= ppm(@analysis.value(el)) %></td>

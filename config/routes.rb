@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     post :map_airport
   end
 
+  resources :aircraft_imports, path: "imports", only: %i[new create show]
   resources :aircraft do
     member do
       patch :hours, action: :update_hours
@@ -40,6 +41,7 @@ Rails.application.routes.draw do
     resources :oil_analyses, path: "oil_analysis" do
       collection { post :import }
     end
+    resources :logbook_imports, path: "logbook/import", only: %i[new create show]
     resources :logbook_entries
     resources :documents
     resources :document_collections, except: %i[index show]
@@ -56,6 +58,7 @@ Rails.application.routes.draw do
     resources :major_records
     resources :aircraft_roles, path: "access", only: %i[index create update destroy]
     resources :share_tokens, only: %i[create destroy]
+    resource :export, controller: "aircraft_exports", only: :show
     resources :events, only: :index
   end
 

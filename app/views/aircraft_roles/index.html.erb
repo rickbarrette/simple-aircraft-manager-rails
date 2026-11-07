@@ -58,4 +58,14 @@
       <%= f.submit "Create Share Link" %>
     <% end %>
   </section>
+
+  <section class="card lg:col-span-2">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">Backup &amp; transfer</h2>
+        <p class="hint">Everything recorded for <%= @aircraft.tail_number %>, with its files, in one .sam.zip archive. Import it from the Fleet page here or into another Simple Aircraft Manager (including the original).</p>
+      </div>
+      <%= link_to "Download .sam.zip", aircraft_export_path(@aircraft), class: "btn-secondary", data: { turbo: false } %>
+    </div>
+  </section>
 </div>

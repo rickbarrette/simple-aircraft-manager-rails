@@ -32,7 +32,9 @@
   <h2 class="<%= h2 %>">3. System description</h2>
   <ul class="<%= p_ %> list-disc pl-5">
     <li><strong>Software:</strong> Simple Aircraft Manager, version <%= info.revision %> (Ruby <%= RUBY_VERSION %>, Rails <%= Rails.version %>, SQLite <%= SQLite3::SQLITE_VERSION %>).</li>
-    <li><strong>Hosting and network:</strong> <%= policy.hosting_description.presence || "[describe the server, location and network]" %> Access is over HTTPS<%= " with single sign-on (#{Sso.label})" if Sso.enabled? %>.</li>
+    <li><strong>Hosting and network:</strong>
+      <% if policy.hosting_description.present? %><div class="mt-1"><%= markdown(policy.hosting_description) %></div><% else %>[describe the server, location and network]<% end %>
+      <p class="mt-1">Access is over HTTPS<%= " with single sign-on (#{Sso.label})" if Sso.enabled? %>.</p></li>
     <li><strong>Data:</strong> one SQLite database plus uploaded files (stored once per identical file) on the server's storage volume.</li>
     <li><strong>Backups:</strong> every night the app makes a verified copy of the database in the storage volume (SQLite integrity check and record counts compared) and keeps the newest <%= Setting.integer("backups_kept") %>. Off-site: <% if OffsiteConnection.connected? %>after each nightly backup the app copies the verified database snapshot (compressed) to Google Drive (account <%= OffsiteConnection.current.account_email %>, folder “<%= OffsiteConnection::ROOT_FOLDER %>”), keeping the newest <%= Setting.integer("offsite_backups_kept") %>, together with every uploaded file (scans, documents, attachments) not already copied; files are never deleted from the off-site copy. A failed copy is emailed to the administrators. A restore test downloads the newest copy, opens it and checks it, and checks a sample of files against their checksums.<%= " #{policy.offsite_backup_description}" if policy.offsite_backup_description.present? %><% else %><%= policy.offsite_backup_description.presence || "[describe the off-site backup]" %><% end %></li>
   </ul>
@@ -101,7 +103,7 @@
 
   <% if policy.additional_procedures.present? %>
     <h2 class="<%= h2 %>">14. Additional procedures</h2>
-    <div class="<%= p_ %> whitespace-pre-wrap"><%= policy.additional_procedures %></div>
+    <div class="<%= p_ %>"><%= markdown(policy.additional_procedures) %></div>
   <% end %>
 
   <h2 class="<%= h2 %>">Revision history</h2>

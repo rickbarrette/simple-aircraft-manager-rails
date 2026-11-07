@@ -11,7 +11,8 @@
       <%= f.field :responsible_name, label: "Responsible person", placeholder: "Jane Pilot" %>
       <%= f.field :responsible_title, label: "Their role", placeholder: "Owner" %>
     </div>
-    <%= f.field :hosting_description, as: :textarea, rows: 2, label: "Hosting and network",
+    <%= f.field :hosting_description, as: :textarea, rows: 8, label: "Hosting and network",
+          hint: "Leave a blank line between paragraphs. Markdown works: **bold**, lists.",
           placeholder: "Self-hosted on a server at the owner's home, behind a firewall and an authenticating proxy." %>
     <%= f.field :offsite_backup_description, as: :textarea, rows: 2, label: (OffsiteConnection.connected? ? "Off-site backup (optional: Google Drive is connected)" : "Off-site backup"),
           hint: (OffsiteConnection.connected? ? "The Google Drive backup is described automatically; add anything else here." : "Or set up the built-in Google Drive backup under Admin → Off-site Backup."),
@@ -20,7 +21,8 @@
       <%= f.field :audit_interval_months, as: :number, min: 1, max: 24, label: "Audit every (months)" %>
       <%= f.field :audit_sample_size, as: :number, min: 1, max: 50, label: "Entries sampled per audit" %>
     </div>
-    <%= f.field :additional_procedures, as: :textarea, rows: 3, label: "Additional procedures (optional)" %>
+    <%= f.field :additional_procedures, as: :textarea, rows: 12, label: "Additional procedures (optional)",
+          hint: "Leave a blank line between items. Markdown works: **bold** headings, lists." %>
     <%= f.submit "Save" %>
   <% end %>
 

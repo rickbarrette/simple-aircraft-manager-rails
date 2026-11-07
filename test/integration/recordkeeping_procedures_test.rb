@@ -28,6 +28,12 @@ class RecordkeepingProceduresTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Jane Pilot"
     assert_includes response.body, "Self-hosted server behind a firewall."
+    RecordkeepingPolicy.current.update!(hosting_description: "First paragraph.\n\nSecond paragraph.", additional_procedures: "**Who makes entries.** The owner.\n\n**Retention.** Kept.")
+    get draft_admin_procedures_path
+    assert_select ".markdown p", text: "Second paragraph."
+    assert_select ".markdown strong", text: "Retention."
+    assert_no_match(/\*\*Retention/, response.body)
+    fill_policy
     post adopt_admin_procedures_path, params: { summary: "Initial issue" }
     r1 = ProceduresRevision.current
     assert_equal 1, r1.number

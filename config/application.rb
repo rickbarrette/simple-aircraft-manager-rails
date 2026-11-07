@@ -16,6 +16,15 @@ module SimpleAircraftManager
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[active_storage assets tasks])
 
+    # File links (rails_blob_path) stop working after this, so a link copied
+    # from a page, or seen before access was removed, doesn't work forever.
+    config.active_storage.urls_expire_in = 1.hour
+
+    config.action_dispatch.default_headers.merge!(
+      "Permissions-Policy" => "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
+      "Cross-Origin-Opener-Policy" => "same-origin"
+    )
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

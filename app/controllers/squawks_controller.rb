@@ -70,5 +70,6 @@ class SquawksController < ApplicationController
 
   def squawk_params
     params.require(:squawk).permit(:priority, :issue_reported, :component_id, :notes, attachments: [])
+          .tap { |p| p[:component_id] = scoped_id(@aircraft.components, p[:component_id]) if p.key?(:component_id) }
   end
 end

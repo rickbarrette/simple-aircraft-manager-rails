@@ -1,6 +1,9 @@
 module Authentication
   extend ActiveSupport::Concern
 
+  # A session unused for this long is signed out.
+  SESSION_IDLE_TIMEOUT = 30.days
+
   included do
     before_action :require_authentication
     helper_method :authenticated?
@@ -26,7 +29,15 @@ module Authentication
     end
 
     def find_session_by_cookie
-      Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      session = Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      return unless session
+      if session.updated_at < SESSION_IDLE_TIMEOUT.ago
+        session.destroy
+        cookies.delete(:session_id)
+        return
+      end
+      session.touch if session.updated_at < 1.hour.ago # last-active time, without a write per request
+      session
     end
 
     def request_authentication

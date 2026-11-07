@@ -78,3 +78,7 @@ gem "pdf-reader", "~> 2.16"
 gem "rubyzip", ">= 2.4", "< 3" # aircraft archives (.sam.zip)
 gem "anthropic", "~> 2.6" # AI logbook transcription (Claude)
 gem "commonmarker", "~> 2.10" # Markdown in notes
+
+gem "omniauth", "~> 2.1" # single sign-on (OpenID Connect)
+gem "omniauth_openid_connect", "~> 0.8"
+gem "omniauth-rails_csrf_protection", "~> 2.0"

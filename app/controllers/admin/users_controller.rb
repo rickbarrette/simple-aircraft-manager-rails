@@ -30,6 +30,7 @@ class Admin::UsersController < ApplicationController
     end
     @user.admin = admin_flag
     if @user.update(attrs)
+      @user.sessions.where.not(id: Current.session.id).destroy_all if attrs.key?(:password) # new password signs them out
       redirect_to admin_users_path, notice: "User updated."
     else
       render :edit, status: :unprocessable_entity

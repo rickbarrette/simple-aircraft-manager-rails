@@ -1,12 +1,22 @@
 <% content_for :title, "Sign in" %>
 <div class="mx-auto max-w-sm">
   <h1 class="mb-4 text-2xl font-bold">Sign in</h1>
-  <%= form_with url: session_path, class: "card card-body space-y-4" do |form| %>
-    <div><%= form.label :email_address, "Email", class: "label" %>
-      <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", value: params[:email_address], class: "input" %></div>
-    <div><%= form.label :password, class: "label" %>
-      <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72, class: "input" %></div>
-    <%= form.submit "Sign in", class: "btn-primary w-full justify-center" %>
-    <p class="text-center text-sm"><%= link_to "Forgot password?", new_password_path, class: "link" %></p>
-  <% end %>
+  <div class="card card-body space-y-4">
+    <% if Sso.enabled? %>
+      <%= button_to "Sign in with #{Sso.label}", "/auth/#{Sso::PROVIDER}", class: "btn-primary w-full justify-center", data: { turbo: false } %>
+    <% end %>
+    <% if Sso.password_login? %>
+      <% if Sso.enabled? %>
+        <div class="flex items-center gap-3 text-xs text-slate-400"><span class="h-px flex-1 bg-slate-200"></span>or<span class="h-px flex-1 bg-slate-200"></span></div>
+      <% end %>
+      <%= form_with url: session_path, class: "space-y-4" do |form| %>
+        <div><%= form.label :email_address, "Email", class: "label" %>
+          <%= form.email_field :email_address, required: true, autofocus: !Sso.enabled?, autocomplete: "username", value: params[:email_address], class: "input" %></div>
+        <div><%= form.label :password, class: "label" %>
+          <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72, class: "input" %></div>
+        <%= form.submit "Sign in", class: (Sso.enabled? ? "btn-secondary" : "btn-primary") + " w-full justify-center" %>
+        <p class="text-center text-sm"><%= link_to "Forgot password?", new_password_path, class: "link" %></p>
+      <% end %>
+    <% end %>
+  </div>
 </div>

@@ -1,6 +1,6 @@
 <%# Applies the saved theme before the page paints (no light flash in dark mode).
     "system" (default) follows the OS setting. Set by theme_controller.js. %>
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
   (function () {
     try {
       var choice = localStorage.getItem("theme") || "system";

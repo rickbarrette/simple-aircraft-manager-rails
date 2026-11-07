@@ -10,7 +10,7 @@
             <td><%= r.user.display_name %><div class="text-xs text-slate-500"><%= r.user.email_address %></div></td>
             <td>
               <%= form_with url: aircraft_aircraft_role_path(@aircraft, r), method: :patch do |f| %>
-                <%= f.select :role, AircraftRole::ROLES.invert, { selected: r.role }, class: "input w-28", onchange: "this.form.requestSubmit()" %>
+                <%= f.select :role, AircraftRole::ROLES.invert, { selected: r.role }, class: "input w-28", data: { submit_on_change: true } %>
               <% end %>
             </td>
             <td class="text-right"><% unless r.user == current_user %><%= delete_button "Remove", aircraft_aircraft_role_path(@aircraft, r), confirm: "Remove #{r.user.display_name}'s access?" %><% end %></td>
@@ -40,7 +40,7 @@
               </div>
               <%= delete_button "Revoke", aircraft_share_token_path(@aircraft, t), confirm: "Revoke this link? Anyone using it will lose access." %>
             </div>
-            <input type="text" readonly value="<%= shared_url(t.token) %>" class="input mt-2 font-mono text-xs" onclick="this.select()">
+            <input type="text" readonly value="<%= shared_url(t.token) %>" class="input mt-2 font-mono text-xs" data-select-on-click>
             <div class="mt-1 text-xs text-slate-500">Created <%= t.created_at.to_date %><%= " by #{t.created_by.display_name}" if t.created_by %> · <%= t.expires_at ? "expires #{l t.expires_at, format: :short}" : "never expires" %></div>
           </li>
         <% end %>

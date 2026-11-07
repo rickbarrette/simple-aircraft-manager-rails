@@ -12,7 +12,7 @@
     </div>
     <% if changes.any? %>
       <table class="table">
-        <thead><tr><th class="w-8"><input type="checkbox" checked aria-label="Select all" onclick="this.closest('table').querySelectorAll('tbody input[type=checkbox]').forEach(c => c.checked = this.checked)"></th><th>Logged</th><th>Standard</th><th>Airport</th><th class="text-right">Entries</th></tr></thead>
+        <thead><tr><th class="w-8"><input type="checkbox" checked aria-label="Select all" data-check-all></th><th>Logged</th><th>Standard</th><th>Airport</th><th class="text-right">Entries</th></tr></thead>
         <tbody>
           <% changes.each do |c| %>
             <tr>

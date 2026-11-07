@@ -4,6 +4,11 @@ Rails.application.routes.draw do
   post "rails/active_storage/direct_uploads", to: "direct_uploads#create"
 
   resource :session
+  # Single sign-on: POST /auth/oidc (handled by OmniAuth) comes back here.
+  match "auth/:provider/callback", to: "sso#callback", via: %i[get post], as: :sso_callback
+  get "auth/failure", to: "sso#failure"
+  delete "profile/sso", to: "sso#destroy", as: :sso_link
+  delete "profile/sessions", to: "profiles#sign_out_others", as: :other_sessions
   resources :passwords, param: :token
   resource :setup, only: %i[new create], controller: "setup"
   resource :profile, only: %i[edit update]

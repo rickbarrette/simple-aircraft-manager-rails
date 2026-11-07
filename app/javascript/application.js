@@ -42,3 +42,17 @@ function labelTableCells(root = document) {
 }
 document.addEventListener("turbo:load", () => labelTableCells())
 document.addEventListener("turbo:frame-load", (event) => labelTableCells(event.target))
+
+// Small behaviours that used to be inline onclick handlers (blocked by the CSP).
+document.addEventListener("click", (event) => {
+  const target = event.target
+  if (!(target instanceof HTMLInputElement)) return
+  if (target.matches("[data-select-on-click]")) target.select()
+  if (target.matches("[data-check-all]")) {
+    target.closest("table")?.querySelectorAll("tbody input[type=checkbox]").forEach((box) => { box.checked = target.checked })
+  }
+})
+
+document.addEventListener("change", (event) => {
+  if (event.target.matches?.("[data-submit-on-change]")) event.target.form?.requestSubmit()
+})

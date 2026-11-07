@@ -57,6 +57,22 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | Optional. They enable password-reset emails. Without them an admin resets passwords from **Users**. |
 | `ANTHROPIC_API_KEY` | Optional. Lets Claude transcribe scanned logbook pages into entries (**Logbook → Import scans**). Without it, scans are only uploaded. |
 | `LOGBOOK_AI_MODEL`, `LOGBOOK_AI_EFFORT` | Optional. The Claude model and effort used for transcription (default `claude-opus-5-5`, `high`). |
+| `APP_URL` | Optional public base URL, e.g. `https://aircraft.example.com` (default `https://APP_HOST`). Used for the SSO callback. |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Optional. Turn on single sign-on with an OpenID Connect provider (see below). |
+| `OIDC_PROVIDER_NAME` | Button label, e.g. `Authentik` (default `SSO`). |
+| `OIDC_AUTO_CREATE_USERS` | `true` creates an account for anyone the provider lets in. New accounts start with no aircraft. Default off: an admin adds users first. |
+| `OIDC_TRUST_EMAIL` | `true` links existing accounts by email even if the provider doesn't mark it verified. Only use it if users can't edit their own email at the provider. |
+| `OIDC_ADMIN_GROUP` | Optional. Members of this provider group become admins and others lose admin, synced at each sign-in. |
+| `PASSWORD_LOGIN` | `false` hides email/password sign-in and password resets once SSO works. It's ignored while SSO isn't configured, so you can't lock yourself out. |
+
+### Single sign-on (Authentik example)
+
+1. In Authentik, create an **OAuth2/OpenID Provider** (confidential client) with the redirect URI `https://YOUR-HOST/auth/oidc/callback` and the scopes `openid`, `email` and `profile`. Then create an **Application** that uses it.
+2. Set `OIDC_ISSUER` to the provider's issuer URL (`https://auth.example.com/application/o/<slug>/`), plus `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and `OIDC_PROVIDER_NAME=Authentik`, then restart.
+3. The sign-in page now shows **Sign in with Authentik**. The first SSO sign-in links an existing account with the same email if Authentik marks the email verified. Otherwise, sign in with your password and use **Profile → Link Authentik**.
+4. Once everyone can sign in with SSO, optionally set `PASSWORD_LOGIN=false`.
+
+Other OIDC providers (Keycloak, Google, Entra ID…) work the same way.
 
 ### Backups
 
@@ -65,7 +81,7 @@ SQLite runs in WAL mode, so a plain file copy taken while the app is running can
 ```bash
 mkdir -p backup
 for db in storage/production*.sqlite3; do sqlite3 "$db" ".backup 'backup/$(basename "$db")'"; done
-rsync -a --exclude '*.sqlite3*' storage/ backup/   # uploaded files
+rsync -aH --exclude '*.sqlite3*' storage/ backup/  # uploaded files (-H keeps the hard links that store duplicates once)
 ```
 
 Alternatively, stop the container and copy the volume.

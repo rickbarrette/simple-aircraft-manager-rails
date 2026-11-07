@@ -4,9 +4,42 @@
   <%= f.field :name %>
   <%= f.field :email_address, as: :email, label: "Email" %>
   <%= f.field :password, as: :password, label: "New password", hint: "Leave blank to keep your current password.", autocomplete: "new-password" %>
-  <%= f.field :password_confirmation, as: :password, label: "Confirm new password" %>
+  <%= f.field :password_confirmation, as: :password, label: "Confirm new password", autocomplete: "new-password" %>
+  <div>
+    <%= label_tag "user[current_password]", "Current password", class: "label" %>
+    <%= password_field_tag "user[current_password]", nil, id: "user_current_password", class: "input", autocomplete: "current-password" %>
+    <p class="hint">Needed to change your email or password.<%= " Signed up with #{Sso.label} and never set one? Use “Forgot password?” on the sign-in page." if Sso.enabled? && @user.sso_uid? %></p>
+  </div>
   <%= f.submit "Save" %>
 <% end %>
+
+<% if Sso.enabled? %>
+  <section class="card card-body mt-5 max-w-md">
+    <h2 class="card-title">Single sign-on</h2>
+    <% if @user.sso_uid? %>
+      <p class="mt-1 text-sm text-slate-600">Your account is linked to <%= Sso.label %>; you can sign in with it.</p>
+      <% if Sso.password_login? %>
+        <div class="mt-3"><%= button_to "Unlink #{Sso.label}", sso_link_path, method: :delete, class: "btn-secondary btn-sm",
+              form: { data: { turbo_confirm: "Unlink #{Sso.label}? You'll sign in with your email and password." } } %></div>
+      <% end %>
+    <% else %>
+      <p class="mt-1 text-sm text-slate-600">Link your <%= Sso.label %> account to sign in with it.</p>
+      <div class="mt-3"><%= button_to "Link #{Sso.label}", "/auth/#{Sso::PROVIDER}", class: "btn-secondary btn-sm", data: { turbo: false } %></div>
+    <% end %>
+  </section>
+<% end %>
+
+<section class="card card-body mt-5 max-w-md">
+  <h2 class="card-title">Sessions</h2>
+  <% others = @user.sessions.where.not(id: Current.session.id).count %>
+  <p class="mt-1 text-sm text-slate-600">
+    You're signed in on <%= pluralize(others, "other device or browser", plural: "other devices or browsers") %>.
+    Sessions unused for <%= Authentication::SESSION_IDLE_TIMEOUT.inspect %> sign out on their own.
+  </p>
+  <% if others.positive? %>
+    <div class="mt-3"><%= button_to "Sign out everywhere else", other_sessions_path, method: :delete, class: "btn-secondary btn-sm" %></div>
+  <% end %>
+</section>
 
 <section class="card card-body mt-5 max-w-md">
   <h2 class="card-title">Integrations</h2>

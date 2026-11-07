@@ -1,0 +1,68 @@
+<% content_for :title, "#{@aircraft.tail_number} Bulk Upload" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<% file_classes = "block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
+<%= form_with url: bulk_aircraft_documents_path(@aircraft), multipart: true, class: "card card-body max-w-3xl space-y-4",
+      data: { controller: "bulk-upload", bulk_upload_url_value: rails_direct_uploads_path,
+              bulk_upload_max_bytes_value: UploadValidation::MAX_SIZE, action: "submit->bulk-upload#submit" } do %>
+  <div>
+    <h2 class="card-title">Bulk upload</h2>
+    <p class="text-sm text-slate-500">Each file becomes its own document, named after the file. Give files the same name to combine them, in order, as the pages of one document.</p>
+  </div>
+  <% if @bulk_error %>
+    <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert"><%= @bulk_error %></div>
+  <% end %>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= label_tag :doc_type, "Type", class: "label" %>
+      <%= select_tag :doc_type, options_for_select(Document::TYPES.invert, @bulk[:doc_type]), class: "input" %>
+    </div>
+    <div>
+      <%= label_tag :visibility, "Share-link visibility", class: "label" %>
+      <%= select_tag :visibility, options_for_select([ [ "Inherit from collection", "" ] ] + DocumentCollection::VISIBILITIES.invert.to_a, @bulk[:visibility]), class: "input" %>
+    </div>
+    <div>
+      <%= label_tag :document_collection_id, "Collection", class: "label" %>
+      <%= select_tag :document_collection_id,
+            options_for_select([ [ "— None —", "" ] ] + @aircraft.document_collections.ordered.map { [ _1.name, _1.id ] }, @bulk[:document_collection_id]), class: "input" %>
+    </div>
+    <div>
+      <%= label_tag :new_collection, "…or a new collection", class: "label" %>
+      <%= text_field_tag :new_collection, @bulk[:new_collection], class: "input", placeholder: "e.g. 2025 Annual" %>
+    </div>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <%= label_tag :files, "Files", class: "label" %>
+      <%= file_field_tag "files[]", id: "files", multiple: true, class: file_classes,
+            data: { bulk_upload_target: "input", action: "change->bulk-upload#add" } %>
+    </div>
+    <div data-bulk-upload-target="folderField" hidden>
+      <%= label_tag :folder, "…or a whole folder", class: "label" %>
+      <input type="file" id="folder" webkitdirectory multiple class="<%= file_classes %>"
+             data-bulk-upload-target="folder" data-action="change->bulk-upload#add">
+    </div>
+  </div>
+  <p class="hint !mt-1">Images, PDFs or text, up to <%= UploadValidation::MAX_SIZE / 1.megabyte %> MB each and <%= DocumentsController::MAX_BULK_FILES %> at a time.</p>
+
+  <div data-bulk-upload-target="panel" hidden class="space-y-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <p class="text-sm font-medium text-slate-700" data-bulk-upload-target="summary"></p>
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="flex items-center gap-2 text-sm text-slate-700" data-bulk-upload-target="groupField" hidden>
+          <input type="checkbox" class="h-4 w-4 rounded border-slate-300" data-bulk-upload-target="group" data-action="bulk-upload#regroup">
+          One document per folder
+        </label>
+        <button type="button" class="btn-secondary btn-sm" data-action="bulk-upload#clear">Clear</button>
+      </div>
+    </div>
+    <ul class="divide-y divide-slate-100 rounded-md ring-1 ring-slate-200" data-bulk-upload-target="list"></ul>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <button type="submit" class="btn-primary" data-bulk-upload-target="submit">Upload</button>
+    <%= link_to "Cancel", aircraft_documents_path(@aircraft), class: "btn-secondary" %>
+    <p class="text-sm text-slate-500" data-bulk-upload-target="status" role="status"></p>
+  </div>
+<% end %>

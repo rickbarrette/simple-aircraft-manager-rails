@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  # Signed-in users only, with the upload rules checked before any bytes are sent
+  # (overrides Active Storage's open endpoint at the same path).
+  post "rails/active_storage/direct_uploads", to: "direct_uploads#create"
+
   resource :session
   resources :passwords, param: :token
   resource :setup, only: %i[new create], controller: "setup"
@@ -45,7 +49,12 @@ Rails.application.routes.draw do
     end
     resources :logbook_imports, path: "logbook/import", only: %i[new create show]
     resources :logbook_entries
-    resources :documents
+    resources :documents do
+      collection do
+        get :bulk, action: :bulk_new, as: :new_bulk
+        post :bulk, action: :bulk_create
+      end
+    end
     resources :document_collections, except: %i[index show]
     resources :inspections, only: :index
     resources :inspection_types, except: %i[index show]

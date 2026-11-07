@@ -1,8 +1,9 @@
 <% content_for :title, "#{@aircraft.tail_number} Documents" %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
-<div class="mb-4 flex justify-end gap-2">
+<div class="mb-4 flex flex-wrap justify-end gap-2">
   <% if owner? %>
     <%= link_to "+ Collection", new_aircraft_document_collection_path(@aircraft), class: "btn-secondary" %>
+    <%= link_to "Bulk Upload", new_bulk_aircraft_documents_path(@aircraft), class: "btn-secondary" %>
     <%= link_to "+ Upload Document", new_aircraft_document_path(@aircraft), class: "btn-primary" %>
   <% end %>
 </div>

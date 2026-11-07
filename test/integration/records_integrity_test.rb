@@ -111,4 +111,21 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
   ensure
     ENV["APP_REVISION"] = saved
   end
+
+  test "the packaged status report has intact styles and no in-app controls" do
+    engine = create_component(@a, tbo_hours: 2000, hours_since_overhaul: 126, on_condition: true)
+    path = Rails.root.join("tmp", "pkg-#{SecureRandom.hex(4)}.zip")
+    RecordsPackage.new(@a, source: "test").write_to(path)
+    html = Zip::File.open(path) { |z| z.read("status-report.html").force_encoding("UTF-8") }
+    File.delete(path)
+    assert_includes html, "<style>"
+    refute_includes html, "\\[</head>" # escaped "&" in CSS selectors left intact
+    assert_equal 1, html.scan("</head>").size
+    refute_includes html, "Print or save as PDF"
+    refute_includes html, "← Back"
+    assert_includes html, "On condition (Part 91)"
+    assert_includes html, "1,874.0 hrs"
+    engine.update!(tbo_critical: true)
+    refute engine.reload.tbo_critical? # on condition wins
+  end
 end

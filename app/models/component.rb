@@ -49,6 +49,9 @@ class Component < ApplicationRecord
   def engine? = component_type&.name.to_s.match?(/engine/i)
   def propeller? = component_type&.name.to_s.match?(/propell?er|\bprop\b/i)
 
+  # "On condition" means TBO isn't a limit, so it's never also a hard limit.
+  before_validation { self.tbo_critical = false if on_condition? }
+
   def hours_to_tbo
     tbo_hours - hours_since_overhaul if tbo_hours
   end

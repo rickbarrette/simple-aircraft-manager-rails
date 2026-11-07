@@ -5,11 +5,13 @@
 <% th = "border-b border-slate-300 py-1 pr-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500" %>
 <% td = "border-b border-slate-100 py-1 pr-3 align-top" %>
 
+<% unless @standalone %>
 <div class="mb-4 flex flex-wrap items-center justify-between gap-2 print:hidden">
   <% back = @share ? shared_path(@share.token) : aircraft_path(a) %>
   <%= link_to "← Back", back, class: "link text-sm" %>
   <button type="button" class="btn-primary" data-print>Print or save as PDF</button>
 </div>
+<% end %>
 
 <header class="flex flex-wrap items-end justify-between gap-4 border-b-2 border-slate-800 pb-3">
   <div>
@@ -70,8 +72,8 @@
           <tr><td class="<%= td %>"><%= c %> <span class="text-slate-500"><%= c.model %></span></td><td class="<%= td %>"><%= c.serial_number.presence || "—" %></td>
             <td class="<%= td %>"><%= [ (c.tbo_hours && "#{hours(c.tbo_hours)} hrs"), (c.tbo_days && "#{c.tbo_days} days") ].compact.join(" / ") %></td>
             <td class="<%= td %> text-right tabular-nums"><%= hours(c.hours_since_overhaul) %> hrs</td>
-            <td class="<%= td %>"><%= c.on_condition? ? "On condition" : (c.hours_to_tbo ? "#{hours(c.hours_to_tbo)} hrs" : "—") %></td>
-            <td class="<%= td %> text-xs"><%= c.tbo_critical? ? "Hard limit" : "Recommended" %></td></tr>
+            <td class="<%= td %>"><%= c.hours_to_tbo ? "#{hours(c.hours_to_tbo)} hrs" : "—" %></td>
+            <td class="<%= td %> text-xs"><%= c.on_condition? ? "On condition (Part 91)" : (c.tbo_critical? ? "Hard limit" : "Recommended") %></td></tr>
         <% end %>
       </tbody>
     </table>

@@ -37,7 +37,8 @@
     <div class="space-y-2">
       <%= f.field :tbo_critical, as: :checkbox, label: "Treat TBO as a hard limit",
             hint: "Under Part 91, TBO is usually the manufacturer's recommendation, unless an AD or the Airworthiness Limitations make it mandatory." %>
-      <%= f.field :on_condition, as: :checkbox, label: "On condition (Part 91)" %>
+      <%= f.field :on_condition, as: :checkbox, label: "On condition (Part 91)",
+            hint: "Run past TBO based on condition: TBO is shown for reference, never as a limit (this overrides the hard limit)." %>
     </div>
     <%= f.field :inspection_hours, as: :number, label: "Inspect every (hrs)" %>
     <%= f.field :inspection_days, as: :number, label: "Inspect every (days)" %>

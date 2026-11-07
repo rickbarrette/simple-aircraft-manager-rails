@@ -95,16 +95,17 @@ class RecordsPackage
 
   # The status report as one self-contained HTML file (styles inlined).
   def status_report_html
-    inline_styles(ApplicationController.render("maintenance_reports/show", layout: "report", assigns: { report: MaintenanceReport.new(@aircraft) }))
+    inline_styles(ApplicationController.render("maintenance_reports/show", layout: "report", assigns: { report: MaintenanceReport.new(@aircraft), standalone: true }))
   end
 
   def standalone_html(body, title)
-    inline_styles(ApplicationController.render(html: body.html_safe, layout: "report", assigns: {}).sub(%r{<title>.*?</title>}m, "<title>#{ERB::Util.h(title)}</title>"))
+    inline_styles(ApplicationController.render(html: body.html_safe, layout: "report", assigns: { standalone: true }).sub(%r{<title>.*?</title>}m) { "<title>#{ERB::Util.h(title)}</title>" })
   end
 
   def inline_styles(html)
     css = %w[tailwind.css application.css].filter_map { Rails.application.assets.load_path.find(_1)&.content }.join("\n")
-    html.gsub(%r{<link rel="stylesheet"[^>]*>\s*}, "").sub("</head>", "<style>#{css}</style></head>")
+    # Block forms: a replacement string would treat "\\&" etc. in the CSS as back-references.
+    html.gsub(%r{<link rel="stylesheet"[^>]*>\s*}) { "" }.sub("</head>") { "<style>#{css}</style></head>" }
         .gsub(%r{<script\b[^>]*>.*?</script>}m, "").gsub(%r{<link rel="modulepreload"[^>]*>\s*}, "")
   end
 end

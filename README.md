@@ -101,6 +101,8 @@ rsync -aH --exclude '*.sqlite3*' storage/ backup/  # uploaded files (-H keeps th
 
 Alternatively, stop the container and copy the volume.
 
+To restore, stop the app and run `bin/rails backups:restore` (the newest nightly copy, or a file such as one downloaded from Google Drive); it checks the copy first and keeps the current database aside. Then `bin/rails records:check` verifies the history and signatures. `bin/rails sam:doctor` gives a health report of the whole installation. All commands are in the [administration guide](docs/guide/administration.md#maintenance-commands).
+
 The app also makes a verified copy of the main database every night in `storage/backups` (Admin → About shows the last one), so a backup of the storage volume always contains a consistent database snapshot.
 
 For an off-site copy without extra tools, **Admin → Off-site Backup** connects a Google Drive account: each night the verified database copy and any new uploaded files are copied there, and a restore test checks them. Setup and restoring are in the [administration guide](docs/guide/administration.md#off-site-backup-to-google-drive). Keep `SECRET_KEY_BASE` somewhere safe off the server: stored secrets (API keys, the Drive connection) and electronic signature seals depend on it.

@@ -88,10 +88,28 @@ The first backup starts straight away. It copies every uploaded file, so it can 
 If the server is lost:
 
 1. Set up the app again (see the main README) with the **same `SECRET_KEY_BASE`**, but don't start it yet.
-2. From Google Drive, download the newest file in **Simple Aircraft Manager backups → database**, unzip it (`gunzip sam-….sqlite3.gz`), and put it in place of `storage/production.sqlite3` (delete any `production.sqlite3-wal` and `-shm` files next to it).
-3. Start the app and sign in. The records are back, but uploaded files are still missing.
-4. Restore the files: `bin/rails offsite:restore_files` downloads them from Drive (the connection is in the restored database). If that doesn't work (for example the `SECRET_KEY_BASE` is lost), download the **files** folder from Drive, unzip it on the server and run `bin/rails "offsite:restore_files[/path/to/files]"`.
-5. Check the About page (run **Back up and check now**) and open a few entries and documents.
+2. From Google Drive, download the newest file in **Simple Aircraft Manager backups → database** (`sam-….sqlite3.gz`) and copy it onto the server.
+3. Put it in place: `bin/rails "backups:restore[/path/to/sam-….sqlite3.gz]"`. With Docker, run it in a one-off container while the app is stopped: `docker compose run --rm web bin/rails "backups:restore[/rails/storage/sam-….sqlite3.gz]"` (copy the file into the storage volume first). It checks the copy, keeps any existing database aside, and asks before replacing.
+4. Start the app and sign in. The records are back, but uploaded files are still missing.
+5. Restore the files: `bin/rails offsite:restore_files` downloads them from Drive (the connection is in the restored database). If that doesn't work (for example the `SECRET_KEY_BASE` is lost), download the **files** folder from Drive, unzip it on the server and run `bin/rails "offsite:restore_files[/path/to/files]"`.
+6. Check everything: `bin/rails records:check` (history and signatures intact) and `bin/rails sam:doctor`, then open a few entries and documents.
+
+The same `backups:restore` (with no file) puts back the newest nightly copy from `storage/backups`, for example after a mistake that can't be undone in the app; `bin/rails backups:list` shows the copies.
+
+## Maintenance commands
+
+Run on the server like the account recovery commands (`docker compose exec web` in front, or the container's Console in Portainer).
+
+| Command | What it does |
+|---|---|
+| `bin/rails sam:doctor` | Health report: secret key, address, HTTPS, email (SMTP reachable), single sign-on (issuer reachable), Google Drive, migrations, disk space, background jobs, and how recent the backup, records check, off-site copy, procedures and audit are. Exits non-zero if something fails |
+| `bin/rails records:check` | Backs up the database now and checks the record history and every signature; prints any problems and exits non-zero |
+| `bin/rails backups:list` | Lists the nightly database copies |
+| `bin/rails "backups:restore[file]"` | Replaces the database with a backup (newest nightly copy if no file; a Google Drive `.sqlite3.gz` works too). The app must be stopped: `docker compose stop web`, then `docker compose run --rm web bin/rails backups:restore`. The current database is moved to `storage/pre-restore-…`, never deleted. `CONFIRM=yes` skips the question |
+| `bin/rails users:sign_out_all` | Signs every user out of every device, if you think an account or session was compromised |
+| `bin/rails "sam:records_package[N12345]"` | Writes the aircraft's records package to a zip, for when the web side is down |
+| `bin/rails "email:test[you@example.com]"` | Sends a test email and shows the mail settings |
+| `bin/rails offsite:backup` / `offsite:restore_test` | Runs the Google Drive copy or a restore test now and prints the result |
 
 ## Recordkeeping procedures
 

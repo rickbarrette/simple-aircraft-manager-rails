@@ -7,14 +7,14 @@ class OffsiteBackupJob < ApplicationJob
 
   def perform(kind = "backup")
     return unless OffsiteConnection.connected?
-    run = kind == "restore_test" ? OffsiteBackup.restore_test! : backup
+    run = kind == "restore_test" ? OffsiteBackup.restore_test! : self.class.backup
     return if run.nil? || run.ok || !MailSettings.configured?
     User.active.where(admin: true).find_each { AdminMailer.offsite_alert(_1, run).deliver_now }
   end
 
-  private
-
-  def backup
+  # Copies the latest verified backup (making one if there's none from the
+  # last day). Returns the OffsiteRun. Also used by bin/rails offsite:backup.
+  def self.backup
     latest = BackupRun.where(ok: true).order(:created_at, :id).last
     latest = DatabaseBackup.run! unless latest && latest.created_at > 1.day.ago && latest.path.present? && File.exist?(latest.path)
     return OffsiteRun.create!(kind: "backup", ok: false, message: "No verified database backup to copy: #{latest.message}") unless latest.ok

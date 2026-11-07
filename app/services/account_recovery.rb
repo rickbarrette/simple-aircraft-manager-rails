@@ -65,6 +65,14 @@ class AccountRecovery
     [ user, password ]
   end
 
+  # Ends every session of every user (suspected compromise): everyone signs
+  # in again, through the lockout and two-factor checks.
+  def self.sign_out_all!
+    count = Session.delete_all
+    Rails.logger.warn("[account recovery] all #{count} sessions ended from the command line")
+    count
+  end
+
   def self.generate_password = SecureRandom.alphanumeric(20).scan(/.{5}/).join("-")
 
   def self.log(user, what) = Rails.logger.warn("[account recovery] #{user.email_address}: #{what} from the command line")

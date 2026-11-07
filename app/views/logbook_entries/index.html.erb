@@ -7,6 +7,9 @@
       <%= form_with url: aircraft_logbook_entries_path(@aircraft), method: :get, class: "flex w-full flex-wrap gap-2 sm:w-auto" do |f| %>
         <%= f.search_field :q, value: @query, placeholder: "Search entries…", class: "input min-w-0 flex-1 sm:w-48 sm:flex-none" %>
         <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: "All logs", selected: @log_type }, class: "input w-32" %>
+        <% if @unverified_count.positive? || @unverified_only %>
+          <label class="flex items-center gap-1 text-sm text-slate-700"><%= f.check_box :unverified, { checked: @unverified_only }, "1", nil %> Unverified (<%= @unverified_count %>)</label>
+        <% end %>
         <%= f.submit "Filter", class: "btn-secondary" %>
       <% end %>
       <% if owner? %><%= link_to "Import scans", new_aircraft_logbook_import_path(@aircraft), class: "btn-secondary" %><%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %><% end %>
@@ -23,7 +26,8 @@
               <td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
               <td class="text-xs"><%= LogbookEntry::ENTRY_TYPES[e.entry_type] %></td>
               <td class="text-right tabular-nums"><%= hours(e.aircraft_hours_at_entry) %></td>
-              <td class="max-w-xl"><%= e.text.truncate(220) %> <%= "📄" if e.document %></td>
+              <td class="max-w-xl"><%= e.text.truncate(220) %> <%= "📄" if e.document %>
+                <% unless e.verified? %><span class="badge-orange" title="Transcribed by Claude<%= " (#{e.transcription_confidence} confidence)" if e.transcription_confidence %>; check it against the scan">Unverified</span><% end %></td>
               <td class="text-xs text-slate-500"><%= e.signoff_person %><%= " ##{e.signoff_certificate_number}" if e.signoff_certificate_number %><% if e.signoff_location.present? %><br><%= e.signoff_location %><% end %>
                 <% if (missing = e.missing_record_items).any? %><br><span class="badge-orange" title="Missing: <%= missing.to_sentence %>">Incomplete</span><% end %></td>
             </tr>

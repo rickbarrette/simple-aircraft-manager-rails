@@ -22,3 +22,6 @@ production:
   weekly_reminders:
     class: WeeklyReminderJob
     schedule: every monday at 12pm
+  ad_watch:
+    class: AdWatchJob
+    schedule: every sunday at 10am

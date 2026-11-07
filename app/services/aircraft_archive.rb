@@ -16,9 +16,10 @@ module AircraftArchive
   TOP_LEVEL_KEYS = %w[
     schema_version exported_at source_instance aircraft component_types components document_collections
     documents document_images logbook_entries squawks inspection_types inspection_records ads ad_compliances
-    consumable_records major_records notes oil_analysis_reports flight_logs features
+    consumable_records major_records notes oil_analysis_reports flight_logs features weight_balance_records
   ].freeze
-  OPTIONAL_KEYS = %w[features].freeze # and flight_logs before schema v2
+  # Not in archives from the original app (nor flight_logs before schema v2).
+  OPTIONAL_KEYS = %w[features weight_balance_records].freeze
 
   MANIFEST_MAX_BYTES = 50.megabytes
   FILE_MAX_BYTES = 1.gigabyte # the most Admin → Settings allows for uploads

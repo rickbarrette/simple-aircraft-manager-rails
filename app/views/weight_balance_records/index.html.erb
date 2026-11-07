@@ -1,0 +1,94 @@
+<% content_for :title, "#{@aircraft.tail_number} Weight & Balance" %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<% setup = @aircraft.loading_setup %>
+<div class="grid gap-5 lg:grid-cols-2">
+  <section class="card">
+    <div class="card-header">
+      <h2 class="card-title">Current weight & balance</h2>
+      <% if owner? %><%= link_to "+ New W&B", new_aircraft_weight_balance_record_path(@aircraft), class: "btn-primary btn-sm" %><% end %>
+    </div>
+    <% if @current %>
+      <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <dt class="text-slate-500">As of</dt><dd><%= fmt_date(@current.date) %><%= " · #{@current.reason}" if @current.reason.present? %></dd>
+        <dt class="text-slate-500">Empty weight</dt><dd class="font-medium"><%= number_with_precision(@current.empty_weight, precision: 1, delimiter: ",") %> lb</dd>
+        <dt class="text-slate-500">Empty CG (arm)</dt><dd class="font-medium"><%= number_with_precision(@current.empty_arm, precision: 2) %> in</dd>
+        <dt class="text-slate-500">Moment</dt><dd><%= number_with_precision(@current.empty_moment, precision: 0, delimiter: ",") %> lb-in</dd>
+        <dt class="text-slate-500">Max gross weight</dt><dd><%= @current.max_gross_weight ? "#{number_with_precision(@current.max_gross_weight, precision: 0, delimiter: ',')} lb" : "—" %></dd>
+        <dt class="text-slate-500">Useful load</dt><dd class="font-medium"><%= @current.useful_load ? "#{number_with_precision(@current.useful_load, precision: 1, delimiter: ',')} lb" : "—" %></dd>
+      </dl>
+    <% else %>
+      <%= empty_state "No weight & balance recorded yet. Add the figures from the current W&B report." %>
+    <% end %>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2 class="card-title">Loading calculator</h2>
+      <% if owner? %><%= link_to "Loading setup", edit_aircraft_loading_setup_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+    </div>
+    <% if @current && setup.configured? %>
+      <div class="card-body space-y-3" data-controller="wb-calculator"
+           data-wb-calculator-empty-weight-value="<%= @current.empty_weight.to_f %>" data-wb-calculator-empty-moment-value="<%= @current.empty_moment.to_f %>"
+           data-wb-calculator-max-gross-value="<%= @current.max_gross_weight.to_f %>" data-wb-calculator-fuel-density-value="<%= setup.fuel_lb_per_gal.to_f %>"
+           data-wb-calculator-envelope-value="<%= setup.envelope.map { |w, c| [ w.to_f, c.to_f ] }.to_json %>">
+        <div class="grid gap-2 sm:grid-cols-2">
+          <% setup.stations.each do |st| %>
+            <label class="text-sm">
+              <span class="label"><%= st.name %> <span class="font-normal text-slate-500">· arm <%= st.arm %> in<%= ", max #{st.max.to_s.sub(/\.0\z/, '')} #{st.fuel ? 'gal' : 'lb'}" if st.max %></span></span>
+              <span class="flex items-center gap-2">
+                <input type="number" min="0" step="0.1" class="input" inputmode="decimal" data-wb-calculator-target="station"
+                       data-arm="<%= st.arm.to_f %>" data-fuel="<%= st.fuel %>" data-max="<%= st.max.to_f %>" data-action="input->wb-calculator#update">
+                <span class="w-6 text-xs text-slate-500"><%= st.fuel ? "gal" : "lb" %></span>
+              </span>
+            </label>
+          <% end %>
+          <% if setup.stations.any?(&:fuel) %>
+            <label class="text-sm"><span class="label">Fuel burned in flight</span>
+              <span class="flex items-center gap-2"><input type="number" min="0" step="0.1" class="input" inputmode="decimal" data-wb-calculator-target="burn" data-action="input->wb-calculator#update"><span class="w-6 text-xs text-slate-500">gal</span></span></label>
+          <% end %>
+        </div>
+        <div class="grid items-start gap-3 sm:grid-cols-[1fr_auto]">
+          <table class="w-full text-sm table-keep">
+            <thead><tr class="text-left text-xs uppercase text-slate-500"><th></th><th class="text-right">Weight</th><th class="text-right">CG</th><th class="text-right">Moment</th></tr></thead>
+            <tbody>
+              <tr><td>Takeoff</td><td class="text-right tabular-nums" data-wb-calculator-target="takeoffWeight">—</td><td class="text-right tabular-nums" data-wb-calculator-target="takeoffCg">—</td><td class="text-right tabular-nums" data-wb-calculator-target="takeoffMoment">—</td></tr>
+              <tr><td>Landing</td><td class="text-right tabular-nums" data-wb-calculator-target="landingWeight">—</td><td class="text-right tabular-nums" data-wb-calculator-target="landingCg">—</td><td class="text-right tabular-nums" data-wb-calculator-target="landingMoment">—</td></tr>
+            </tbody>
+          </table>
+          <svg viewBox="0 0 220 160" class="h-40 w-56 rounded bg-slate-50" data-wb-calculator-target="chart" aria-label="CG envelope"></svg>
+        </div>
+        <ul class="space-y-1 text-sm" data-wb-calculator-target="messages" role="status"></ul>
+        <p class="hint">A planning aid from the figures entered here. Check against the POH and the aircraft's current W&B report.</p>
+      </div>
+    <% elsif !@current %>
+      <%= empty_state "Record the current weight & balance first." %>
+    <% else %>
+      <%= empty_state(owner? ? "Set up the loading stations and CG envelope from the POH to use the calculator." : "An owner needs to set up the loading stations first.") %>
+    <% end %>
+  </section>
+</div>
+
+<section class="card mt-5">
+  <div class="card-header"><h2 class="card-title">History</h2></div>
+  <% if @records.any? %>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>Date</th><th class="text-right">Empty weight</th><th class="text-right">CG</th><th class="text-right">Useful load</th><th>Reason</th><th></th></tr></thead>
+        <tbody>
+          <% @records.each do |r| %>
+            <tr>
+              <td class="whitespace-nowrap"><%= r.date %></td>
+              <td class="text-right tabular-nums"><%= number_with_precision(r.empty_weight, precision: 1, delimiter: ",") %> lb</td>
+              <td class="text-right tabular-nums"><%= number_with_precision(r.empty_arm, precision: 2) %> in</td>
+              <td class="text-right tabular-nums"><%= r.useful_load ? "#{number_with_precision(r.useful_load, precision: 1, delimiter: ',')} lb" : "—" %></td>
+              <td class="text-xs"><%= r.reason %>
+                <% if r.major_record %><div><%= link_to r.major_record.title, aircraft_major_record_path(@aircraft, r.major_record), class: "link" %></div><% end %>
+                <% if r.document %><div><%= link_to "📄 #{r.document.name}", aircraft_document_path(@aircraft, r.document), class: "link" %></div><% end %></td>
+              <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_weight_balance_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %><%= empty_state "No records yet." %><% end %>
+</section>

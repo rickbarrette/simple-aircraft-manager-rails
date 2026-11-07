@@ -1,10 +1,73 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "File Access",
-      "fingerprint": "c1d23cfd1f641b61be5cc6d747c8658806ed9e5adccb66eaca8f2aac5ef449ee",
-      "file": "app/controllers/flight_imports_controller.rb",
-      "note": "Token is validated against TOKEN_FORMAT (server-generated uuid.ext) before use, and File.basename is applied; path is confined to tmp/imports."
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "43d7e4cfb5fdffe8ce34bb9676dc02e2a9e5dba55fdc47fbb480cace17bafe59",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/admin/about/show.html.erb",
+      "line": 14,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(\"Source code\", SystemInfo.new.repository_url, :class => \"link\", :target => \"_blank\", :rel => \"noopener\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "Admin::AboutController",
+          "method": "show",
+          "line": 7,
+          "file": "app/controllers/admin/about_controller.rb",
+          "rendered": {
+            "name": "admin/about/show",
+            "file": "app/views/admin/about/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/about/show"
+      },
+      "user_input": "SystemInfo.new.repository_url",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": "The repository URL comes from the server environment (APP_REPOSITORY_URL) or a constant, and SystemInfo only returns http(s) URLs; admins only."
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "85f8003e1ad00eeb2308faea3dd89e55db1b7a794b9c1a8b05c16466849038ac",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/admin/about/show.html.erb",
+      "line": 12,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(SystemInfo.new.revision, SystemInfo.new.revision_url, :class => \"link\", :target => \"_blank\", :rel => \"noopener\", :title => \"This commit on GitHub\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "Admin::AboutController",
+          "method": "show",
+          "line": 7,
+          "file": "app/controllers/admin/about_controller.rb",
+          "rendered": {
+            "name": "admin/about/show",
+            "file": "app/views/admin/about/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/about/show"
+      },
+      "user_input": "SystemInfo.new.revision_url",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": "The repository URL comes from the server environment (APP_REPOSITORY_URL) or a constant, and SystemInfo only returns http(s) URLs; admins only."
     }
-  ]
+  ],
+  "brakeman_version": "8.1.0"
 }

@@ -94,6 +94,8 @@ class LogbookImportFlowTest < ActionDispatch::IntegrationTest
 
     entries = @a.logbook_entries.order(:id)
     assert_equal [ "Changed oil", "Annual inspection, found airworthy", "[date unreadable] Replaced [?] gasket" ], entries.map(&:text)
+    assert entries.none?(&:verified?) # transcriptions wait for a person to check them
+    assert_equal [ "high", "high", "low" ], entries.map(&:transcription_confidence)
     assert_equal [ "J. Mechanic", "AP", "1234567" ], entries.first.then { [ _1.signoff_person, _1.signoff_certificate_type, _1.signoff_certificate_number ] }
     assert_equal [ 1, 2, 3 ], entries.map(&:page_number)
     assert entries.all? { _1.document == document && _1.log_type == "ENG" }

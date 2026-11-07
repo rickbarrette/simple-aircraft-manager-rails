@@ -1,5 +1,5 @@
 <p>Here's what needs attention on your aircraft.</p>
-<% @items.each do |aircraft, issues| %>
+<% @items.each do |aircraft, issues, alerts| %>
   <h3 style="margin: 16px 0 4px;"><%= link_to aircraft.tail_number, aircraft_url(aircraft) %> <span style="font-weight: normal; color: #64748b;"><%= aircraft.airworthiness.label %></span></h3>
   <ul style="margin: 0; padding-left: 20px;">
     <% issues.each do |issue| %>
@@ -7,6 +7,10 @@
         <%= issue.title %> <span style="color: #64748b;"><%= issue.description %></span></li>
     <% end %>
   </ul>
+  <% if alerts.any? %>
+    <p style="margin: 8px 0 0;"><strong><%= alerts.size %> newly published <%= "AD".pluralize(alerts.size) %> may apply:</strong>
+      <%= alerts.map { _1.ad_number || _1.fr_document_number }.to_sentence %>. <%= link_to "Review them", aircraft_airworthiness_directives_url(aircraft, anchor: "new-ads") %>.</p>
+  <% end %>
 <% end %>
 <p style="color: #64748b; font-size: 12px; margin-top: 20px;">
   Based on the records in Simple Aircraft Manager. Turn these emails off on your <%= link_to "profile", edit_profile_url %>.

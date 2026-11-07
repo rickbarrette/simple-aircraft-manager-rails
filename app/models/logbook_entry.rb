@@ -33,6 +33,7 @@ class LogbookEntry < ApplicationRecord
   normalizes :signoff_certificate_type, :inspection_result, :signoff_certificate_number, with: ->(v) { v.strip.presence }
 
   scope :recent_first, -> { order(date: :desc, created_at: :desc) }
+  scope :unverified, -> { where(verified: false) }
 
   def self.search(q)
     return all if q.blank?

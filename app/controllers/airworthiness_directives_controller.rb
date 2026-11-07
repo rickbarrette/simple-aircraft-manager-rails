@@ -9,6 +9,7 @@ class AirworthinessDirectivesController < ApplicationController
     @history = AdCompliance.for_aircraft(@aircraft).recent_first
                            .includes(:component, :logbook_entry, airworthiness_directive: :document, inspection_record: :inspection_type)
     @attachable = AirworthinessDirective.where.not(id: @aircraft.applicable_ads.select(:id)).ordered if owner?
+    @alerts = @aircraft.ad_alerts.pending
   end
 
   def new

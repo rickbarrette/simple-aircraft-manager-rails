@@ -19,11 +19,12 @@ class SystemInfo
                   "unknown"
   end
 
-  def repository_url = REPOSITORY_URL.chomp("/")
+  # Only an http(s) address is linked (it comes from the environment).
+  def repository_url = REPOSITORY_URL.match?(%r{\Ahttps?://[^\s"'<>]+\z}) ? REPOSITORY_URL.chomp("/") : nil
 
   # The running commit on the repository host, when the revision is known.
   def revision_url
-    "#{repository_url}/commit/#{revision}" if revision.match?(/\A\h{7,40}\z/)
+    "#{repository_url}/commit/#{revision}" if repository_url && revision.match?(/\A\h{7,40}\z/)
   end
 
   def built_at

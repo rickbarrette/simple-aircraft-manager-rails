@@ -25,6 +25,8 @@ class Aircraft < ApplicationRecord
   has_many :flight_logs, dependent: :destroy
   has_many :consumable_records, dependent: :destroy
   has_many :oil_analyses, dependent: :destroy
+  has_many :weight_balance_records, dependent: :destroy
+  has_many :ad_alerts, dependent: :destroy
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
 
@@ -52,6 +54,9 @@ class Aircraft < ApplicationRecord
   end
 
   def hobbs? = time_basis == "hobbs"
+
+  def current_weight_balance = weight_balance_records.recent_first.first
+  def loading_setup = LoadingSetup.from_aircraft(self)
   def time_basis_label = TIME_BASES[time_basis]
 
   def airworthiness

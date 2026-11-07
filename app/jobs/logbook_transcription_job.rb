@@ -124,7 +124,8 @@ class LogbookTranscriptionJob < ApplicationJob
       signoff_certificate_type: LogbookEntry::CERTIFICATE_TYPES.key?(entry["signoff_certificate_type"]) ? entry["signoff_certificate_type"] : nil,
       signoff_certificate_number: entry["signoff_certificate_number"].to_s.strip.first(40).presence,
       aircraft_hours_at_entry: entry["aircraft_hours"].is_a?(Numeric) && entry["aircraft_hours"] >= 0 ? entry["aircraft_hours"] : nil,
-      document: @document, page_number: page_number
+      document: @document, page_number: page_number,
+      verified: false, transcription_confidence: (entry["confidence"] if %w[high medium low].include?(entry["confidence"]))
     )
     @import.increment!(:entries_created)
     warn("The #{date} entry on page #{page_number} was hard to read. Please check it against the scan.") if entry["confidence"] == "low"

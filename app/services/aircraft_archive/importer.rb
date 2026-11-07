@@ -140,6 +140,8 @@ module AircraftArchive
         make: a["make"].to_s, model: a["model"].to_s, serial_number: a["serial_number"].to_s, description: a["description"].to_s,
         purchased: date(a["purchased"]), status: Aircraft::STATUSES.key?(a["status"]) ? a["status"] : "AVAILABLE",
         time_basis: Aircraft::TIME_BASES.key?(a["time_basis"]) ? a["time_basis"] : "tach",
+        loading_stations: a["loading_stations"].is_a?(Hash) ? a["loading_stations"] : nil,
+        cg_envelope: a["cg_envelope"].is_a?(Array) ? a["cg_envelope"] : nil, ad_watch_terms: a["ad_watch_terms"].to_s.first(500).presence,
         tach_time: num(a["tach_time"] || a["flight_time"]) || 0, tach_time_offset: num(a["tach_time_offset"]) || 0,
         hobbs_time: num(a["hobbs_time"]) || 0, hobbs_time_offset: num(a["hobbs_time_offset"]) || 0,
         icao_type: a["icao_type"].to_s.upcase.presence&.then { _1.match?(/\A[A-Z0-9]{1,4}\z/) ? _1 : nil }
@@ -227,6 +229,8 @@ module AircraftArchive
           signoff_certificate_type: LogbookEntry::CERTIFICATE_TYPES.key?(data["signoff_certificate_type"]) ? data["signoff_certificate_type"] : nil,
           signoff_certificate_number: data["signoff_certificate_number"].to_s.presence,
           inspection_result: LogbookEntry::INSPECTION_RESULTS.key?(data["inspection_result"]) ? data["inspection_result"] : nil,
+          verified: data["verified"] != false,
+          transcription_confidence: %w[high medium low].include?(data["transcription_confidence"]) ? data["transcription_confidence"] : nil,
           aircraft_hours_at_entry: num(data["aircraft_hours_at_entry"]), page_number: data["page_number"],
           document_id: @map[:document][data["log_image_id"].to_s]
         )
@@ -359,10 +363,25 @@ module AircraftArchive
           form_337_document_id: @map[:document][data["form_337_document_id"].to_s], stc_number: data["stc_number"].to_s,
           stc_holder: data["stc_holder"].to_s, stc_document_id: @map[:document][data["stc_document_id"].to_s],
           logbook_entry_id: @map[:logbook][data["logbook_entry_id"].to_s], aircraft_hours: num(data["aircraft_hours"]),
-          notes: data["notes"].to_s, has_ica: data["has_ica"] == true, ica_notes: data["ica_notes"]
+          notes: data["notes"].to_s, has_ica: data["has_ica"] == true, ica_notes: data["ica_notes"],
+          ica_inspection_type_id: @map[:inspection_type][data["ica_inspection_type_id"].to_s]
         )
         r.save!(validate: false)
+        (@map[:major_record] ||= {})[data["id"].to_s] = r.id
         tick("major_records")
+      end
+      import_weight_balance
+    end
+
+    def import_weight_balance
+      m("weight_balance_records").each do |data|
+        w = @aircraft.weight_balance_records.new(
+          date: date(data["date"]) || Date.new(1900, 1, 1), empty_weight: num(data["empty_weight"]) || 0, empty_arm: num(data["empty_arm"]) || 0,
+          max_gross_weight: num(data["max_gross_weight"]), reason: data["reason"].to_s.presence, notes: data["notes"].to_s.presence,
+          major_record_id: (@map[:major_record] || {})[data["major_record_id"].to_s], document_id: @map[:document][data["document_id"].to_s]
+        )
+        w.save!(validate: false)
+        tick("weight_balance_records")
       end
     end
 

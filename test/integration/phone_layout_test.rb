@@ -14,7 +14,7 @@ class PhoneLayoutTest < ActionDispatch::IntegrationTest
     assert_select "header nav.sm\\:hidden a[href='#{admin_users_path}']"
     assert_select "details.md\\:hidden summary", text: /Section\s*Components/
     assert_select "details.md\\:hidden nav a[aria-current=page]", "Components"
-    assert_select "details.md\\:hidden nav a", count: 14
+    assert_select "details.md\\:hidden nav a", count: 15
     assert_select "nav.md\\:flex a.tab-active", "Components" # wider screens keep the tabs
   end
 

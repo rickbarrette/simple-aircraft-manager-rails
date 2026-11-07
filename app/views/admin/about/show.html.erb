@@ -11,7 +11,7 @@
       <p class="font-mono text-2xl font-semibold" data-revision>
         <%= info.revision_url ? link_to(info.revision, info.revision_url, class: "link", target: "_blank", rel: "noopener", title: "This commit on GitHub") : info.revision %>
       </p>
-      <p class="mt-1 text-sm"><%= link_to "Source code", info.repository_url, class: "link", target: "_blank", rel: "noopener" %></p>
+      <% if info.repository_url %><p class="mt-1 text-sm"><%= link_to "Source code", info.repository_url, class: "link", target: "_blank", rel: "noopener" %></p><% end %>
     </div>
     <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
       <div><dt class="text-slate-500">Built</dt><dd class="font-medium"><%= info.built_at ? l(info.built_at.in_time_zone, format: :short) : "—" %></dd></div>

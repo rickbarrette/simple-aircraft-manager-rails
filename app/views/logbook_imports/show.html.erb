@@ -23,7 +23,8 @@
       <%= @import.transcribe ? "Done: #{pluralize(@import.entries_created, 'logbook entry')} added." : "Pages saved." %>
     </p>
     <% if @import.transcribe && @import.entries_created.positive? %>
-      <p class="text-slate-600">Check the new entries against the scans: handwriting isn't always read perfectly.</p>
+      <p class="text-slate-600">The new entries are marked unverified until someone checks them against the scans, since handwriting isn't always read perfectly.
+        <%= link_to "Check them now", aircraft_logbook_entries_path(@aircraft, unverified: 1), class: "link" %></p>
     <% end %>
   <% else %>
     <p class="font-medium text-red-700">The import stopped: <%= @import.error %></p>

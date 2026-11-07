@@ -1,0 +1,18 @@
+<%= form_with model: [aircraft, record], url: record.new_record? ? aircraft_weight_balance_records_path(aircraft) : aircraft_weight_balance_record_path(aircraft, record),
+              class: "card card-body space-y-4 max-w-2xl" do |f| %>
+  <%= f.errors_summary %>
+  <p class="text-sm text-slate-600">The figures from the weight & balance report: after weighing, or after an alteration or equipment change that changes the empty weight or CG.</p>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :date, as: :date %>
+    <%= f.field :reason, placeholder: "e.g. Weighed at annual; GTX 345 installed" %>
+    <%= f.field :empty_weight, as: :number, step: 0.1, label: "Empty weight (lb)", required: true %>
+    <%= f.field :empty_arm, as: :number, step: 0.01, label: "Empty CG / arm (in aft of datum)", required: true %>
+    <%= f.field :max_gross_weight, as: :number, step: 0.1, label: "Max gross weight (lb)" %>
+    <%= f.field :major_record_id, as: :select, label: "Alteration (337)",
+          collection: [ [ "— None —", nil ] ] + aircraft.major_records.recent_first.map { [ "#{_1.date_performed} – #{_1.title.truncate(50)}", _1.id ] } %>
+    <%= f.field :document_id, as: :select, label: "W&B report document", collection: document_options(aircraft) %>
+  </div>
+  <%= f.field :notes, as: :textarea, rows: 2 %>
+  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_weight_balance_records_path(aircraft), class: "btn-secondary" %></div>
+<% end %>
+<% if record.persisted? %><div class="mt-4"><%= delete_button "Delete record", aircraft_weight_balance_record_path(aircraft, record) %></div><% end %>

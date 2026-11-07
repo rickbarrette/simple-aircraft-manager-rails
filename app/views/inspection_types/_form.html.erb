@@ -1,5 +1,9 @@
 <%= form_with model: inspection_type, url: inspection_type.new_record? ? aircraft_inspection_types_path(aircraft) : aircraft_inspection_type_path(aircraft, inspection_type), class: "card card-body space-y-4 max-w-2xl" do |f| %>
   <%= f.errors_summary %>
+  <% if @major_record %>
+    <%= hidden_field_tag :major_record_id, @major_record.id %>
+    <p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200">For the Instructions for Continued Airworthiness of <strong><%= @major_record.title %></strong><%= " (STC #{@major_record.stc_number})" if @major_record.stc_number.present? %>. Set the interval the ICA gives.<%= " ICA notes: #{@major_record.ica_notes}" if @major_record.ica_notes.present? %></p>
+  <% end %>
   <%= f.field :name, required: true, placeholder: "Annual Inspection" %>
   <%= f.field :effect, as: :select, label: "When overdue", collection: InspectionType::EFFECTS.invert,
         hint: "An overdue pitot-static check (91.411) only rules out IFR, and an overdue transponder check (91.413) only rules out using the transponder. Neither grounds the aircraft." %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_07_220000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -37,6 +37,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "ad_alerts", force: :cascade do |t|
+    t.integer "aircraft_id", null: false
+    t.string "fr_document_number", null: false
+    t.string "ad_number"
+    t.string "amendment"
+    t.string "title"
+    t.text "abstract"
+    t.date "publication_date"
+    t.date "effective_on"
+    t.string "html_url"
+    t.string "matched_term"
+    t.string "status", default: "new", null: false
+    t.integer "airworthiness_directive_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aircraft_id", "fr_document_number"], name: "index_ad_alerts_on_aircraft_id_and_fr_document_number", unique: true
+    t.index ["aircraft_id"], name: "index_ad_alerts_on_aircraft_id"
+    t.index ["airworthiness_directive_id"], name: "index_ad_alerts_on_airworthiness_directive_id"
   end
 
   create_table "ad_compliances", force: :cascade do |t|
@@ -123,6 +143,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.datetime "updated_at", null: false
     t.string "icao_type"
     t.string "time_basis", default: "tach", null: false
+    t.json "loading_stations"
+    t.json "cg_envelope"
+    t.string "ad_watch_terms"
+    t.datetime "ad_watch_checked_at"
   end
 
   create_table "aircraft_airworthiness_directives", id: false, force: :cascade do |t|
@@ -423,6 +447,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.string "signoff_certificate_type"
     t.string "signoff_certificate_number"
     t.string "inspection_result"
+    t.boolean "verified", default: true, null: false
+    t.string "transcription_confidence"
     t.index ["aircraft_id"], name: "index_logbook_entries_on_aircraft_id"
     t.index ["document_id"], name: "index_logbook_entries_on_document_id"
   end
@@ -468,9 +494,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "ica_inspection_type_id"
     t.index ["aircraft_id"], name: "index_major_records_on_aircraft_id"
     t.index ["component_id"], name: "index_major_records_on_component_id"
     t.index ["form_337_document_id"], name: "index_major_records_on_form_337_document_id"
+    t.index ["ica_inspection_type_id"], name: "index_major_records_on_ica_inspection_type_id"
     t.index ["logbook_entry_id"], name: "index_major_records_on_logbook_entry_id"
     t.index ["stc_document_id"], name: "index_major_records_on_stc_document_id"
   end
@@ -569,8 +597,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
     t.index ["sso_uid"], name: "index_users_on_sso_uid", unique: true
   end
 
+  create_table "weight_balance_records", force: :cascade do |t|
+    t.integer "aircraft_id", null: false
+    t.date "date", null: false
+    t.decimal "empty_weight", precision: 8, scale: 1, null: false
+    t.decimal "empty_arm", precision: 7, scale: 2, null: false
+    t.decimal "max_gross_weight", precision: 8, scale: 1
+    t.string "reason"
+    t.text "notes"
+    t.integer "major_record_id"
+    t.integer "document_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aircraft_id"], name: "index_weight_balance_records_on_aircraft_id"
+    t.index ["document_id"], name: "index_weight_balance_records_on_document_id"
+    t.index ["major_record_id"], name: "index_weight_balance_records_on_major_record_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ad_alerts", "aircraft"
+  add_foreign_key "ad_alerts", "airworthiness_directives", on_delete: :nullify
   add_foreign_key "ad_compliances", "aircraft"
   add_foreign_key "ad_compliances", "airworthiness_directives"
   add_foreign_key "ad_compliances", "components"
@@ -614,6 +661,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
   add_foreign_key "major_records", "components", on_delete: :nullify
   add_foreign_key "major_records", "documents", column: "form_337_document_id", on_delete: :nullify
   add_foreign_key "major_records", "documents", column: "stc_document_id", on_delete: :nullify
+  add_foreign_key "major_records", "inspection_types", column: "ica_inspection_type_id", on_delete: :nullify
   add_foreign_key "major_records", "logbook_entries", on_delete: :nullify
   add_foreign_key "oil_analyses", "aircraft"
   add_foreign_key "oil_analyses", "components"
@@ -624,4 +672,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_07_210000) do
   add_foreign_key "squawks", "components", on_delete: :nullify
   add_foreign_key "squawks", "logbook_entries", on_delete: :nullify
   add_foreign_key "squawks", "users", column: "reported_by_id", on_delete: :nullify
+  add_foreign_key "weight_balance_records", "aircraft"
+  add_foreign_key "weight_balance_records", "documents", on_delete: :nullify
+  add_foreign_key "weight_balance_records", "major_records", on_delete: :nullify
 end

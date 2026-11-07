@@ -7,6 +7,11 @@ class InspectionTypesController < ApplicationController
   def new
     @inspection_type = InspectionType.new(required: true, recurring: true)
     @applies_to_airframe = true
+    if (@major_record = ica_record)
+      @inspection_type.name = "ICA: #{@major_record.title}".first(120)
+      @applies_to_airframe = @major_record.component.nil?
+      @inspection_type.components = [ @major_record.component ] if @major_record.component
+    end
   end
 
   def create
@@ -14,11 +19,17 @@ class InspectionTypesController < ApplicationController
     InspectionType.transaction do
       @inspection_type.save!
       apply_applicability(@inspection_type, to_airframe: applies_to_airframe?, component_ids: applicable_component_ids)
+      ica_record&.update!(ica_inspection_type: @inspection_type)
     end
     log_event("inspection", "Inspection type added: #{@inspection_type.name}")
-    redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection type added."
+    if (record = ica_record)
+      redirect_to aircraft_major_record_path(@aircraft, record), notice: "ICA inspection added. Record when it was last done to see when it's next due."
+    else
+      redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection type added."
+    end
   rescue ActiveRecord::RecordInvalid
     @applies_to_airframe = applies_to_airframe?
+    @major_record = ica_record
     render :new, status: :unprocessable_entity
   end
 
@@ -45,6 +56,11 @@ class InspectionTypesController < ApplicationController
   end
 
   private
+
+  # Creating the inspection an STC's ICA calls for (from its major record).
+  def ica_record
+    @aircraft.major_records.find_by(id: params[:major_record_id]) if params[:major_record_id].present?
+  end
 
   def set_type
     @inspection_type = @aircraft.applicable_inspection_types.find(params[:id])

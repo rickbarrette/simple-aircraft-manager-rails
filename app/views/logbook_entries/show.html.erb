@@ -5,6 +5,12 @@
     <% if owner? %><%= link_to "Edit", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
   </div>
   <div class="card-body space-y-3">
+    <% unless @entry.verified? %>
+      <div class="flex flex-wrap items-center justify-between gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
+        <span>Transcribed by Claude<%= " (#{@entry.transcription_confidence} confidence)" if @entry.transcription_confidence %> and not yet checked. Compare it with the scan<%= @entry.document ? "" : " or the paper logbook" %> before relying on it.</span>
+        <% if owner? %><%= button_to "Matches the scan: mark verified", verify_aircraft_logbook_entry_path(@aircraft, @entry), method: :patch, class: "btn-secondary btn-sm" %><% end %>
+      </div>
+    <% end %>
     <div class="flex flex-wrap gap-4 text-sm text-slate-600">
       <span>Type: <%= LogbookEntry::ENTRY_TYPES[@entry.entry_type] %></span>
       <span>Aircraft hours: <%= hours(@entry.aircraft_hours_at_entry) %></span>

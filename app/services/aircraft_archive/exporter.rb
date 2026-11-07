@@ -81,7 +81,12 @@ module AircraftArchive
             date_performed: r.date_performed&.iso8601, performed_by: r.performed_by, component_id: id(r.component_id),
             form_337_document_id: id(r.form_337_document_id), stc_number: r.stc_number, stc_holder: r.stc_holder,
             stc_document_id: id(r.stc_document_id), logbook_entry_id: id(r.logbook_entry_id), aircraft_hours: dec(r.aircraft_hours),
-            notes: r.notes, has_ica: r.has_ica, ica_notes: r.ica_notes }
+            notes: r.notes, has_ica: r.has_ica, ica_notes: r.ica_notes, ica_inspection_type_id: id(r.ica_inspection_type_id) }
+        end,
+        weight_balance_records: a.weight_balance_records.map do |w|
+          { id: id(w), date: w.date&.iso8601, empty_weight: dec(w.empty_weight), empty_arm: dec(w.empty_arm),
+            max_gross_weight: dec(w.max_gross_weight), reason: w.reason, notes: w.notes,
+            major_record_id: id(w.major_record_id), document_id: id(w.document_id) }
         end,
         notes: a.notes.includes(:user).map do |n|
           { id: id(n), aircraft_id: id(a), text: n.text, public: n.public, added_by_display: n.user&.display_name,
@@ -120,7 +125,8 @@ module AircraftArchive
 
     def aircraft_hash(a)
       { id: id(a), tail_number: a.tail_number, make: a.make, model: a.model, serial_number: a.serial_number,
-        description: a.description, purchased: a.purchased&.iso8601, status: a.status, time_basis: a.time_basis, tach_time: dec(a.tach_time),
+        description: a.description, purchased: a.purchased&.iso8601, status: a.status, time_basis: a.time_basis,
+        loading_stations: a.loading_stations, cg_envelope: a.cg_envelope, ad_watch_terms: a.ad_watch_terms, tach_time: dec(a.tach_time),
         tach_time_offset: dec(a.tach_time_offset), hobbs_time: dec(a.hobbs_time), hobbs_time_offset: dec(a.hobbs_time_offset),
         picture: file(a.picture, "aircraft_pictures"), icao_type: a.icao_type }
     end
@@ -139,7 +145,8 @@ module AircraftArchive
       { id: id(e), aircraft_id: id(e.aircraft_id), log_type: e.log_type, date: e.date&.iso8601, text: e.text,
         signoff_person: e.signoff_person, signoff_location: e.signoff_location,
         signoff_certificate_type: e.signoff_certificate_type, signoff_certificate_number: e.signoff_certificate_number,
-        inspection_result: e.inspection_result, log_image_id: id(e.document_id),
+        inspection_result: e.inspection_result, verified: e.verified, transcription_confidence: e.transcription_confidence,
+        log_image_id: id(e.document_id),
         aircraft_hours_at_entry: dec(e.aircraft_hours_at_entry), component_hours: {}, entry_type: e.entry_type,
         page_number: e.page_number, components: [], related_documents: [] }
     end

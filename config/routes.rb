@@ -60,7 +60,9 @@ Rails.application.routes.draw do
       collection { post :import }
     end
     resources :logbook_imports, path: "logbook/import", only: %i[new create show]
-    resources :logbook_entries
+    resources :logbook_entries do
+      member { patch :verify }
+    end
     resources :documents do
       collection do
         get :bulk, action: :bulk_new, as: :new_bulk
@@ -72,6 +74,16 @@ Rails.application.routes.draw do
     resources :inspection_types, except: %i[index show]
     resource :standard_inspections, only: %i[new create]
     resources :inspection_records, except: %i[index show]
+    resources :ad_alerts, path: "ads/new_ads", only: [] do
+      member do
+        post :track
+        post :dismiss
+      end
+      collection do
+        post :check
+        patch :terms
+      end
+    end
     resources :airworthiness_directives, path: "ads", except: :show do
       collection { post :attach }
     end
@@ -80,6 +92,8 @@ Rails.application.routes.draw do
       post :confirm
     end
     resources :major_records
+    resource :loading_setup, path: "weight_balance/loading", only: %i[edit update] # before the records' :id routes
+    resources :weight_balance_records, path: "weight_balance", except: :show
     resources :aircraft_roles, path: "access", only: %i[index create update destroy]
     resources :share_tokens, only: %i[create destroy]
     resource :export, controller: "aircraft_exports", only: :show

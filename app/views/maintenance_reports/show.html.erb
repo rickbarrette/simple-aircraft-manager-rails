@@ -137,6 +137,13 @@
 </section>
 
 <section class="<%= section %>">
+  <h2 class="text-base font-semibold">Weight and balance</h2>
+  <% if (wb = a.current_weight_balance) %>
+    <p class="mt-1 text-sm">Empty weight <strong><%= number_with_precision(wb.empty_weight, precision: 1, delimiter: ",") %> lb</strong>, CG <strong><%= number_with_precision(wb.empty_arm, precision: 2) %> in</strong><%= ", useful load #{number_with_precision(wb.useful_load, precision: 1, delimiter: ',')} lb" if wb.useful_load %>, as of <%= wb.date %><%= " (#{wb.reason})" if wb.reason.present? %>.</p>
+  <% else %><p class="mt-1 text-sm text-slate-500">None recorded.</p><% end %>
+</section>
+
+<section class="<%= section %>">
   <h2 class="text-base font-semibold">Open discrepancies</h2>
   <% if (squawks = @report.open_squawks.to_a).any? %>
     <ul class="mt-2 space-y-1 text-sm">

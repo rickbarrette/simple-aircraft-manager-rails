@@ -1,9 +1,12 @@
 Here's what needs attention on your aircraft.
-<% @items.each do |aircraft, issues| %>
+<% @items.each do |aircraft, issues, alerts| %>
 
 <%= aircraft.tail_number %> (<%= aircraft.airworthiness.label %>): <%= aircraft_url(aircraft) %>
 <% issues.each do |issue| %>
 - <%= { "RED" => "Overdue", "LIMITED" => "Overdue", "ORANGE" => "Due soon", "INFO" => "Deferred" }[issue.severity] %>: <%= issue.title %>. <%= issue.description %>
+<% end %>
+<% if alerts.any? %>
+- New ADs that may apply: <%= alerts.map { _1.ad_number || _1.fr_document_number }.to_sentence %>. Review: <%= aircraft_airworthiness_directives_url(aircraft, anchor: "new-ads") %>
 <% end %>
 <% end %>
 

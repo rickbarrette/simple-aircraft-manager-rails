@@ -13,6 +13,7 @@ module AircraftHelper
       [ "ADs", aircraft_airworthiness_directives_path(aircraft), %w[airworthiness_directives ad_compliances ad_imports] ],
       [ "Documents", aircraft_documents_path(aircraft), %w[documents document_collections] ],
       [ "Major Records", aircraft_major_records_path(aircraft), %w[major_records] ],
+      [ "W&B", aircraft_weight_balance_records_path(aircraft), %w[weight_balance_records loading_setups] ],
       [ "Notes", aircraft_notes_path(aircraft), %w[notes] ],
       [ "Activity", aircraft_events_path(aircraft), %w[events] ],
       ([ "Access & Sharing", aircraft_aircraft_roles_path(aircraft), %w[aircraft_roles share_tokens] ] if owner?)

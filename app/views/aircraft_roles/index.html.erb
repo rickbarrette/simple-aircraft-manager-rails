@@ -67,5 +67,12 @@
       </div>
       <%= link_to "Download .sam.zip", aircraft_export_path(@aircraft), class: "btn-secondary", data: { turbo: false } %>
     </div>
+    <div class="card-header border-t border-slate-100">
+      <div>
+        <h2 class="card-title">Records package</h2>
+        <p class="hint">For an FAA or NTSB request, or a buyer: every logbook entry as a PDF with its electronic signature, a signature register, the full change history, the status report, and the .sam.zip, in one ZIP with a README.</p>
+      </div>
+      <%= link_to "Download records package", aircraft_records_package_path(@aircraft), class: "btn-secondary", data: { turbo: false } %>
+    </div>
   </section>
 </div>

@@ -1,9 +1,20 @@
 class Admin::AboutController < ApplicationController
   before_action :require_admin!
-  rate_limit to: 5, within: 1.minute, only: %i[test_email test_reminder], with: -> { redirect_to admin_about_path, alert: "Try again in a minute." }
+  rate_limit to: 5, within: 1.minute, only: %i[test_email test_reminder check_records], with: -> { redirect_to admin_about_path, alert: "Try again in a minute." }
 
   def show
     @info = SystemInfo.new
+  end
+
+  # Back up and verify the records now (normally nightly).
+  def check_records
+    backup = DatabaseBackup.run!
+    check = RecordsIntegrity.check!
+    if backup.ok && check.ok
+      redirect_to admin_about_path(anchor: "records"), notice: "Backed up and checked: no problems found."
+    else
+      redirect_to admin_about_path(anchor: "records"), alert: "The records check found problems; see Records below."
+    end
   end
 
   # This week's reminder for the current admin, now.

@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   prepend_before_action :redirect_to_setup
+  before_action { Current.ip_address = request.remote_ip } # for record history
   helper_method :current_user
 
   rescue_from ActiveRecord::RecordNotFound do

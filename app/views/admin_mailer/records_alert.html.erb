@@ -1,0 +1,5 @@
+<p>Last night's records check found a problem.</p>
+<p>Backup: <strong><%= @backup.ok ? "OK" : "FAILED: #{@backup.message}" %></strong><br>
+Integrity check: <strong><%= @check.ok ? "OK" : "#{@check.problems.size} problem(s)" %></strong></p>
+<ul><% Array(@check.problems).first(20).each do |p| %><li><%= p %></li><% end %></ul>
+<p>See Admin → About for details.</p>

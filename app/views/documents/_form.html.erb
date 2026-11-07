@@ -8,6 +8,8 @@
     <%= f.field :visibility, as: :select, label: "Share-link visibility",
           collection: [["Inherit from collection", nil]] + DocumentCollection::VISIBILITIES.invert.to_a %>
   </div>
+  <%= f.field :legacy_record, as: :checkbox, label: "Legacy record (a scan of the paper logbooks or records)",
+        hint: "Records from before the electronic records began. Keep the paper originals." %>
   <%= f.field :expires_on, as: :date, label: "Expires on", wrapper: { class: "max-w-xs" },
         hint: "Optional. Registration (good for 7 years, 14 CFR 47.40), insurance, radio license… You'll be reminded before it expires; an expired registration shows the aircraft grounded." %>
   <%= f.field :description, as: :textarea, rows: 2 %>

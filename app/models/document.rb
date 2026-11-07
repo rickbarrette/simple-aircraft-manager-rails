@@ -1,4 +1,5 @@
 class Document < ApplicationRecord
+  include Versioned
   include UploadValidation
 
   TYPES = {

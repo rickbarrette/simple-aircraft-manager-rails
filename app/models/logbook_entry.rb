@@ -1,4 +1,5 @@
 class LogbookEntry < ApplicationRecord
+  include Versioned
   LOG_TYPES = { "AC" => "Aircraft", "ENG" => "Engine", "PROP" => "Propeller", "OTHER" => "Other" }.freeze
   ENTRY_TYPES = {
     "MAINTENANCE" => "Maintenance", "INSPECTION" => "Inspection", "FLIGHT" => "Flight",

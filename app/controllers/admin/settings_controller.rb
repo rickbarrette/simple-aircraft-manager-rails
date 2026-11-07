@@ -2,18 +2,18 @@ class Admin::SettingsController < ApplicationController
   before_action :require_admin!
 
   def edit
-    @values = { "max_upload_mb" => Setting.max_upload_mb }
+    @values = { "max_upload_mb" => Setting.max_upload_mb, "backups_kept" => Setting.integer("backups_kept") }
   end
 
   def update
-    submitted = params.fetch(:settings, {}).permit(:max_upload_mb).to_h
+    submitted = params.fetch(:settings, {}).permit(:max_upload_mb, :backups_kept).to_h
     records = Setting.update_integers(submitted)
     @errors = records.flat_map { _1.errors.full_messages }
     if @errors.empty?
       Rails.logger.info("[settings] #{current_user.email_address} changed #{submitted.inspect}")
       redirect_to edit_admin_settings_path, notice: "Settings saved."
     else
-      @values = { "max_upload_mb" => Setting.max_upload_mb }.merge(submitted)
+      @values = { "max_upload_mb" => Setting.max_upload_mb, "backups_kept" => Setting.integer("backups_kept") }.merge(submitted)
       render :edit, status: :unprocessable_entity
     end
   end

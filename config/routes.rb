@@ -102,6 +102,8 @@ Rails.application.routes.draw do
     resources :share_tokens, only: %i[create destroy]
     resource :export, controller: "aircraft_exports", only: :show
     resource :report, controller: "maintenance_reports", only: :show
+    resource :records_package, path: "records", only: :show
+    resources :record_versions, path: "history", only: :index
     resources :events, only: :index
   end
 
@@ -130,6 +132,7 @@ Rails.application.routes.draw do
     end
     post "about/test_email", to: "about#test_email", as: :test_email
     post "about/test_reminder", to: "about#test_reminder", as: :test_reminder
+    post "about/check_records", to: "about#check_records", as: :check_records
     resources :users, except: :show
     resources :component_types, except: :show
     resources :airports, except: :show do

@@ -58,3 +58,11 @@
     <% end %>
   </div>
 </section>
+
+<% history = (@entry.versions.to_a + @entry.parts.flat_map { _1.versions.to_a } + (@entry.signature ? @entry.signature.versions.to_a : [])).sort_by(&:id).reverse %>
+<% if history.any? %>
+  <details class="card mt-5 max-w-4xl">
+    <summary class="card-header cursor-pointer"><span class="card-title">Change history (<%= history.size %>)</span></summary>
+    <%= render "record_versions/list", versions: history %>
+  </details>
+<% end %>

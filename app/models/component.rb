@@ -1,4 +1,5 @@
 class Component < ApplicationRecord
+  include Versioned
   STATUSES = { "SPARE" => "Spare Part", "IN-USE" => "In Service", "DISPOSED" => "Disposed" }.freeze
   # What "since overhaul" counts from, and how logbooks abbreviate it.
   OVERHAUL_KINDS = { "major" => "Major overhaul", "factory_overhaul" => "Factory overhaul", "factory_new" => "Factory new or rebuilt (zero time)" }.freeze

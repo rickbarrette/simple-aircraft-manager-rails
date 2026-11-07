@@ -3,9 +3,12 @@
 <section class="card">
   <div class="card-header">
     <h2 class="card-title">Activity Log</h2>
+    <div class="flex flex-wrap items-center gap-2">
+    <%= link_to "Record history", aircraft_record_versions_path(@aircraft), class: "btn-secondary btn-sm", title: "Every change to the maintenance records, field by field" %>
     <%= form_with url: aircraft_events_path(@aircraft), method: :get, class: "flex gap-2" do |f| %>
       <%= f.select :category, AircraftEvent::CATEGORIES.invert, { include_blank: "All categories", selected: @category }, class: "input", data: { submit_on_change: true } %>
     <% end %>
+    </div>
   </div>
   <%= render "events/list", events: @events, full: true %>
 </section>

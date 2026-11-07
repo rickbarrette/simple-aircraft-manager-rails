@@ -15,7 +15,7 @@ module AircraftHelper
       [ "Major Records", aircraft_major_records_path(aircraft), %w[major_records] ],
       [ "W&B", aircraft_weight_balance_records_path(aircraft), %w[weight_balance_records loading_setups] ],
       [ "Notes", aircraft_notes_path(aircraft), %w[notes] ],
-      [ "Activity", aircraft_events_path(aircraft), %w[events] ],
+      [ "Activity", aircraft_events_path(aircraft), %w[events record_versions] ],
       ([ "Access & Sharing", aircraft_aircraft_roles_path(aircraft), %w[aircraft_roles share_tokens] ] if owner?)
     ].compact
   end

@@ -1,6 +1,7 @@
 # A sub-component a logbook entry also covers (the oil filter on the engine…)
 # and its times at the entry.
 class LogbookEntryPart < ApplicationRecord
+  include Versioned
   belongs_to :logbook_entry
   belongs_to :component
 

@@ -1,4 +1,5 @@
 class AdCompliance < ApplicationRecord
+  include Versioned
   # Method of compliance, recorded per 91.417(a)(2)(v).
   METHODS = {
     "inspection" => "Inspection",

@@ -1,4 +1,5 @@
 class MajorRecord < ApplicationRecord
+  include Versioned
   RECORD_TYPES = { "repair" => "Major Repair", "alteration" => "Major Alteration" }.freeze
 
   belongs_to :aircraft

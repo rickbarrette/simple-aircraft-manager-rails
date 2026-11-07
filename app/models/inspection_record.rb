@@ -1,4 +1,5 @@
 class InspectionRecord < ApplicationRecord
+  include Versioned
   belongs_to :inspection_type
   belongs_to :aircraft, optional: true
   belongs_to :component, optional: true

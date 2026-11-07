@@ -143,6 +143,7 @@ module AircraftArchive
         make: a["make"].to_s, model: a["model"].to_s, serial_number: a["serial_number"].to_s, description: a["description"].to_s,
         purchased: date(a["purchased"]), status: Aircraft::STATUSES.key?(a["status"]) ? a["status"] : "AVAILABLE",
         time_basis: Aircraft::TIME_BASES.key?(a["time_basis"]) ? a["time_basis"] : "tach",
+        electronic_records_since: date(a["electronic_records_since"]),
         loading_stations: a["loading_stations"].is_a?(Hash) ? a["loading_stations"] : nil,
         cg_envelope: a["cg_envelope"].is_a?(Array) ? a["cg_envelope"] : nil, ad_watch_terms: a["ad_watch_terms"].to_s.first(500).presence,
         tach_time: num(a["tach_time"] || a["flight_time"]) || 0, tach_time_offset: num(a["tach_time_offset"]) || 0,
@@ -207,7 +208,7 @@ module AircraftArchive
         d = @aircraft.documents.new(name: data["name"].to_s.presence || "Untitled", description: data["description"].to_s,
                                     doc_type: data["doc_type"].presence, visibility: visibility(data["visibility"]),
                                     document_collection_id: @map[:collection][data["collection_id"].to_s],
-                                    expires_on: date(data["expires_on"]))
+                                    expires_on: date(data["expires_on"]), legacy_record: data["legacy_record"] == true)
         d.doc_type = "OTHER" unless Document::TYPES.key?(d.doc_type)
         d.save!(validate: false)
         @map[:document][data["id"].to_s] = d.id

@@ -78,6 +78,38 @@
   </div>
 </div>
 
+<section class="card mt-5" id="records">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">Records integrity</h2>
+      <p class="text-xs text-slate-500">Nightly: a verified database backup, then a check of the record history chains and every electronic signature (AC 120-78B 3.2).</p>
+    </div>
+    <%= button_to "Back up and check now", admin_check_records_path, class: "btn-secondary btn-sm", data: { turbo_submits_with: "Checking…" } %>
+  </div>
+  <% check = IntegrityCheck.latest %>
+  <% backup = BackupRun.latest %>
+  <%= render "pairs", pairs: [
+        [ "Last check", check ? "#{l(check.created_at, format: :short)} · #{check.ok ? 'no problems' : pluralize(check.problems.size, 'problem')}" : "not run yet" ],
+        [ "Checked", check ? "#{number_with_delimiter(check.versions_checked)} history entries, #{number_with_delimiter(check.signatures_checked)} signatures" : nil ],
+        [ "Last backup", backup ? "#{l(backup.created_at, format: :short)} · #{backup.ok ? number_to_human_size(backup.bytes) : 'FAILED'}" : "not run yet" ],
+        [ "Backup check", backup&.message ],
+        [ "Backups kept", "#{Setting.integer('backups_kept')} (in storage/backups)" ]
+      ] %>
+  <% if check && !check.ok %>
+    <ul class="list-disc space-y-1 px-8 pb-3 text-sm text-red-700"><% check.problems.each do |p| %><li><%= p %></li><% end %></ul>
+  <% end %>
+</section>
+
+<section class="card mt-5">
+  <div class="card-header"><h2 class="card-title">Software versions</h2></div>
+  <% revisions = AppRevision.latest_first.limit(20) %>
+  <% if revisions.any? %>
+    <%= render "pairs", pairs: revisions.map { |r| [ r.revision, "#{l(r.first_seen_at, format: :short)} – #{l(r.last_seen_at, format: :short)}" ] } %>
+  <% else %>
+    <%= empty_state "No versions recorded yet." %>
+  <% end %>
+</section>
+
 <details class="card mt-5">
   <summary class="card-header cursor-pointer"><span class="card-title">All gems (<%= info.all_gems.size %>)</span></summary>
   <div class="grid gap-x-6 px-4 py-3 font-mono text-xs sm:grid-cols-2 lg:grid-cols-3">

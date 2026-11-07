@@ -1,4 +1,5 @@
 class Squawk < ApplicationRecord
+  include Versioned
   include UploadValidation
 
   PRIORITIES = { 0 => "Ground Aircraft", 1 => "Fix Soon", 2 => "Fix at Next Inspection", 3 => "Fix Eventually" }.freeze

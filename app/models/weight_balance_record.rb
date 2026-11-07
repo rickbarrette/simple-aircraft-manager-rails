@@ -2,6 +2,7 @@
 # date, usually after weighing or an equipment change (each alteration that
 # changes them needs a new one; its 337 can be linked).
 class WeightBalanceRecord < ApplicationRecord
+  include Versioned
   belongs_to :aircraft
   belongs_to :major_record, optional: true
   belongs_to :document, optional: true

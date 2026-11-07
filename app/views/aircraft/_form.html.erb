@@ -25,6 +25,8 @@
     <p class="hint">To change hours use “Update Hours” on the overview, so component times stay in sync.</p>
   <% end %>
   <%= f.field :picture, as: :file, accept: "image/*" %>
+  <%= f.field :electronic_records_since, as: :date, label: "Electronic records since", wrapper: { class: "max-w-xs" },
+        hint: "The date this app became the maintenance record. Earlier records stay in the paper logbooks (mark their scans as legacy records)." %>
   <%= f.field :airworthiness_enforcement, as: :checkbox, label: "Enforce airworthiness",
               hint: "Block flight logs and hours updates while the aircraft shows Grounded." %>
   <div class="flex gap-2">

@@ -50,7 +50,7 @@ module AircraftArchive
         end,
         documents: a.documents.map do |d|
           { id: id(d), aircraft_id: id(a), collection_id: id(d.document_collection_id), doc_type: d.doc_type, name: d.name,
-            description: d.description, visibility: d.visibility, expires_on: d.expires_on&.iso8601, components: [] }
+            description: d.description, visibility: d.visibility, expires_on: d.expires_on&.iso8601, legacy_record: d.legacy_record, components: [] }
         end,
         document_images: a.documents.includes(pages_attachments: :blob).flat_map do |d|
           d.pages.map { |page| { id: id(page), document_id: id(d), notes: "", image: file(page, "health/documents") } }
@@ -125,7 +125,7 @@ module AircraftArchive
 
     def aircraft_hash(a)
       { id: id(a), tail_number: a.tail_number, make: a.make, model: a.model, serial_number: a.serial_number,
-        description: a.description, purchased: a.purchased&.iso8601, status: a.status, time_basis: a.time_basis,
+        description: a.description, purchased: a.purchased&.iso8601, status: a.status, time_basis: a.time_basis, electronic_records_since: a.electronic_records_since&.iso8601,
         loading_stations: a.loading_stations, cg_envelope: a.cg_envelope, ad_watch_terms: a.ad_watch_terms, tach_time: dec(a.tach_time),
         tach_time_offset: dec(a.tach_time_offset), hobbs_time: dec(a.hobbs_time), hobbs_time_offset: dec(a.hobbs_time_offset),
         picture: file(a.picture, "aircraft_pictures"), icao_type: a.icao_type }

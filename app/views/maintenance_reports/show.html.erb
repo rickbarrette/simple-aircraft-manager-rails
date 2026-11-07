@@ -22,6 +22,7 @@
     <dt class="text-slate-500">Airframe time in service</dt><dd class="font-semibold"><%= hours(@report.time_in_service) %> hrs (<%= clock %>)</dd>
     <dt class="text-slate-500">Tach / Hobbs</dt><dd><%= hours(a.tach_time) %> / <%= hours(a.hobbs_time) %></dd>
     <dt class="text-slate-500">Status</dt><dd><%= airworthiness_badge(@report.airworthiness) %></dd>
+    <dt class="text-slate-500">Electronic records since</dt><dd><%= a.electronic_records_since || "—" %></dd>
   </dl>
 </header>
 

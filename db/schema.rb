@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_08_020000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -147,6 +147,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_010000) do
     t.json "cg_envelope"
     t.string "ad_watch_terms"
     t.datetime "ad_watch_checked_at"
+    t.date "electronic_records_since"
   end
 
   create_table "aircraft_airworthiness_directives", id: false, force: :cascade do |t|
@@ -285,6 +286,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_010000) do
     t.index ["component_id", "airworthiness_directive_id"], name: "idx_component_ads", unique: true
   end
 
+  create_table "app_revisions", force: :cascade do |t|
+    t.string "revision", null: false
+    t.datetime "built_at"
+    t.datetime "first_seen_at", null: false
+    t.datetime "last_seen_at", null: false
+    t.index ["revision"], name: "index_app_revisions_on_revision", unique: true
+  end
+
+  create_table "backup_runs", force: :cascade do |t|
+    t.boolean "ok", null: false
+    t.string "path"
+    t.bigint "bytes"
+    t.text "message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "component_types", force: :cascade do |t|
     t.string "name", null: false
     t.boolean "consumable", default: false, null: false
@@ -371,6 +389,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_010000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "expires_on"
+    t.boolean "legacy_record", default: false, null: false
     t.index ["aircraft_id"], name: "index_documents_on_aircraft_id"
     t.index ["document_collection_id"], name: "index_documents_on_document_collection_id"
   end
@@ -453,6 +472,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_010000) do
     t.decimal "hours_tolerance", precision: 6, scale: 1, default: "0.0", null: false
     t.integer "satisfies_id"
     t.index ["satisfies_id"], name: "index_inspection_types_on_satisfies_id"
+  end
+
+  create_table "integrity_checks", force: :cascade do |t|
+    t.boolean "ok", null: false
+    t.integer "versions_checked", default: 0, null: false
+    t.integer "signatures_checked", default: 0, null: false
+    t.json "problems"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "logbook_entries", force: :cascade do |t|
@@ -582,6 +610,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_010000) do
     t.index ["aircraft_id", "sample_date"], name: "index_oil_analyses_on_aircraft_id_and_sample_date"
     t.index ["aircraft_id"], name: "index_oil_analyses_on_aircraft_id"
     t.index ["component_id"], name: "index_oil_analyses_on_component_id"
+  end
+
+  create_table "record_versions", force: :cascade do |t|
+    t.integer "aircraft_id"
+    t.string "item_type", null: false
+    t.integer "item_id", null: false
+    t.string "event", null: false
+    t.integer "user_id"
+    t.string "ip_address"
+    t.text "payload", null: false
+    t.string "prev_hash"
+    t.string "chain_hash", null: false
+    t.datetime "created_at", null: false
+    t.index ["aircraft_id"], name: "index_record_versions_on_aircraft_id"
+    t.index ["item_type", "item_id"], name: "index_record_versions_on_item_type_and_item_id"
   end
 
   create_table "sessions", force: :cascade do |t|

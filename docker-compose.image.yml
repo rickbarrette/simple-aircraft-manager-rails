@@ -1,7 +1,8 @@
 # Run a published image, without cloning the source.
 #
 #   1. Put this file and a .env (copied from .env.example) in a folder.
-#   2. Set the image below to the one you use. To publish your own:
+#   2. The image below is the project's published one (tags: latest, or a
+#      commit such as :1412470). To build and publish your own instead:
 #        docker build -t your-registry/simple-aircraft-manager-rails:latest \
 #          --build-arg APP_REVISION=$(git rev-parse --short HEAD) --build-arg APP_BUILT_AT=$(date -u +%FT%TZ) .
 #        docker push your-registry/simple-aircraft-manager-rails:latest
@@ -12,7 +13,7 @@
 # (database changes are applied when the container starts). Then: docker compose exec web bin/rails sam:doctor
 services:
   web:
-    image: your-registry/simple-aircraft-manager-rails:latest
+    image: barrettefab/simple-aircraft-manager-rails:latest
     restart: unless-stopped
     ports:
       - "3000:80"

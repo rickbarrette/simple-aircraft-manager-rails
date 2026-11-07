@@ -10,7 +10,7 @@
 # to rely on the app's own sign-in (and optionally its single sign-on).
 services:
   web:
-    image: your-registry/simple-aircraft-manager-rails:latest   # or: build: .
+    image: barrettefab/simple-aircraft-manager-rails:latest   # or your own image, or: build: .
     restart: unless-stopped
     env_file: .env
     environment:

@@ -7,6 +7,9 @@ class SystemInfo
     omniauth omniauth_openid_connect rubyzip roo pdf-reader bcrypt
   ].freeze
 
+  # Where the source lives; APP_REPOSITORY_URL overrides it for a fork.
+  REPOSITORY_URL = ENV["APP_REPOSITORY_URL"].presence || "https://github.com/rickbarrette/simple-aircraft-manager-rails"
+
   DATABASES = { "Main" => :primary, "Cache" => :cache, "Jobs" => :queue, "Cable" => :cable }.freeze
 
   # Set by the Docker build (see Dockerfile); in development, read from git.
@@ -14,6 +17,13 @@ class SystemInfo
     @revision ||= ENV["APP_REVISION"].presence ||
                   (Rails.root.join(".git").exist? && `git -C #{Rails.root} rev-parse --short HEAD 2>/dev/null`.strip.presence) ||
                   "unknown"
+  end
+
+  def repository_url = REPOSITORY_URL.chomp("/")
+
+  # The running commit on the repository host, when the revision is known.
+  def revision_url
+    "#{repository_url}/commit/#{revision}" if revision.match?(/\A\h{7,40}\z/)
   end
 
   def built_at

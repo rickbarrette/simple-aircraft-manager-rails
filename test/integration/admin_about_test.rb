@@ -15,7 +15,8 @@ class AdminAboutTest < ActionDispatch::IntegrationTest
       get admin_about_path
     end
     assert_response :success
-    assert_select "[data-revision]", text: "abc1234"
+    assert_select "[data-revision] a[href='#{SystemInfo::REPOSITORY_URL}/commit/abc1234']", text: "abc1234"
+    assert_select "a[href='#{SystemInfo::REPOSITORY_URL}']", text: "Source code"
     body = response.body
     [ RUBY_VERSION, Rails.version, SQLite3::SQLITE_VERSION, Gem.loaded_specs["turbo-rails"].version.to_s ].each { assert_includes body, _1 }
     assert_includes body, "on (#{LogbookTranscriber::MODEL})"

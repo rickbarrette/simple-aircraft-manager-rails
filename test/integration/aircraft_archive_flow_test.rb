@@ -41,6 +41,14 @@ class AircraftArchiveFlowTest < ActionDispatch::IntegrationTest
     assert_equal "Aircraft exported (.sam.zip)", @a.events.last.event_name
   end
 
+  test "a records package imports from the .sam.zip inside it" do
+    package = File.join(Dir.mktmpdir, "n12345-records.zip")
+    RecordsPackage.new(@a, source: "test").write_to(package)
+    assert_equal "N12345", AircraftArchive::Importer.check(package).tail_number
+    copy = AircraftArchive::Importer.new(package, owner: @owner, tail_number: "N54321").run[:aircraft]
+    assert_equal @a.logbook_entries.count, copy.logbook_entries.count
+  end
+
   test "an archive re-zipped from an unzipped folder still imports" do
     sign_in @owner
     path = download_export

@@ -28,11 +28,29 @@ module AircraftArchive
                   counts: RECORD_SECTIONS.to_h { [ _1, Array(manifest[_1]).size ] })
     end
 
-    def self.with_zip(path)
+    # Opens the archive. A records package (Access & Sharing) carries the
+    # .sam.zip inside it, so that inner archive is opened instead.
+    def self.with_zip(path, &)
       Zip.validate_entry_sizes = true # a lying size header raises instead of inflating forever
-      Zip::File.open(path) { |zip| yield zip }
+      Zip::File.open(path) do |zip|
+        inner = nested_archive(zip)
+        next yield(zip) unless inner
+        raise Error, "The archive inside the records package is too large." if inner.size > ARCHIVE_MAX_BYTES
+        Tempfile.create([ "sam-inner", ".zip" ], binmode: true) do |tmp|
+          inner.get_input_stream { |io| IO.copy_stream(io, tmp) }
+          tmp.flush
+          Zip::File.open(tmp.path, &)
+        end
+      end
     rescue Zip::Error => e
       raise Error, "Not a valid .sam.zip archive (#{e.message})"
+    end
+
+    # The single *.sam.zip entry of a records package (no manifest of its own).
+    def self.nested_archive(zip)
+      return if zip.find_entry("manifest.json") || root_prefix(zip).present?
+      candidates = zip.entries.reject { _1.name.start_with?("__MACOSX/") }.select { _1.name.match?(%r{\A([^/]+/)?[^/]+\.sam\.zip\z}) }
+      candidates.first if candidates.one?
     end
 
     # "" normally; "folder/" when everything sits in one folder, as when a

@@ -25,6 +25,7 @@ class RecordsPackage
       if (revision = ProceduresRevision.current)
         add(zip, "recordkeeping-procedures.html", standalone_html(revision.content, "Recordkeeping procedures, revision #{revision.number}"))
       end
+      add(zip, "viewer/docker-compose.yml", viewer_compose)
       archive = Tempfile.new([ "archive", ".sam.zip" ])
       AircraftArchive::Exporter.new(@aircraft, source: @source).write_to(archive.path)
       zip.put_next_entry("#{@aircraft.tail_number.downcase}.sam.zip")
@@ -62,6 +63,7 @@ class RecordsPackage
       - status-report.html    Maintenance status per 14 CFR 91.417(a)(2): times, life-limited parts, inspections, ADs, alterations.
       - #{@aircraft.tail_number.downcase}.sam.zip        All records and files as data, to load into another system.
       - recordkeeping-procedures.html  How these electronic records and signatures are kept (AC 120-78B), current adopted revision.
+      - viewer/docker-compose.yml       Runs Simple Aircraft Manager on your own computer to browse the archive (below).
 
       Signatures
       Each electronic signature records who signed, with which certificate, what they certified, when, and a SHA-256
@@ -70,7 +72,57 @@ class RecordsPackage
       signing; "Superseded" means a later signed correction replaces it.
 
       Last records integrity check: #{check ? "#{check.created_at.utc.strftime('%Y-%m-%d %H:%M UTC')}, #{check.ok ? 'no problems found' : "#{check.problems.size} problem(s) found"}" : 'not run yet'}.
+
+      Viewing the data in Simple Aircraft Manager
+      The PDF, CSV and HTML files above open on their own. To browse everything (components, logbook, ADs,
+      inspections, documents, flights, oil and fuel) the way the owner sees it, run the app on your own computer:
+
+        1. Install Docker Desktop (https://www.docker.com/products/docker-desktop/).
+        2. In a terminal, go to the "viewer" folder of this package and run:   docker compose up -d
+        3. Open http://localhost:3000 and create the first (admin) account.
+        4. Choose Fleet -> Import and select #{@aircraft.tail_number.downcase}.sam.zip from this package (or this whole zip file).
+
+      The copy runs only on your computer and stays separate from the owner's system. Electronic signatures are
+      shown as imported: compare their fingerprints with signatures.csv and logbook-entries.pdf. To stop it:
+      docker compose down (add -v to delete the local copy).
+      #{"\nSimple Aircraft Manager is open source: #{repository}" if repository}
     TXT
+  end
+
+  def repository = SystemInfo.new.repository_url
+
+  # The published image, as named in the project's docker-compose.image.yml
+  # (APP_IMAGE overrides it, e.g. for a fork's own image).
+  def viewer_image
+    ENV["APP_IMAGE"].presence ||
+      Rails.root.join("docker-compose.image.yml").then { _1.exist? ? _1.read[/^\s*image:\s*(\S+)/, 1] : nil }
+  end
+
+  # A ready-to-run local viewer, with its own throwaway secret key (never this
+  # installation's), plain HTTP on localhost.
+  def viewer_compose
+    image = viewer_image
+    <<~YAML
+      # Simple Aircraft Manager on your own computer, to browse #{@aircraft.tail_number.downcase}.sam.zip.
+      #   docker compose up -d   then open http://localhost:3000, create an account,
+      #   and import #{@aircraft.tail_number.downcase}.sam.zip (Fleet -> Import). Stop: docker compose down
+      # Prepared with software version #{SystemInfo.new.revision}.#{" Source: #{repository}" if repository}
+      services:
+        web:
+          #{image ? "image: #{image}" : "build: .   # no published image known: build from the source code"}
+          restart: "no"
+          ports:
+            - "3000:80"
+          environment:
+            SECRET_KEY_BASE: #{SecureRandom.hex(64)}   # for this local copy only
+            APP_HOST: localhost:3000
+            FORCE_SSL: "false"
+            SOLID_QUEUE_IN_PUMA: "true"
+          volumes:
+            - viewer_storage:/rails/storage
+      volumes:
+        viewer_storage:
+    YAML
   end
 
   def signatures_csv(entries)

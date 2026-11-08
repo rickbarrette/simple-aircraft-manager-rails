@@ -17,7 +17,7 @@ Give it a label and optionally an expiry. Documents only appear if their visibil
 
 ## Records package
 
-**Download records package** builds a zip for the FAA, a buyer or a new maintainer: every logbook entry as a PDF with its signatures, a signature register, the change history, the status report, the current recordkeeping procedures, and the data archive.
+**Download records package** builds a zip for the FAA, a buyer or a new maintainer: every logbook entry as a PDF with its signatures, a signature register, the change history, the status report, the current recordkeeping procedures, and the data archive. Its README explains each file, links to the source code, and includes a ready-to-run `viewer/docker-compose.yml`: with Docker Desktop, the recipient can run the app on their own computer and import the archive to browse everything.
 
 ## Backup and transfer
 

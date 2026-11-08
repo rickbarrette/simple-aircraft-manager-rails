@@ -80,7 +80,7 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
     File.binwrite(path, response.body)
     Zip::File.open(path) do |zip|
       def zip.text(name) = read(name).force_encoding("UTF-8")
-      assert_equal %w[README.txt logbook-entries.pdf n12345.sam.zip record-history.csv signatures.csv status-report.html], zip.entries.map(&:name).sort
+      assert_equal %w[README.txt logbook-entries.pdf n12345.sam.zip record-history.csv signatures.csv status-report.html viewer/docker-compose.yml], zip.entries.map(&:name).sort
       readme = zip.text("README.txt")
       assert_includes readme, "All 2 logbook entries, oldest first. 1 are signed electronically"
       assert_includes readme, "Electronic records since: 2026-01-01"
@@ -117,8 +117,16 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
     engine = create_component(@a, tbo_hours: 2000, hours_since_overhaul: 126, on_condition: true)
     path = Rails.root.join("tmp", "pkg-#{SecureRandom.hex(4)}.zip")
     RecordsPackage.new(@a, source: "test").write_to(path)
-    html, csv = Zip::File.open(path) { |z| [ z.read("status-report.html").force_encoding("UTF-8"), z.read("signatures.csv").force_encoding("UTF-8") ] }
+    html, csv, readme, compose = Zip::File.open(path) { |z| %w[status-report.html signatures.csv README.txt viewer/docker-compose.yml].map { z.read(_1).force_encoding("UTF-8") } }
     assert csv.start_with?("\uFEFF"), "CSV has a byte order mark for Excel"
+    assert_includes readme, "Viewing the data in Simple Aircraft Manager"
+    assert_includes readme, SystemInfo.new.repository_url
+    viewer = YAML.safe_load(compose)
+    web = viewer.dig("services", "web")
+    assert_equal File.read(Rails.root.join("docker-compose.image.yml"))[/image:\s*(\S+)/, 1], web["image"]
+    assert_equal "false", web.dig("environment", "FORCE_SSL")
+    assert_equal 128, web.dig("environment", "SECRET_KEY_BASE").size
+    refute_equal Rails.application.secret_key_base, web.dig("environment", "SECRET_KEY_BASE")
     File.delete(path)
     assert_includes html, "<style>"
     refute_includes html, "\\[</head>" # escaped "&" in CSS selectors left intact

@@ -167,7 +167,11 @@ class GroupFourTest < ActionDispatch::IntegrationTest
 
   test "newly published ADs are found, tracked or dismissed, and reported weekly" do
     create_component(@a, component_type: component_type("Engine"), model: "O-320-H2AD")
-    assert_equal [ "172N", "O-320-H2AD" ], AdWatch.default_terms(@a)
+    assert_equal [ "172N", "O-320-H2AD", "O-320" ], AdWatch.default_terms(@a) # engine family too
+    assert_equal "O-200", AdWatch.model_family("O-200A")
+    assert_equal "IO-550", AdWatch.model_family("IO-550-N")
+    assert_nil AdWatch.model_family("O-200")
+    assert_nil AdWatch.model_family("1A102/OCM6948")
     known = AirworthinessDirective.create!(name: "2020-01-01", short_description: "Already tracked")
     known.aircraft << @a
     stub = stub_request(:get, %r{\Ahttps://www\.federalregister\.gov/api/v1/documents\.json}).to_return(status: 200, body: FR_RESPONSE)
@@ -175,7 +179,7 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     sign_in @owner
     post check_aircraft_ad_alerts_path(@a)
     assert_redirected_to aircraft_airworthiness_directives_path(@a, anchor: "new-ads")
-    assert_requested stub, times: 2 # one search per term
+    assert_requested stub, times: 3 # one search per term (model, engine model, engine family)
     alert = @a.ad_alerts.sole # already-tracked and non-AD documents skipped
     assert_equal [ "2026-17-10", "39-23454", "new" ], [ alert.ad_number, alert.amendment, alert.status ]
     get aircraft_airworthiness_directives_path(@a)

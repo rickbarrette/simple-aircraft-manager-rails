@@ -19,9 +19,17 @@ class AdWatch
   # Model names to search for: the owner's list, or the aircraft, engine and
   # propeller models.
   def self.default_terms(aircraft)
-    models = [ aircraft.model ] + aircraft.components.in_use.includes(:component_type)
-                                         .select { _1.component_type&.name.to_s.match?(/engine|propell?er|\bprop\b/i) }.map(&:model)
-    models.compact_blank.map { _1.strip }.uniq
+    engines = aircraft.components.in_use.includes(:component_type)
+                      .select { _1.component_type&.name.to_s.match?(/engine|propell?er|\bprop\b/i) }.map(&:model).compact_blank.map(&:strip)
+    ([ aircraft.model.to_s.strip ] + engines.flat_map { [ _1, model_family(_1) ] }).compact_blank.uniq
+  end
+
+  # The engine family ADs often name instead of the exact model, and that also
+  # catches a different spelling of the suffix: "O-200A" and "O-200-A" -> "O-200",
+  # "IO-550-N" -> "IO-550". Nil when there's no family to add.
+  def self.model_family(model)
+    family = model.to_s.upcase[/\A([A-Z]{1,5}-\d{3,4})(?=-?[A-Z0-9])/, 1]
+    family unless family.nil? || family == model.to_s.upcase
   end
 
   def terms

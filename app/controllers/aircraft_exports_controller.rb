@@ -14,6 +14,8 @@ class AircraftExportsController < ApplicationController
     path = EXPORT_DIR.join("#{SecureRandom.hex(12)}.zip").to_s
     exporter.write_to(path)
     log_event("aircraft", "Aircraft exported (.sam.zip)")
-    send_file path, filename: exporter.filename, type: "application/zip", disposition: "attachment"
+    # Generic binary, not application/zip: Safari unzips zip downloads into a
+    # folder ("Open safe files"), and the archive must stay one file to import.
+    send_file path, filename: exporter.filename, type: "application/octet-stream", disposition: "attachment"
   end
 end

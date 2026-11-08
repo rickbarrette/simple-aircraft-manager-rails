@@ -16,7 +16,8 @@ class AircraftArchiveFlowTest < ActionDispatch::IntegrationTest
   def download_export
     get aircraft_export_path(@a)
     assert_response :success
-    assert_equal "application/zip", response.media_type
+    assert_equal "application/octet-stream", response.media_type # so Safari doesn't unzip it into a folder
+    assert_match(/attachment; filename="n12345-[\d-]+\.sam\.zip"/, response.headers["Content-Disposition"])
     path = File.join(Dir.mktmpdir, "export.sam.zip")
     File.binwrite(path, response.body)
     path
@@ -38,6 +39,27 @@ class AircraftArchiveFlowTest < ActionDispatch::IntegrationTest
     assert_match(/attachment; filename="n12345-\d{4}-\d\d-\d\d\.sam\.zip"/, response.headers["Content-Disposition"])
     assert_equal "N12345", Zip::File.open(path) { JSON.parse(_1.read("manifest.json")) }["aircraft"]["tail_number"]
     assert_equal "Aircraft exported (.sam.zip)", @a.events.last.event_name
+  end
+
+  test "an archive re-zipped from an unzipped folder still imports" do
+    sign_in @owner
+    path = download_export
+    rezipped = File.join(Dir.mktmpdir, "n12345.zip")
+    Zip::File.open(path) do |src|
+      Zip::OutputStream.open(rezipped) do |out|
+        out.put_next_entry("__MACOSX/n12345/._manifest.json")
+        out.write("resource fork")
+        src.each do |e|
+          next if e.directory?
+          out.put_next_entry("n12345-export/#{e.name}")
+          out.write(e.get_input_stream.read)
+        end
+      end
+    end
+    assert_equal "N12345", AircraftArchive::Importer.check(rezipped).tail_number
+    copy = AircraftArchive::Importer.new(rezipped, owner: @owner, tail_number: "N54321").run[:aircraft]
+    assert_equal @a.logbook_entries.count, copy.logbook_entries.count
+    assert_equal @a.documents.count, copy.documents.count
   end
 
   test "importing an archive: tail clash asks for a new tail, then the job builds the aircraft" do

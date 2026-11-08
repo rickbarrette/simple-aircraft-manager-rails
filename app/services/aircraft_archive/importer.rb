@@ -35,6 +35,15 @@ module AircraftArchive
       raise Error, "Not a valid .sam.zip archive (#{e.message})"
     end
 
+    # "" normally; "folder/" when everything sits in one folder, as when a
+    # browser unzipped the download and the folder was zipped again (Finder's
+    # Compress adds that folder, and a __MACOSX folder that's ignored).
+    def self.root_prefix(zip)
+      return "" if zip.find_entry("manifest.json")
+      folders = zip.entries.map(&:name).reject { _1.start_with?("__MACOSX/") }.grep(%r{\A[^/]+/manifest\.json\z})
+      folders.one? ? folders.first.delete_suffix("manifest.json") : ""
+    end
+
     def self.validate_zip(zip)
       uncompressed = compressed = 0
       zip.each do |entry|
@@ -46,7 +55,7 @@ module AircraftArchive
       end
       raise Error, "The archive is compressed suspiciously well (over #{MAX_RATIO}:1)." if compressed.positive? && uncompressed / compressed > MAX_RATIO
 
-      entry = zip.find_entry("manifest.json") or raise Error, "The archive has no manifest.json. Is it a .sam.zip export?"
+      entry = zip.find_entry("#{root_prefix(zip)}manifest.json") or raise Error, "The archive has no manifest.json. Is it a .sam.zip export?"
       raise Error, "manifest.json is too large." if entry.size > MANIFEST_MAX_BYTES
       manifest = begin
         JSON.parse(entry.get_input_stream.read.force_encoding("UTF-8"))
@@ -92,6 +101,7 @@ module AircraftArchive
       self.class.with_zip(@path) do |zip|
         @zip = zip
         @manifest = self.class.validate_zip(zip)
+        @root = self.class.root_prefix(zip)
         import_all
       end
       { aircraft: @aircraft, counts: @counts, warnings: @warnings }
@@ -487,7 +497,7 @@ module AircraftArchive
 
     def upload(archive_path)
       raise Error, "unsafe file path #{archive_path}" unless self.class.safe_name?(archive_path)
-      entry = @zip.find_entry(archive_path) or raise Error, "file #{File.basename(archive_path)} isn't in the archive"
+      entry = @zip.find_entry("#{@root}#{archive_path}") or raise Error, "file #{File.basename(archive_path)} isn't in the archive"
       raise Error, "#{File.basename(archive_path)} is too large" if entry.size > FILE_MAX_BYTES
       ext = AircraftArchive.extension(archive_path)
       raise Error, "#{File.basename(archive_path)} isn't an allowed file type" unless EXTENSIONS.include?(ext)

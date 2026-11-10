@@ -55,7 +55,7 @@
   <div class="card-header">
     <div>
       <h2 class="card-title">Newly published ADs that may apply</h2>
-      <p class="text-xs text-slate-500">Searched weekly in the Federal Register for <%= AdWatch.new(@aircraft).terms.to_sentence.presence || "the aircraft, engine and propeller models" %><%= " · last checked #{time_ago_in_words(@aircraft.ad_watch_checked_at)} ago" if @aircraft.ad_watch_checked_at %>.</p>
+      <p class="text-xs text-slate-500">Searched weekly in the Federal Register for <%= AdWatch.new(@aircraft).terms.map(&:label).uniq.to_sentence.presence || "the aircraft and its installed components" %><%= " · last checked #{time_ago_in_words(@aircraft.ad_watch_checked_at)} ago" if @aircraft.ad_watch_checked_at %>.</p>
     </div>
     <% if owner? %><%= button_to "Check now", check_aircraft_ad_alerts_path(@aircraft), class: "btn-secondary btn-sm", data: { turbo_submits_with: "Checking…" } %><% end %>
   </div>
@@ -85,10 +85,10 @@
     <%= form_with url: terms_aircraft_ad_alerts_path(@aircraft), method: :patch, class: "flex flex-wrap items-end gap-2 border-t border-slate-100 px-4 py-3" do %>
       <div class="min-w-0 flex-1">
         <%= label_tag :ad_watch_terms, "Search terms", class: "label" %>
-        <%= text_field_tag :ad_watch_terms, @aircraft.ad_watch_terms, class: "input", placeholder: AdWatch.default_terms(@aircraft).join(", ").presence || "e.g. 172N, O-320, 1C160" %>
+        <%= text_field_tag :ad_watch_terms, @aircraft.ad_watch_terms, class: "input", placeholder: AdWatch.default_terms(@aircraft).map(&:label).uniq.join(", ").presence || "e.g. 172N, O-320, 1C160" %>
       </div>
       <%= submit_tag "Save", class: "btn-secondary" %>
-      <p class="hint w-full">Comma-separated model names. Left blank, the aircraft, engine and propeller models are used. Matches are only possibly applicable: check each AD's applicability (and serial number ranges) before tracking it.</p>
+      <p class="hint w-full">Comma-separated model names. Left blank, the aircraft model, engine and propeller models (and their families) and every installed component’s make and model are used; a match on a component makes the tracked AD apply to that component. Matches are only possibly applicable: check each AD's applicability (and serial number ranges) before tracking it.</p>
     <% end %>
   <% end %>
 </section>

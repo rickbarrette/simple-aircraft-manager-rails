@@ -165,9 +165,30 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     { document_number: "2026-22222", title: "Special Conditions; Something Else", publication_date: "2026-08-02", docket_ids: [] }
   ] }.to_json
 
+  test "the AD search also looks for installed components, and an AD found that way applies to the component" do
+    magneto = create_component(@a, component_type: component_type("Magneto"), manufacturer: "Champion", model: "Slick 4301")
+    create_component(@a, component_type: component_type("ELT"), manufacturer: "Artex", model: "345", status: "SPARE")
+    terms = AdWatch.default_terms(@a)
+    assert_equal [ "172N", "Champion Slick 4301" ], terms.map(&:label).uniq # spares skipped
+    assert_equal [ %w[Champion 4301], %w[Magneto 4301] ], terms.drop(1).map(&:words) # maker + designator, type + designator
+    assert_equal [ magneto.id ], terms.drop(1).map(&:component_id).uniq
+
+    stub_request(:get, %r{federalregister}).to_return(status: 200, body: { results: [] }.to_json)
+    stub = stub_request(:get, %r{federalregister}).with(query: hash_including("conditions" => hash_including("term" => %("airworthiness directives" "Champion" "4301"))))
+                                                .to_return(status: 200, body: FR_RESPONSE)
+    AdWatch.new(@a).check!
+    assert_requested stub
+    alert = @a.ad_alerts.find_by!(ad_number: "2026-17-10")
+    assert_equal [ "Champion Slick 4301", magneto ], [ alert.matched_term, alert.component ]
+    ad = alert.track!
+    assert_includes magneto.reload.airworthiness_directives, ad
+    refute_includes ad.aircraft, @a
+    assert_includes @a.applicable_ads, ad # through the component
+  end
+
   test "newly published ADs are found, tracked or dismissed, and reported weekly" do
     create_component(@a, component_type: component_type("Engine"), model: "O-320-H2AD")
-    assert_equal [ "172N", "O-320-H2AD", "O-320" ], AdWatch.default_terms(@a) # engine family too
+    assert_equal [ "172N", "O-320-H2AD", "O-320" ], AdWatch.default_terms(@a).map(&:label) # engine family too
     assert_equal "O-200", AdWatch.model_family("O-200A")
     assert_equal "IO-550", AdWatch.model_family("IO-550-N")
     assert_nil AdWatch.model_family("O-200")
@@ -207,7 +228,7 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     assert_equal "dismissed", other.reload.status
 
     patch terms_aircraft_ad_alerts_path(@a), params: { ad_watch_terms: "172, O-320" }
-    assert_equal [ "172", "O-320" ], AdWatch.new(@a.reload).terms
+    assert_equal [ "172", "O-320" ], AdWatch.new(@a.reload).terms.map(&:label)
 
     stub_request(:get, %r{federalregister}).to_return(status: 503)
     post check_aircraft_ad_alerts_path(@a)

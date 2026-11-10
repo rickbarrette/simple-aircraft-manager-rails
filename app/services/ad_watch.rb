@@ -16,12 +16,35 @@ class AdWatch
     @aircraft = aircraft
   end
 
-  # Model names to search for: the owner's list, or the aircraft, engine and
-  # propeller models.
+  # A search: what's shown ("Champion Slick 4301"), the words that must all
+  # appear in the AD's text, and the installed component it came from.
+  Term = Data.define(:label, :words, :component_id) do
+    def to_s = label
+  end
+
+  ENGINE_OR_PROP = /engine|propell?er|\bprop\b/i
+
+  # The aircraft model; each engine and propeller model (and its family);
+  # and every other installed component's make and model, so ADs on
+  # appliances (magnetos, ELTs, radios, filters…) are found too.
   def self.default_terms(aircraft)
-    engines = aircraft.components.in_use.includes(:component_type)
-                      .select { _1.component_type&.name.to_s.match?(/engine|propell?er|\bprop\b/i) }.map(&:model).compact_blank.map(&:strip)
-    ([ aircraft.model.to_s.strip ] + engines.flat_map { [ _1, model_family(_1) ] }).compact_blank.uniq
+    terms = []
+    terms << Term.new(aircraft.model.strip, [ aircraft.model.strip ], nil) if aircraft.model.present?
+    aircraft.components.in_use.includes(:component_type).order(:id).each do |c|
+      model = c.model.to_s.strip
+      next if model.blank?
+      if c.component_type&.name.to_s.match?(ENGINE_OR_PROP)
+        [ model, model_family(model) ].compact.each { |m| terms << Term.new(m, [ m ], c.id) }
+      else
+        label = [ c.manufacturer.to_s.strip, model ].compact_blank.join(" ")
+        # Maker + model, and type + model: ADs often name the maker differently
+        # (a successor company) but say what the part is ("magneto", "ELT").
+        [ c.manufacturer.to_s.strip.split.first, c.component_type&.name.to_s.strip.split.first ].compact_blank.uniq.each do |lead|
+          terms << Term.new(label, ([ lead ] + designators(model)).uniq, c.id)
+        end
+      end
+    end
+    terms.uniq { _1.words.map(&:downcase) }
   end
 
   # The engine family ADs often name instead of the exact model, and that also
@@ -32,16 +55,25 @@ class AdWatch
     family unless family.nil? || family == model.to_s.upcase
   end
 
+  # The parts of a model name with digits in them ("Slick 4301" -> ["4301"]):
+  # brand words in the model field rarely appear in an AD's text.
+  def self.designators(model)
+    words = model.split
+    with_digits = words.grep(/\d/)
+    with_digits.any? ? with_digits : words
+  end
+
+  # The owner's own list (comma-separated) replaces the defaults.
   def terms
     custom = @aircraft.ad_watch_terms.to_s.split(/[,;\n]/).map(&:strip).compact_blank
-    custom.any? ? custom : self.class.default_terms(@aircraft)
+    custom.any? ? custom.map { Term.new(_1, [ _1 ], nil) } : self.class.default_terms(@aircraft)
   end
 
   # Returns the new AdAlerts.
   def check!
     since = (@aircraft.ad_watch_checked_at || FIRST_LOOKBACK.ago).to_date - 7 # overlap; duplicates are skipped
     known = AirworthinessDirective.pluck(:name).to_set
-    created = terms.flat_map { |term| search(term, since).filter_map { record(_1, term, known) } }
+    created = terms.flat_map { |term| search(term.words, since).filter_map { record(_1, term, known) } }
     @aircraft.update_column(:ad_watch_checked_at, Time.current)
     created
   end
@@ -57,15 +89,16 @@ class AdWatch
       fr_document_number: doc["document_number"], ad_number: ad_number,
       amendment: dockets.find { _1.start_with?("Amendment ") }&.delete_prefix("Amendment "),
       title: doc["title"].to_s.truncate(250), abstract: doc["abstract"], html_url: doc["html_url"],
-      publication_date: doc["publication_date"], effective_on: doc["effective_on"], matched_term: term
+      publication_date: doc["publication_date"], effective_on: doc["effective_on"], matched_term: term.label,
+      component_id: term.component_id
     )
   end
 
-  def search(term, since)
+  def search(words, since)
     query = [
       [ "per_page", "50" ], [ "order", "newest" ],
       [ "conditions[agencies][]", "federal-aviation-administration" ], [ "conditions[type][]", "RULE" ],
-      [ "conditions[term]", %("airworthiness directives" "#{term.delete('"')}") ],
+      [ "conditions[term]", ([ "airworthiness directives" ] + words).map { %("#{_1.delete('"')}") }.join(" ") ],
       [ "conditions[publication_date][gte]", since.iso8601 ]
     ] + FIELDS.map { [ "fields[]", _1 ] }
     uri = URI(API)

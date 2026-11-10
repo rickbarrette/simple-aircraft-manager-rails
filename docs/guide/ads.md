@@ -10,7 +10,7 @@ The **ADs** tab lists the ADs and bulletins that apply to the aircraft or its co
 
 ## Newly published ADs
 
-The app searches the Federal Register weekly for new ADs mentioning the aircraft, engine and propeller models (or the terms you set). **Check now** runs it straight away. For each match, **Track** it or **Dismiss** it. Matches are only *possibly* applicable: check the AD's applicability and serial number ranges first.
+The app searches the Federal Register weekly for new ADs mentioning the aircraft model, the engine and propeller models (and their families, e.g. O-200 for an O-200A), and the make and model of every other installed component, such as magnetos, the ELT and radios (or only the terms you set). Tracking an AD found through a component makes it apply to that component. **Check now** runs it straight away. For each match, **Track** it or **Dismiss** it. Matches are only *possibly* applicable: check the AD's applicability and serial number ranges first.
 
 ## Recording compliance
 

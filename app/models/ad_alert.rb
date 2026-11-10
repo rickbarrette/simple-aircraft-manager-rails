@@ -4,6 +4,7 @@ class AdAlert < ApplicationRecord
   STATUSES = %w[new tracked dismissed].freeze
 
   belongs_to :aircraft
+  belongs_to :component, optional: true
   belongs_to :airworthiness_directive, optional: true
 
   validates :fr_document_number, presence: true, uniqueness: { scope: :aircraft_id }
@@ -20,7 +21,13 @@ class AdAlert < ApplicationRecord
         name: ad_number.presence || fr_document_number, short_description: summary, effective_date: effective_on,
         document_url: html_url, docket_number: amendment, required_action: abstract.to_s.truncate(2000)
       )
-      ad.aircraft << aircraft unless ad.aircraft.include?(aircraft)
+      # Matched on an installed component: the AD applies to that component;
+      # otherwise to the airframe.
+      if component && component.aircraft_id == aircraft_id
+        ad.components << component unless ad.components.include?(component)
+      else
+        ad.aircraft << aircraft unless ad.aircraft.include?(aircraft)
+      end
       update!(status: "tracked", airworthiness_directive: ad)
       ad
     end

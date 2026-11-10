@@ -9,7 +9,7 @@ class AdAlertsController < ApplicationController
   def check
     found = AdWatch.new(@aircraft).check!
     redirect_to aircraft_airworthiness_directives_path(@aircraft, anchor: "new-ads"),
-                notice: found.any? ? "Found #{helpers.pluralize(found.size, 'newly published AD')} to review." : "No new ADs found for #{AdWatch.new(@aircraft).terms.to_sentence}."
+                notice: found.any? ? "Found #{helpers.pluralize(found.size, 'newly published AD')} to review." : "No new ADs found for #{AdWatch.new(@aircraft).terms.map(&:label).uniq.to_sentence}."
   rescue AdWatch::Error => e
     redirect_to aircraft_airworthiness_directives_path(@aircraft), alert: "Couldn't check for new ADs: #{e.message}."
   end

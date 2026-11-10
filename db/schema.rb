@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_08_050000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_09_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -54,9 +54,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_050000) do
     t.integer "airworthiness_directive_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "component_id"
     t.index ["aircraft_id", "fr_document_number"], name: "index_ad_alerts_on_aircraft_id_and_fr_document_number", unique: true
     t.index ["aircraft_id"], name: "index_ad_alerts_on_aircraft_id"
     t.index ["airworthiness_directive_id"], name: "index_ad_alerts_on_airworthiness_directive_id"
+    t.index ["component_id"], name: "index_ad_alerts_on_component_id"
   end
 
   create_table "ad_compliances", force: :cascade do |t|
@@ -823,6 +825,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_08_050000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ad_alerts", "aircraft"
   add_foreign_key "ad_alerts", "airworthiness_directives", on_delete: :nullify
+  add_foreign_key "ad_alerts", "components", on_delete: :nullify
   add_foreign_key "ad_compliances", "aircraft"
   add_foreign_key "ad_compliances", "airworthiness_directives"
   add_foreign_key "ad_compliances", "components"

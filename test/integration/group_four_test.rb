@@ -169,8 +169,9 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     magneto = create_component(@a, component_type: component_type("Magneto"), manufacturer: "Champion", model: "Slick 4301")
     create_component(@a, component_type: component_type("ELT"), manufacturer: "Artex", model: "345", status: "SPARE")
     terms = AdWatch.default_terms(@a)
-    assert_equal [ "172N", "Champion Slick 4301" ], terms.map(&:label).uniq # spares skipped
-    assert_equal [ %w[Champion 4301], %w[Magneto 4301] ], terms.drop(1).map(&:words) # maker + designator, type + designator
+    assert_equal [ "Cessna 172N", "Champion Slick 4301" ], terms.map(&:label).uniq # spares skipped
+    assert_equal %w[Cessna 172N], terms.first.words # the make keeps unrelated "172N" mentions out
+    assert_equal [ %w[Champion 4301], %w[Magneto 4301], %w[Champion Magneto] ], terms.drop(1).map(&:words) # maker/type + designator, maker + type
     assert_equal [ magneto.id ], terms.drop(1).map(&:component_id).uniq
 
     stub_request(:get, %r{federalregister}).to_return(status: 200, body: { results: [] }.to_json)
@@ -188,7 +189,9 @@ class GroupFourTest < ActionDispatch::IntegrationTest
 
   test "newly published ADs are found, tracked or dismissed, and reported weekly" do
     create_component(@a, component_type: component_type("Engine"), model: "O-320-H2AD")
-    assert_equal [ "172N", "O-320-H2AD", "O-320" ], AdWatch.default_terms(@a).map(&:label) # engine family too
+    assert_equal [ "Cessna 172N", "O-320-H2AD", "O-320" ], AdWatch.default_terms(@a).map(&:label) # engine family too
+    assert_equal %w[Continental Bendix], AdWatch.maker_words("Continental/Bendix")
+    assert_equal [ "Air Example Co" ], AdWatch.maker_words("Air Example Co") # short first word: whole name
     assert_equal "O-200", AdWatch.model_family("O-200A")
     assert_equal "IO-550", AdWatch.model_family("IO-550-N")
     assert_nil AdWatch.model_family("O-200")
@@ -227,8 +230,8 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     post dismiss_aircraft_ad_alert_path(@a, other)
     assert_equal "dismissed", other.reload.status
 
-    patch terms_aircraft_ad_alerts_path(@a), params: { ad_watch_terms: "172, O-320" }
-    assert_equal [ "172", "O-320" ], AdWatch.new(@a.reload).terms.map(&:label)
+    patch terms_aircraft_ad_alerts_path(@a), params: { ad_watch_terms: "172, O-320, 172n" } # the bare model is skipped
+    assert_equal [ "Cessna 172N", "O-320-H2AD", "O-320", "172" ], AdWatch.new(@a.reload).terms.map(&:label) # added to the automatic ones
 
     stub_request(:get, %r{federalregister}).to_return(status: 503)
     post check_aircraft_ad_alerts_path(@a)

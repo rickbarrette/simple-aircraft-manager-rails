@@ -24,27 +24,45 @@ class AdWatch
 
   ENGINE_OR_PROP = /engine|propell?er|\bprop\b/i
 
-  # The aircraft model; each engine and propeller model (and its family);
-  # and every other installed component's make and model, so ADs on
-  # appliances (magnetos, ELTs, radios, filters…) are found too.
+  # What to look for, each a few words that must all appear in the AD:
+  # - the aircraft make + model ("Cessna" "150L": the make keeps unrelated
+  #   ADs that happen to contain "150L" out);
+  # - each engine and propeller model, and its family ("O-200A", "O-200");
+  #   for a propeller also its maker + "propeller";
+  # - every other installed component as maker + model designator, type +
+  #   designator, and maker + type ("Bendix" "magneto"): appliance ADs often
+  #   name a series ("S-20") rather than the exact model.
   def self.default_terms(aircraft)
     terms = []
-    terms << Term.new(aircraft.model.strip, [ aircraft.model.strip ], nil) if aircraft.model.present?
+    if aircraft.model.present?
+      model = aircraft.model.strip
+      terms << Term.new([ aircraft.make, model ].compact_blank.join(" "), [ maker_words(aircraft.make).first, model ].compact, nil)
+    end
     aircraft.components.in_use.includes(:component_type).order(:id).each do |c|
       model = c.model.to_s.strip
       next if model.blank?
-      if c.component_type&.name.to_s.match?(ENGINE_OR_PROP)
+      type = c.component_type&.name.to_s.strip
+      label = [ c.manufacturer.to_s.strip, model ].compact_blank.join(" ")
+      makers = maker_words(c.manufacturer)
+      if type.match?(ENGINE_OR_PROP)
         [ model, model_family(model) ].compact.each { |m| terms << Term.new(m, [ m ], c.id) }
+        makers.each { |mk| terms << Term.new(label, [ mk, "propeller" ], c.id) } if type.match?(/prop/i)
       else
-        label = [ c.manufacturer.to_s.strip, model ].compact_blank.join(" ")
-        # Maker + model, and type + model: ADs often name the maker differently
-        # (a successor company) but say what the part is ("magneto", "ELT").
-        [ c.manufacturer.to_s.strip.split.first, c.component_type&.name.to_s.strip.split.first ].compact_blank.uniq.each do |lead|
-          terms << Term.new(label, ([ lead ] + designators(model)).uniq, c.id)
-        end
+        makers.each { |mk| terms << Term.new(label, [ mk ] + designators(model), c.id) }
+        terms << Term.new(label, [ type ] + designators(model), c.id) if type.present?
+        makers.each { |mk| terms << Term.new(label, [ mk, type ], c.id) } if type.present?
       end
     end
     terms.uniq { _1.words.map(&:downcase) }
+  end
+
+  # The words to search a maker by: each maker in "Continental/Bendix", by its
+  # first word, or the whole name when that's too short to mean much ("Air Example Co").
+  def self.maker_words(maker)
+    maker.to_s.split(%r{\s*[/,&]\s*}).map(&:strip).compact_blank.map do |name|
+      first = name.split.first
+      first.length >= 4 ? first : name
+    end.uniq
   end
 
   # The engine family ADs often name instead of the exact model, and that also
@@ -63,10 +81,13 @@ class AdWatch
     with_digits.any? ? with_digits : words
   end
 
-  # The owner's own list (comma-separated) replaces the defaults.
+  # The automatic searches plus the owner's own terms (comma-separated).
   def terms
     custom = @aircraft.ad_watch_terms.to_s.split(/[,;\n]/).map(&:strip).compact_blank
-    custom.any? ? custom.map { Term.new(_1, [ _1 ], nil) } : self.class.default_terms(@aircraft)
+    # The bare aircraft model is already searched with its make, which keeps
+    # out the many unrelated ADs that contain the same characters.
+    custom.reject! { _1.casecmp?(@aircraft.model.to_s.strip) }
+    (self.class.default_terms(@aircraft) + custom.map { Term.new(_1, [ _1 ], nil) }).uniq { _1.words.map(&:downcase) }
   end
 
   # Returns the new AdAlerts.

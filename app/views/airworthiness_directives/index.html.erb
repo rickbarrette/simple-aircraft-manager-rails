@@ -84,11 +84,11 @@
   <% if owner? %>
     <%= form_with url: terms_aircraft_ad_alerts_path(@aircraft), method: :patch, class: "flex flex-wrap items-end gap-2 border-t border-slate-100 px-4 py-3" do %>
       <div class="min-w-0 flex-1">
-        <%= label_tag :ad_watch_terms, "Search terms", class: "label" %>
-        <%= text_field_tag :ad_watch_terms, @aircraft.ad_watch_terms, class: "input", placeholder: AdWatch.default_terms(@aircraft).map(&:label).uniq.join(", ").presence || "e.g. 172N, O-320, 1C160" %>
+        <%= label_tag :ad_watch_terms, "Additional search terms", class: "label" %>
+        <%= text_field_tag :ad_watch_terms, @aircraft.ad_watch_terms, class: "input", placeholder: "e.g. an STC or part that isn't a component" %>
       </div>
       <%= submit_tag "Save", class: "btn-secondary" %>
-      <p class="hint w-full">Comma-separated model names. Left blank, the aircraft model, engine and propeller models (and their families) and every installed component’s make and model are used; a match on a component makes the tracked AD apply to that component. Matches are only possibly applicable: check each AD's applicability (and serial number ranges) before tracking it.</p>
+      <p class="hint w-full">Comma-separated, searched in addition to the automatic ones: the aircraft make and model, engine and propeller models (and families), and every installed component’s maker, type and model. A match on a component makes the tracked AD apply to that component. Matches are only possibly applicable: check each AD's applicability (and serial number ranges) before tracking it.</p>
     <% end %>
   <% end %>
 </section>

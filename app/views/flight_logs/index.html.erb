@@ -4,28 +4,52 @@
 <section class="card">
   <div class="card-header"><h2 class="card-title">Flight Log</h2><div class="flex gap-2"><%= link_to "Export for AirTrail", new_aircraft_air_trail_export_path(@aircraft), class: "btn-secondary" %><% if owner? %><%= link_to "Standardize airport codes", aircraft_airport_codes_path(@aircraft), class: "btn-secondary" %><%= link_to "Import from spreadsheet", new_aircraft_flight_import_path(@aircraft), class: "btn-secondary" %><% end %><%= link_to "+ Log Flight", new_aircraft_flight_log_path(@aircraft), class: "btn-primary" %></div></div>
   <% if @flight_logs.any? %>
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead><tr><th>Date</th><th>Route</th><th class="text-right">Tach</th><th class="text-right">Hobbs</th><th class="text-right">Oil (qt)</th><th class="text-right">Fuel (gal)</th><th class="pl-6">Pilot</th></tr></thead>
-        <tbody>
-          <% blank = tag.span("—", class: "text-slate-300") %>
-          <% @flight_logs.each do |fl| %>
-            <tr>
-              <td class="whitespace-nowrap"><%= link_to fl.date, aircraft_flight_log_path(@aircraft, fl), class: "link" %></td>
-              <td class="whitespace-nowrap">
-                <%= fl.route_summary.presence || blank %>
-                <% if fl.track_log.attached? %><span class="ml-1" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
-                <% if fl.engine_data.attached? %><span class="ml-1" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
-              </td>
-              <td class="text-right tabular-nums"><%= fl.tach_time ? hours(fl.tach_time) : blank %></td>
-              <td class="text-right tabular-nums"><%= fl.hobbs_time ? hours(fl.hobbs_time) : blank %></td>
-              <td class="text-right tabular-nums"><%= fl.oil_added ? number_with_precision(fl.oil_added, precision: 2, strip_insignificant_zeros: true) : blank %></td>
-              <td class="text-right tabular-nums"><%= fl.fuel_added ? number_with_precision(fl.fuel_added, precision: 2, strip_insignificant_zeros: true) : blank %></td>
-              <td class="pl-6 text-slate-600"><%= fl.user&.display_name || blank %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+    <% blank = tag.span("—", class: "text-slate-300") %>
+    <% qty = ->(v) { v ? number_with_precision(v, precision: 2, strip_insignificant_zeros: true) : blank } %>
+    <div class="hidden grid-cols-[9.5rem_1fr_repeat(4,5rem)_1.25rem] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:grid">
+      <span>Date</span><span>Route</span><span class="text-right">Tach</span><span class="text-right">Hobbs</span><span class="text-right">Fuel (gal)</span><span class="text-right">Oil (qt)</span><span></span>
+    </div>
+    <div class="divide-y divide-slate-100">
+      <% @days.each do |day| %>
+        <details class="group flight-day">
+          <summary class="flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-3 hover:bg-slate-50 sm:grid sm:grid-cols-[9.5rem_1fr_repeat(4,5rem)_1.25rem] [&::-webkit-details-marker]:hidden">
+            <span class="font-medium whitespace-nowrap"><%= day.date.strftime("%a %b %-d, %Y") %><span class="block text-xs font-normal text-slate-500"><%= pluralize(day.flights.size, "flight") %></span></span>
+            <span class="min-w-0 basis-full sm:basis-auto">
+              <%= day.route.presence || blank %>
+              <% if day.track_log? %><span class="ml-1" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
+              <% if day.engine_data? %><span class="ml-1" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
+              <% if day.pilots.any? %><span class="block text-xs text-slate-500"><%= day.pilots.to_sentence %></span><% end %>
+            </span>
+            <span class="text-sm tabular-nums sm:text-right"><span class="text-xs text-slate-500 sm:hidden">Tach </span><%= day.tach_time ? hours(day.tach_time) : blank %></span>
+            <span class="text-sm tabular-nums sm:text-right"><span class="text-xs text-slate-500 sm:hidden">Hobbs </span><%= day.hobbs_time ? hours(day.hobbs_time) : blank %></span>
+            <span class="text-sm tabular-nums sm:text-right"><span class="text-xs text-slate-500 sm:hidden">Fuel </span><%= qty.(day.fuel_added) %></span>
+            <span class="text-sm tabular-nums sm:text-right"><span class="text-xs text-slate-500 sm:hidden">Oil </span><%= qty.(day.oil_added) %></span>
+            <span aria-hidden="true" class="ml-auto text-slate-400 transition group-open:rotate-90">›</span>
+          </summary>
+          <div class="overflow-x-auto bg-slate-50/60 px-2 pb-3 sm:px-4">
+            <table class="table">
+              <thead><tr><th>Leg</th><th>Route</th><th class="text-right">Tach</th><th class="text-right">Hobbs</th><th class="text-right">Fuel (gal)</th><th class="text-right">Oil (qt)</th><th class="pl-6">Pilot</th></tr></thead>
+              <tbody>
+                <% day.flights.each_with_index do |fl, i| %>
+                  <tr>
+                    <td class="whitespace-nowrap" data-label=""><%= link_to "Leg #{i + 1}", aircraft_flight_log_path(@aircraft, fl), class: "link" %></td>
+                    <td class="whitespace-nowrap" data-label="Route">
+                      <%= fl.route_summary.presence || blank %>
+                      <% if fl.track_log.attached? %><span class="ml-1" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
+                      <% if fl.engine_data.attached? %><span class="ml-1" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
+                    </td>
+                    <td class="text-right tabular-nums" data-label="Tach"><%= fl.tach_time ? hours(fl.tach_time) : blank %></td>
+                    <td class="text-right tabular-nums" data-label="Hobbs"><%= fl.hobbs_time ? hours(fl.hobbs_time) : blank %></td>
+                    <td class="text-right tabular-nums" data-label="Fuel"><%= qty.(fl.fuel_added) %></td>
+                    <td class="text-right tabular-nums" data-label="Oil"><%= qty.(fl.oil_added) %></td>
+                    <td class="pl-6 text-slate-600" data-label="Pilot"><%= fl.user&.display_name || blank %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      <% end %>
     </div>
   <% else %>
     <%= empty_state "No flights logged yet." %>

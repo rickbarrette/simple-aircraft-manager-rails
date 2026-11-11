@@ -7,6 +7,7 @@ class FlightLogsController < ApplicationController
 
   def index
     @flight_logs = @aircraft.flight_logs.recent_first.includes(:user).with_attached_track_log.with_attached_engine_data
+    @days = FlightDay.group(@flight_logs)
     @stats = FlightStats.new(@aircraft)
   end
 

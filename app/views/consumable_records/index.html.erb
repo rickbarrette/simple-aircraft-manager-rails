@@ -27,25 +27,7 @@
 <section class="card mt-5">
   <div class="card-header"><h2 class="card-title">Records</h2></div>
   <% if @records.any? %>
-    <div class="overflow-x-auto">
-      <table class="table">
-        <thead><tr><th>Date</th><th>Type</th><th class="text-right">Added</th><th class="text-right">Level after</th><th>Product</th><th class="text-right">Tach</th><th>Notes</th><th></th></tr></thead>
-        <tbody>
-          <% @records.each do |r| %>
-            <tr>
-              <td class="whitespace-nowrap"><%= r.date %></td>
-              <td><%= tag.span ConsumableRecord::TYPES[r.record_type], class: r.record_type == "oil" ? "badge-orange" : "badge-blue" %></td>
-              <td class="text-right tabular-nums"><%= r.quantity_added %> <%= r.unit %></td>
-              <td class="text-right tabular-nums"><%= r.level_after ? "#{r.level_after} #{r.unit}" : "" %></td>
-              <td><%= r.consumable_type %></td>
-              <td class="text-right tabular-nums"><%= hours(r.flight_hours) %></td>
-              <td class="text-xs text-slate-500"><%= r.notes %><%= " (excluded from average)" if r.excluded_from_averages? %></td>
-              <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_consumable_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+    <%= render "consumable_records/records", records: @records, page: @page, more: @more %>
   <% else %>
     <%= empty_state "No oil or fuel records yet." %>
   <% end %>

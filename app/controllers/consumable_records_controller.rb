@@ -3,10 +3,19 @@ class ConsumableRecordsController < ApplicationController
   before_action :require_owner!, only: %i[edit update destroy]
   before_action :set_record, only: %i[edit update destroy]
 
+  RECORDS_PER_PAGE = 50
+
+  # Records a page at a time; the rest load as you scroll (each page ends in
+  # a lazy frame that fetches the next). The charts cover everything.
   def index
+    @page = [ params[:page].to_i, 1 ].max
+    rows = @aircraft.consumable_records.recent_first.offset((@page - 1) * RECORDS_PER_PAGE).limit(RECORDS_PER_PAGE + 1).to_a
+    @more = rows.size > RECORDS_PER_PAGE
+    @records = rows.first(RECORDS_PER_PAGE)
+    return render(partial: "consumable_records/records", locals: { records: @records, page: @page, more: @more }) if turbo_frame_request?
+
     @oil = ConsumptionStats.new(@aircraft, "oil")
     @fuel = ConsumptionStats.new(@aircraft, "fuel")
-    @records = @aircraft.consumable_records.recent_first.limit(200)
   end
 
   def new

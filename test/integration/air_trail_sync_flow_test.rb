@@ -20,7 +20,7 @@ class AirTrailSyncFlowTest < ActionDispatch::IntegrationTest
     connect
     assert_redirected_to air_trail_connection_path
     follow_redirect!
-    assert_match "Connected to AirTrail as ricky", response.body
+    assert_match "Connected to AirTrail as jane", response.body
     assert_equal "https://airtrail.test", @user.air_trail_connection.base_url
 
     perform_enqueued_jobs do

@@ -11,13 +11,13 @@ class AirTrailExportTest < ActiveSupport::TestCase
                            tach_time: tach, hobbs_time: hobbs, user: user, notes: notes)
   end
 
-  def export(**opts) = AirTrailExport.new(@a, username: "ricky", **opts)
+  def export(**opts) = AirTrailExport.new(@a, username: "jane", **opts)
 
   test "builds AirTrail's import format" do
     fly Date.new(2026, 10, 24), "KLHV", "44N", tach: 1.9, hobbs: 2.0, notes: "Fall colors"
     data = JSON.parse(export(aircraft_type: "c150").to_json)
 
-    assert_equal [ { "id" => "sam-pilot", "username" => "ricky", "displayName" => "ricky" } ], data["users"]
+    assert_equal [ { "id" => "sam-pilot", "username" => "jane", "displayName" => "jane" } ], data["users"]
     f = data["flights"].first
     assert_equal "2026-10-24", f["date"]
     assert_equal "day", f["datePrecision"]
@@ -83,6 +83,6 @@ class AirTrailExportTest < ActiveSupport::TestCase
     assert_not AirTrailExport.new(@a, username: "ri").valid?
     assert_not AirTrailExport.new(@a, username: "jane pilot").valid?
     assert_not export(aircraft_type: "CESSNA").valid?
-    assert_not AirTrailExport.new(create_aircraft, username: "ricky").valid? # no flights
+    assert_not AirTrailExport.new(create_aircraft, username: "jane").valid? # no flights
   end
 end

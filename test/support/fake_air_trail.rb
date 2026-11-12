@@ -44,7 +44,7 @@ class FakeAirTrail
     query = URI.decode_www_form(req.uri.query.to_s).to_h
     case [ req.method, path ]
     in [ :get, "/api/v1/me" ]
-      json(200, data: { id: "u-ricky", username: "ricky", displayName: "Ricky", role: nil, isOwner: true,
+      json(200, data: { id: "u-jane", username: "jane", displayName: "Jane", role: nil, isOwner: true,
                         permissions: [], credential: { kind: "apiKey", scopes: @scopes } })
     in [ :get, "/api/v1/airports" ]
       code = query["query"].to_s.upcase

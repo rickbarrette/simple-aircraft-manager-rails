@@ -30,11 +30,11 @@ class AirTrailSyncerTest < ActiveSupport::TestCase
     body = @fake.flights.fetch(sync.remote_id)
     assert_equal [ "2026-10-24", 101, 102, 7, 2160, "N12345" ],
                  body.values_at("date", "fromId", "toId", "aircraftId", "duration", "aircraftReg")
-    assert_equal [ { "userId" => "u-ricky", "guestName" => nil, "seat" => "pilot", "seatNumber" => nil,
+    assert_equal [ { "userId" => "u-jane", "guestName" => nil, "seat" => "pilot", "seatNumber" => nil,
                      "seatClass" => nil, "flightReason" => nil, "customFields" => {} } ], body["passengers"]
     assert_equal "gpx", body.dig("track", "sourceFormat")
     assert_equal [ -71.412028, 41.597139, 5.2 ], body.dig("track", "coordinates", 0)
-    assert_equal "ricky", @connection.reload.remote_username
+    assert_equal "jane", @connection.reload.remote_username
   end
 
   test "unchanged flights aren't re-sent; changed ones are replaced; deleted-in-AirTrail ones recreated" do

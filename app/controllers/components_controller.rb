@@ -23,6 +23,8 @@ class ComponentsController < ApplicationController
 
   def show
     @squawks = @component.squawks.by_priority.with_attached_attachments
+    ids = @component.inspection_type_ids
+    @inspection_rows = Compliance.inspection_rows(@aircraft).select { ids.include?(_1.type.id) }
   end
 
   def new
@@ -76,10 +78,8 @@ class ComponentsController < ApplicationController
     params.require(:component).permit(
       :component_type_id, :parent_component_id, :manufacturer, :model, :serial_number,
       :install_location, :notes, :status, :date_in_service, :hours_in_service,
-      :hours_since_overhaul, :overhaul_date, :overhaul_kind, :tbo_hours, :tbo_days, :inspection_hours,
-      :inspection_days, :replacement_hours, :replacement_days, :replacement_every, :replacement_unit, :tbo_every, :tbo_unit,
-      :inspection_every, :inspection_unit, :tbo_critical, :on_condition,
-      :inspection_critical, :replacement_critical, :expires_on
+      :hours_since_overhaul, :overhaul_date, :overhaul_kind, :tbo_hours, :tbo_days, :replacement_hours, :replacement_days, :replacement_every, :replacement_unit, :tbo_every, :tbo_unit,
+      :tbo_critical, :on_condition, :replacement_critical, :replacement_from_install, :expires_on
     ).tap do |p|
       # Owners can create a component type inline instead of asking an admin.
       if (name = params[:new_component_type].to_s.strip).present?

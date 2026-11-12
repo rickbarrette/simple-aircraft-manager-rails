@@ -2,7 +2,7 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= form_with model: [@aircraft, @flight_log], class: "card card-body space-y-5 max-w-3xl",
       data: { controller: "offline-flight", offline_flight_tail_value: @aircraft.tail_number,
-              action: "submit->offline-flight#submit turbo:submit-start->offline-flight#remember turbo:fetch-request-error->offline-flight#networkFailed" } do |f| %>
+              action: "submit->offline-flight#submit turbo:submit-start->offline-flight#remember turbo:fetch-request-error->offline-flight#networkFailed turbo:before-fetch-response->offline-flight#gatewayFailed" } do |f| %>
   <%= f.hidden_field :client_key, data: { offline_flight_target: "key" } %>
   <div class="hidden rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-offline-flight-target="notice" role="status"></div>
   <%= f.errors_summary %>

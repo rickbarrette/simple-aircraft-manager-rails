@@ -11,6 +11,11 @@ class InspectionTypesController < ApplicationController
       @inspection_type.name = "ICA: #{@major_record.title}".first(120)
       @applies_to_airframe = @major_record.component.nil?
       @inspection_type.components = [ @major_record.component ] if @major_record.component
+    elsif (component = @aircraft.components.find_by(id: params[:component_id]))
+      # From a component's page: applies to that part, e.g. "Magneto 500-hour inspection".
+      @inspection_type.name = "#{component} inspection"
+      @inspection_type.components = [ component ]
+      @applies_to_airframe = false
     end
   end
 

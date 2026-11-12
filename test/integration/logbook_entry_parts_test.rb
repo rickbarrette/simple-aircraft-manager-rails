@@ -68,6 +68,28 @@ class LogbookEntryPartsTest < ActionDispatch::IntegrationTest
     assert_select "select[name='logbook_entry[parts][#{oil.id}][service]']", 0
   end
 
+  test "servicing new oil typed in at 0 hours restarts it from the airframe time flown since the entry" do
+    oil = create_component(@a, component_type: component_type("Oil"), manufacturer: "Phillips", model: "20W50",
+                               parent_component: @engine, hours_in_service: 36.0, hours_since_overhaul: 36.0)
+    post aircraft_logbook_entries_path(@a), params: { logbook_entry: entry_params(aircraft_hours_at_entry: 4210.3, parts: {
+      oil.id => { include: "1", hours: "0.0", since: "0.0", service: "serviced" } }) }
+    assert_equal [ 0.0, 36.0, Date.new(2026, 8, 20) ], oil.reload.then { [ _1.hours_since_overhaul.to_f, _1.hours_in_service.to_f, _1.overhaul_date ] }
+  end
+
+  test "a new entry can complete inspections such as an oil change" do
+    oil_change = InspectionType.create!(name: "Oil Change", recurring: true, recurring_hours: 50).tap { _1.aircraft << @a }
+    get new_aircraft_logbook_entry_path(@a)
+    assert_select "input[name='logbook_entry[inspection_type_ids][]'][value='#{oil_change.id}']"
+    post aircraft_logbook_entries_path(@a), params: { logbook_entry: entry_params(inspection_type_ids: [ "", oil_change.id ]) }
+    entry = @a.logbook_entries.sole
+    record = @a.inspection_records.sole
+    assert_equal [ oil_change, entry, Date.new(2026, 8, 20), 4200.3 ], [ record.inspection_type, record.logbook_entry, record.date, record.aircraft_hours.to_f ]
+    assert @a.events.exists?(event_name: "Inspection completed: Oil Change (logbook entry 2026-08-20)")
+
+    get edit_aircraft_logbook_entry_path(@a, entry) # not offered again on edit (it would record twice)
+    assert_select "input[name='logbook_entry[inspection_type_ids][]']", 0
+  end
+
   test "printouts add a line per sub-component; archives carry them" do
     entry = @a.logbook_entries.create!(entry_params.merge(component: @engine))
     entry.parts.create!(component: @filter, hours_at_entry: 110.5, since_overhaul_at_entry: 10.5)

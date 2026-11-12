@@ -35,6 +35,14 @@ export default class extends Controller {
     if (this.pending) await this.save(this.pending)
   }
 
+  // A proxy answered because the app is unreachable (502/503/504): keep the
+  // flight instead of showing the proxy's error page.
+  async gatewayFailed(event) {
+    if (![ 502, 503, 504 ].includes(event.detail.fetchResponse.statusCode) || !this.pending) return
+    event.preventDefault()
+    await this.save(this.pending)
+  }
+
   async save(fields) {
     const item = { id: this.keyTarget.value, url: this.element.action, tail: this.tailValue, savedAt: new Date().toISOString(), fields }
     try {

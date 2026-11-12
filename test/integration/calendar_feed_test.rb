@@ -10,7 +10,7 @@ class CalendarFeedTest < ActionDispatch::IntegrationTest
     @oil = create_component(@a, component_type: component_type("Oil"), manufacturer: "Phillips", model: "20W50",
                                 replacement_hours: 50, replacement_days: 120, hours_since_overhaul: 45, overhaul_date: Date.current - 30)
     @mag = create_component(@a, component_type: component_type("Magneto"), manufacturer: "Bendix", model: "S4LN-21",
-                                inspection_hours: 500, hours_since_overhaul: 450, overhaul_date: Date.current - 400)
+                                tbo_hours: 500, hours_since_overhaul: 450, overhaul_date: Date.current - 400)
     @a.documents.create!(name: "Registration", doc_type: "REGISTRATION", expires_on: Date.current + 200)
   end
 
@@ -20,7 +20,7 @@ class CalendarFeedTest < ActionDispatch::IntegrationTest
     assert_equal Date.current + 50, oil.date # 5 hrs at 0.1/day, before the 120-day limit (90 days left)
     assert oil.projected
     assert_equal 1005.0, oil.due_hours.to_f
-    assert_equal Date.current + 500, items["inspect-#{@mag.id}"].date # 50 hrs / 0.1 a day
+    assert_equal Date.current + 500, items["tbo-#{@mag.id}"].date # 50 hrs / 0.1 a day
     assert_equal Date.current + 200, items["document-#{@a.documents.first.id}"].date
     refute items["document-#{@a.documents.first.id}"].projected
   end

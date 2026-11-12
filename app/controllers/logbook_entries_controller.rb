@@ -38,6 +38,7 @@ class LogbookEntriesController < ApplicationController
     if @entry.save
       log_event("logbook", "Logbook entry #{@entry.supersedes ? 'correction ' : ''}added (#{@entry.date})")
       record_parts_service
+      record_inspections
       redirect_to aircraft_logbook_entry_path(@aircraft, @entry),
                   notice: @entry.supersedes ? "Correction saved. Sign it to supersede the original entry." : "Logbook entry added."
     else
@@ -92,12 +93,24 @@ class LogbookEntriesController < ApplicationController
   # Sub-components marked "Serviced" or "Replaced" on a new entry: recorded on
   # the Components tab too, dated to the entry.
   def record_parts_service
+    flown = (@aircraft.current_hours - @entry.aircraft_hours_at_entry if @entry.aircraft_hours_at_entry)
     parts_params.each do |id, p|
       next unless p["include"] == "1" && %w[serviced replaced].include?(p["service"])
       part = @entry.parts.find { _1.component_id == id.to_i } or next
       component = part.component
-      component.service_from_entry!(date: @entry.date, hours_at_entry: part.hours_at_entry, replaced: p["service"] == "replaced")
+      component.service_from_entry!(date: @entry.date, hours_at_entry: part.hours_at_entry, flown_since: flown, replaced: p["service"] == "replaced")
       log_event("component", "#{p['service'] == 'replaced' ? 'Replaced' : 'Serviced'}: #{component} (logbook entry #{@entry.date})")
+    end
+  end
+
+  # Inspections ticked on a new entry (e.g. Oil Change): done at the entry's
+  # date and airframe time, linked to it.
+  def record_inspections
+    ids = Array(params.dig(:logbook_entry, :inspection_type_ids)).compact_blank
+    @aircraft.applicable_inspection_types.where(id: ids).find_each do |type|
+      @aircraft.inspection_records.create!(inspection_type: type, logbook_entry: @entry, date: @entry.date,
+                                           aircraft_hours: @entry.aircraft_hours_at_entry)
+      log_event("inspection", "Inspection completed: #{type.name} (logbook entry #{@entry.date})")
     end
   end
 

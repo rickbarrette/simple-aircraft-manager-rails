@@ -46,6 +46,7 @@ export default class extends Controller {
     try {
       response = await fetch(item.url, { method: "POST", body, credentials: "same-origin", headers: { Accept: "text/html" } })
     } catch (_) { return "offline" }
+    if ([ 502, 503, 504 ].includes(response.status)) return "offline"
     if (response.url.includes("/session/new")) return "signin"
     if (response.ok) return "sent"
     const html = await response.text()

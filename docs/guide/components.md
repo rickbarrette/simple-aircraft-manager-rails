@@ -12,7 +12,9 @@ The **Components** tab is a tree of the aircraft's parts: engine, propeller, mag
   - **Replace every** hours and/or a calendar interval in days, months or years (whichever comes first); **Replacement critical** makes overdue replacement ground the aircraft (oil, filters, ELT battery…).
   - **Expires on**: a date marked on the part, such as an ELT battery's.
   - **TBO** hours and/or a calendar interval. Under Part 91 TBO is usually a recommendation; tick **Treat TBO as a hard limit** only when an AD or the airworthiness limitations make it one, or **On condition** to show it without warnings.
-  - **Inspect every** hours and/or a calendar interval, counted from the component's last service. For an inspection with its own records (an oil change, a magneto inspection, the ELT check), set it up on the **Inspections** tab and apply it to the component instead: the inspection then governs and the component's own interval is ignored.
+  - **Replacement counts from**: *Last service* (the default), or *Installation (life limit)* for a part that's cleaned and reused but has a life limit, such as a reusable oil filter: its limit then counts from its total time and in-service date, and only a replacement restarts it.
+
+**Inspections** of a part (a magneto's 500-hour inspection, an oil change, the ELT check) are inspection types applied to the component: use **+ Inspection** on the component's page, or set one up on the **Inspections** tab. The component's page lists them with when they were last done and are next due; they're tracked from their records, count toward airworthiness, and can be completed from a logbook entry.
 
 Logged hours are added to every component that's in service.
 

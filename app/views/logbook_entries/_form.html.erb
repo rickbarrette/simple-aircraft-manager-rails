@@ -33,6 +33,23 @@
   <%= f.field :text, as: :textarea, label: "Entry text", rows: 8, data: { entry_template_target: "text" } %>
   <p class="hint !mt-1">A maintenance entry needs a description of the work, the date, and the name, signature, certificate number and kind of certificate of whoever approved the return to service (14 CFR 43.9). An inspection entry also needs the type and extent of the inspection, the aircraft's time in service, and the result (43.11).</p>
   <%= render "shared/sign_as" %>
+  <% if entry.new_record? && (types = aircraft.applicable_inspection_types.order(:name)).any? %>
+    <%# Recurring items this work completes (e.g. an oil change): recorded on the Inspections tab, dated to this entry. %>
+    <% ticked = Array(params.dig(:logbook_entry, :inspection_type_ids)).map(&:to_s) %>
+    <fieldset>
+      <legend class="label">Inspections completed</legend>
+      <div class="grid gap-x-4 gap-y-1 sm:grid-cols-3">
+        <% types.each do |t| %>
+          <label class="flex items-center gap-2 text-sm">
+            <%= check_box_tag "logbook_entry[inspection_type_ids][]", t.id, ticked.include?(t.id.to_s), id: "inspection_type_#{t.id}",
+                              class: "h-4 w-4 shrink-0 rounded border-slate-300" %>
+            <span><%= t.name %></span>
+          </label>
+        <% end %>
+      </div>
+      <p class="hint">Ticked ones are recorded as done on the Inspections tab, at this entry's date and airframe time, linked to this entry.</p>
+    </fieldset>
+  <% end %>
   <div class="grid gap-4 sm:grid-cols-3">
     <%= f.field :signoff_person, label: "Signed off by", placeholder: "Name", data: { signer_target: "name" } %>
     <%= f.field :signoff_certificate_type, as: :select, label: "Kind of certificate", include_blank: "—",

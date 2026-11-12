@@ -57,23 +57,17 @@ class DueList
     end
   end
 
-  # A component's own "Inspect every" counts from its last service; when an
-  # inspection type covers the component, that inspection (tracked from its
-  # records, under inspections) governs instead.
   def components
-    @aircraft.components.in_use.includes(:component_type, :inspection_types).flat_map do |c|
+    @aircraft.components.in_use.includes(:component_type).flat_map do |c|
       label = "#{c} #{c.model}".strip
       path = @urls.aircraft_component_path(@aircraft, c)
       since_service = c.hours_since_overhaul.to_d
       [
         (item("replace-#{c.id}", "Replace #{label}", "component", path, date: c.next_replacement_date,
-              hours_left: c.replacement_hours && c.replacement_hours - since_service) if c.replacement_hours || c.replacement_calendar?),
+              hours_left: c.hours_to_replacement) if c.replacement_hours || c.replacement_calendar?),
         (item("tbo-#{c.id}", "#{label} reaches TBO", "component", path,
               date: c.tbo_after(c.overhaul_date),
               hours_left: c.tbo_hours && c.tbo_hours - since_service) if (c.tbo_hours || c.tbo_calendar?) && !c.on_condition?),
-        (item("inspect-#{c.id}", "Inspect #{label}", "component", path,
-              date: c.inspection_after(c.overhaul_date),
-              hours_left: c.inspection_hours && c.inspection_hours - since_service) if (c.inspection_hours || c.inspection_calendar?) && c.inspection_types.empty?),
         (item("expires-#{c.id}", "#{label} expires", "component", path, date: c.expires_on) if c.expires_on)
       ]
     end

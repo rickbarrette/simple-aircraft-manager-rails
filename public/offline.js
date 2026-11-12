@@ -6,10 +6,15 @@ try {
   var box = document.getElementById("forms")
   Object.keys(forms).forEach(function (path) {
     if (!/^\/aircraft\/\d+\/flight_logs\/new$/.test(path)) return
-    var a = document.createElement("a")
-    a.href = path
-    a.textContent = "Log a flight: " + forms[path]
-    box.appendChild(a)
-    box.hidden = false
+    // Only offer forms the service worker actually kept; others just loop back here.
+    var kept = window.caches ? caches.open("sam-flight-forms").then(function (c) { return c.match(location.origin + path) }) : Promise.resolve(null)
+    kept.then(function (hit) {
+      if (!hit) return
+      var a = document.createElement("a")
+      a.href = path
+      a.textContent = "Log a flight: " + forms[path]
+      box.appendChild(a)
+      box.hidden = false
+    }).catch(function () {})
   })
 } catch (e) { /* storage off */ }

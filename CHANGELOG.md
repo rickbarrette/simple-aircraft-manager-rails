@@ -2,6 +2,19 @@
 
 Each release has a **version** (year.month.release, e.g. 2026.11.0) and a **build** (the exact source commit, shown on Admin → About). The newest release is first.
 
+## 2026.11.1
+
+### Fixes
+
+- Logging a flight offline works: the Log Flight form is kept on the device however you open it, the offline page shows its links and icon, and a flight saved while the app's server is unreachable (502/503/504) is queued and sent later instead of failing.
+- Marking a sub-component Serviced on a logbook entry restarts its time since service from the airframe time on the entry, so new oil typed in at 0 hours no longer keeps its old hours.
+
+### Changes
+
+- New logbook entries have **Inspections completed**: tick the inspections the work completes (an oil change) and they're recorded on the Inspections tab at the entry's date and airframe time, linked to the entry.
+- Components have **Replacement counts from**: last service (as before) or installation, for a life-limited part that's cleaned and reused, such as a reusable oil filter. Only a replacement restarts an installation-based limit.
+- A component's own "Inspect every" and "Inspection critical" settings are gone; inspections of a part are inspection types applied to it. A component's page lists its inspections with last done and next due, and **+ Inspection** adds one for that part. Existing settings are converted when upgrading.
+
 ## 2026.11.0
 
 The first numbered release. Highlights of what Simple Aircraft Manager does as of this version:

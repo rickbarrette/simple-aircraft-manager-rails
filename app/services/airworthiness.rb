@@ -146,19 +146,20 @@ class Airworthiness
       desc = ""
 
       if c.replacement_critical? && c.replacement_hours
-        if c.hours_since_overhaul >= c.replacement_hours
+        used = c.replacement_hours_used
+        if used >= c.replacement_hours
           overdue = true
-          desc = "Replace every #{c.replacement_hours} hrs. Current: #{c.hours_since_overhaul} hrs."
-        elsif c.hours_since_overhaul + HOURS_WARNING >= c.replacement_hours
+          desc = "Replace every #{c.replacement_hours} hrs. Current: #{used} hrs#{' since installed' if c.replacement_from_install?}."
+        elsif used + HOURS_WARNING >= c.replacement_hours
           approaching = true
-          desc = "Replace in #{c.replacement_hours - c.hours_since_overhaul} hrs."
+          desc = "Replace in #{c.replacement_hours - used} hrs."
         end
       end
 
       if c.replacement_critical? && (due = c.next_replacement_date)
         if @today >= due
           overdue = true
-          desc = "Replace every #{c.replacement_interval_label}. Last serviced #{c.overhaul_date}."
+          desc = "Replace every #{c.replacement_interval_label}. #{c.replacement_from_install? ? 'Installed' : 'Last serviced'} #{c.replacement_counted_from}."
         elsif @today + DAYS_WARNING >= due
           approaching = true
           desc = "Replace in #{(due - @today).to_i} days."

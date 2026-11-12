@@ -24,12 +24,12 @@
       <dt class="text-slate-500">Since OH / service</dt><dd><%= hours(@component.hours_since_overhaul) %></dd>
       <dt class="text-slate-500">TBO</dt><dd><%= @component.tbo_hours ? "#{@component.tbo_hours} h (#{hours(@component.hours_to_tbo)} remaining)" : "—" %></dd>
       <dt class="text-slate-500">Replacement</dt><dd>
-        <%= [@component.replacement_hours && "#{@component.replacement_hours} h", @component.replacement_interval_label].compact.join(" / ").presence || "—" %>
+        <%= [@component.replacement_hours && "#{@component.replacement_hours} h", @component.replacement_interval_label].compact.join(" / ").presence&.then { @component.replacement_from_install? ? "#{_1} since installed" : _1 } || "—" %>
         <% if (d = @component.next_replacement_date) %><div class="text-xs text-slate-500">Next by <%= fmt_date(d) %></div><% end %>
       </dd>
       <dt class="text-slate-500">Flags</dt>
       <dd class="col-span-3 flex flex-wrap gap-1">
-        <% { tbo_critical: "TBO critical", replacement_critical: "Replacement critical", inspection_critical: "Inspection critical", on_condition: "On condition" }.each do |flag, label| %>
+        <% { tbo_critical: "TBO critical", replacement_critical: "Replacement critical", on_condition: "On condition" }.each do |flag, label| %>
           <% if @component.public_send("#{flag}?") %><span class="badge-blue"><%= label %></span><% end %>
         <% end %>
       </dd>
@@ -52,6 +52,33 @@
     </section>
   <% end %>
 </div>
+
+<% if @inspection_rows.any? || owner? %>
+  <section class="card mt-5" id="inspections">
+    <div class="card-header">
+      <h2 class="card-title">Inspections of this component</h2>
+      <% if owner? %><%= link_to "+ Inspection", new_aircraft_inspection_type_path(@aircraft, component_id: @component.id), class: "btn-secondary btn-sm" %><% end %>
+    </div>
+    <% if @inspection_rows.any? %>
+      <table class="table">
+        <thead><tr><th>Inspection</th><th>Interval</th><th>Last done</th><th>Next due</th><th>Status</th></tr></thead>
+        <tbody>
+          <% @inspection_rows.each do |row| %>
+            <tr>
+              <td class="font-medium"><%= row.type.name %><%= tag.span(" advisory", class: "text-xs text-slate-500") if row.type.advisory? %></td>
+              <td class="text-xs"><%= row.type.interval_description %></td>
+              <td class="text-xs"><%= row.latest ? "#{fmt_date(row.latest.date)} @ #{hours(row.latest.hours_at_inspection)} h" : "—" %></td>
+              <td class="text-xs"><%= [row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} h"].compact.join(" / ").presence || "—" %></td>
+              <td><%= compliance_badge(row.status) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="card-body text-sm text-slate-500">None. Add one for a recurring inspection of this part (e.g. a 500-hour magneto inspection); it's tracked on the Inspections tab and can be completed from a logbook entry.</p>
+    <% end %>
+  </section>
+<% end %>
 
 <% if @squawks.any? %>
   <section class="card mt-5">

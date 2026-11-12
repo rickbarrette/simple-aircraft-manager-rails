@@ -36,20 +36,30 @@ class OverviewAndIntervalsTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "No flights logged yet."
   end
 
-  test "hours already run out count as overdue; an inspection covering a component replaces its own interval" do
+  test "hours already run out count as overdue" do
     filter = create_component(@a, component_type: component_type("Oil Filter"), manufacturer: "Champion", model: "CH48110",
-                                  inspection_hours: 50, hours_since_overhaul: 60, overhaul_date: Date.current - 300)
-    mag = create_component(@a, component_type: component_type("Magneto"), manufacturer: "Slick", model: "4371",
-                               inspection_hours: 500, hours_since_overhaul: 120, overhaul_date: Date.current - 300)
+                                  replacement_hours: 50, hours_since_overhaul: 60, overhaul_date: Date.current - 300)
     items = DueList.new(@a).items.index_by(&:key)
-    assert items["inspect-#{filter.id}"].overdue?
-    assert_equal Date.current, items["inspect-#{filter.id}"].date
+    assert items["replace-#{filter.id}"].overdue?
+    assert_equal Date.current, items["replace-#{filter.id}"].date
     refute items["replace-#{@oil.id}"].overdue?
+  end
 
-    type = InspectionType.create!(name: "Oil change", effect: "advisory", recurring: true, recurring_hours: 50)
-    type.components << filter
-    assert_nil DueList.new(@a).items.find { _1.key == "inspect-#{filter.id}" }
-    assert DueList.new(@a).items.find { _1.key == "inspect-#{mag.id}" }
+  test "a component's page lists the inspections applied to it and offers to add one for it" do
+    sign_in @owner
+    mag = create_component(@a, component_type: component_type("Magneto"), manufacturer: "Slick", model: "4371", install_location: "Left")
+    get aircraft_component_path(@a, mag)
+    assert_select "#inspections", text: /None/
+    get new_aircraft_inspection_type_path(@a, component_id: mag.id)
+    assert_select "input[name='inspection_type[name]'][value='Magneto (Left) inspection']"
+    assert_select "input#comp_#{mag.id}[checked]"
+    assert_select "input[name=applies_to_airframe]:not([checked])"
+
+    InspectionType.create!(name: "Left magneto 500-hour", effect: "advisory", recurring: true, recurring_hours: 500).components << mag
+    get aircraft_component_path(@a, mag)
+    assert_select "#inspections td", text: /Left magneto 500-hour/
+    get edit_aircraft_component_path(@a, mag)
+    assert_select "input[name='component[inspection_hours]']", 0
   end
 
   test "a component limit in years is stored as months and lands on the same date" do

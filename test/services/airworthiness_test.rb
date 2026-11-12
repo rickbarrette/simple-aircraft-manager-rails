@@ -85,6 +85,17 @@ class AirworthinessTest < ActiveSupport::TestCase
     assert_equal "RED", Airworthiness.new(@aircraft).call.status
   end
 
+  test "a life limit counted from installation ignores servicing" do
+    filter = create_component(@aircraft, component_type: component_type("Oil filter"), replacement_critical: true, replacement_hours: 1250,
+                              hours_in_service: 1250, hours_since_overhaul: 10, date_in_service: Date.current, overhaul_date: Date.current)
+    assert_equal "GREEN", Airworthiness.new(@aircraft).call.status # counted from the last cleaning: 1240 hrs left
+    filter.update!(replacement_from_install: true)
+    assert_equal [ 0, Date.current ], [ filter.hours_to_replacement, filter.replacement_counted_from ]
+    assert_equal "RED", Airworthiness.new(@aircraft).call.status
+    filter.update!(hours_in_service: 0, replacement_hours: nil, replacement_months: 60, date_in_service: 61.months.ago.to_date)
+    assert_equal "RED", Airworthiness.new(@aircraft).call.status # 5 years since installed, though cleaned today
+  end
+
   test "spare components are ignored" do
     create_component(@aircraft, status: "SPARE", replacement_critical: true, replacement_hours: 10, hours_since_overhaul: 50)
     assert_equal "GREEN", Airworthiness.new(@aircraft).call.status

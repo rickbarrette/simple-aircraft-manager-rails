@@ -8,7 +8,6 @@ class Component < ApplicationRecord
 
   calendar_interval :replacement, days: :replacement_days, months: :replacement_months
   calendar_interval :tbo, days: :tbo_days, months: :tbo_months
-  calendar_interval :inspection, days: :inspection_days, months: :inspection_months
 
   belongs_to :aircraft, optional: true
   belongs_to :parent_component, class_name: "Component", optional: true
@@ -63,15 +62,21 @@ class Component < ApplicationRecord
     tbo_hours - hours_since_overhaul if tbo_hours
   end
 
+  # The hours the replacement limit counts: since installed for a life-limited
+  # part that's serviced and reused, else since its last service.
+  def replacement_hours_used = replacement_from_install? ? hours_in_service : hours_since_overhaul
+
+  def replacement_counted_from = replacement_from_install? ? date_in_service : overhaul_date
+
   def hours_to_replacement
-    replacement_hours - hours_since_overhaul if replacement_hours
+    replacement_hours - replacement_hours_used if replacement_hours
   end
 
   # Past the date marked on the part (it may be used through that date).
   def expired?(today = Date.current) = expires_on.present? && today > expires_on
 
   def next_replacement_date
-    replacement_after(overhaul_date)
+    replacement_after(replacement_counted_from)
   end
 
   # :overdue / :due_soon / :ok / nil (not tracked) for display on the components tab.
@@ -96,10 +101,18 @@ class Component < ApplicationRecord
   # Service reset: always zeroes time since overhaul; optionally the whole
   # in-service clock when the part was physically replaced.
   # Serviced (or replaced) as recorded in a logbook entry: dated to the entry,
-  # with the hours it has run since then (its total time now less its total
-  # time at the entry) as the new time since service.
-  def service_from_entry!(date:, hours_at_entry:, replaced: false)
-    since = hours_at_entry ? [ hours_in_service.to_d - hours_at_entry.to_d, 0 ].max : 0
+  # with the hours it has run since then as the new time since service. That's
+  # the airframe time flown since the entry when known (the part's own total
+  # at the entry is often typed as 0 for new oil, which would keep the old
+  # hours), else its total time now less its total time at the entry.
+  def service_from_entry!(date:, hours_at_entry:, flown_since: nil, replaced: false)
+    since =
+      if flown_since then flown_since.to_d
+      elsif hours_at_entry then hours_in_service.to_d - hours_at_entry.to_d
+      else 0
+      end
+    since = [ since, 0 ].max
+    since = [ since, hours_in_service.to_d ].min unless replaced # can't have run longer since service than in total
     attrs = { hours_since_overhaul: since, overhaul_date: date }
     attrs.merge!(hours_in_service: since, date_in_service: date) if replaced
     update!(attrs)

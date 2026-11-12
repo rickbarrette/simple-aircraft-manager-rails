@@ -7,9 +7,15 @@
     <meta name="robots" content="noindex, nofollow">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%# Always a full page load: a Turbo visit would keep the app's dark theme
+        on this white page, and leave this page's styles behind on Back. %>
+    <meta name="turbo-visit-control" content="reload">
     <% unless @standalone %><link rel="icon" href="/favicon.svg" type="image/svg+xml"><% end %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
+    <%# No Turbo here (Back is then an ordinary page load); just the Print button. %>
+    <script nonce="<%= content_security_policy_nonce %>">
+      document.addEventListener("click", (e) => { if (e.target.closest?.("[data-print]")) window.print() })
+    </script>
     <style>
       html, body { background: #fff; }
       @page { margin: 0.5in; }

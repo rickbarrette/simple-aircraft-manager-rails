@@ -1,8 +1,8 @@
 require "test_helper"
 
-# The Overview's Last flight and Coming due cards, and intervals entered as
-# days, months or years.
-class OverviewDueAndIntervalsTest < ActionDispatch::IntegrationTest
+# The Overview's Last flight card, intervals entered as days, months or years,
+# and the status report opening as its own page.
+class OverviewAndIntervalsTest < ActionDispatch::IntegrationTest
   setup do
     @owner = create_user("owner@example.com")
     @pilot = create_user("pilot@example.com")
@@ -17,7 +17,7 @@ class OverviewDueAndIntervalsTest < ActionDispatch::IntegrationTest
                          replacement_hours: 500, hours_since_overhaul: 100, overhaul_date: Date.current - 30)
   end
 
-  test "the overview shows the last day's flying and what's coming due" do
+  test "the overview shows the last day's flying" do
     sign_in @pilot
     get aircraft_path(@a)
     assert_response :success
@@ -26,8 +26,6 @@ class OverviewDueAndIntervalsTest < ActionDispatch::IntegrationTest
     assert_includes body, "2 legs"
     assert_includes body, "18 gal"
     assert_includes body, "5 qt"
-    assert_includes body, "Replace Oil" # 4 hrs left
-    assert_not_includes body, "Replace Magneto" # 400 hrs left
   end
 
   test "the overview copes with nothing logged" do
@@ -36,7 +34,6 @@ class OverviewDueAndIntervalsTest < ActionDispatch::IntegrationTest
     get aircraft_path(bare)
     assert_response :success
     assert_includes response.body, "No flights logged yet."
-    assert_includes response.body, "Nothing coming due soon."
   end
 
   test "hours already run out count as overdue; an inspection covering a component replaces its own interval" do
@@ -100,5 +97,14 @@ class OverviewDueAndIntervalsTest < ActionDispatch::IntegrationTest
     ad.valid?
     assert_equal [ 0, 24 ], [ ad.recurring_days, ad.recurring_months ]
     assert_equal "2 years", ad.recurring_interval_label
+  end
+
+  test "the status report always opens as a full page, without Turbo" do
+    sign_in @pilot
+    get aircraft_report_path(@a)
+    assert_response :success
+    assert_select "meta[name='turbo-visit-control'][content='reload']"
+    assert_select "script[type='importmap']", false
+    assert_select "button[data-print]"
   end
 end

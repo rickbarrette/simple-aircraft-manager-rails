@@ -10,7 +10,6 @@ The **Overview** tab shows:
 
 - **Airworthiness**: the overall status and each reason for it.
 - **Active squawks**, **Consumption** (oil and fuel rates), **Notes** and **Recent activity**.
-- **Coming due**: anything due in the next 30 days or 10 hours. Dates marked "~" are estimated from the last year's flying.
 - **Last flight**: the most recent day's legs as one route, the meters at the end, and the fuel and oil left.
 - **Update Hours**: enter the current meter readings (see [Flights and hours](flights.md)).
 - **Details** and the **Status report** link.

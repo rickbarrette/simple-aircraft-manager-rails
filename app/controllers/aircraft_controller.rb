@@ -14,7 +14,6 @@ class AircraftController < ApplicationController
     @notes = @aircraft.notes.recent_first.includes(:user).limit(5)
     @oil = ConsumptionStats.new(@aircraft, "oil")
     @fuel = ConsumptionStats.new(@aircraft, "fuel")
-    @coming_due = DueList.new(@aircraft).soon
     last = @aircraft.flight_logs.recent_first.first
     @last_day = last && @aircraft.flight_logs.where(date: last.date).order(:created_at).to_a
   end

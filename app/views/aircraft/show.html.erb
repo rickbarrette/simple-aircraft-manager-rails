@@ -46,8 +46,6 @@
       <% end %>
     </section>
 
-    <%= render "aircraft/coming_due", aircraft: @aircraft, due: @coming_due %>
-
     <section class="card">
       <div class="card-header"><h2 class="card-title">Consumption</h2>
         <%= link_to "Oil & fuel →", aircraft_consumable_records_path(@aircraft), class: "link text-sm" %></div>

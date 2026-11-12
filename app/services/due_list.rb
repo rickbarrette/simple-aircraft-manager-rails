@@ -9,10 +9,6 @@ class DueList
   end
 
   # Hours flown per day over the past year (nil when it hasn't flown).
-  # What counts as coming up soon (Overview).
-  SOON_DAYS = 30
-  SOON_HOURS = 10
-
   def self.daily_rate(aircraft, today: Date.current)
     hours = aircraft.flight_logs.where(date: (today - 365)..today).sum(:tach_time).to_f
     hours.positive? ? hours / 365.0 : nil
@@ -28,13 +24,6 @@ class DueList
 
   def items
     (inspections + ads + components + documents).compact.sort_by { [ _1.date, _1.title ] }
-  end
-
-  # Due in the next SOON_DAYS days or SOON_HOURS hours (or overdue).
-  def soon
-    horizon = @today + SOON_DAYS
-    hours_limit = @now_hours + SOON_HOURS
-    items.select { |i| i.date <= horizon || (i.due_hours && i.due_hours <= hours_limit) }
   end
 
   private

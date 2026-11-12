@@ -41,4 +41,21 @@ class FlightDaysTest < ActionDispatch::IntegrationTest
     leg(Date.new(2026, 11, 8), nil, nil, 2, 2.5)
     assert_equal "KOQU", FlightDay.group(@a.flight_logs.to_a).first.route
   end
+
+  test "the log loads a page of days at a time; the next page comes in a lazy frame" do
+    35.times { |i| leg(Date.new(2026, 1, 1) + i, "KOQU", "KBID", 100 + i, 100.5 + i) }
+    sign_in @owner
+    get aircraft_flight_logs_path(@a)
+    assert_select "details.flight-day", FlightLogsController::DAYS_PER_PAGE
+    assert_select "turbo-frame#flight-days-1[target=_top]"
+    assert_select "turbo-frame#flight-days-2[loading=lazy][src=?]", aircraft_flight_logs_path(@a, page: 2)
+    assert_select "h2", text: "Flight hours by month" # stats only on the full page
+
+    get aircraft_flight_logs_path(@a, page: 2), headers: { "Turbo-Frame" => "flight-days-2" }
+    assert_response :success
+    assert_select "turbo-frame#flight-days-2 details.flight-day", 5
+    assert_select "turbo-frame#flight-days-3", 0 # last page
+    assert_select "h2", text: "Flight hours by month", count: 0
+    assert_includes response.body, "Thu Jan 1, 2026"
+  end
 end

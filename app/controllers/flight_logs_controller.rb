@@ -5,9 +5,20 @@ class FlightLogsController < ApplicationController
   before_action :require_engine_data_access!, only: %i[attach_engine_data remove_engine_data]
   helper_method :manage_engine_data?
 
+  DAYS_PER_PAGE = 30
+
+  # The flight log a page of days at a time; the rest load as you scroll
+  # (each page ends in a lazy frame that fetches the next).
   def index
-    @flight_logs = @aircraft.flight_logs.recent_first.includes(:user).with_attached_track_log.with_attached_engine_data
-    @days = FlightDay.group(@flight_logs)
+    @page = [ params[:page].to_i, 1 ].max
+    dates = @aircraft.flight_logs.distinct.order(date: :desc)
+                     .offset((@page - 1) * DAYS_PER_PAGE).limit(DAYS_PER_PAGE + 1).pluck(:date)
+    @more = dates.size > DAYS_PER_PAGE
+    logs = @aircraft.flight_logs.where(date: dates.first(DAYS_PER_PAGE))
+                    .includes(:user).with_attached_track_log.with_attached_engine_data
+    @days = FlightDay.group(logs)
+    return render(partial: "flight_logs/days", locals: { days: @days, page: @page, more: @more }) if turbo_frame_request?
+
     @stats = FlightStats.new(@aircraft)
   end
 

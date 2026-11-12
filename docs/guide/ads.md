@@ -16,4 +16,6 @@ The app searches the Federal Register weekly for new ADs mentioning the aircraft
 
 **Comply** records the date, aircraft hours, the component, the logbook entry, the method (inspection, terminating action, AMOC) and the AD revision complied with, with details of what was done. **N/A** records that an AD doesn't apply, and why (for example, serial number outside the affected range). Recurring ADs then show when they're next due.
 
+Applying an AD to the aircraft or a component, removing it, and changes to it are kept in **Activity → Record history**, with who and when. An owner can **Restore** an AD that was removed by mistake from there.
+
 Make the logbook entry for the work as well; the status report lists each AD with its method and revision (91.417(a)(2)(v)).

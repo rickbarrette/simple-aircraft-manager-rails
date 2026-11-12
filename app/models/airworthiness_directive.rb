@@ -7,8 +7,7 @@ class AirworthinessDirective < ApplicationRecord
   BULLETIN_LABELS = { "ad" => "AD", "saib" => "SAIB", "sb" => "SB", "alert" => "Alert", "other" => "Bulletin" }.freeze
 
   belongs_to :document, optional: true
-  has_and_belongs_to_many :aircraft
-  has_and_belongs_to_many :components
+  include SharedRecordHistory # has_and_belongs_to_many :aircraft and :components, with history
   has_many :ad_compliances, dependent: :destroy
 
   validates :name, :short_description, presence: true

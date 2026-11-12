@@ -10,5 +10,5 @@
       <%= select_tag :type, options_for_select([ [ "All records", "" ] ] + @types.map { [ _1.underscore.humanize, _1 ] }, @type), class: "input w-48", data: { submit_on_change: true } %>
     <% end %>
   </div>
-  <% if @versions.any? %><%= render "record_versions/list", versions: @versions %><% else %><%= empty_state "No changes recorded yet." %><% end %>
+  <% if @versions.any? %><%= render "record_versions/list", versions: @versions, aircraft: @aircraft, can_restore: owner? %><% else %><%= empty_state "No changes recorded yet." %><% end %>
 </section>

@@ -12,8 +12,7 @@ class InspectionType < ApplicationRecord
   # Short form for the airworthiness status ("VFR only").
   LIMITATIONS = { "no_ifr" => "VFR only", "no_transponder" => "No transponder" }.freeze
 
-  has_and_belongs_to_many :aircraft
-  has_and_belongs_to_many :components
+  include SharedRecordHistory # has_and_belongs_to_many :aircraft and :components, with history
   has_many :inspection_records, dependent: :destroy
   belongs_to :satisfies, class_name: "InspectionType", optional: true
   has_many :satisfied_by, class_name: "InspectionType", foreign_key: :satisfies_id, inverse_of: :satisfies, dependent: :nullify

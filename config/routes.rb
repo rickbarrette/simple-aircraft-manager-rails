@@ -109,7 +109,9 @@ Rails.application.routes.draw do
     resource :export, controller: "aircraft_exports", only: :show
     resource :report, controller: "maintenance_reports", only: :show
     resource :records_package, path: "records", only: :show
-    resources :record_versions, path: "history", only: :index
+    resources :record_versions, path: "history", only: :index do
+      member { post :restore }
+    end
     resources :events, only: :index
   end
 

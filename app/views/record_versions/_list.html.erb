@@ -4,9 +4,18 @@
     <li class="px-4 py-2">
       <div class="flex flex-wrap items-baseline justify-between gap-2">
         <span><span class="font-medium"><%= v.item_type.underscore.humanize %> #<%= v.item_id %></span>
-          <span class="<%= { 'create' => 'badge-green', 'update' => 'badge-blue', 'destroy' => 'badge-red' }[v.event] %> ml-1"><%= { "create" => "created", "update" => "changed", "destroy" => "deleted" }[v.event] %></span></span>
+          <span class="<%= { 'create' => 'badge-green', 'update' => 'badge-blue', 'destroy' => 'badge-red', 'link' => 'badge-green', 'unlink' => 'badge-orange' }[v.event] %> ml-1"><%= { "create" => "created", "update" => "changed", "destroy" => "deleted", "link" => "applied", "unlink" => "removed" }[v.event] %></span></span>
         <span class="text-xs text-slate-500"><%= v.created_at.utc.strftime("%Y-%m-%d %H:%M:%S UTC") %> · <%= v.user&.display_name || "system" %><%= " · #{v.ip_address}" if v.ip_address %></span>
       </div>
+      <% if v.event.in?(%w[link unlink]) %>
+        <% c = v.changes_hash %>
+        <p class="mt-1 text-xs text-slate-600">
+          <%= c["record"] %> <%= v.event == "link" ? "applies to" : "no longer applies to" %> <%= c["applies_to"] == "component" ? c["component"] : "the airframe" %><%= " (#{c['reason']})" if c["reason"] %>.
+          <% if v.event == "unlink" && local_assigns[:aircraft] && local_assigns[:can_restore] && RecordVersionsController.restorable?(v, aircraft) %>
+            <%= button_to "Restore", restore_aircraft_record_version_path(aircraft, v), method: :post, class: "btn-secondary btn-sm ml-2", form: { class: "inline" } %>
+          <% end %>
+        </p>
+      <% end %>
       <% if v.event == "update" %>
         <dl class="mt-1 grid gap-x-3 text-xs text-slate-600 sm:grid-cols-[10rem_1fr]">
           <% v.changes_hash.each do |field, (before, after)| %>

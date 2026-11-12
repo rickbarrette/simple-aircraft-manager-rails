@@ -19,6 +19,8 @@ class Component < ApplicationRecord
   has_many :logbook_entry_parts, dependent: :destroy
   has_and_belongs_to_many :inspection_types
   has_and_belongs_to_many :airworthiness_directives
+  # Its AD and inspection links go with it; keep that in the record history.
+  before_destroy(prepend: true) { (airworthiness_directives.to_a + inspection_types.to_a).each { _1.history_component_deleted(self) } }
 
   validates :manufacturer, :model, :date_in_service, presence: true
   validates :status, inclusion: { in: STATUSES.keys }

@@ -70,7 +70,7 @@ For domain-level forward auth, Authentik matches each line as a regular expressi
 ```
 ^https://aircraft\.example\.com/manifest\.json$
 ^https://aircraft\.example\.com/service-worker\.js$
-^https://aircraft\.example\.com/offline\.html$
+^https://aircraft\.example\.com/offline\.(html|js)$
 ^https://aircraft\.example\.com/favicon\.svg$
 ^https://aircraft\.example\.com/icon(-192|-maskable)?\.(png|svg)$
 ^https://aircraft\.example\.com/apple-touch-icon\.png$
@@ -89,7 +89,7 @@ What each group is for:
 
 | Lines | Needed for | What's exposed |
 |---|---|---|
-| `manifest.json`, `service-worker.js`, `offline.html`, icons | Installing the app on a phone (the browser fetches these without cookies), and share pages | Static files with no data |
+| `manifest.json`, `service-worker.js`, `offline.html`, `offline.js`, icons | Installing the app on a phone (the browser fetches these without cookies), and share pages | Static files with no data |
 | `/assets/…` | Styles and scripts for share pages and the signing pages | Static files with no data |
 | `/shared/<token>`, `/shared/<token>/report` | Read-only share links (Access & Sharing) | Only with a valid, unexpired, unrevoked 32-character token, and only what that link's level shows |
 | `/rails/active_storage/blobs/redirect/…`, `/rails/active_storage/disk/…` | The aircraft picture and shared documents on share pages | A file only to someone holding its signed link (from a page they could see). Disk links expire after a few minutes; redirect links don't, so a forwarded link keeps working |

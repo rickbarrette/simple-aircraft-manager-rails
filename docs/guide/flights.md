@@ -11,6 +11,12 @@ Every hour flown is added to the aircraft and to each installed component, which
 - The route (From/To airports autocomplete) and notes.
 - Optionally a **track log** (GPX, KML or CSV) and **engine monitor data** (CGR-30P / CGR-30C `.csv`), which you can chart on the flight's page.
 
+### With no signal
+
+On a phone or tablet with the app installed (see [Getting started](getting-started.md)), you can log a flight without a connection, as long as you've opened **Log Flight** for that aircraft on that device before. Without signal, the form opens from the copy the device kept, and **Log Flight** saves the flight on the device instead of sending it. The next leg starts where the last one ended. When the connection is back, the app sends the saved flights by itself and says so at the top of the page. A flight that's rejected (for example a typo in the tach) stays there with the reason, to log again by hand or discard. Sending twice never logs a flight twice.
+
+Track and engine data files attached offline are kept and sent too.
+
 ## Update hours
 
 When you don't log each flight, use **Update Hours** on the overview: enter the current meter readings and the difference is applied to every installed component. A reading lower than the current one is treated as a correction.

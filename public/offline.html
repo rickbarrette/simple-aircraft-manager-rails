@@ -19,6 +19,7 @@
     img { width: 72px; height: 72px; }
     h1 { font-size: 1.25rem; margin: 16px 0 8px; }
     p { margin: 0 0 24px; color: var(--muted); }
+    #forms a { display: block; margin-top: 8px; color: var(--accent); font-weight: 600; }
     button { font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 6px; padding: 10px 20px; cursor: pointer; }
   </style>
 </head>
@@ -28,7 +29,10 @@
     <h1>You're offline</h1>
     <p>Simple Aircraft Manager needs a connection to load your aircraft. Check your signal and try again.</p>
     <button type="button" onclick="location.reload()">Try again</button>
+    <div id="forms" hidden>
+      <p style="margin:24px 0 8px">You can still log a flight; it's sent when you're back online:</p>
+    </div>
   </main>
-  <script>window.addEventListener("online", function () { location.reload() })</script>
+  <script src="/offline.js"></script>
 </body>
 </html>

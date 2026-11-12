@@ -55,6 +55,10 @@ class FlightLogsController < ApplicationController
   end
 
   def create
+    # Already received (sent again from the offline queue): don't log it twice.
+    if (key = params.dig(:flight_log, :client_key).to_s.presence) && @aircraft.flight_logs.exists?(client_key: key.first(64))
+      return redirect_to(aircraft_flight_logs_path(@aircraft), notice: "Flight already logged.")
+    end
     @flight_log = @aircraft.flight_logs.new(flight_log_params)
     if @flight_log.valid?
       HoursService.new(@aircraft).log_flight!(@flight_log)
@@ -111,7 +115,7 @@ class FlightLogsController < ApplicationController
     params.require(:flight_log).permit(
       :date, :tach_time, :tach_out, :tach_in, :hobbs_time, :hobbs_out, :hobbs_in,
       :departure_location, :destination_location, :route, :oil_added, :oil_added_type,
-      :oil_level_after, :fuel_added, :fuel_added_type, :fuel_level_after, :notes, :track_log, :engine_data
-    )
+      :oil_level_after, :fuel_added, :fuel_added_type, :fuel_level_after, :notes, :track_log, :engine_data, :client_key
+    ).tap { _1[:client_key] = _1[:client_key].to_s.first(64).presence if _1.key?(:client_key) }
   end
 end

@@ -47,6 +47,27 @@ class LogbookEntryPartsTest < ActionDispatch::IntegrationTest
     assert_empty entry.parts.reload
   end
 
+  test "a new entry can record a sub-component as serviced or replaced on the Components tab" do
+    oil = create_component(@a, component_type: component_type("Oil"), manufacturer: "Phillips", model: "20W50",
+                               parent_component: @engine, hours_in_service: 45.0, hours_since_overhaul: 45.0)
+    get new_aircraft_logbook_entry_path(@a)
+    assert_select "select[name='logbook_entry[parts][#{oil.id}][service]'] option", 3
+    post aircraft_logbook_entries_path(@a), params: { logbook_entry: entry_params(parts: {
+      @filter.id => { include: "1", hours: "110.5", since: "10.5", service: "serviced" },
+      oil.id => { include: "1", hours: "35.0", since: "35.0", service: "replaced" } }) }
+    assert_redirected_to aircraft_logbook_entry_path(@a, @a.logbook_entries.last)
+    @filter.reload
+    oil.reload
+    # dated to the entry; the 10 hours flown since the entry carry over
+    assert_equal [ Date.new(2026, 8, 20), 10.0, 120.5 ], [ @filter.overhaul_date, @filter.hours_since_overhaul.to_f, @filter.hours_in_service.to_f ]
+    assert_equal [ 10.0, 10.0, Date.new(2026, 8, 20) ], [ oil.hours_since_overhaul.to_f, oil.hours_in_service.to_f, oil.date_in_service ]
+    assert @a.events.exists?(event_name: "Replaced: #{oil} (logbook entry 2026-08-20)")
+
+    entry = @a.logbook_entries.last # editing doesn't offer it again (it would apply twice)
+    get edit_aircraft_logbook_entry_path(@a, entry)
+    assert_select "select[name='logbook_entry[parts][#{oil.id}][service]']", 0
+  end
+
   test "printouts add a line per sub-component; archives carry them" do
     entry = @a.logbook_entries.create!(entry_params.merge(component: @engine))
     entry.parts.create!(component: @filter, hours_at_entry: 110.5, since_overhaul_at_entry: 10.5)

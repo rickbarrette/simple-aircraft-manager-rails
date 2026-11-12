@@ -90,6 +90,16 @@ class Component < ApplicationRecord
 
   # Service reset: always zeroes time since overhaul; optionally the whole
   # in-service clock when the part was physically replaced.
+  # Serviced (or replaced) as recorded in a logbook entry: dated to the entry,
+  # with the hours it has run since then (its total time now less its total
+  # time at the entry) as the new time since service.
+  def service_from_entry!(date:, hours_at_entry:, replaced: false)
+    since = hours_at_entry ? [ hours_in_service.to_d - hours_at_entry.to_d, 0 ].max : 0
+    attrs = { hours_since_overhaul: since, overhaul_date: date }
+    attrs.merge!(hours_in_service: since, date_in_service: date) if replaced
+    update!(attrs)
+  end
+
   def reset_service!(reset_in_service: false)
     attrs = { hours_since_overhaul: 0, overhaul_date: Date.current }
     attrs.merge!(hours_in_service: 0, date_in_service: Date.current) if reset_in_service

@@ -27,7 +27,7 @@
       <% part = parts[c.id] %>
       <% ancestors = c.ancestor_ids %>
       <% field = "#{f.object_name}[parts][#{c.id}]" %>
-      <div class="grid items-end gap-2 sm:grid-cols-[1fr_9rem_9rem]" data-component-times-target="part" data-ancestors="<%= ancestors.join(' ') %>"
+      <div class="grid items-end gap-2 <%= f.object.new_record? ? 'sm:grid-cols-[1fr_9rem_9rem_10rem]' : 'sm:grid-cols-[1fr_9rem_9rem]' %>" data-component-times-target="part" data-ancestors="<%= ancestors.join(' ') %>"
            data-total="<%= c.hours_in_service.to_f %>" data-since="<%= c.hours_since_overhaul.to_f %>"
            <%= "hidden" unless selected && ancestors.include?(selected.id) %>>
         <label class="flex items-center gap-2 text-sm">
@@ -41,8 +41,13 @@
         <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_since"><%= c.since_overhaul_abbreviation.capitalize %></label>
           <%= number_field_tag "#{field}[since]", part&.since_overhaul_at_entry, id: "part_#{c.id}_since", step: 0.1, class: "input",
                                data: { role: "since", action: "input->component-times#partEdited" } %></div>
+        <% if f.object.new_record? %>
+          <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_service">On the Components tab</label>
+            <%= select_tag "#{field}[service]", options_for_select([ [ "Not changed", "" ], [ "Serviced", "serviced" ], [ "Replaced", "replaced" ] ], params.dig(:logbook_entry, :parts, c.id.to_s, :service)),
+                           id: "part_#{c.id}_service", class: "input" %></div>
+        <% end %>
       </div>
     <% end %>
-    <p class="hint">Their times are worked out the same way as the component's. Sub-components are set up on the Components tab (a part's "Parent component").</p>
+    <p class="hint">Their times are worked out the same way as the component's. Sub-components are set up on the Components tab (a part's "Parent component").<%= " “Serviced” or “Replaced” also records it on the Components tab (e.g. an oil and filter change), dated to this entry." if f.object.new_record? %></p>
   </fieldset>
 <% end %>

@@ -12,11 +12,14 @@
 <% end %>
 <div class="space-y-5">
   <% @collections.each do |col| %>
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title"><%= "★ " if col.starred? %><%= col.name %></h2>
-          <% if col.description.present? %><p class="text-xs text-slate-500"><%= col.description %></p><% end %>
+    <details class="card group document-collection">
+      <summary class="card-header cursor-pointer list-none border-b-0 group-open:border-b [&::-webkit-details-marker]:hidden">
+        <div class="flex min-w-0 items-start gap-2">
+          <span aria-hidden="true" class="mt-0.5 text-slate-400 transition group-open:rotate-90">›</span>
+          <div class="min-w-0">
+            <h2 class="card-title"><%= "★ " if col.starred? %><%= col.name %> <span class="text-sm font-normal text-slate-500">(<%= col.documents.size %>)</span></h2>
+            <% if col.description.present? %><p class="text-xs text-slate-500"><%= col.description %></p><% end %>
+          </div>
         </div>
         <div class="flex items-center gap-2">
           <%= visibility_badge(col.visibility) %>
@@ -25,16 +28,21 @@
             <%= link_to "Edit", edit_aircraft_document_collection_path(@aircraft, col), class: "btn-secondary btn-sm" %>
           <% end %>
         </div>
-      </div>
+      </summary>
       <% if col.documents.any? %>
         <ul class="divide-y divide-slate-100"><% col.documents.sort_by(&:name).each do |doc| %><%= render "documents/doc_row", doc: doc, aircraft: @aircraft %><% end %></ul>
       <% else %><%= empty_state "Empty collection." %><% end %>
-    </section>
+    </details>
   <% end %>
   <% if @uncollected.any? %>
-    <section class="card">
-      <div class="card-header"><h2 class="card-title">Uncollected</h2></div>
+    <details class="card group document-collection">
+      <summary class="card-header cursor-pointer list-none border-b-0 group-open:border-b [&::-webkit-details-marker]:hidden">
+        <div class="flex items-start gap-2">
+          <span aria-hidden="true" class="mt-0.5 text-slate-400 transition group-open:rotate-90">›</span>
+          <h2 class="card-title">Uncollected <span class="text-sm font-normal text-slate-500">(<%= @uncollected.size %>)</span></h2>
+        </div>
+      </summary>
       <ul class="divide-y divide-slate-100"><% @uncollected.each do |doc| %><%= render "documents/doc_row", doc: doc, aircraft: @aircraft %><% end %></ul>
-    </section>
+    </details>
   <% end %>
 </div>

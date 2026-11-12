@@ -4,7 +4,7 @@ The **Documents** tab keeps scans and files: registration, airworthiness certifi
 
 - **+ Upload Document**: a name, type, collection, description, and one or more files (images, PDFs or text). Each file is a page in the viewer.
 - **Bulk upload**: many files at once. Each becomes its own document named after the file; files with the same name are combined, in order, as pages of one document.
-- **+ Collection** groups documents (for example *Engine logbook* or *Annual 2026*).
+- **+ Collection** groups documents (for example *Engine logbook* or *Annual 2026*). Collections start collapsed, showing how many documents they hold; click one to open it.
 
 ## Expiry
 

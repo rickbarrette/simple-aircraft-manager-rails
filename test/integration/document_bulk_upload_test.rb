@@ -15,6 +15,18 @@ class DocumentBulkUploadTest < ActionDispatch::IntegrationTest
     ActiveStorage::Blob.create_and_upload!(io: StringIO.new("bytes"), filename: name, content_type: type)
   end
 
+  test "collections are collapsed on the documents page, with their document count" do
+    sign_in @owner
+    @a.document_collections.create!(name: "Engine logbook").documents.create!(aircraft: @a, name: "Scan", doc_type: "LOG")
+    @a.documents.create!(name: "Loose receipt", doc_type: "INVOICE")
+    get aircraft_documents_path(@a)
+    assert_select "details.document-collection", 2
+    assert_select "details.document-collection[open]", 0 # collapsed until clicked
+    assert_select "details.document-collection summary h2", text: /Engine logbook\s*\(1\)/
+    assert_select "details.document-collection summary h2", text: /Uncollected\s*\(1\)/
+    assert_select "details.document-collection a", text: "Scan" # still in the page, just closed
+  end
+
   test "owner sees the bulk page; pilots and outsiders can't use it" do
     sign_in @owner
     get aircraft_documents_path(@a)

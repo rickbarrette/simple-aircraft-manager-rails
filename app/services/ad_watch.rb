@@ -92,11 +92,20 @@ class AdWatch
 
   # Returns the new AdAlerts.
   def check!
-    since = (@aircraft.ad_watch_checked_at || FIRST_LOOKBACK.ago).to_date - 7 # overlap; duplicates are skipped
+    since = start_date - 7 # overlap; duplicates are skipped
     known = AirworthinessDirective.pluck(:name).to_set
     created = terms.flat_map { |term| search(term.words, since).filter_map { record(_1, term, known) } }
     @aircraft.update_column(:ad_watch_checked_at, Time.current)
     created
+  end
+
+  # Where the search picks up: the last check; before the first one, the
+  # last DRS import (the baseline, less 60 days for ADs that hadn't reached
+  # DRS yet), else two years back.
+  def start_date
+    return @aircraft.ad_watch_checked_at.to_date if @aircraft.ad_watch_checked_at
+    imported = @aircraft.drs_imports.maximum(:created_at)
+    imported ? (imported - 60.days).to_date : FIRST_LOOKBACK.ago.to_date
   end
 
   private

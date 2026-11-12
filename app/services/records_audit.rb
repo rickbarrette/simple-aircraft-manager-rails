@@ -29,6 +29,7 @@ class RecordsAudit
                backup.present? && backup.ok && backup.created_at > 2.days.ago,
                backup ? "#{backup.created_at.to_date}: #{backup.message}" : "Never run"),
       *offsite_items,
+      drs_item,
       Item.new("procedures", "The procedures document is adopted and its details filled in", true,
                revision.present? && @policy.complete?,
                revision ? "Revision #{revision.number}, adopted #{revision.adopted_at.to_date}" : "Not adopted yet"),
@@ -67,6 +68,12 @@ class RecordsAudit
   def restore_test = OffsiteConnection.connected? ? OffsiteRun.latest_restore_test : nil
 
   private
+
+  def drs_item
+    due = Aircraft.ordered.select { DrsImport.renewal_due?(_1) || DrsImport.missing_models(_1).any? }
+    Item.new("drs", "Each aircraft's AD list was refreshed from FAA DRS in the last 12 months, for all its models", true, due.empty?,
+             due.any? ? "Needs a DRS import: #{due.map(&:tail_number).join(', ')}" : "Up to date")
+  end
 
   def offsite_items
     return [] unless OffsiteConnection.connected?

@@ -18,6 +18,8 @@
     <% @certificates.each do |c| %><li><strong><%= c.expired? ? "Expired" : "Expires" %> <%= c.expires_on %>:</strong> <%= c.kind_label %> <%= c.number %></li><% end %>
   </ul>
 <% end %>
+<% if @drs_due.any? %><p><strong>Refresh the AD list from FAA DRS</strong> (new ADs are found weekly, but revisions and anything missed come from a fresh import):</p>
+<ul><% @drs_due.each do |a| %><li><%= link_to a.tail_number, aircraft_airworthiness_directives_url(a) %>: <%= (m = DrsImport.missing_models(a)).any? ? "never imported for #{m.to_sentence}" : "last import #{a.drs_imports.latest_first.first&.created_at&.to_date || 'never'}" %></li><% end %></ul><% end %>
 <% if @audit_due %><p><strong>Records audit due <%= @audit_due %></strong> (AC 120-78B quality control): <%= link_to "start it", new_admin_audit_url %>.</p><% end %>
 <p style="color: #64748b; font-size: 12px; margin-top: 20px;">
   Based on the records in Simple Aircraft Manager. Turn these emails off on your <%= link_to "profile", edit_profile_url %>.

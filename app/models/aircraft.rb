@@ -21,6 +21,7 @@ class Aircraft < ApplicationRecord
   has_many :documents, dependent: :destroy
   has_many :inspection_records, dependent: :destroy
   has_many :ad_compliances, dependent: :destroy
+  has_many :drs_imports, dependent: :delete_all
   has_many :major_records, dependent: :destroy
   has_many :flight_logs, dependent: :destroy
   has_many :consumable_records, dependent: :destroy

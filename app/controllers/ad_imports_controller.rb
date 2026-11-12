@@ -29,6 +29,9 @@ class AdImportsController < ApplicationController
     # Only AD numbers present in the uploaded file; values are checked against AdImport::ACTIONS.
     decisions = params.fetch(:decisions, {}).permit(*import.rows.map(&:number)).to_h
     result = import.import!(decisions: decisions, user: current_user)
+    @aircraft.drs_imports.create!(user: current_user, filename: params[:filename].to_s.first(200), ad_count: import.rows.size,
+                                  tracked: result[:tracked], not_applicable: result[:not_applicable],
+                                  models_covered: DrsImport.covered(@aircraft, import.rows.flat_map(&:models)))
     discard_upload(token)
     redirect_to aircraft_airworthiness_directives_path(@aircraft),
                 notice: "Imported #{result[:tracked]} ADs to track and #{result[:not_applicable]} marked N/A; " \

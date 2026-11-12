@@ -16,6 +16,13 @@ Your certificates:
 - <%= c.expired? ? "Expired" : "Expires" %> <%= c.expires_on %>: <%= c.kind_label %> <%= c.number %>
 <% end %>
 <% end %>
+<% if @drs_due.any? %>
+
+AD list from FAA DRS needs a refresh:
+<% @drs_due.each do |a| %>
+- <%= a.tail_number %>: <%= (m = DrsImport.missing_models(a)).any? ? "never imported for #{m.to_sentence}" : "last import #{a.drs_imports.latest_first.first&.created_at&.to_date || 'never'}" %> (<%= aircraft_airworthiness_directives_url(a) %>)
+<% end %>
+<% end %>
 <% if @audit_due %>
 
 Records audit due <%= @audit_due %>: <%= new_admin_audit_url %>

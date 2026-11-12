@@ -51,6 +51,27 @@
   <% end %>
 </section>
 
+<% last_drs = @aircraft.drs_imports.latest_first.first %>
+<% missing = DrsImport.missing_models(@aircraft) %>
+<section class="card mt-5" id="ad-baseline">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">AD baseline from FAA DRS</h2>
+      <p class="text-xs text-slate-500">The full list comes from DRS imports; the weekly search below adds what's published after.</p>
+    </div>
+    <% if owner? %><%= link_to "Import from FAA DRS", new_aircraft_ad_import_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+  </div>
+  <div class="card-body space-y-2 text-sm">
+    <% if last_drs %>
+      <p>Last import <strong><%= last_drs.created_at.to_date %></strong> by <%= last_drs.user&.display_name || "—" %>: <%= last_drs.ad_count %> ADs<%= ", covering #{Array(last_drs.models_covered).to_sentence}" if Array(last_drs.models_covered).any? %>.</p>
+      <% if last_drs.created_at < DrsImport::RENEW_AFTER.ago %><p class="text-amber-800">Over a year old: import again to pick up revised ADs and anything the weekly search missed.</p><% end %>
+    <% else %>
+      <p class="text-amber-800">No DRS import yet. Export the ADs for each model from drs.faa.gov and import them here.</p>
+    <% end %>
+    <% if missing.any? %><p class="text-amber-800">Never imported for: <strong><%= missing.join(", ") %></strong>. Search DRS for each and import the file.</p><% end %>
+  </div>
+</section>
+
 <section class="card mt-5" id="new-ads">
   <div class="card-header">
     <div>

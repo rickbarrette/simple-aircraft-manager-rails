@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_09_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -405,6 +405,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_010000) do
     t.boolean "legacy_record", default: false, null: false
     t.index ["aircraft_id"], name: "index_documents_on_aircraft_id"
     t.index ["document_collection_id"], name: "index_documents_on_document_collection_id"
+  end
+
+  create_table "drs_imports", force: :cascade do |t|
+    t.integer "aircraft_id", null: false
+    t.integer "user_id"
+    t.string "filename"
+    t.json "models_covered"
+    t.integer "ad_count", default: 0, null: false
+    t.integer "tracked", default: 0, null: false
+    t.integer "not_applicable", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aircraft_id"], name: "index_drs_imports_on_aircraft_id"
+    t.index ["user_id"], name: "index_drs_imports_on_user_id"
   end
 
   create_table "entry_signatures", force: :cascade do |t|
@@ -854,6 +868,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_09_010000) do
   add_foreign_key "document_collections", "aircraft"
   add_foreign_key "documents", "aircraft"
   add_foreign_key "documents", "document_collections"
+  add_foreign_key "drs_imports", "aircraft", on_delete: :cascade
+  add_foreign_key "drs_imports", "users", on_delete: :nullify
   add_foreign_key "entry_signatures", "logbook_entries"
   add_foreign_key "entry_signatures", "users", on_delete: :nullify
   add_foreign_key "flight_logs", "aircraft"

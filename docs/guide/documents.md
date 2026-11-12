@@ -6,6 +6,10 @@ The **Documents** tab keeps scans and files: registration, airworthiness certifi
 - **Bulk upload**: many files at once. Each becomes its own document named after the file; files with the same name are combined, in order, as pages of one document.
 - **+ Collection** groups documents (for example *Engine logbook* or *Annual 2026*). Collections start collapsed, showing how many documents they hold; click one to open it.
 
+## Searching inside documents
+
+The text on each document's pages is read in the background so **Search** can find it: a PDF's own text when it has one, otherwise OCR of the scan (Tesseract, on the server). Printed text reads well; handwriting much less so. An admin can switch scans to Claude (Admin → Settings → Document search), which reads handwriting far better but uses the Anthropic API. New uploads are read within a minute or so; existing documents are caught up overnight.
+
 ## Expiry
 
 Give a registration, insurance policy or similar an expiration date and it shows on the airworthiness status as it approaches. An expired registration grounds the aircraft (91.203(a)(2)).

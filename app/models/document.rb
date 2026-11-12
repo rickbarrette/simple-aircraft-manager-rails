@@ -31,6 +31,12 @@ class Document < ApplicationRecord
   def to_s = name
   def type_label = TYPES[doc_type]
   def expired?(today = Date.current) = expires_on.present? && today > expires_on
+
+  # The page files the search text was read from; when they change, it's read again.
+  def pages_source_key = pages.map(&:blob_id).sort.join(",")
+  def pages_text_stale? = pages_text_source.to_s != pages_source_key
+
+  after_commit(on: %i[create update]) { DocumentTextJob.perform_later(id) if pages.attached? && pages_text_stale? }
   def expiry_warning_days = EXPIRY_WARNING_DAYS.fetch(doc_type, 30)
 
   # nil visibility inherits from the collection; uncollected docs default to private.

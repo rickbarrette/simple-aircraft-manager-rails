@@ -38,5 +38,13 @@
     <p class="hint">With off-site backup to Google Drive, this many of the newest nightly database copies are kept there. Uploaded files are copied once and kept.</p>
   </div>
 
+  <h2 class="card-title pt-2">Document search</h2>
+  <div>
+    <%= label_tag "settings[documents_claude_text]", "Read scanned documents with", class: "label" %>
+    <%= select_tag "settings[documents_claude_text]", options_for_select([ [ "Tesseract (free, on this server)", 0 ], [ "Claude (better on handwriting; uses the Anthropic API)", 1 ] ], @values["documents_claude_text"].to_i),
+          id: "settings_documents_claude_text", class: "input" %>
+    <p class="hint">Text in documents is read so search can find it. PDFs that contain text are read directly either way. Claude is used only when an ANTHROPIC_API_KEY is set<%= " (it isn't)" if ENV["ANTHROPIC_API_KEY"].blank? %>, and costs API credit per page.</p>
+  </div>
+
   <div class="flex gap-2"><%= f.submit "Save Settings", class: "btn-primary" %><%= link_to "Cancel", admin_about_path, class: "btn-secondary" %></div>
 <% end %>

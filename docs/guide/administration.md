@@ -43,6 +43,7 @@ If single sign-on is broken and `PASSWORD_LOGIN=false` is set, remove that setti
 
 - **Uploads**: the largest file anyone can upload. A proxy in front of the app may have its own smaller limit.
 - **Backups**: how many nightly database copies to keep, on the server and in Google Drive.
+- **Document search**: read scanned documents with Tesseract (free, on the server) or Claude (better on handwriting, needs `ANTHROPIC_API_KEY`, costs API credit). PDFs with text are read directly either way.
 
 ## About
 

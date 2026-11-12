@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_040000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -404,6 +404,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_030000) do
     t.datetime "updated_at", null: false
     t.date "expires_on"
     t.boolean "legacy_record", default: false, null: false
+    t.text "pages_text"
+    t.string "pages_text_method"
+    t.string "pages_text_source"
+    t.datetime "pages_text_at"
     t.index ["aircraft_id"], name: "index_documents_on_aircraft_id"
     t.index ["document_collection_id"], name: "index_documents_on_document_collection_id"
   end

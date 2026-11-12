@@ -9,6 +9,7 @@ class Setting < ApplicationRecord
     "max_upload_mb" => { default: 50, in: 1..1024, label: "Maximum upload size (MB)" },
     "backups_kept" => { default: 14, in: 1..365, label: "Database backups kept" },
     "offsite_backups_kept" => { default: 30, in: 1..365, label: "Database copies kept in Google Drive" },
+    "documents_claude_text" => { default: 0, in: 0..1, label: "Read scanned documents with Claude" },
     "logbook_templates_seeded" => { default: 0, in: 0..1, label: "Built-in logbook templates added" } # internal flag
   }.freeze
 

@@ -25,6 +25,9 @@ production:
   ad_watch:
     class: AdWatchJob
     schedule: every sunday at 10am
+  document_text:
+    class: DocumentTextJob
+    schedule: every day at 2am
   records_integrity:
     class: RecordsIntegrityJob
     schedule: every day at 3:30am

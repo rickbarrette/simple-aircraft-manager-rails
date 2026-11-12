@@ -7,7 +7,7 @@
     <% end %>
     <% if Sso.password_login? %>
       <% if Sso.enabled? %>
-        <div class="flex items-center gap-3 text-xs text-slate-400"><span class="h-px flex-1 bg-slate-200"></span>or<span class="h-px flex-1 bg-slate-200"></span></div>
+        <div class="flex items-center gap-3 text-xs text-slate-500"><span class="h-px flex-1 bg-slate-200"></span>or<span class="h-px flex-1 bg-slate-200"></span></div>
       <% end %>
       <%= form_with url: session_path, class: "space-y-4" do |form| %>
         <div><%= form.label :email_address, "Email", class: "label" %>

@@ -134,7 +134,7 @@ class GroupFourTest < ActionDispatch::IntegrationTest
     assert_select "input[data-wb-calculator-target=station][data-fuel=true][data-arm='48.0']"
     assert_select "input[data-wb-calculator-target=burn]"
     get aircraft_major_record_path(@a, alteration)
-    assert_includes response.body, "2026-01-01: 1500.0 lb @ 39.50 in"
+    assert_includes response.body, "Jan 1, 2026: 1500.0 lb @ 39.50 in"
     get aircraft_report_path(@a)
     assert_includes response.body, "Empty weight <strong>1,500.0 lb</strong>"
 

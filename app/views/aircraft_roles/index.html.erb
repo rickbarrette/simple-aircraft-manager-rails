@@ -41,7 +41,7 @@
               <%= delete_button "Revoke", aircraft_share_token_path(@aircraft, t), confirm: "Revoke this link? Anyone using it will lose access." %>
             </div>
             <input type="text" readonly value="<%= shared_url(t.token) %>" class="input mt-2 font-mono text-xs" data-select-on-click>
-            <div class="mt-1 text-xs text-slate-500">Created <%= t.created_at.to_date %><%= " by #{t.created_by.display_name}" if t.created_by %> · <%= t.expires_at ? "expires #{l t.expires_at, format: :short}" : "never expires" %></div>
+            <div class="mt-1 text-xs text-slate-500">Created <%= fmt_date(t.created_at.to_date) %><%= " by #{t.created_by.display_name}" if t.created_by %> · <%= t.expires_at ? "expires #{l t.expires_at, format: :short}" : "never expires" %></div>
           </li>
         <% end %>
       </ul>

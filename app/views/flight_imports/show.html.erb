@@ -71,7 +71,7 @@
       <tbody>
         <% rows.each do |r| %>
           <tr class="<%= 'opacity-50' unless r.importable? %>">
-            <td><%= r.line %></td><td class="whitespace-nowrap"><%= r.date %></td><td><%= r.from %></td><td><%= r.to %></td>
+            <td><%= r.line %></td><td class="whitespace-nowrap"><%= fmt_date(r.date) %></td><td><%= r.from %></td><td><%= r.to %></td>
             <td class="text-right tabular-nums"><%= r.tach_in %></td><td class="text-right tabular-nums"><%= hours(r.tach_time) if r.tach_time %></td>
             <td class="text-right tabular-nums"><%= r.hobbs_in %></td><td class="text-right tabular-nums"><%= hours(r.hobbs_time) if r.hobbs_time %></td>
             <td class="text-right"><%= r.oil %></td><td class="text-right"><%= r.fuel %></td>

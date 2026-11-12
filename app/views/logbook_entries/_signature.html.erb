@@ -9,6 +9,6 @@
   <div class="mt-1 text-xs text-slate-500">
     Status: <strong><%= sig.imported? ? "Signed on #{sig.origin} (imported)" : sig.status_label %></strong>
     · Fingerprint <span class="font-mono"><%= sig.content_digest.first(16) %>…</span>
-    <% if entry.superseded_by %> · Corrected by <%= link_to "the #{entry.superseded_by.date} entry", aircraft_logbook_entry_path(entry.aircraft, entry.superseded_by), class: "link" %><% end %>
+    <% if entry.superseded_by %> · Corrected by <%= link_to "the #{fmt_date(entry.superseded_by.date)} entry", aircraft_logbook_entry_path(entry.aircraft, entry.superseded_by), class: "link" %><% end %>
   </div>
 </div>

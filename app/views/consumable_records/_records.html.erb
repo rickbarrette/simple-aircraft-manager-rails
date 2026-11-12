@@ -13,7 +13,7 @@
       <tbody>
         <% records.each do |r| %>
           <tr class="consumable-record">
-            <td class="whitespace-nowrap"><%= r.date %></td>
+            <td class="whitespace-nowrap"><%= fmt_date(r.date) %></td>
             <td><%= tag.span ConsumableRecord::TYPES[r.record_type], class: r.record_type == "oil" ? "badge-orange" : "badge-blue" %></td>
             <td class="text-right tabular-nums" data-label="Added"><%= r.quantity_added %> <%= r.unit %></td>
             <td class="text-right tabular-nums" data-label="Level after"><%= r.level_after ? "#{r.level_after} #{r.unit}" : "" %></td>

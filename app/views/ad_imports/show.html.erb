@@ -34,7 +34,7 @@
                 <%= r.subject %>
                 <% if r.summary %><details class="mt-1 text-xs text-slate-600"><summary class="cursor-pointer text-sky-700">Summary</summary><%= r.summary %></details><% end %>
               </td>
-              <td class="whitespace-nowrap text-xs"><%= r.effective_date %></td>
+              <td class="whitespace-nowrap text-xs"><%= fmt_date(r.effective_date) %></td>
               <td class="text-xs">
                 <% r.notes.each do |n| %><div class="<%= n.start_with?("Already", "Matches") ? 'text-slate-500' : 'text-amber-800' %>">• <%= n %></div><% end %>
               </td>

@@ -77,7 +77,7 @@
         <tbody>
           <% @records.each do |r| %>
             <tr>
-              <td class="whitespace-nowrap"><%= r.date %></td>
+              <td class="whitespace-nowrap"><%= fmt_date(r.date) %></td>
               <td class="text-right tabular-nums"><%= number_with_precision(r.empty_weight, precision: 1, delimiter: ",") %> lb</td>
               <td class="text-right tabular-nums"><%= number_with_precision(r.empty_arm, precision: 2) %> in</td>
               <td class="text-right tabular-nums"><%= r.useful_load ? "#{number_with_precision(r.useful_load, precision: 1, delimiter: ',')} lb" : "—" %></td>

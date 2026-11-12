@@ -14,7 +14,7 @@
     <dt class="text-slate-500">Weight & balance</dt>
     <dd>
       <% if (wb = @aircraft.weight_balance_records.where(major_record: @record).recent_first.first) %>
-        <%= link_to "#{wb.date}: #{number_with_precision(wb.empty_weight, precision: 1)} lb @ #{number_with_precision(wb.empty_arm, precision: 2)} in", aircraft_weight_balance_records_path(@aircraft), class: "link" %>
+        <%= link_to "#{fmt_date(wb.date)}: #{number_with_precision(wb.empty_weight, precision: 1)} lb @ #{number_with_precision(wb.empty_arm, precision: 2)} in", aircraft_weight_balance_records_path(@aircraft), class: "link" %>
       <% elsif owner? %>
         <%= link_to "Record the new W&B", new_aircraft_weight_balance_record_path(@aircraft, major_record_id: @record.id), class: "link" %>
       <% else %>—<% end %>

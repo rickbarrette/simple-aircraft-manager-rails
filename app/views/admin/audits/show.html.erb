@@ -1,11 +1,11 @@
 <% content_for :title, "Records audit" %>
-<h1 class="mb-1 text-2xl font-bold">Records audit, <%= @audit.performed_at.to_date %></h1>
+<h1 class="mb-1 text-2xl font-bold">Records audit, <%= fmt_date(@audit.performed_at.to_date) %></h1>
 <p class="mb-4 text-sm text-slate-600">By <%= @audit.performed_by&.display_name %> · <span class="<%= @audit.passed ? 'badge-green' : 'badge-orange' %>"><%= @audit.passed ? "Passed" : "Items not passed" %></span></p>
 <section class="card">
   <ul class="divide-y divide-slate-100 text-sm">
     <% @audit.results.each do |r| %>
       <li class="flex items-start gap-3 px-4 py-2"><span class="<%= r['passed'] ? 'badge-green' : 'badge-red' %>"><%= r["passed"] ? "Pass" : "Fail" %></span>
-        <span><span class="font-medium"><%= r["title"] %></span><%= tag.span(" (checked by the app)", class: "text-xs text-slate-400") if r["auto"] %>
+        <span><span class="font-medium"><%= r["title"] %></span><%= tag.span(" (checked by the app)", class: "text-xs text-slate-500") if r["auto"] %>
           <% if r["detail"].present? %><span class="block text-xs text-slate-600"><%= r["detail"] %></span><% end %></span></li>
     <% end %>
   </ul>

@@ -14,8 +14,8 @@
       <p class="mt-1 flex flex-wrap gap-x-3 text-sm"><%= link_to "What's new", help_page_path("changelog"), class: "link" %><% if info.repository_url %><%= link_to "Source code", info.repository_url, class: "link", target: "_blank", rel: "noopener" %><% end %></p>
     </div>
     <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
-      <div><dt class="text-slate-500">Built</dt><dd class="font-medium"><%= info.built_at ? l(info.built_at.in_time_zone, format: :short) : "—" %></dd></div>
-      <div><dt class="text-slate-500">Started</dt><dd class="font-medium"><%= l(info.booted_at.in_time_zone, format: :short) %></dd></div>
+      <div><dt class="text-slate-500">Built</dt><dd class="font-medium"><%= info.built_at ? fmt_time(info.built_at.in_time_zone) : "—" %></dd></div>
+      <div><dt class="text-slate-500">Started</dt><dd class="font-medium"><%= fmt_time(info.booted_at.in_time_zone) %></dd></div>
       <div><dt class="text-slate-500">Uptime</dt><dd class="font-medium"><%= distance_of_time_in_words(info.booted_at, Time.current) %></dd></div>
     </dl>
   </div>
@@ -89,13 +89,13 @@
   <% check = IntegrityCheck.latest %>
   <% backup = BackupRun.latest %>
   <%= render "pairs", pairs: [
-        [ "Last check", check ? "#{l(check.created_at, format: :short)} · #{check.ok ? 'no problems' : pluralize(check.problems.size, 'problem')}" : "not run yet" ],
+        [ "Last check", check ? "#{fmt_time(check.created_at)} · #{check.ok ? 'no problems' : pluralize(check.problems.size, 'problem')}" : "not run yet" ],
         [ "Checked", check ? "#{number_with_delimiter(check.versions_checked)} history entries, #{number_with_delimiter(check.signatures_checked)} signatures" : nil ],
-        [ "Last backup", backup ? "#{l(backup.created_at, format: :short)} · #{backup.ok ? number_to_human_size(backup.bytes) : 'FAILED'}" : "not run yet" ],
+        [ "Last backup", backup ? "#{fmt_time(backup.created_at)} · #{backup.ok ? number_to_human_size(backup.bytes) : 'FAILED'}" : "not run yet" ],
         [ "Backup check", backup&.message ],
         [ "Backups kept", "#{Setting.integer('backups_kept')} (in storage/backups)" ],
-        [ "Off-site backup", OffsiteConnection.connected? ? ((o = OffsiteRun.latest_backup) ? tag.span("#{o.ok ? 'OK' : 'FAILED'} #{o.created_at.to_date}", class: (o.ok && o.recent? ? nil : "badge-orange")) + " · Google Drive (#{OffsiteConnection.current.account_email})" : "Google Drive connected, none yet") : link_to("not set up", admin_offsite_backup_path, class: "badge-orange") ],
-        [ "Procedures", (r = ProceduresRevision.current) ? "Revision #{r.number}, adopted #{r.adopted_at.to_date}" : tag.span("not adopted", class: "badge-orange") ],
+        [ "Off-site backup", OffsiteConnection.connected? ? ((o = OffsiteRun.latest_backup) ? tag.span("#{o.ok ? 'OK' : 'FAILED'} #{fmt_date(o.created_at.to_date)}", class: (o.ok && o.recent? ? nil : "badge-orange")) + " · Google Drive (#{OffsiteConnection.current.account_email})" : "Google Drive connected, none yet") : link_to("not set up", admin_offsite_backup_path, class: "badge-orange") ],
+        [ "Procedures", (r = ProceduresRevision.current) ? "Revision #{r.number}, adopted #{fmt_date(r.adopted_at.to_date)}" : tag.span("not adopted", class: "badge-orange") ],
         [ "Last audit", AuditRun.latest ? "#{AuditRun.latest.performed_at.to_date} · #{AuditRun.latest.passed ? 'passed' : 'items not passed'}" : "none yet" ],
         [ "Next audit due", AuditRun.due_soon? ? tag.span(AuditRun.next_due.to_s, class: "badge-orange") : AuditRun.next_due.to_s ]
       ] %>
@@ -108,7 +108,7 @@
   <div class="card-header"><h2 class="card-title">Software versions</h2></div>
   <% revisions = AppRevision.latest_first.limit(20) %>
   <% if revisions.any? %>
-    <%= render "pairs", pairs: revisions.map { |r| [ [ r.version, "build #{r.revision}" ].compact.join(" · "), "#{l(r.first_seen_at, format: :short)} – #{l(r.last_seen_at, format: :short)}" ] } %>
+    <%= render "pairs", pairs: revisions.map { |r| [ [ r.version, "build #{r.revision}" ].compact.join(" · "), "#{fmt_time(r.first_seen_at)} – #{fmt_time(r.last_seen_at)}" ] } %>
   <% else %>
     <%= empty_state "No versions recorded yet." %>
   <% end %>

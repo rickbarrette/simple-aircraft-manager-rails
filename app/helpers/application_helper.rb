@@ -4,8 +4,14 @@ module ApplicationHelper
     number_with_precision(value, precision: 1, delimiter: ",")
   end
 
+  # How dates and times read across the app: "Nov 8, 2026", "Nov 8, 2026 14:05".
+  # (Signatures and the record history keep exact UTC timestamps, 2026-11-08 14:05 UTC.)
   def fmt_date(value)
-    value ? l(value.to_date, format: :long) : "—"
+    value ? value.to_date.strftime("%b %-d, %Y") : "—"
+  end
+
+  def fmt_time(value)
+    value ? value.in_time_zone.strftime("%b %-d, %Y %H:%M") : "—"
   end
 
   AIRWORTHINESS_COLORS = { "RED" => "red", "LIMITED" => "blue", "ORANGE" => "orange", "GREEN" => "green", "INFO" => "gray" }.freeze

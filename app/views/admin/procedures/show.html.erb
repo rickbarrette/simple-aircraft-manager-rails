@@ -38,7 +38,7 @@
       <h2 class="card-title">Current revision</h2>
       <% current = @revisions.first %>
       <% if current %>
-        <p class="text-sm">Revision <strong><%= current.number %></strong>, adopted <%= current.adopted_at.to_date %> by <%= current.adopted_by&.display_name %>. <%= link_to "View / print", revision_admin_procedures_path(current), class: "link", target: "_blank" %></p>
+        <p class="text-sm">Revision <strong><%= current.number %></strong>, adopted <%= fmt_date(current.adopted_at.to_date) %> by <%= current.adopted_by&.display_name %>. <%= link_to "View / print", revision_admin_procedures_path(current), class: "link", target: "_blank" %></p>
       <% else %>
         <p class="text-sm text-amber-800">No revision adopted yet.</p>
       <% end %>
@@ -54,7 +54,7 @@
       <div class="card-header"><h2 class="card-title">Earlier revisions</h2></div>
       <% if @revisions.size > 1 %>
         <ul class="divide-y divide-slate-100 text-sm">
-          <% @revisions.drop(1).each do |r| %><li class="flex justify-between px-4 py-2"><span>Revision <%= r.number %> · <%= r.adopted_at.to_date %> · <%= r.summary %></span><%= link_to "View", revision_admin_procedures_path(r), class: "link", target: "_blank" %></li><% end %>
+          <% @revisions.drop(1).each do |r| %><li class="flex justify-between px-4 py-2"><span>Revision <%= r.number %> · <%= fmt_date(r.adopted_at.to_date) %> · <%= r.summary %></span><%= link_to "View", revision_admin_procedures_path(r), class: "link", target: "_blank" %></li><% end %>
         </ul>
       <% else %><%= empty_state "None." %><% end %>
     </section>

@@ -31,7 +31,7 @@
           <tbody>
             <% @updates.each do |u| %>
               <tr>
-                <td class="whitespace-nowrap text-xs"><%= l(u.created_at, format: :short) %></td>
+                <td class="whitespace-nowrap text-xs"><%= fmt_time(u.created_at) %></td>
                 <td class="text-xs"><%= u.requested_by&.display_name || "Startup" %></td>
                 <td><%= tag.span u.status.capitalize, class: { "done" => "badge-green", "failed" => "badge-red" }.fetch(u.status, "badge-blue") %></td>
                 <td class="text-xs"><%= u.done? ? u.summary : u.error %></td>

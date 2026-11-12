@@ -1,7 +1,7 @@
 <% content_for :title, "Sign a logbook entry" %>
 <div class="mx-auto max-w-md space-y-4">
   <h1 class="text-2xl font-bold">Sign a logbook entry</h1>
-  <p class="text-sm text-slate-600">You've been asked to sign the <%= @entry.date %> <%= LogbookEntry::LOG_TYPES[@entry.log_type].downcase %> log entry for <%= @entry.aircraft.tail_number %>. First, sign in as <strong><%= @invitation.email %></strong>.</p>
+  <p class="text-sm text-slate-600">You've been asked to sign the <%= fmt_date(@entry.date) %> <%= LogbookEntry::LOG_TYPES[@entry.log_type].downcase %> log entry for <%= @entry.aircraft.tail_number %>. First, sign in as <strong><%= @invitation.email %></strong>.</p>
   <div class="card card-body space-y-3">
     <%= link_to "I have an account: sign in", new_session_path, class: "btn-primary w-full justify-center" %>
   </div>

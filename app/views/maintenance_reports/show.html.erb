@@ -52,9 +52,9 @@
       <tbody>
         <% @report.life_limited.each do |c| %>
           <tr><td class="<%= td %>"><%= c %> <span class="text-slate-500"><%= c.model %></span></td><td class="<%= td %>"><%= c.serial_number.presence || "—" %></td>
-            <td class="<%= td %>"><%= [ (c.replacement_hours && "#{hours(c.replacement_hours)} hrs"), (c.replacement_days && "#{c.replacement_days} days"), (c.expires_on && "expires #{c.expires_on}") ].compact.join(" / ") %></td>
+            <td class="<%= td %>"><%= [ (c.replacement_hours && "#{hours(c.replacement_hours)} hrs"), (c.replacement_days && "#{c.replacement_days} days"), (c.expires_on && "expires #{fmt_date(c.expires_on)}") ].compact.join(" / ") %></td>
             <td class="<%= td %> text-right tabular-nums"><%= hours(c.hours_since_overhaul) %> hrs</td>
-            <td class="<%= td %>"><%= [ (c.hours_to_replacement && "#{hours(c.hours_to_replacement)} hrs"), (c.next_replacement_date && "by #{c.next_replacement_date}") ].compact.join(", ") %></td>
+            <td class="<%= td %>"><%= [ (c.hours_to_replacement && "#{hours(c.hours_to_replacement)} hrs"), (c.next_replacement_date && "by #{fmt_date(c.next_replacement_date)}") ].compact.join(", ") %></td>
             <td class="<%= td %>"><%= life_badge(c.life_status) %></td></tr>
         <% end %>
       </tbody>
@@ -90,7 +90,7 @@
           <% last = row.latest %>
           <tr><td class="<%= td %>"><%= row.type.name %><% if row.type.satisfies %><div class="text-xs text-slate-500">Also counts as <%= row.type.satisfies.name %></div><% end %></td>
             <td class="<%= td %> text-xs"><%= row.type.interval_description %></td>
-            <td class="<%= td %>"><%= last ? "#{last.date}#{" @ #{hours(last.hours_at_inspection)}" if last.hours_at_inspection}" : "Never" %><%= " (#{last.inspection_type.name})" if last && last.inspection_type != row.type %></td>
+            <td class="<%= td %>"><%= last ? "#{fmt_date(last.date)}#{" @ #{hours(last.hours_at_inspection)}" if last.hours_at_inspection}" : "Never" %><%= " (#{last.inspection_type.name})" if last && last.inspection_type != row.type %></td>
             <td class="<%= td %> text-right tabular-nums"><%= last&.hours_at_inspection ? "#{hours(@report.time_in_service - last.hours_at_inspection)} hrs" : "—" %></td>
             <td class="<%= td %>"><%= [ row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} hrs" ].compact.join(" / ").presence || "—" %></td>
             <td class="<%= td %>"><%= compliance_badge(row.status) %></td></tr>
@@ -129,7 +129,7 @@
       <thead><tr><th class="<%= th %>">Date</th><th class="<%= th %>">Type</th><th class="<%= th %>">Description</th><th class="<%= th %>">STC</th><th class="<%= th %>">Form 337</th></tr></thead>
       <tbody>
         <% majors.each do |m| %>
-          <tr><td class="<%= td %>"><%= m.date_performed %></td><td class="<%= td %> text-xs"><%= m.type_label %></td>
+          <tr><td class="<%= td %>"><%= fmt_date(m.date_performed) %></td><td class="<%= td %> text-xs"><%= m.type_label %></td>
             <td class="<%= td %>"><%= m.title %><%= " · #{m.component}" if m.component %></td>
             <td class="<%= td %> text-xs"><%= [ m.stc_number, m.stc_holder ].compact_blank.join(", ").presence || "—" %></td>
             <td class="<%= td %> text-xs"><%= m.form_337_document ? "On file" : "—" %></td></tr>
@@ -142,7 +142,7 @@
 <section class="<%= section %>">
   <h2 class="text-base font-semibold">Weight and balance</h2>
   <% if (wb = a.current_weight_balance) %>
-    <p class="mt-1 text-sm">Empty weight <strong><%= number_with_precision(wb.empty_weight, precision: 1, delimiter: ",") %> lb</strong>, CG <strong><%= number_with_precision(wb.empty_arm, precision: 2) %> in</strong><%= ", useful load #{number_with_precision(wb.useful_load, precision: 1, delimiter: ',')} lb" if wb.useful_load %>, as of <%= wb.date %><%= " (#{wb.reason})" if wb.reason.present? %>.</p>
+    <p class="mt-1 text-sm">Empty weight <strong><%= number_with_precision(wb.empty_weight, precision: 1, delimiter: ",") %> lb</strong>, CG <strong><%= number_with_precision(wb.empty_arm, precision: 2) %> in</strong><%= ", useful load #{number_with_precision(wb.useful_load, precision: 1, delimiter: ',')} lb" if wb.useful_load %>, as of <%= fmt_date(wb.date) %><%= " (#{wb.reason})" if wb.reason.present? %>.</p>
   <% else %><p class="mt-1 text-sm text-slate-500">None recorded.</p><% end %>
 </section>
 
@@ -150,7 +150,7 @@
   <h2 class="text-base font-semibold">Open discrepancies</h2>
   <% if (squawks = @report.open_squawks.to_a).any? %>
     <ul class="mt-2 space-y-1 text-sm">
-      <% squawks.each do |s| %><li><%= squawk_priority_badge(s) %> <%= s.issue_reported %><%= " · #{s.component}" if s.component %> <span class="text-xs text-slate-500">(<%= s.created_at.to_date %>)</span></li><% end %>
+      <% squawks.each do |s| %><li><%= squawk_priority_badge(s) %> <%= s.issue_reported %><%= " · #{s.component}" if s.component %> <span class="text-xs text-slate-500">(<%= fmt_date(s.created_at.to_date) %>)</span></li><% end %>
     </ul>
   <% else %><p class="mt-1 text-sm text-slate-500">None open.</p><% end %>
 </section>

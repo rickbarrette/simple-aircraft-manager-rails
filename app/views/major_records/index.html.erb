@@ -11,7 +11,7 @@
       <tbody>
         <% @records.each do |r| %>
           <tr>
-            <td class="whitespace-nowrap"><%= r.date_performed %></td>
+            <td class="whitespace-nowrap"><%= fmt_date(r.date_performed) %></td>
             <td><%= tag.span r.type_label, class: r.record_type == "repair" ? "badge-orange" : "badge-blue" %></td>
             <td><%= link_to r.title, aircraft_major_record_path(@aircraft, r), class: "link" %><%= tag.div(r.component, class: "text-xs text-slate-500") if r.component %></td>
             <td class="text-xs"><%= r.performed_by %></td>

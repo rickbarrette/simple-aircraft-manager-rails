@@ -13,7 +13,7 @@ Here's what needs attention<%= " on your aircraft" if @items.any? %>.
 
 Your certificates:
 <% @certificates.each do |c| %>
-- <%= c.expired? ? "Expired" : "Expires" %> <%= c.expires_on %>: <%= c.kind_label %> <%= c.number %>
+- <%= c.expired? ? "Expired" : "Expires" %> <%= fmt_date(c.expires_on) %>: <%= c.kind_label %> <%= c.number %>
 <% end %>
 <% end %>
 <% if @drs_due.any? %>

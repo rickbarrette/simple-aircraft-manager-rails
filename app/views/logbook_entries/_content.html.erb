@@ -14,6 +14,6 @@
   <% end %>
   <% if entry.inspection_result %><dt class="text-slate-500">Result</dt><dd><%= entry.inspection_result_label %></dd><% end %>
   <% if entry.signoff_location.present? %><dt class="text-slate-500">Location</dt><dd><%= entry.signoff_location %></dd><% end %>
-  <% if entry.supersedes %><dt class="text-slate-500">Corrects</dt><dd>The <%= entry.supersedes.date %> entry</dd><% end %>
+  <% if entry.supersedes %><dt class="text-slate-500">Corrects</dt><dd>The <%= fmt_date(entry.supersedes.date) %> entry</dd><% end %>
 </dl>
 <div class="mt-3 whitespace-pre-wrap rounded bg-slate-50 p-3 font-mono text-sm"><%= entry.text %></div>

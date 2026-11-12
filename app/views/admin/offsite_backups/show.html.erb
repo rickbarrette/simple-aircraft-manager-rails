@@ -6,7 +6,7 @@
   <section class="card card-body space-y-3">
     <h2 class="card-title">Google Drive</h2>
     <% if @connection.connected? %>
-      <p class="text-sm"><span class="badge-green">Connected</span> <strong><%= @connection.account_email %></strong>, by <%= @connection.connected_by&.display_name %> on <%= @connection.connected_at&.to_date %>.
+      <p class="text-sm"><span class="badge-green">Connected</span> <strong><%= @connection.account_email %></strong>, by <%= @connection.connected_by&.display_name %> on <%= fmt_date(@connection.connected_at&.to_date) %>.
         Folder: <em><%= OffsiteConnection::ROOT_FOLDER %></em>.</p>
       <p class="text-sm">Uploaded files copied: <%= @files_copied %> of <%= @files_total %>.</p>
       <div class="flex flex-wrap gap-2">
@@ -52,7 +52,7 @@
     <ul class="divide-y divide-slate-100 text-sm">
       <% @runs.each do |r| %>
         <li class="flex items-start gap-3 px-4 py-2"><span class="<%= r.ok ? 'badge-green' : 'badge-red' %>"><%= r.ok ? "OK" : "Failed" %></span>
-          <span><span class="font-medium"><%= r.kind == "restore_test" ? "Restore test" : "Backup" %></span> · <%= l(r.created_at.in_time_zone, format: :short) %><span class="block text-xs text-slate-600"><%= r.message %></span></span></li>
+          <span><span class="font-medium"><%= r.kind == "restore_test" ? "Restore test" : "Backup" %></span> · <%= fmt_time(r.created_at.in_time_zone) %><span class="block text-xs text-slate-600"><%= r.message %></span></span></li>
       <% end %>
     </ul>
   <% else %><%= empty_state "None yet." %><% end %>

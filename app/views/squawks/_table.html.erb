@@ -9,10 +9,10 @@
             <%= s.issue_reported %>
             <%= render "squawks/attachments", squawk: s %>
             <% if s.notes.present? %><div class="mt-1 text-xs text-slate-500"><%= s.notes %></div><% end %>
-            <% if s.deferred? %><div class="mt-1 text-xs text-sky-700"><%= s.deferral_action_label %>, <%= s.deferred_at.to_date %>, determined by <%= s.deferred_by_name %> (<%= Squawk::DEFERRAL_ROLES[s.deferred_by_role]&.downcase %>)</div><% end %>
+            <% if s.deferred? %><div class="mt-1 text-xs text-sky-700"><%= s.deferral_action_label %>, <%= fmt_date(s.deferred_at.to_date) %>, determined by <%= s.deferred_by_name %> (<%= Squawk::DEFERRAL_ROLES[s.deferred_by_role]&.downcase %>)</div><% end %>
           </td>
           <td><%= s.component&.to_s || "—" %></td>
-          <td class="whitespace-nowrap text-xs text-slate-500"><%= s.created_at.to_date %><br><%= s.reported_by&.display_name %></td>
+          <td class="whitespace-nowrap text-xs text-slate-500"><%= fmt_date(s.created_at.to_date) %><br><%= s.reported_by&.display_name %></td>
           <td class="whitespace-nowrap text-right">
             <% if owner? %><%= link_to "Resolve", resolution_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm" %><% end %>
             <% if s.deferred? %>

@@ -26,6 +26,7 @@ The first numbered release. Highlights of what Simple Aircraft Manager does as o
 ### Flying
 
 - Flight log grouped by day with the route and totals; long logs load as you scroll.
+- Log flights with no signal: the phone keeps them and sends them when it's back online.
 - Engine monitor data charts, GPS tracks, AirTrail sync, spreadsheet import, and oil and fuel trends.
 
 ### Accounts and security
@@ -33,6 +34,11 @@ The first numbered release. Highlights of what Simple Aircraft Manager does as o
 - Single sign-on (OpenID Connect), sign-in links, account lockout, breached-password check and optional authenticator codes.
 - Command-line account recovery and maintenance commands (health report, records check, restore).
 
-### Help
+### Finding things
 
-- A user guide for every area, in the app under Help.
+- One search box for the logbook, squawks, notes, ADs, documents (including the text of scanned pages), components, flights and major records.
+
+### Help and polish
+
+- A user guide for every area, in the app under Help; release notes (this page) under What's new.
+- Dates read the same way everywhere ("Nov 8, 2026"); keyboard users get a skip link and visible focus; images have descriptions.

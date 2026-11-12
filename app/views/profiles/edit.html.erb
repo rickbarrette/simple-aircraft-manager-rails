@@ -34,7 +34,7 @@
 <section class="card card-body mt-5 max-w-md" id="two-factor">
   <h2 class="card-title">Two-factor sign-in</h2>
   <% if @user.otp_enabled? %>
-    <p class="mt-1 text-sm text-slate-600"><span class="badge-green">On</span> since <%= @user.otp_enabled_at.to_date %>: signing in with your password or an emailed link also asks for a code from your authenticator app. <%= @user.recovery_codes_left %> recovery codes left.</p>
+    <p class="mt-1 text-sm text-slate-600"><span class="badge-green">On</span> since <%= fmt_date(@user.otp_enabled_at.to_date) %>: signing in with your password or an emailed link also asks for a code from your authenticator app. <%= @user.recovery_codes_left %> recovery codes left.</p>
     <%= form_with url: two_factor_path, class: "mt-3 flex flex-wrap items-end gap-2" do |f| %>
       <div><%= label_tag :code, "Current code or a recovery code", class: "label" %><%= text_field_tag :code, nil, required: true, autocomplete: "one-time-code", class: "input w-44" %></div>
       <%= button_tag "New recovery codes", type: "submit", formaction: recovery_codes_two_factor_path, class: "btn-secondary btn-sm" %>
@@ -71,7 +71,7 @@
       <% @user.certificates.each do |c| %>
         <li class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
           <span><span class="font-medium"><%= c.kind_label %></span> · <%= c.number %>
-            <% if c.expires_on %><span class="ml-1 <%= c.expired? ? 'badge-red' : (Date.current + UserCertificate::EXPIRY_WARNING_DAYS >= c.expires_on ? 'badge-orange' : 'badge-gray') %>"><%= c.expired? ? "Expired" : "Expires" %> <%= c.expires_on %></span><% end %></span>
+            <% if c.expires_on %><span class="ml-1 <%= c.expired? ? 'badge-red' : (Date.current + UserCertificate::EXPIRY_WARNING_DAYS >= c.expires_on ? 'badge-orange' : 'badge-gray') %>"><%= c.expired? ? "Expired" : "Expires" %> <%= fmt_date(c.expires_on) %></span><% end %></span>
           <%= button_to "Remove", certificate_path(c), method: :delete, class: "btn-secondary btn-sm", form: { data: { turbo_confirm: "Remove your #{c.kind_label} certificate?" } } %>
         </li>
       <% end %>

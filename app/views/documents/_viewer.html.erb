@@ -11,7 +11,7 @@
   </div>
   <div class="flex justify-center rounded bg-slate-50 p-2">
     <% if current.image? %>
-      <%= image_tag rails_blob_path(current, disposition: :inline), class: "max-h-[80vh] max-w-full" %>
+      <%= image_tag rails_blob_path(current, disposition: :inline), alt: current.filename.to_s, class: "max-h-[80vh] max-w-full" %>
     <% elsif current.content_type == "application/pdf" %>
       <iframe src="<%= rails_blob_path(current, disposition: :inline) %>" class="h-[80vh] w-full"></iframe>
     <% else %>

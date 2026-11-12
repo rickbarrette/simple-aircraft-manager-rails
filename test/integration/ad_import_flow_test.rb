@@ -70,7 +70,7 @@ class AdImportFlowTest < ActionDispatch::IntegrationTest
       assert_equal Date.new(2026, 9, 3), AdWatch.new(@aircraft).start_date # last import less 60 days
       sign_in @owner
       get aircraft_airworthiness_directives_path(@aircraft)
-      assert_includes response.body, "Last import <strong>2026-11-02</strong>"
+      assert_includes response.body, "Last import <strong>Nov 2, 2026</strong>"
     end
     travel_to Time.zone.local(2027, 12, 1) do # over a year: the first Monday-of-month email and the audit flag it
       assert DrsImport.renewal_due?(@aircraft)

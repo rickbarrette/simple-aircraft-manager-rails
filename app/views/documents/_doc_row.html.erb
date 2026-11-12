@@ -3,7 +3,7 @@
     <%= link_to doc.name, aircraft_document_path(aircraft, doc), class: "link font-medium" %>
     <span class="ml-2 text-xs text-slate-500"><%= doc.type_label %> · <%= pluralize(doc.pages.size, "file") %></span>
     <% if doc.legacy_record? %><span class="ml-1 badge-gray" title="Scan of the paper (legacy) records">Legacy record</span><% end %>
-    <% if doc.expires_on %><span class="ml-1 <%= doc.expired? ? 'badge-red' : (Date.current + doc.expiry_warning_days >= doc.expires_on ? 'badge-orange' : 'badge-gray') %>"><%= doc.expired? ? "Expired" : "Expires" %> <%= doc.expires_on %></span><% end %>
+    <% if doc.expires_on %><span class="ml-1 <%= doc.expired? ? 'badge-red' : (Date.current + doc.expiry_warning_days >= doc.expires_on ? 'badge-orange' : 'badge-gray') %>"><%= doc.expired? ? "Expired" : "Expires" %> <%= fmt_date(doc.expires_on) %></span><% end %>
     <% if doc.description.present? %><div class="text-xs text-slate-500"><%= doc.description.truncate(120) %></div><% end %>
   </div>
   <div class="flex items-center gap-2">

@@ -18,7 +18,7 @@
   <div class="card-body space-y-3">
     <% if @entry.signed? %><%= render "logbook_entries/signature", entry: @entry %>
     <% elsif LogbookEntry::RECORD_TYPES.include?(@entry.entry_type) %>
-      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200">Not signed electronically.<%= " Pending correction of the #{@entry.supersedes.date} entry." if @entry.supersedes %> Sign it here, or print it and sign the paper copy.</p>
+      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200">Not signed electronically.<%= " Pending correction of the #{fmt_date(@entry.supersedes.date)} entry." if @entry.supersedes %> Sign it here, or print it and sign the paper copy.</p>
     <% end %>
     <% unless @entry.verified? %>
       <div class="flex flex-wrap items-center justify-between gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">

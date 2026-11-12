@@ -1,7 +1,7 @@
 <% content_for :title, @aircraft.tail_number %>
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
   <div class="flex items-center gap-3">
-    <% if @aircraft.picture.attached? %><%= image_tag rails_blob_path(@aircraft.picture, disposition: :inline), class: "h-16 w-16 rounded-md object-cover" %><% end %>
+    <% if @aircraft.picture.attached? %><%= image_tag rails_blob_path(@aircraft.picture, disposition: :inline), class: "h-16 w-16 rounded-md object-cover", alt: "Photo of #{@aircraft.tail_number}" %><% end %>
     <div>
       <h1 class="text-2xl font-bold"><%= @aircraft.tail_number %> <span class="text-base font-normal text-slate-500"><%= [@aircraft.make, @aircraft.model].compact_blank.join(" ") %></span></h1>
       <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
@@ -67,7 +67,7 @@
 
   <% if @notes.any? %>
     <section class="card"><div class="card-header"><h2 class="card-title">Notes</h2></div>
-      <ul class="divide-y divide-slate-100"><% @notes.each do |n| %><li class="px-4 py-2 text-sm"><%= markdown n.text %><div class="text-xs text-slate-500"><%= n.created_at.to_date %></div></li><% end %></ul></section>
+      <ul class="divide-y divide-slate-100"><% @notes.each do |n| %><li class="px-4 py-2 text-sm"><%= markdown n.text %><div class="text-xs text-slate-500"><%= fmt_date(n.created_at.to_date) %></div></li><% end %></ul></section>
   <% end %>
 
   <% if @documents.any? %>
@@ -81,23 +81,23 @@
   <% if @share.maintenance? %>
     <section class="card"><div class="card-header"><h2 class="card-title">Logbook</h2></div>
       <% if @logbook.any? %><table class="table"><tbody><% @logbook.each do |e| %><tr>
-        <td class="whitespace-nowrap"><%= e.date %></td><td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
+        <td class="whitespace-nowrap"><%= fmt_date(e.date) %></td><td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
         <td class="text-right"><%= hours(e.aircraft_hours_at_entry) %></td><td class="whitespace-pre-wrap text-xs"><%= e.text %></td><td class="text-xs"><%= e.signoff_person %></td></tr><% end %></tbody></table>
       <% else %><%= empty_state "No entries." %><% end %></section>
 
     <div class="grid gap-5 lg:grid-cols-2">
       <section class="card"><div class="card-header"><h2 class="card-title">Inspection History</h2></div>
-        <table class="table"><tbody><% @inspection_history.each do |r| %><tr><td><%= r.date %></td><td><%= r.inspection_type.name %></td><td class="text-right"><%= hours(r.hours_at_inspection) %></td></tr><% end %></tbody></table></section>
+        <table class="table"><tbody><% @inspection_history.each do |r| %><tr><td><%= fmt_date(r.date) %></td><td><%= r.inspection_type.name %></td><td class="text-right"><%= hours(r.hours_at_inspection) %></td></tr><% end %></tbody></table></section>
       <section class="card"><div class="card-header"><h2 class="card-title">AD Compliance History</h2></div>
-        <table class="table"><tbody><% @ad_history.each do |c| %><tr><td class="whitespace-nowrap"><%= c.date_complied %></td><td><%= ad_link(c.airworthiness_directive) %><div class="text-xs text-slate-500"><%= c.airworthiness_directive.short_description %></div></td><td class="text-xs"><%= c.not_applicable? ? "N/A: " : "" %><%= c.compliance_notes %></td></tr><% end %></tbody></table></section>
+        <table class="table"><tbody><% @ad_history.each do |c| %><tr><td class="whitespace-nowrap"><%= fmt_date(c.date_complied) %></td><td><%= ad_link(c.airworthiness_directive) %><div class="text-xs text-slate-500"><%= c.airworthiness_directive.short_description %></div></td><td class="text-xs"><%= c.not_applicable? ? "N/A: " : "" %><%= c.compliance_notes %></td></tr><% end %></tbody></table></section>
     </div>
 
     <section class="card"><div class="card-header"><h2 class="card-title">Major Repairs & Alterations</h2></div>
-      <% if @major_records.any? %><table class="table"><tbody><% @major_records.each do |r| %><tr><td><%= r.date_performed %></td><td><%= r.type_label %></td><td><%= r.title %><div class="text-xs text-slate-500"><%= r.description %></div></td><td class="text-xs"><%= r.stc_number %></td></tr><% end %></tbody></table>
+      <% if @major_records.any? %><table class="table"><tbody><% @major_records.each do |r| %><tr><td><%= fmt_date(r.date_performed) %></td><td><%= r.type_label %></td><td><%= r.title %><div class="text-xs text-slate-500"><%= r.description %></div></td><td class="text-xs"><%= r.stc_number %></td></tr><% end %></tbody></table>
       <% else %><%= empty_state "None recorded." %><% end %></section>
 
     <section class="card"><div class="card-header"><h2 class="card-title">Resolved Squawks</h2></div>
-      <% if @resolved_squawks.any? %><ul class="divide-y divide-slate-100"><% @resolved_squawks.each do |s| %><li class="px-4 py-2 text-sm"><%= squawk_priority_badge(s) %> <%= s.issue_reported %> <span class="text-xs text-slate-500">resolved <%= s.resolved_at&.to_date %></span></li><% end %></ul>
+      <% if @resolved_squawks.any? %><ul class="divide-y divide-slate-100"><% @resolved_squawks.each do |s| %><li class="px-4 py-2 text-sm"><%= squawk_priority_badge(s) %> <%= s.issue_reported %> <span class="text-xs text-slate-500">resolved <%= fmt_date(s.resolved_at&.to_date) %></span></li><% end %></ul>
       <% else %><%= empty_state "None." %><% end %></section>
   <% end %>
 </div>

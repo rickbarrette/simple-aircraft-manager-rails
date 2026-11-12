@@ -3,7 +3,7 @@
 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
   <div class="flex items-center gap-3">
     <% if aircraft.picture.attached? %>
-      <%= image_tag aircraft.picture, class: "h-12 w-12 rounded-md object-cover" %>
+      <%= image_tag aircraft.picture, class: "h-12 w-12 rounded-md object-cover", alt: "" %>
     <% end %>
     <div>
       <h1 class="text-2xl font-bold tracking-tight">

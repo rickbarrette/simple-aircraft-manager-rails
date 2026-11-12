@@ -10,8 +10,8 @@
         <span class="font-medium whitespace-nowrap"><%= day.date.strftime("%a %b %-d, %Y") %><span class="block text-xs font-normal text-slate-500"><%= pluralize(day.flights.size, "flight") %></span></span>
         <span class="min-w-0 basis-full sm:basis-auto">
           <%= day.route.presence || blank %>
-          <% if day.track_log? %><span class="ml-1" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
-          <% if day.engine_data? %><span class="ml-1" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
+          <% if day.track_log? %><span class="ml-1" role="img" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
+          <% if day.engine_data? %><span class="ml-1" role="img" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
           <% if day.pilots.any? %><span class="block text-xs text-slate-500"><%= day.pilots.to_sentence %></span><% end %>
         </span>
         <span class="text-sm tabular-nums sm:text-right"><span class="text-xs text-slate-500 sm:hidden">Tach </span><%= day.tach_time ? hours(day.tach_time) : blank %></span>
@@ -29,8 +29,8 @@
                 <td class="whitespace-nowrap" data-label=""><%= link_to "Leg #{i + 1}", aircraft_flight_log_path(@aircraft, fl), class: "link" %></td>
                 <td class="whitespace-nowrap" data-label="Route">
                   <%= fl.route_summary.presence || blank %>
-                  <% if fl.track_log.attached? %><span class="ml-1" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
-                  <% if fl.engine_data.attached? %><span class="ml-1" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
+                  <% if fl.track_log.attached? %><span class="ml-1" role="img" title="GPS track attached" aria-label="GPS track attached">📍</span><% end %>
+                  <% if fl.engine_data.attached? %><span class="ml-1" role="img" title="Engine data attached" aria-label="Engine data attached">📈</span><% end %>
                 </td>
                 <td class="text-right tabular-nums" data-label="Tach"><%= fl.tach_time ? hours(fl.tach_time) : blank %></td>
                 <td class="text-right tabular-nums" data-label="Hobbs"><%= fl.hobbs_time ? hours(fl.hobbs_time) : blank %></td>

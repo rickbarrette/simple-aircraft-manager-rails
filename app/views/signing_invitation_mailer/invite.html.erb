@@ -1,4 +1,4 @@
-<p><%= @invitation.invited_by&.display_name || "The owner" %> asks you to sign a logbook entry for <strong><%= @entry.aircraft.tail_number %></strong> (<%= @entry.date %>, <%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log).</p>
+<p><%= @invitation.invited_by&.display_name || "The owner" %> asks you to sign a logbook entry for <strong><%= @entry.aircraft.tail_number %></strong> (<%= fmt_date(@entry.date) %>, <%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log).</p>
 <% if @invitation.message.present? %><p><em>“<%= @invitation.message %>”</em></p><% end %>
-<p><%= link_to "Review and sign the entry", @url %> (the link works once, until <%= @invitation.expires_at.to_date %>).</p>
+<p><%= link_to "Review and sign the entry", @url %> (the link works once, until <%= fmt_date(@invitation.expires_at.to_date) %>).</p>
 <p style="color:#64748b;font-size:12px">You'll sign in or create an account for <%= @invitation.email %>, add your certificate, and sign with your password.</p>

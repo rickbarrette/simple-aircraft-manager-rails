@@ -24,6 +24,6 @@ class ConsumableRecordsPagingTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#consumable-records-3", 0
     assert_select "thead", 0 # header only on the first page
     assert_select "h2", text: "Fuel Burn", count: 0
-    assert_includes response.body, "2026-01-01" # the oldest record is reachable
+    assert_includes response.body, "Jan 1, 2026" # the oldest record is reachable
   end
 end

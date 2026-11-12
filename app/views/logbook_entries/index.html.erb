@@ -24,11 +24,11 @@
         <tbody>
           <% @entries.each do |e| %>
             <tr>
-              <td class="whitespace-nowrap"><input type="checkbox" name="ids[]" value="<%= e.id %>" form="print-entries" class="mr-1 align-middle" aria-label="Select the <%= e.date %> entry"><%= link_to e.date, aircraft_logbook_entry_path(@aircraft, e), class: "link" %></td>
+              <td class="whitespace-nowrap"><input type="checkbox" name="ids[]" value="<%= e.id %>" form="print-entries" class="mr-1 align-middle" aria-label="Select the <%= fmt_date(e.date) %> entry"><%= link_to e.date, aircraft_logbook_entry_path(@aircraft, e), class: "link" %></td>
               <td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
               <td class="text-xs"><%= LogbookEntry::ENTRY_TYPES[e.entry_type] %></td>
               <td class="text-right tabular-nums"><%= hours(e.aircraft_hours_at_entry) %></td>
-              <td class="max-w-xl"><%= e.text.truncate(220) %> <%= "📄" if e.document %>
+              <td class="max-w-xl"><%= e.text.truncate(220) %> <% if e.document %><span role="img" title="Has a scanned page" aria-label="Has a scanned page">📄</span><% end %>
                 <% unless e.verified? %><span class="badge-orange" title="Transcribed by Claude<%= " (#{e.transcription_confidence} confidence)" if e.transcription_confidence %>; check it against the scan">Unverified</span><% end %></td>
               <td class="text-xs text-slate-500"><%= e.signoff_person %><%= " ##{e.signoff_certificate_number}" if e.signoff_certificate_number %><% if e.signoff_location.present? %><br><%= e.signoff_location %><% end %>
                 <% if e.signature %><br><span class="<%= e.superseded? ? 'badge-orange' : 'badge-green' %>" title="Signed electronically by <%= e.signature.signer_name %>"><%= e.superseded? ? "Superseded" : "Signed" %></span>

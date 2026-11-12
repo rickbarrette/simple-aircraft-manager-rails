@@ -55,7 +55,7 @@ class SquawkWorkflowTest < ActionDispatch::IntegrationTest
     assert @squawk.resolved?
     assert_equal [ "MAINTENANCE", "AP", "7654321", [] ], [ entry.entry_type, entry.signoff_certificate_type, entry.signoff_certificate_number, entry.missing_record_items ]
     get aircraft_squawks_path(@a)
-    assert_select "a[href='#{aircraft_logbook_entry_path(@a, entry)}']", text: "Logbook 2026-11-01"
+    assert_select "a[href='#{aircraft_logbook_entry_path(@a, entry)}']", text: "Logbook Nov 1, 2026"
 
     other = @a.squawks.create!(priority: 2, issue_reported: "Chipped paint")
     patch resolve_aircraft_squawk_path(@a, other), params: { logbook: "existing", logbook_entry_id: entry.id }

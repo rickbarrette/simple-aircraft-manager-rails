@@ -15,7 +15,7 @@
 <% if @certificates.any? %>
   <h3 style="margin: 16px 0 4px;">Your certificates</h3>
   <ul style="margin: 0; padding-left: 20px;">
-    <% @certificates.each do |c| %><li><strong><%= c.expired? ? "Expired" : "Expires" %> <%= c.expires_on %>:</strong> <%= c.kind_label %> <%= c.number %></li><% end %>
+    <% @certificates.each do |c| %><li><strong><%= c.expired? ? "Expired" : "Expires" %> <%= fmt_date(c.expires_on) %>:</strong> <%= c.kind_label %> <%= c.number %></li><% end %>
   </ul>
 <% end %>
 <% if @drs_due.any? %><p><strong>Refresh the AD list from FAA DRS</strong> (new ADs are found weekly, but revisions and anything missed come from a fresh import):</p>

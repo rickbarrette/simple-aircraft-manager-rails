@@ -3,7 +3,7 @@
   <% if entry.supersedes %>
     <%= f.hidden_field :supersedes_id %>
     <p class="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
-      Correcting the signed <%= link_to "#{entry.supersedes.date} entry", aircraft_logbook_entry_path(aircraft, entry.supersedes), class: "link" %>.
+      Correcting the signed <%= link_to "#{fmt_date(entry.supersedes.date)} entry", aircraft_logbook_entry_path(aircraft, entry.supersedes), class: "link" %>.
       Change what's wrong, save, then sign it: the original's signature is then marked superseded (it's kept, not deleted).
     </p>
   <% end %>

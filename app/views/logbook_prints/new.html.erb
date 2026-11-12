@@ -9,7 +9,7 @@
   <% @entries.each do |e| %><%= hidden_field_tag "ids[]", e.id, id: nil %><% end %>
   <ul class="max-h-48 space-y-1 overflow-y-auto rounded-md bg-slate-50 p-3 text-sm">
     <% @entries.each do |e| %>
-      <li><span class="font-medium"><%= e.date %></span> · <%= LogbookEntry::LOG_TYPES[e.log_type] %> · <%= e.text.truncate(90) %>
+      <li><span class="font-medium"><%= fmt_date(e.date) %></span> · <%= LogbookEntry::LOG_TYPES[e.log_type] %> · <%= e.text.truncate(90) %>
         <% if (missing = e.missing_record_items).any? %><span class="text-xs text-amber-700">(missing <%= missing.to_sentence %>)</span><% end %></li>
     <% end %>
   </ul>

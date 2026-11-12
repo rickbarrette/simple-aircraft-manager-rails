@@ -16,7 +16,7 @@ class SystemDoctor
     doctor = new
     list = doctor.checks
     lines = list.map { |c| "#{{ ok: '  ok ', warn: ' WARN', fail: ' FAIL' }[c.status]}  #{c.name.ljust(22)} #{c.detail}" }
-    [ "Simple Aircraft Manager #{SystemInfo.new.revision} (#{Rails.env})", *lines ].join("\n").then { [ _1, list ] }
+    [ "Simple Aircraft Manager #{SystemInfo.new.version_label} (#{Rails.env})", *lines ].join("\n").then { [ _1, list ] }
   end
 
   private

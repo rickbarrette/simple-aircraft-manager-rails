@@ -31,7 +31,7 @@
 
   <h2 class="<%= h2 %>">3. System description</h2>
   <ul class="<%= p_ %> list-disc pl-5">
-    <li><strong>Software:</strong> Simple Aircraft Manager, version <%= info.revision %> (Ruby <%= RUBY_VERSION %>, Rails <%= Rails.version %>, SQLite <%= SQLite3::SQLITE_VERSION %>).</li>
+    <li><strong>Software:</strong> Simple Aircraft Manager, version <%= info.version_label %> (Ruby <%= RUBY_VERSION %>, Rails <%= Rails.version %>, SQLite <%= SQLite3::SQLITE_VERSION %>).</li>
     <li><strong>Hosting and network:</strong>
       <% if policy.hosting_description.present? %><div class="mt-1"><%= markdown(policy.hosting_description) %></div><% else %>[describe the server, location and network]<% end %>
       <p class="mt-1"><%= ProceduresTemplates.https? ? "Connections use HTTPS only: the system redirects plain HTTP and marks its cookies secure." : "The system is set not to enforce HTTPS itself (FORCE_SSL=false); how connections are protected is described above." %> <%= ProceduresTemplates.sign_in_sentence %></p></li>
@@ -78,7 +78,7 @@
     <li><strong>Confidential information (3.2.3):</strong> records are visible only to the aircraft's users, and to share links an owner creates (scoped and optionally expiring).</li>
     <li><strong>Data corruption (3.2.4):</strong> nightly, the history chains and every signature's seal and fingerprint are checked; administrators are emailed on any problem.</li>
     <li><strong>Outages (3.2.5):</strong> entries are made on paper and signed in ink during an outage (section 13); the database is restored from the latest verified copy or the off-site backup.</li>
-    <li><strong>Software revision control (3.2.6):</strong> the software is updated by deploying a new version built from its source repository; each version and when it ran is recorded by the system. Before an update that changes how records are entered, displayed or accessed, the responsible person reviews it, and these procedures are revised if they're affected.</li>
+    <li><strong>Software revision control (3.2.6):</strong> the software is updated by deploying a new release built from its source repository. Each release has a version (year.month.release, e.g. 2026.11.0) and a build (the exact source commit), with release notes describing what changed (What's new); each version and when it ran is recorded by the system. Before an update that changes how records are entered, displayed or accessed, the responsible person reviews it, and these procedures are revised if they're affected.</li>
     <li><strong>Backups (3.2.7):</strong> see section 3.</li>
   </ul>
 

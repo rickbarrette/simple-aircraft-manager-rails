@@ -38,7 +38,7 @@ class RecordsAudit
       Item.new("certificates", "No active user is relying on an expired certificate", true, true,
                expired.any? ? "Expired (can't sign until renewed): #{expired.map { "#{_1.user.display_name} #{_1.short_label}" }.join(', ')}" : "None expired"),
       Item.new("versions", "Software versions since the last audit", true, true,
-               versions_since.map(&:revision).join(", ").presence || "No changes")
+               versions_since.map { [ _1.version, "build #{_1.revision}" ].compact.join(" ") }.join(", ").presence || "No changes")
     ]
   end
 

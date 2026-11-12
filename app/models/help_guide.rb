@@ -3,7 +3,7 @@
 class HelpGuide
   DIR = Rails.root.join("docs/guide")
   ORDER = %w[README getting-started profile aircraft flights squawks oil-and-fuel components logbook records
-             inspections ads documents major-records sharing administration].freeze
+             inspections ads documents major-records sharing administration changelog].freeze
   OPTIONS = {
     parse: { smart: true },
     render: { hardbreaks: false, unsafe: false },
@@ -18,7 +18,7 @@ class HelpGuide
 
   def self.find(slug)
     return unless ORDER.include?(slug.to_s)
-    path = DIR.join("#{slug}.md")
+    path = slug.to_s == "changelog" ? Rails.root.join("CHANGELOG.md") : DIR.join("#{slug}.md")
     return unless path.file?
     markdown = path.read
     Page.new(slug: slug.to_s, title: markdown[/\A# (.+)$/, 1] || slug.to_s.titleize, markdown: markdown)

@@ -37,13 +37,13 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 4,
-      "fingerprint": "85f8003e1ad00eeb2308faea3dd89e55db1b7a794b9c1a8b05c16466849038ac",
+      "fingerprint": "8a1a5b9527b7a486b508cfeedb365ccb784d3a0736e794ef2b9a81d95a2b669c",
       "check_name": "LinkToHref",
       "message": "Potentially unsafe model attribute in `link_to` href",
       "file": "app/views/admin/about/show.html.erb",
-      "line": 12,
+      "line": 13,
       "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
-      "code": "link_to(SystemInfo.new.revision, SystemInfo.new.revision_url, :class => \"link\", :target => \"_blank\", :rel => \"noopener\", :title => \"This commit on GitHub\")",
+      "code": "link_to(SystemInfo.new.revision, SystemInfo.new.revision_url, :class => \"link font-mono\", :target => \"_blank\", :rel => \"noopener\", :title => \"This commit on GitHub\")",
       "render_path": [
         {
           "type": "controller",

@@ -46,7 +46,7 @@ If single sign-on is broken and `PASSWORD_LOGIN=false` is set, remove that setti
 
 ## About
 
-**About** shows the running version, features and storage, and has tools:
+**About** shows the running version (year.month.release, e.g. 2026.11.0) and build (the exact source commit), with a link to **What's new** (the release notes, also under Help), and the features and storage. It has tools:
 
 - **Send test email** and **Send me this week's reminder** check that email works.
 - **Records integrity**: the last nightly backup, off-site copy and records check. **Back up and check now** runs the backup and check straight away.

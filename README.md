@@ -13,6 +13,10 @@ The port aims to be **easy to host**. It runs as one process with one SQLite dat
 - Authentication uses the Rails 8 built-in generator (sessions plus password reset), emailed sign-in links, and optional OpenID Connect single sign-on (OmniAuth).
 - Prawn renders the printable logbook entries; Commonmarker renders Markdown notes and the user guide.
 
+## Versions
+
+Releases are numbered **year.month.release** (`2026.11.0`, `2026.11.1`, … restarting each month) in [`VERSION`](VERSION), and identified exactly by the **build**: the commit they were built from. Both show on Admin → About; [`CHANGELOG.md`](CHANGELOG.md) has the release notes (in the app: Help → What's new). Each release is tagged `v<version>` in git and on Docker Hub.
+
 ## User guide
 
 The [user guide](docs/guide/README.md) explains how to use the app, for pilots, owners, mechanics and admins. The same pages are shown in the app under **Help**.

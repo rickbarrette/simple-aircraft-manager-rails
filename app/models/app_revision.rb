@@ -10,6 +10,7 @@ class AppRevision < ApplicationRecord
     record = find_or_initialize_by(revision: revision)
     record.first_seen_at ||= now
     record.built_at ||= SystemInfo.new.built_at
+    record.version ||= SystemInfo.new.version
     record.last_seen_at = now
     record.save!
   rescue ActiveRecord::ActiveRecordError => e

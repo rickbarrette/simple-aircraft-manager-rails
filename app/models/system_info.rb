@@ -12,7 +12,16 @@ class SystemInfo
 
   DATABASES = { "Main" => :primary, "Cache" => :cache, "Jobs" => :queue, "Cable" => :cable }.freeze
 
-  # Set by the Docker build (see Dockerfile); in development, read from git.
+  # The release version, YYYY.MM.N (the repository's VERSION file).
+  def version
+    @version ||= Rails.root.join("VERSION").then { _1.exist? ? _1.read.strip.presence : nil } || "unreleased"
+  end
+
+  # "2026.11.0 (build 87e3094)"
+  def version_label = "#{version} (build #{revision})"
+
+  # The build: the commit it was made from. Set by the Docker build (see
+  # Dockerfile); in development, read from git.
   def revision
     @revision ||= ENV["APP_REVISION"].presence ||
                   (Rails.root.join(".git").exist? && `git -C #{Rails.root} rev-parse --short HEAD 2>/dev/null`.strip.presence) ||

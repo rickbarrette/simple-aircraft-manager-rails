@@ -8,10 +8,10 @@
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
       <p class="text-xs uppercase tracking-wide text-slate-500">Version</p>
-      <p class="font-mono text-2xl font-semibold" data-revision>
-        <%= info.revision_url ? link_to(info.revision, info.revision_url, class: "link", target: "_blank", rel: "noopener", title: "This commit on GitHub") : info.revision %>
-      </p>
-      <% if info.repository_url %><p class="mt-1 text-sm"><%= link_to "Source code", info.repository_url, class: "link", target: "_blank", rel: "noopener" %></p><% end %>
+      <p class="font-mono text-2xl font-semibold" data-version><%= info.version %></p>
+      <p class="text-sm text-slate-600" data-revision>Build
+        <%= info.revision_url ? link_to(info.revision, info.revision_url, class: "link font-mono", target: "_blank", rel: "noopener", title: "This commit on GitHub") : tag.span(info.revision, class: "font-mono") %></p>
+      <p class="mt-1 flex flex-wrap gap-x-3 text-sm"><%= link_to "What's new", help_page_path("changelog"), class: "link" %><% if info.repository_url %><%= link_to "Source code", info.repository_url, class: "link", target: "_blank", rel: "noopener" %><% end %></p>
     </div>
     <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
       <div><dt class="text-slate-500">Built</dt><dd class="font-medium"><%= info.built_at ? l(info.built_at.in_time_zone, format: :short) : "—" %></dd></div>
@@ -108,7 +108,7 @@
   <div class="card-header"><h2 class="card-title">Software versions</h2></div>
   <% revisions = AppRevision.latest_first.limit(20) %>
   <% if revisions.any? %>
-    <%= render "pairs", pairs: revisions.map { |r| [ r.revision, "#{l(r.first_seen_at, format: :short)} – #{l(r.last_seen_at, format: :short)}" ] } %>
+    <%= render "pairs", pairs: revisions.map { |r| [ [ r.version, "build #{r.revision}" ].compact.join(" · "), "#{l(r.first_seen_at, format: :short)} – #{l(r.last_seen_at, format: :short)}" ] } %>
   <% else %>
     <%= empty_state "No versions recorded yet." %>
   <% end %>

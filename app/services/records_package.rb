@@ -51,7 +51,7 @@ class RecordsPackage
     check = IntegrityCheck.latest
     <<~TXT
       Maintenance records for #{@aircraft.tail_number} (#{[ @aircraft.make, @aircraft.model ].compact_blank.join(' ')}, S/N #{@aircraft.serial_number.presence || 'not recorded'})
-      Prepared #{@generated_at.utc.strftime('%Y-%m-%d %H:%M UTC')} by Simple Aircraft Manager (#{@source}), software version #{SystemInfo.new.revision}.
+      Prepared #{@generated_at.utc.strftime('%Y-%m-%d %H:%M UTC')} by Simple Aircraft Manager (#{@source}), software version #{SystemInfo.new.version_label}.
 
       Electronic records since: #{@aircraft.electronic_records_since&.iso8601 || 'not stated'}. Earlier records are the paper logbooks#{' (scans marked "legacy record" are in the archive)' if @aircraft.documents.where(legacy_record: true).exists?}.
 
@@ -106,7 +106,7 @@ class RecordsPackage
       # Simple Aircraft Manager on your own computer, to browse #{@aircraft.tail_number.downcase}.sam.zip.
       #   docker compose up -d   then open http://localhost:3000, create an account,
       #   and import #{@aircraft.tail_number.downcase}.sam.zip (Fleet -> Import). Stop: docker compose down
-      # Prepared with software version #{SystemInfo.new.revision}.#{" Source: #{repository}" if repository}
+      # Prepared with software version #{SystemInfo.new.version_label}.#{" Source: #{repository}" if repository}
       services:
         web:
           #{image ? "image: #{image}" : "build: .   # no published image known: build from the source code"}

@@ -20,6 +20,12 @@ To make new recovery codes or turn it off, enter a current code (or a recovery c
 
 Signing in with single sign-on doesn't ask for this code: the sign-on provider handles its own second factor.
 
+## Calendar feed
+
+**Create calendar link** gives a private address for your calendar app (Google Calendar: Other calendars → From URL; iPhone: tap **Subscribe**). It shows what's coming due on your aircraft as all-day events: inspections, ADs, part replacements, TBO and inspection limits, and expiring documents. Items due by hours get a date projected from the aircraft's flying over the past year, marked "projected". Calendar apps refresh it every few hours.
+
+Anyone with the link can see the list, so keep it private; **Make a new link** retires the old one.
+
 ## Certificates
 
 Add each certificate you sign maintenance records with: its kind (A&P, IA, airframe, powerplant, repairman, repair station, pilot…), its number, and for an IA, its expiry. You need one to sign a logbook entry, and the entry records which one you used. An IA expires on March 31 of each odd-numbered year unless renewed; you're reminded 60 days ahead.

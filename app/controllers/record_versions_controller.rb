@@ -3,7 +3,7 @@ class RecordVersionsController < ApplicationController
   include AircraftScoped
   before_action :require_owner!, only: :restore
 
-  SHARED = %w[AirworthinessDirective InspectionType].freeze
+  SHARED = { "AirworthinessDirective" => AirworthinessDirective, "InspectionType" => InspectionType }.freeze
 
   def index
     @type = params[:type].presence_in(RecordVersion.where(aircraft_id: @aircraft.id).distinct.pluck(:item_type))
@@ -16,8 +16,8 @@ class RecordVersionsController < ApplicationController
   # Puts back an AD or inspection type link that was removed (the removal
   # stays in the history, and the restore is recorded as a new link).
   def restore
-    version = RecordVersion.where(aircraft_id: @aircraft.id, event: "unlink", item_type: SHARED).find(params[:id])
-    record = version.item_type.constantize.find_by(id: version.item_id)
+    version = RecordVersion.where(aircraft_id: @aircraft.id, event: "unlink", item_type: SHARED.keys).find(params[:id])
+    record = SHARED.fetch(version.item_type).find_by(id: version.item_id)
     return redirect_to(aircraft_record_versions_path(@aircraft), alert: "That record no longer exists.") unless record
     c = version.changes_hash
     if c["applies_to"] == "component"
@@ -33,8 +33,8 @@ class RecordVersionsController < ApplicationController
 
   # Whether an unlink can still be undone (the record exists and isn't linked that way now).
   def self.restorable?(version, aircraft)
-    return false unless version.event == "unlink" && SHARED.include?(version.item_type)
-    record = version.item_type.constantize.find_by(id: version.item_id) or return false
+    return false unless version.event == "unlink" && SHARED.key?(version.item_type)
+    record = SHARED[version.item_type].find_by(id: version.item_id) or return false
     c = version.changes_hash
     if c["applies_to"] == "component"
       record.component_ids.exclude?(c["component_id"]) && aircraft.components.exists?(id: c["component_id"])

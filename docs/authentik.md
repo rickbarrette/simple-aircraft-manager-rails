@@ -82,6 +82,7 @@ For domain-level forward auth, Authentik matches each line as a regular expressi
 ^https://aircraft\.example\.com/profile/certificates(\?.*)?$
 ^https://aircraft\.example\.com/profile/two_factor(/new|/recovery_codes)?(\?.*)?$
 ^https://aircraft\.example\.com/help/records$
+^https://aircraft\.example\.com/calendar/[A-Za-z0-9]{32}\.ics$
 ```
 
 What each group is for:
@@ -97,8 +98,9 @@ What each group is for:
 | `/profile/certificates` | Invited mechanics adding their certificate before signing | Adding a certificate to their own account; it only returns to a `/sign/…` page |
 | `/profile/two_factor…` | Invited mechanics setting up an authenticator app | Their own two-factor setup |
 | `/help/records` | The "How signing works" link on the signing form | The signing instructions, for signed-in accounts |
+| `/calendar/<token>.ics` | Calendar apps fetching the due-items feed (Profile → Calendar feed) | The due list of that user's aircraft, only with their secret 32-character token; making a new link retires the old one |
 
-Leave out lines for features you don't use: without share links drop `/shared` and Active Storage; if mechanics never sign through invitations drop `/sign`, `/session`, `/profile/…` and `/help/records`.
+Leave out lines for features you don't use: without share links drop `/shared` and Active Storage; without calendar feeds drop `/calendar`; if mechanics never sign through invitations drop `/sign`, `/session`, `/profile/…` and `/help/records`.
 
 Everything else stays behind Authentik: the fleet, records, admin pages, the emailed sign-in links and password resets (an invited mechanic who forgets their password asks the administrator, who resets it under Admin → Users or sends a new invitation), and the Google Drive callback (`/admin/offsite_backup/callback`), which comes back to the administrator's own signed-in browser.
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_020000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -814,6 +814,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_010000) do
     t.datetime "otp_enabled_at"
     t.integer "otp_last_used_at"
     t.json "otp_recovery_codes"
+    t.string "calendar_token"
+    t.index ["calendar_token"], name: "index_users_on_calendar_token", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["sso_uid"], name: "index_users_on_sso_uid", unique: true
   end

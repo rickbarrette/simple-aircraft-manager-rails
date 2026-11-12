@@ -141,6 +141,7 @@ To back up or move a single aircraft with all its files, use **Access & Sharing 
 | Major repairs and alterations | Form 337, STC, and ICA tracking; an STC's ICA can become a tracked recurring inspection. |
 | Weight & balance | History of empty weight and CG (linked to the alteration that changed them) and a loading calculator: takeoff and landing weight and CG against max gross and the CG envelope. The envelope can be entered as CG (inches) or as moment (lb-in/1000, as in POH moment charts and Garmin Pilot). |
 | Status report | A printable maintenance status (91.417(a)(2)): total times, life-limited parts, time since overhaul, inspections, ADs with method and revision, major alterations, open discrepancies. Also on maintenance share links. |
+| Calendar feed | A private iCalendar link (Profile) with everything coming due on your aircraft as all-day events; hour-based items get a date projected from the past year's flying. |
 | Reminders | A Monday email to owners when something is overdue or coming due, and to anyone whose certificate (e.g. an IA) is about to expire; admins also get the records audit due date (needs SMTP; users can turn it off). |
 | Oil and fuel | Records, trend charts, and averages (last 20 intervals, IQR outlier filtering, manual exclusion). |
 | Activity log | Every write is recorded as an `AircraftEvent`. |

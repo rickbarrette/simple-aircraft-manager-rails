@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_one :air_trail_connection, dependent: :destroy
   has_many :certificates, -> { ordered }, class_name: "UserCertificate", dependent: :destroy
   has_many :entry_signatures, dependent: :nullify
+  has_secure_token :calendar_token, length: 32
 
   scope :active, -> { where(disabled_at: nil) }
 

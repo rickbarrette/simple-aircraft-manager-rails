@@ -126,6 +126,11 @@ Rails.application.routes.draw do
   post "sign/:token", to: "invited_signings#create"
   post "sign/:token/account", to: "invited_signings#account", as: :account_invited_signing
 
+  # Calendar feed of what's coming due (secret link; calendar apps can't sign in).
+  get "calendar/:token.ics", to: "calendar_feeds#show", as: :calendar_feed, constraints: { token: /[A-Za-z0-9]{32}/ },
+                              format: false, defaults: { format: "ics" }
+  resource :calendar_token, path: "profile/calendar", only: :create
+
   get "shared/:token", to: "shared#show", as: :shared
   get "shared/:token/report", to: "shared#report", as: :shared_report
 

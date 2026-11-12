@@ -77,7 +77,8 @@ class ComponentsController < ApplicationController
       :component_type_id, :parent_component_id, :manufacturer, :model, :serial_number,
       :install_location, :notes, :status, :date_in_service, :hours_in_service,
       :hours_since_overhaul, :overhaul_date, :overhaul_kind, :tbo_hours, :tbo_days, :inspection_hours,
-      :inspection_days, :replacement_hours, :replacement_days, :tbo_critical, :on_condition,
+      :inspection_days, :replacement_hours, :replacement_days, :replacement_every, :replacement_unit, :tbo_every, :tbo_unit,
+      :inspection_every, :inspection_unit, :tbo_critical, :on_condition,
       :inspection_critical, :replacement_critical, :expires_on
     ).tap do |p|
       # Owners can create a component type inline instead of asking an admin.

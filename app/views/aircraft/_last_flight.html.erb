@@ -1,0 +1,27 @@
+<%# The most recent day's flying (Overview). %>
+<section class="card">
+  <div class="card-header">
+    <h2 class="card-title">Last flight</h2>
+    <%= link_to "Flights →", aircraft_flight_logs_path(aircraft), class: "link text-sm" %>
+  </div>
+  <% if last_day %>
+    <% route = last_day.flat_map { [ _1.departure_location, _1.destination_location ] }.compact_blank.chunk_while { _1 == _2 }.map(&:first) %>
+    <% last_leg = last_day.last %>
+    <% fuel_after = last_day.reverse.find(&:fuel_level_after)&.fuel_level_after %>
+    <% oil_after = last_day.reverse.find(&:oil_level_after)&.oil_level_after %>
+    <dl class="card-body grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+      <dt class="text-slate-500">Date</dt>
+      <dd><%= fmt_date(last_leg.date) %><%= " · #{pluralize(last_day.size, 'leg')}" if last_day.size > 1 %></dd>
+      <% if route.any? %><dt class="text-slate-500">Route</dt><dd><%= route.join(" → ") %></dd><% end %>
+      <dt class="text-slate-500">Flown</dt><dd><%= hours(last_day.sum { _1.tach_time.to_d }) %> hrs tach</dd>
+      <% if last_leg.tach_in %><dt class="text-slate-500">Ended at</dt><dd>Tach <%= hours(last_leg.tach_in) %><%= " · Hobbs #{hours(last_leg.hobbs_in)}" if last_leg.hobbs_in %></dd><% end %>
+      <% if fuel_after %><dt class="text-slate-500">Fuel after</dt><dd><%= number_with_precision(fuel_after, precision: 1, strip_insignificant_zeros: true) %> gal</dd><% end %>
+      <% if oil_after %><dt class="text-slate-500">Oil after</dt><dd><%= number_with_precision(oil_after, precision: 1, strip_insignificant_zeros: true) %> qt</dd><% end %>
+      <% if (notes = last_day.filter_map { _1.notes.presence }).any? %>
+        <dt class="text-slate-500">Notes</dt><dd class="whitespace-pre-line"><%= notes.join("\n") %></dd>
+      <% end %>
+    </dl>
+  <% else %>
+    <%= empty_state "No flights logged yet." %>
+  <% end %>
+</section>

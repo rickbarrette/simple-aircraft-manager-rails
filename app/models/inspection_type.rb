@@ -12,6 +12,8 @@ class InspectionType < ApplicationRecord
   # Short form for the airworthiness status ("VFR only").
   LIMITATIONS = { "no_ifr" => "VFR only", "no_transponder" => "No transponder" }.freeze
 
+  include CalendarInterval
+  calendar_interval :recurring, days: :recurring_days, months: :recurring_months, blank: 0
   include SharedRecordHistory # has_and_belongs_to_many :aircraft and :components, with history
   has_many :inspection_records, dependent: :destroy
   belongs_to :satisfies, class_name: "InspectionType", optional: true
@@ -54,7 +56,8 @@ class InspectionType < ApplicationRecord
     return "One-time" unless recurring?
     parts = []
     parts << "#{recurring_hours.to_s.sub(/\.0\z/, '')} hrs" if recurring_hours.to_f > 0
-    parts << "#{recurring_months} months" if recurring_months > 0
+    parts << recurring_interval_label if recurring_months > 0 && recurring_days.zero?
+    parts << "#{recurring_months} months" if recurring_months > 0 && recurring_days > 0
     parts << "#{recurring_days} days" if recurring_days > 0
     parts.any? ? "Every #{parts.join(' / ')}" : "Recurring"
   end

@@ -30,7 +30,7 @@
                 <% if ad.effective_date || ad.product_type.present? %><div class="text-slate-500"><%= [(ad.effective_date && "Effective #{fmt_date(ad.effective_date)}"), ad.product_type.presence].compact.join(" · ") %></div><% end %>
                 <% if ad.superseded_by.present? %><div class="text-amber-700">Superseded by <%= ad.superseded_by %></div><% end %>
                 <% if ad.conditional? && ad.trigger_condition.present? %><div class="text-slate-500">Trigger: <%= ad.trigger_condition %></div><% end %></td>
-              <td class="text-xs"><%= ad.recurring? ? [ad.recurring_hours.to_f > 0 && "#{hours(ad.recurring_hours)} h", ad.recurring_months > 0 && "#{ad.recurring_months} mo"].select(&:itself).join(" / ") : "One-time" %></td>
+              <td class="text-xs"><%= ad.recurring? ? [ad.recurring_hours.to_f > 0 && "#{hours(ad.recurring_hours)} h", ad.recurring_interval_label].select(&:itself).join(" / ") : "One-time" %></td>
               <td class="text-xs"><%= row.latest ? "#{row.latest.date_complied}#{' (permanent)' if row.latest.permanent?}" : "—" %></td>
               <td class="text-xs"><%= [row.next_due_date&.strftime("%b %Y"), row.next_due_hours && "#{hours(row.next_due_hours)} #{@aircraft.time_basis} (#{hours(row.next_due_hours - @aircraft.current_hours)} h left)"].compact.join(" / ").presence || "—" %></td>
               <td><%= compliance_badge(row.status) %></td>

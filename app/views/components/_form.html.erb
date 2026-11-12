@@ -28,12 +28,12 @@
   <fieldset class="grid gap-4 sm:grid-cols-3">
     <legend class="mb-2 text-sm font-semibold text-slate-900">Limits</legend>
     <%= f.field :replacement_hours, as: :number, label: "Replace every (hrs)" %>
-    <%= f.field :replacement_days, as: :number, label: "Replace every (days)" %>
+    <%= f.interval :replacement, label: "Replace every" %>
     <%= f.field :replacement_critical, as: :checkbox, label: "Replacement critical", hint: "Overdue replacement or expiry grounds the aircraft (oil, filters, ELT battery…)." %>
     <%= f.field :expires_on, as: :date, label: "Expires on",
           hint: "The date marked on the part, e.g. an ELT battery's replacement date (14 CFR 91.207(c): also replace it after 1 hour of cumulative use)." %>
     <%= f.field :tbo_hours, as: :number, label: "TBO (hrs)" %>
-    <%= f.field :tbo_days, as: :number, label: "TBO (days)" %>
+    <%= f.interval :tbo, label: "TBO (calendar)" %>
     <div class="space-y-2">
       <%= f.field :tbo_critical, as: :checkbox, label: "Treat TBO as a hard limit",
             hint: "Under Part 91, TBO is usually the manufacturer's recommendation, unless an AD or the Airworthiness Limitations make it mandatory." %>
@@ -41,7 +41,8 @@
             hint: "Run past TBO based on condition: TBO is shown for reference, never as a limit (this overrides the hard limit)." %>
     </div>
     <%= f.field :inspection_hours, as: :number, label: "Inspect every (hrs)" %>
-    <%= f.field :inspection_days, as: :number, label: "Inspect every (days)" %>
+    <%= f.interval :inspection, label: "Inspect every",
+          hint: "Counted from the component's last service. If an inspection (Inspections tab) applies to this component, that inspection and its records govern and these are ignored." %>
     <%= f.field :inspection_critical, as: :checkbox, label: "Inspection critical" %>
   </fieldset>
 

@@ -68,7 +68,7 @@ class InspectionTypesController < ApplicationController
 
   def type_params
     p = params.require(:inspection_type).permit(:name, :recurring, :effect, :hours_tolerance, :satisfies_id,
-                                                :recurring_hours, :recurring_days, :recurring_months)
+                                                :recurring_hours, :recurring_days, :recurring_months, :recurring_every, :recurring_unit)
     p[:satisfies_id] = scoped_id(@aircraft.applicable_inspection_types, p[:satisfies_id]) if p.key?(:satisfies_id)
     p
   end

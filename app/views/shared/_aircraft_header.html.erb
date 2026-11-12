@@ -18,7 +18,7 @@
       </div>
     </div>
   </div>
-  <div class="flex w-full gap-2 sm:w-auto [&>*]:flex-1 [&>*]:justify-center sm:[&>*]:flex-none">
+  <div class="flex w-full gap-2 sm:w-auto [&>*]:flex-1 [&>*]:justify-center [&>*]:whitespace-nowrap max-sm:[&>*]:px-2 sm:[&>*]:flex-none">
     <%= link_to "Log Flight", new_aircraft_flight_log_path(aircraft), class: "btn-primary" %>
     <%= link_to "Report Squawk", new_aircraft_squawk_path(aircraft), class: "btn-secondary" %>
   </div>

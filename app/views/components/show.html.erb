@@ -24,7 +24,7 @@
       <dt class="text-slate-500">Since OH / service</dt><dd><%= hours(@component.hours_since_overhaul) %></dd>
       <dt class="text-slate-500">TBO</dt><dd><%= @component.tbo_hours ? "#{@component.tbo_hours} h (#{hours(@component.hours_to_tbo)} remaining)" : "—" %></dd>
       <dt class="text-slate-500">Replacement</dt><dd>
-        <%= [@component.replacement_hours && "#{@component.replacement_hours} h", @component.replacement_days && "#{@component.replacement_days} d"].compact.join(" / ").presence || "—" %>
+        <%= [@component.replacement_hours && "#{@component.replacement_hours} h", @component.replacement_interval_label].compact.join(" / ").presence || "—" %>
         <% if (d = @component.next_replacement_date) %><div class="text-xs text-slate-500">Next by <%= fmt_date(d) %></div><% end %>
       </dd>
       <dt class="text-slate-500">Flags</dt>

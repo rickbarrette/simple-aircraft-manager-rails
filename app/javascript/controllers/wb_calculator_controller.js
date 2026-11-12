@@ -15,8 +15,10 @@ export default class extends Controller {
     let moment = this.emptyMomentValue
     let fuelArmMoment = 0
     let fuelGallons = 0
+    let loaded = false
     this.stationTargets.forEach((input) => {
       const qty = parseFloat(input.value) || 0
+      if (qty > 0) loaded = true
       const arm = parseFloat(input.dataset.arm)
       const fuel = input.dataset.fuel === "true"
       const max = parseFloat(input.dataset.max) || 0
@@ -39,6 +41,11 @@ export default class extends Controller {
     this.show("takeoff", takeoff)
     this.show("landing", landing)
 
+    if (!loaded) {
+      this.messagesTarget.replaceChildren(Object.assign(document.createElement("li"), { className: "text-slate-500", textContent: "Enter the loading to check weight and CG." }))
+      this.draw(takeoff, landing)
+      return
+    }
     if (this.maxGrossValue && takeoff.weight > this.maxGrossValue) {
       messages.push([ "bad", `Takeoff weight is ${(takeoff.weight - this.maxGrossValue).toFixed(1)} lb over the maximum of ${this.maxGrossValue} lb.` ])
     }

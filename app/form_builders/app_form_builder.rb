@@ -39,6 +39,23 @@ class AppFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
+  # A calendar interval: a number and a days / months / years choice
+  # (see CalendarInterval).
+  #   <%= f.interval :replacement, label: "Replace every" %>
+  def interval(name, label:, hint: nil, wrapper: {})
+    every = :"#{name}_every"
+    errors = object.errors[every]
+    @template.content_tag(:div, class: wrapper[:class]) do
+      label(every, label, class: "label") +
+        @template.content_tag(:div, class: "flex gap-2") do
+          number_field(every, class: "input min-w-0 flex-1", min: 1, step: 1, inputmode: "numeric") +
+            select(:"#{name}_unit", CalendarInterval::UNITS.invert, {}, class: "input w-auto", "aria-label": "#{label} unit")
+        end +
+        (hint ? @template.content_tag(:p, hint, class: "hint") : "".html_safe) +
+        errors.map { |e| @template.content_tag(:p, "#{label} #{e}", class: "field-error") }.join.html_safe
+    end
+  end
+
   def errors_summary
     return "".html_safe unless object&.errors&.any?
     @template.content_tag(:div, class: "rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200") do

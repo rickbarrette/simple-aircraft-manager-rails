@@ -31,8 +31,8 @@
               <td class="text-right tabular-nums"><%= hours(c.hours_in_service) %></td>
               <td class="text-right tabular-nums"><%= hours(c.hours_since_overhaul) %></td>
               <td class="text-xs text-slate-600">
-                <% if c.replacement_critical? && (c.replacement_hours || c.replacement_days) %>
-                  Replace: <%= [c.replacement_hours && "#{c.replacement_hours} h", c.replacement_days && "#{c.replacement_days} d"].compact.join(" / ") %><br>
+                <% if c.replacement_critical? && (c.replacement_hours || c.replacement_calendar?) %>
+                  Replace: <%= [c.replacement_hours && "#{c.replacement_hours} h", c.replacement_interval_label].compact.join(" / ") %><br>
                 <% end %>
                 <% if c.tbo_critical? && c.tbo_hours %>TBO: <%= c.tbo_hours %> h<%= " (on condition)" if c.on_condition? %><br><% end %>
                 <% if c.expires_on %>Expires: <%= fmt_date(c.expires_on) %><% end %>

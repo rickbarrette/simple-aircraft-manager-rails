@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_050000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -353,6 +353,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_050000) do
     t.datetime "updated_at", null: false
     t.date "expires_on"
     t.string "overhaul_kind"
+    t.integer "replacement_months"
+    t.integer "tbo_months"
+    t.integer "inspection_months"
     t.index ["aircraft_id"], name: "index_components_on_aircraft_id"
     t.index ["component_type_id"], name: "index_components_on_component_type_id"
     t.index ["parent_component_id"], name: "index_components_on_parent_component_id"

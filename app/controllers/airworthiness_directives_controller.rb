@@ -68,7 +68,7 @@ class AirworthinessDirectivesController < ApplicationController
   def ad_params
     p = params.require(:airworthiness_directive).permit(
       :name, :short_description, :required_action, :compliance_type, :trigger_condition, :recurring,
-      :recurring_hours, :recurring_months, :recurring_days, :bulletin_type, :mandatory, :document_id, :document_url
+      :recurring_hours, :recurring_months, :recurring_days, :recurring_every, :recurring_unit, :bulletin_type, :mandatory, :document_id, :document_url
     )
     p[:document_id] = scoped_id(@aircraft.documents, p[:document_id])
     p

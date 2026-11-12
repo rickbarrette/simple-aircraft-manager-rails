@@ -1,9 +1,14 @@
 class Component < ApplicationRecord
   include Versioned
+  include CalendarInterval
   STATUSES = { "SPARE" => "Spare Part", "IN-USE" => "In Service", "DISPOSED" => "Disposed" }.freeze
   # What "since overhaul" counts from, and how logbooks abbreviate it.
   OVERHAUL_KINDS = { "major" => "Major overhaul", "factory_overhaul" => "Factory overhaul", "factory_new" => "Factory new or rebuilt (zero time)" }.freeze
   OVERHAUL_ABBREVIATIONS = { "major" => "SMOH", "factory_overhaul" => "SFOH", "factory_new" => "SNEW" }.freeze
+
+  calendar_interval :replacement, days: :replacement_days, months: :replacement_months
+  calendar_interval :tbo, days: :tbo_days, months: :tbo_months
+  calendar_interval :inspection, days: :inspection_days, months: :inspection_months
 
   belongs_to :aircraft, optional: true
   belongs_to :parent_component, class_name: "Component", optional: true
@@ -66,7 +71,7 @@ class Component < ApplicationRecord
   def expired?(today = Date.current) = expires_on.present? && today > expires_on
 
   def next_replacement_date
-    overhaul_date + replacement_days.days if replacement_days && overhaul_date
+    replacement_after(overhaul_date)
   end
 
   # :overdue / :due_soon / :ok / nil (not tracked) for display on the components tab.

@@ -51,8 +51,8 @@ module Compliance
       end
     end
 
-    if ad.recurring? && ad.recurring_months.positive?
-      due = end_of_month_after(compliance.date_complied, ad.recurring_months)
+    if ad.recurring? && ad.recurring_calendar?
+      due = next_due(ad.due_rule, date: compliance.date_complied, hours: nil)[:date]
       result.next_due_date = due
       if today > due
         rank = OVERDUE

@@ -20,6 +20,8 @@ The first numbered release. Highlights of what Simple Aircraft Manager does as o
 - Airworthiness status from ADs, inspections, squawks, components and documents, with Part 91 rules (annual as 100-hour, overruns, IFR and transponder limits).
 - ADs: FAA DRS import with an AD baseline per model, and a weekly search for newly published ADs covering the aircraft, engine, propeller and every installed component.
 - Logbook: templates, engine and propeller times, sub-components (a new entry can also record them serviced or replaced), printable entries for the paper logbook, and AI transcription of scanned pages.
+- The Overview shows what's coming due in the next 30 days or 10 hours, and the last day's flying.
+- Intervals are entered as a number of days, months or years: no converting months to days.
 - Calendar feed of everything coming due, with dates projected from recent flying for hour-based items.
 - Weight and balance with a loading calculator (CG envelope in inches or lb-in/1000).
 

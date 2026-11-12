@@ -158,7 +158,7 @@ class Airworthiness
       if c.replacement_critical? && (due = c.next_replacement_date)
         if @today >= due
           overdue = true
-          desc = "Replace every #{c.replacement_days} days. Last serviced #{c.overhaul_date}."
+          desc = "Replace every #{c.replacement_interval_label}. Last serviced #{c.overhaul_date}."
         elsif @today + DAYS_WARNING >= due
           approaching = true
           desc = "Replace in #{(due - @today).to_i} days."

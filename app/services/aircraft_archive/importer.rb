@@ -215,7 +215,8 @@ module AircraftArchive
           status: Component::STATUSES.key?(data["status"]) ? data["status"] : "SPARE",
           date_in_service: date(data["date_in_service"]) || Date.new(1900, 1, 1), hours_in_service: num(data["hours_in_service"]) || 0,
           hours_since_overhaul: num(data["hours_since_overhaul"]) || 0, overhaul_date: date(data["overhaul_date"]),
-          **data.slice(*%w[tbo_hours tbo_days inspection_hours inspection_days replacement_hours replacement_days]).symbolize_keys,
+          **data.slice(*%w[tbo_hours tbo_days inspection_hours inspection_days replacement_hours replacement_days
+                                  tbo_months inspection_months replacement_months]).symbolize_keys,
           **data.slice(*%w[tbo_critical on_condition inspection_critical replacement_critical]).transform_values { _1 == true }.symbolize_keys
         )
         c.save!(validate: false)

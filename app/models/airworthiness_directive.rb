@@ -6,6 +6,9 @@ class AirworthinessDirective < ApplicationRecord
   }.freeze
   BULLETIN_LABELS = { "ad" => "AD", "saib" => "SAIB", "sb" => "SB", "alert" => "Alert", "other" => "Bulletin" }.freeze
 
+  include CalendarInterval
+  calendar_interval :recurring, days: :recurring_days, months: :recurring_months, blank: 0
+
   belongs_to :document, optional: true
   include SharedRecordHistory # has_and_belongs_to_many :aircraft and :components, with history
   has_many :ad_compliances, dependent: :destroy
@@ -45,9 +48,9 @@ class AirworthinessDirective < ApplicationRecord
   def conditional? = compliance_type == "conditional"
   def bulletin_label = BULLETIN_LABELS[bulletin_type]
 
-  # Recurrence rule for next-due math (AD status uses hours and months).
+  # Recurrence rule for next-due math.
   def due_rule
-    { hours: recurring_hours.to_f, months: recurring_months, days: 0 } if recurring?
+    { hours: recurring_hours.to_f, months: recurring_months, days: recurring_days } if recurring?
   end
 
   def latest_compliance_for(aircraft)

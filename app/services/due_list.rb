@@ -3,11 +3,16 @@
 # Items due by hours get a projected date from the aircraft's flying over
 # the past year. Used by the calendar feed.
 class DueList
-  Item = Data.define(:key, :title, :date, :projected, :due_hours, :kind, :path) do
-    def overdue?(today = Date.current) = date < today
+  # past_hours: the hours have already run out (the date is then today).
+  Item = Data.define(:key, :title, :date, :projected, :due_hours, :kind, :path, :past_hours) do
+    def overdue?(today = Date.current) = past_hours || date < today
   end
 
   # Hours flown per day over the past year (nil when it hasn't flown).
+  # What counts as coming up soon (Overview).
+  SOON_DAYS = 30
+  SOON_HOURS = 10
+
   def self.daily_rate(aircraft, today: Date.current)
     hours = aircraft.flight_logs.where(date: (today - 365)..today).sum(:tach_time).to_f
     hours.positive? ? hours / 365.0 : nil
@@ -25,6 +30,13 @@ class DueList
     (inspections + ads + components + documents).compact.sort_by { [ _1.date, _1.title ] }
   end
 
+  # Due in the next SOON_DAYS days or SOON_HOURS hours (or overdue).
+  def soon
+    horizon = @today + SOON_DAYS
+    hours_limit = @now_hours + SOON_HOURS
+    items.select { |i| i.date <= horizon || (i.due_hours && i.due_hours <= hours_limit) }
+  end
+
   private
 
   # The date it's due: the calendar date, or when the hours run out at the
@@ -35,7 +47,8 @@ class DueList
     use = [ date, projected ].compact.min
     return unless use
     Item.new(key: key, title: title, date: use, projected: use == projected && projected != date, kind: kind, path: path,
-             due_hours: hours_left ? (@now_hours + hours_left.to_d).round(1) : nil)
+             due_hours: hours_left ? (@now_hours + hours_left.to_d).round(1) : nil,
+             past_hours: !hours_left.nil? && hours_left.negative? && use == projected)
   end
 
   def hours_left(due_hours) = due_hours ? due_hours.to_d - @now_hours : nil
@@ -55,20 +68,23 @@ class DueList
     end
   end
 
+  # A component's own "Inspect every" counts from its last service; when an
+  # inspection type covers the component, that inspection (tracked from its
+  # records, under inspections) governs instead.
   def components
-    @aircraft.components.in_use.includes(:component_type).flat_map do |c|
+    @aircraft.components.in_use.includes(:component_type, :inspection_types).flat_map do |c|
       label = "#{c} #{c.model}".strip
       path = @urls.aircraft_component_path(@aircraft, c)
       since_service = c.hours_since_overhaul.to_d
       [
         (item("replace-#{c.id}", "Replace #{label}", "component", path, date: c.next_replacement_date,
-              hours_left: c.replacement_hours && c.replacement_hours - since_service) if c.replacement_hours || c.replacement_days),
+              hours_left: c.replacement_hours && c.replacement_hours - since_service) if c.replacement_hours || c.replacement_calendar?),
         (item("tbo-#{c.id}", "#{label} reaches TBO", "component", path,
-              date: c.tbo_days && c.overhaul_date ? c.overhaul_date + c.tbo_days : nil,
-              hours_left: c.tbo_hours && c.tbo_hours - since_service) if (c.tbo_hours || c.tbo_days) && !c.on_condition?),
+              date: c.tbo_after(c.overhaul_date),
+              hours_left: c.tbo_hours && c.tbo_hours - since_service) if (c.tbo_hours || c.tbo_calendar?) && !c.on_condition?),
         (item("inspect-#{c.id}", "Inspect #{label}", "component", path,
-              date: c.inspection_days && c.overhaul_date ? c.overhaul_date + c.inspection_days : nil,
-              hours_left: c.inspection_hours && c.inspection_hours - since_service) if c.inspection_hours || c.inspection_days),
+              date: c.inspection_after(c.overhaul_date),
+              hours_left: c.inspection_hours && c.inspection_hours - since_service) if (c.inspection_hours || c.inspection_calendar?) && c.inspection_types.empty?),
         (item("expires-#{c.id}", "#{label} expires", "component", path, date: c.expires_on) if c.expires_on)
       ]
     end

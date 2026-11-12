@@ -8,7 +8,7 @@ The **Inspections** tab shows each required inspection, when it was last done an
 
 **+ Inspection Type** adds your own, for example a recurring inspection from an STC's instructions for continued airworthiness. Each type has:
 
-- **Recurring** every so many hours, calendar months (due at the end of the month) and/or days.
+- **Recurring** every so many hours and/or days, months or years (months and years are calendar months, due at the end of the month).
 - What overdue means: **grounds the aircraft**, **no IFR flight** (91.411), **transponder can't be used** (91.413), or **advisory only**.
 - **Overrun allowance**: for the 100-hour, 10 hours. Done late within it, the next one counts from when it was due (91.409(b)).
 - **Also counts as**: an annual also counts as the 100-hour.

@@ -146,7 +146,8 @@ module AircraftArchive
         expires_on: c.expires_on&.iso8601, notes: c.notes, status: c.status, date_in_service: c.date_in_service&.iso8601, hours_in_service: dec(c.hours_in_service),
         hours_since_overhaul: dec(c.hours_since_overhaul), overhaul_date: c.overhaul_date&.iso8601, tbo_hours: c.tbo_hours,
         tbo_days: c.tbo_days, inspection_hours: c.inspection_hours, inspection_days: c.inspection_days,
-        replacement_hours: c.replacement_hours, replacement_days: c.replacement_days, tbo_critical: c.tbo_critical,
+        replacement_hours: c.replacement_hours, replacement_days: c.replacement_days,
+        replacement_months: c.replacement_months, tbo_months: c.tbo_months, inspection_months: c.inspection_months, tbo_critical: c.tbo_critical,
         on_condition: c.on_condition, inspection_critical: c.inspection_critical, replacement_critical: c.replacement_critical }
     end
 

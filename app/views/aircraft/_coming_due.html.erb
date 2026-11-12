@@ -1,0 +1,22 @@
+<%# What's due in the next few weeks or hours (Overview). %>
+<section class="card">
+  <div class="card-header">
+    <h2 class="card-title">Coming due</h2>
+    <span class="text-xs text-slate-500">next <%= DueList::SOON_DAYS %> days or <%= DueList::SOON_HOURS %> hrs</span>
+  </div>
+  <% if due.any? %>
+    <ul class="divide-y divide-slate-100">
+      <% due.each do |item| %>
+        <li class="flex items-baseline justify-between gap-3 px-4 py-2 text-sm">
+          <%= link_to item.title, item.path, class: [ "hover:underline", ("font-medium text-red-700" if item.overdue?) ] %>
+          <span class="shrink-0 text-right text-xs text-slate-500 tabular-nums">
+            <% if item.overdue? %>overdue<% else %><%= "~" if item.projected %><%= fmt_date(item.date) %><% end %><%= " · at #{hours(item.due_hours)} hrs" if item.due_hours %>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+    <% if due.any?(&:projected) %><p class="hint px-4 pb-3">"~" dates are estimated from the last year's flying.</p><% end %>
+  <% else %>
+    <%= empty_state "Nothing coming due soon." %>
+  <% end %>
+</section>

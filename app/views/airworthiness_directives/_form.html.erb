@@ -15,7 +15,7 @@
   </div>
   <div class="grid gap-4 sm:grid-cols-3">
     <%= f.field :recurring_hours, as: :number, step: 0.1, label: "Every (hours)" %>
-    <%= f.field :recurring_months, as: :number, label: "Every (months)" %>
+    <%= f.interval :recurring, label: "Every", hint: "Months and years are due at the end of the month." %>
     <%= f.field :document_id, as: :select, label: "Reference document", collection: document_options(aircraft) %>
   </div>
   <%= f.field :document_url, label: "Link to AD document", placeholder: "https://…",

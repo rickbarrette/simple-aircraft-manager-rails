@@ -1,0 +1,38 @@
+<% content_for :title, @search.query.present? ? "Search: #{@search.query}" : "Search" %>
+<h1 class="mb-4 text-2xl font-bold">Search</h1>
+<%= form_with url: search_path, method: :get, class: "card card-body mb-5 flex flex-wrap items-end gap-2", data: { turbo_action: "advance" } do %>
+  <div class="min-w-0 flex-1">
+    <%= label_tag :q, "Search for", class: "label" %>
+    <%= search_field_tag :q, @search.query, class: "input", autofocus: @search.query.blank?, placeholder: "e.g. magneto, KOQU, 2011-10-09, oil filter" %>
+  </div>
+  <% if @fleet.size > 1 %>
+    <div>
+      <%= label_tag :aircraft_id, "Aircraft", class: "label" %>
+      <%= select_tag :aircraft_id, options_for_select([ [ "All aircraft", "" ] ] + @fleet.map { [ _1.tail_number, _1.id ] }, @aircraft&.id), class: "input" %>
+    </div>
+  <% end %>
+  <%= submit_tag "Search", class: "btn-primary", name: nil %>
+<% end %>
+
+<% if @search.query.present? && !@search.searchable? %>
+  <p class="text-sm text-slate-600">Type at least two characters.</p>
+<% elsif @search.searchable? %>
+  <p class="mb-3 text-sm text-slate-600" role="status"><%= pluralize(@search.count, "result") %> for “<%= @search.query %>”<%= " on #{@aircraft.tail_number}" if @aircraft %>.</p>
+  <div class="space-y-5">
+    <% @search.results.each do |kind, results| %>
+      <section class="card">
+        <div class="card-header"><h2 class="card-title"><%= SiteSearch::KINDS[kind] %> <span class="text-sm font-normal text-slate-500">(<%= results.size %><%= "+" if results.size >= SiteSearch::LIMIT %>)</span></h2></div>
+        <ul class="divide-y divide-slate-100">
+          <% results.each do |r| %>
+            <li class="px-4 py-2">
+              <%= link_to r.title, r.path, class: "link font-medium" %>
+              <% if @fleet.size > 1 && !@aircraft %><span class="badge-gray ml-1"><%= r.aircraft&.tail_number %></span><% end %>
+              <% if r.snippet %><p class="mt-0.5 text-sm text-slate-600"><%= highlight(r.snippet, @search.query, highlighter: '<mark class="rounded bg-amber-100 px-0.5 text-slate-900">\1</mark>') %></p><% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    <% end %>
+    <% if @search.results.empty? %><div class="card"><%= empty_state "Nothing found. Try a shorter word, a part number or an airport code." %></div><% end %>
+  </div>
+<% end %>

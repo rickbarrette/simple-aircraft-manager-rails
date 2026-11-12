@@ -116,6 +116,7 @@ Rails.application.routes.draw do
   end
 
   get "airports/search", to: "airports#search", as: :airport_search
+  get "search", to: "searches#show", as: :search
   get "help", to: "help#show", as: :help
   get "help/records", to: "help#show", defaults: { page: "records" }, as: :records_help
   get "help/:page", to: "help#show", as: :help_page, constraints: { page: /[a-z-]+/ }

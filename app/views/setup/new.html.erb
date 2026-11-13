@@ -7,6 +7,7 @@
     <%= f.field :email_address, as: :email, label: "Email", required: true %>
     <%= f.field :password, as: :password, required: true, hint: "At least #{User::PASSWORD_MIN} characters; not one known from a data breach." %>
     <%= f.field :password_confirmation, as: :password, required: true %>
+    <p class="hint">Simple Aircraft Manager is provided as is, without warranty, and is not approved by the FAA or any other aviation authority. It is up to you to verify that using it for your aircraft and operation is legal and suitable. The full disclaimer is under Help once you're signed in.</p>
     <%= f.submit "Create Admin Account", class: "btn-primary w-full justify-center" %>
   <% end %>
 </div>

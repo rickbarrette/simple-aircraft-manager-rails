@@ -29,6 +29,14 @@ class UserGuideTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the disclaimer says verifying legal use is up to the user, and every page links to it" do
+    get help_page_path("disclaimer")
+    assert_response :success
+    assert_includes response.body, "up to you to verify"
+    get root_path
+    assert_select "footer a[href='#{help_page_path("disclaimer")}']", "Disclaimer"
+  end
+
   test "only guide pages can be opened" do
     get "/help/secrets"
     assert_response :not_found

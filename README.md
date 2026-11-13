@@ -4,6 +4,8 @@ A Ruby on Rails port of [Simple Aircraft Manager](https://github.com/marbindrako
 
 The port aims to be **easy to host**. It runs as one process with one SQLite database directory. It needs no Postgres, no Redis, no nginx, and no Kubernetes.
 
+> **Disclaimer:** this software is provided as is, without warranty of any kind, and is not approved or endorsed by the FAA or any other aviation authority. If you use it, **it is up to you to verify that it is legal and suitable for your use case.** See [Disclaimer](#disclaimer).
+
 ## Stack
 
 - Ruby 4.0, Rails 8.1, SQLite. Solid Queue, Solid Cache, and Solid Cable all use SQLite, so there are no extra services. Background jobs (nightly backup and records check, weekly reminders and AD search) run in the web process.
@@ -195,6 +197,16 @@ The MCP server for AI agents, invitation codes, per-aircraft feature switches, t
 ### Added in this port
 
 AirTrail sync and export, an airport database, FAA DRS AD import, spreadsheet flight import, engine monitor data (CGR-30P/C) with interactive charts, AvLab and Blackstone oil analysis import with trends, multiple squawk attachments with a photo viewer, AI logbook transcription with Claude (images and PDFs), printable logbook entries, electronic signatures and recordkeeping along the lines of AC 120-78B (record history, nightly integrity checks, records package, procedures and audits), off-site backup to Google Drive, a user guide, and an installable PWA.
+
+## Disclaimer
+
+Simple Aircraft Manager is provided **as is**, without warranty of any kind, express or implied. It is not approved, certified or endorsed by the FAA or any other aviation authority.
+
+**If you use it, it is up to you to verify that it is legal and suitable for your use case**: that its electronic records, signatures, backups and procedures meet the regulations that apply to your aircraft and operation (for example 14 CFR 43.9, 43.11 and 91.417, and AC 120-78B), and that anything you print, export or share from it is acceptable to whoever receives it. Check with your aviation authority, mechanic or inspector, insurer and, where needed, a lawyer.
+
+The airworthiness status, due dates, AD matches and projections come only from the records entered and may be incomplete or wrong. They don't replace the aircraft's actual records or the pilot in command's airworthiness decision (14 CFR 91.7). To the extent the law allows, the authors and contributors are not liable for any damage, loss, fine or injury arising from use of the software. Whoever hosts an instance is responsible for running, securing and backing it up.
+
+The same text is in the app under Help → [Disclaimer](docs/guide/disclaimer.md).
 
 ## License
 

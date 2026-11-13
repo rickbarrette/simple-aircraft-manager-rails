@@ -2,6 +2,12 @@
 
 Each release has a **version** (year.month.release, e.g. 2026.11.0) and a **build** (the exact source commit, shown on Admin → About). The newest release is first.
 
+## 2026.11.2
+
+### Changes
+
+- A **disclaimer**: the app is provided as is, without warranty, and isn't approved by the FAA or any other aviation authority. If you use it, it's up to you to verify that it's legal and suitable for your aircraft and operation. The full text is under Help → Disclaimer and in the README. A short notice is at the foot of every page and on the first-run setup screen, and Admin → About links to it.
+
 ## 2026.11.1
 
 ### Fixes

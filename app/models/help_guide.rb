@@ -3,7 +3,7 @@
 class HelpGuide
   DIR = Rails.root.join("docs/guide")
   ORDER = %w[README getting-started profile aircraft flights squawks oil-and-fuel components logbook records
-             inspections ads documents major-records sharing administration changelog].freeze
+             inspections ads documents major-records sharing administration disclaimer changelog].freeze
   OPTIONS = {
     parse: { smart: true },
     render: { hardbreaks: false, unsafe: false },

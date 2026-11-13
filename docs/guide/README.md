@@ -4,6 +4,8 @@ Simple Aircraft Manager keeps the records and status of a small fleet: hours, sq
 
 The same pages are in the app under **Help** in the menu.
 
+> **Disclaimer:** the app is provided as is, without warranty, and is not FAA-approved. It is up to you to verify that using it is legal and suitable for your operation. See the [Disclaimer](disclaimer.md).
+
 ## Everyone
 
 - [Getting started](getting-started.md): signing in, roles, finding your way around, phones
@@ -27,5 +29,9 @@ The same pages are in the app under **Help** in the menu.
 ## Administrators
 
 - [Administration](administration.md): users, settings, templates, backups and off-site backup to Google Drive, recordkeeping procedures and audits
+
+## Legal
+
+- [Disclaimer](disclaimer.md): no warranty; verifying legal use is up to you
 
 Installing and hosting the app is covered in the project's main README.

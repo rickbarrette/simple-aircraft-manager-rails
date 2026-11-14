@@ -92,4 +92,13 @@ class WorkflowPolishTest < ActionDispatch::IntegrationTest
     assert_select "dl > div.detail-row > dt", minimum: 6
     assert_select "dl dd.col-span-3", 0
   end
+
+  test "the profile is two columns on a wide screen: the account and its security, then the rest" do
+    sign_in @owner
+    get edit_profile_path
+    assert_select "div.max-w-5xl > div", 2
+    assert_select "div.max-w-5xl > div:first-child h2", text: "Account"
+    assert_select "div.max-w-5xl > div:first-child #two-factor"
+    assert_select "div.max-w-5xl > div:last-child #device"
+  end
 end

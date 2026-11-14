@@ -2943,6 +2943,7 @@ en:
   profiles:
     edit:
       your_profile: Your Profile
+      account: Account
       email: Email
       weekly_maintenance_reminders: Weekly maintenance reminders
       a_monday_email_about_overdue: A Monday email about overdue and upcoming inspections, ADs, parts and documents on aircraft you own, and certificates of yours about to expire. Only sent when something needs attention.

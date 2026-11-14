@@ -1,138 +1,147 @@
 <h1 class="mb-4 text-2xl font-bold"><%= t(".your_profile") %></h1>
-<%= form_with model: @user, url: profile_path, method: :patch, class: "card card-body space-y-4 max-w-md" do |f| %>
-  <%= f.errors_summary %>
-  <%= f.field :name %>
-  <%= f.field :email_address, as: :email, label: t(".email") %>
-  <%= f.field :reminder_emails, as: :checkbox, label: t(".weekly_maintenance_reminders"),
-        hint: t(MailSettings.configured? ? ".a_monday_email_about_overdue" : ".reminders_once_email_set_up") %>
-  <div>
-    <%= f.label :time_zone, t(".time_zone"), class: "label" %>
-    <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones,
-          { include_blank: t(".time_zone_automatic", zone: device_time_zone_label || t(".time_zone_unknown")) },
-          class: "input" %>
-    <p class="hint"><%= t(".time_zone_hint", now: fmt_time(Time.current)) %></p>
-  </div>
-  <%= f.field :password, as: :password, label: t(".new_password"), hint: t(".leave_blank_to_keep_your", min: User::PASSWORD_MIN), autocomplete: "new-password" %>
-  <%= f.field :password_confirmation, as: :password, label: t(".confirm_new_password"), autocomplete: "new-password" %>
-  <div>
-    <%= label_tag "user[current_password]", t(".current_password"), class: "label" %>
-    <%= password_field_tag "user[current_password]", nil, id: "user_current_password", class: "input", autocomplete: "current-password" %>
-    <p class="hint"><%= t(".needed_to_change_your_email_html", sso_uid: (t(".signed_up_with_and_never", so: Sso.label) if Sso.enabled? && @user.sso_uid?)) %></p>
-  </div>
-  <%= f.submit t(".save") %>
-<% end %>
-
-<% if Sso.enabled? %>
-  <section class="card card-body mt-5 max-w-md">
-    <h2 class="card-title"><%= t(".single_sign_on") %></h2>
-    <% if @user.sso_uid? %>
-      <p class="mt-1 text-sm text-slate-600"><%= t(".your_account_is_linked_to_html", so: Sso.label) %></p>
-      <% if Sso.password_login? %>
-        <div class="mt-3"><%= button_to t(".unlink", so: Sso.label), sso_link_path, method: :delete, class: "btn-secondary btn-sm",
-              form: { data: { turbo_confirm: t(".unlink_you_ll_sign_in", so: Sso.label) } } %></div>
-      <% end %>
-    <% else %>
-      <p class="mt-1 text-sm text-slate-600"><%= t(".link_your_account_to_sign_html", so: Sso.label) %></p>
-      <div class="mt-3"><%= button_to t(".link", so: Sso.label), "/auth/#{Sso::PROVIDER}", class: "btn-secondary btn-sm", data: { turbo: false } %></div>
+<%# One column on a phone; on a wide screen, the account and its security on
+    the left and everything else on the right. %>
+<div class="grid max-w-5xl items-start gap-5 lg:grid-cols-2">
+  <div class="space-y-5">
+    <%= form_with model: @user, url: profile_path, method: :patch, class: "card card-body space-y-4" do |f| %>
+      <h2 class="card-title"><%= t(".account") %></h2>
+      <%= f.errors_summary %>
+      <%= f.field :name %>
+      <%= f.field :email_address, as: :email, label: t(".email") %>
+      <%= f.field :reminder_emails, as: :checkbox, label: t(".weekly_maintenance_reminders"),
+            hint: t(MailSettings.configured? ? ".a_monday_email_about_overdue" : ".reminders_once_email_set_up") %>
+      <div>
+        <%= f.label :time_zone, t(".time_zone"), class: "label" %>
+        <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones,
+              { include_blank: t(".time_zone_automatic", zone: device_time_zone_label || t(".time_zone_unknown")) },
+              class: "input" %>
+        <p class="hint"><%= t(".time_zone_hint", now: fmt_time(Time.current)) %></p>
+      </div>
+      <%= f.field :password, as: :password, label: t(".new_password"), hint: t(".leave_blank_to_keep_your", min: User::PASSWORD_MIN), autocomplete: "new-password" %>
+      <%= f.field :password_confirmation, as: :password, label: t(".confirm_new_password"), autocomplete: "new-password" %>
+      <div>
+        <%= label_tag "user[current_password]", t(".current_password"), class: "label" %>
+        <%= password_field_tag "user[current_password]", nil, id: "user_current_password", class: "input", autocomplete: "current-password" %>
+        <p class="hint"><%= t(".needed_to_change_your_email_html", sso_uid: (t(".signed_up_with_and_never", so: Sso.label) if Sso.enabled? && @user.sso_uid?)) %></p>
+      </div>
+      <%= f.submit t(".save") %>
     <% end %>
-  </section>
-<% end %>
 
-<section class="card card-body mt-5 max-w-md" id="two-factor">
-  <h2 class="card-title"><%= t(".two_factor_sign_in") %></h2>
-  <% if @user.otp_enabled? %>
-    <p class="mt-1 text-sm text-slate-600"><span class="badge-green"><%= t(".on") %></span> <%= t(".since_signing_in_with_your_html", to_date: (fmt_date(@user.otp_enabled_at.to_date)), recovery_codes_left: @user.recovery_codes_left) %></p>
-    <%= form_with url: two_factor_path, class: "mt-3 flex flex-wrap items-end gap-2" do |f| %>
-      <div><%= label_tag :code, t(".current_code_or_a_recovery"), class: "label" %><%= text_field_tag :code, nil, required: true, autocomplete: "one-time-code", class: "input w-44" %></div>
-      <%= button_tag t(".new_recovery_codes"), type: "submit", formaction: recovery_codes_two_factor_path, class: "btn-secondary btn-sm" %>
-      <%= button_tag t(".turn_off"), type: "submit", name: "_method", value: "delete", class: "btn-secondary btn-sm", data: { turbo_confirm: t(".turn_off_two_factor_sign") } %>
+    <% if Sso.enabled? %>
+      <section class="card card-body">
+        <h2 class="card-title"><%= t(".single_sign_on") %></h2>
+        <% if @user.sso_uid? %>
+          <p class="mt-1 text-sm text-slate-600"><%= t(".your_account_is_linked_to_html", so: Sso.label) %></p>
+          <% if Sso.password_login? %>
+            <div class="mt-3"><%= button_to t(".unlink", so: Sso.label), sso_link_path, method: :delete, class: "btn-secondary btn-sm",
+                  form: { data: { turbo_confirm: t(".unlink_you_ll_sign_in", so: Sso.label) } } %></div>
+          <% end %>
+        <% else %>
+          <p class="mt-1 text-sm text-slate-600"><%= t(".link_your_account_to_sign_html", so: Sso.label) %></p>
+          <div class="mt-3"><%= button_to t(".link", so: Sso.label), "/auth/#{Sso::PROVIDER}", class: "btn-secondary btn-sm", data: { turbo: false } %></div>
+        <% end %>
+      </section>
     <% end %>
-  <% else %>
-    <p class="mt-1 text-sm text-slate-600"><%= t(".add_a_code_from_an_html", enabled: (t(".signing_in_with_uses_its", so: Sso.label) if Sso.enabled?)) %></p>
-    <div class="mt-3"><%= link_to t(".set_up"), new_two_factor_path, class: "btn-secondary btn-sm" %></div>
-  <% end %>
-</section>
 
-<section class="card card-body mt-5 max-w-md" id="calendar">
-  <h2 class="card-title"><%= t(".calendar_feed") %></h2>
-  <p class="mt-1 text-sm text-slate-600"><%= t(".what_s_coming_due_on") %></p>
-  <% if @user.calendar_token.present? %>
-    <% feed = "#{Sso.app_url}#{calendar_feed_path(@user.calendar_token)}" %>
-    <input class="input mt-3 font-mono text-xs" value="<%= feed %>" readonly aria-label="<%= t(".calendar_feed_address") %>">
-    <div class="mt-2 flex flex-wrap gap-2">
-      <%= link_to t(".subscribe"), feed.sub(%r{\Ahttps?://}, "webcal://"), class: "btn-secondary btn-sm" %>
-      <%= button_to t(".make_a_new_link"), calendar_token_path, class: "btn-secondary btn-sm",
-            form: { data: { turbo_confirm: t(".replace_the_calendar_link_calendars") } } %>
-    </div>
-    <p class="hint"><%= t(".anyone_with_this_link_can") %></p>
-  <% else %>
-    <div class="mt-3"><%= button_to t(".create_calendar_link"), calendar_token_path, class: "btn-secondary btn-sm" %></div>
-  <% end %>
-</section>
-
-<section class="card card-body mt-5 max-w-md" id="certificates">
-  <h2 class="card-title"><%= t(".certificates") %></h2>
-  <p class="mt-1 text-sm text-slate-600"><%= t(".your_faa_certificates_for_signing") %></p>
-  <% if @user.certificates.any? %>
-    <ul class="mt-3 divide-y divide-slate-100 rounded-md ring-1 ring-slate-200">
-      <% @user.certificates.each do |c| %>
-        <li class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
-          <span><span class="font-medium"><%= c.kind_label %></span> · <%= c.number %>
-            <% if c.expires_on %><span class="ml-1 <%= c.expired? ? 'badge-red' : (Date.current + UserCertificate::EXPIRY_WARNING_DAYS >= c.expires_on ? 'badge-orange' : 'badge-gray') %>"><%= c.expired? ? t(".expired") : t(".expires") %> <%= fmt_date(c.expires_on) %></span><% end %></span>
-          <%= button_to t(".remove"), certificate_path(c), method: :delete, class: "btn-secondary btn-sm", form: { data: { turbo_confirm: t(".remove_your_certificate", kind_label: c.kind_label) } } %>
-        </li>
+    <section class="card card-body" id="two-factor">
+      <h2 class="card-title"><%= t(".two_factor_sign_in") %></h2>
+      <% if @user.otp_enabled? %>
+        <p class="mt-1 text-sm text-slate-600"><span class="badge-green"><%= t(".on") %></span> <%= t(".since_signing_in_with_your_html", to_date: (fmt_date(@user.otp_enabled_at.to_date)), recovery_codes_left: @user.recovery_codes_left) %></p>
+        <%= form_with url: two_factor_path, class: "mt-3 flex flex-wrap items-end gap-2" do |f| %>
+          <div><%= label_tag :code, t(".current_code_or_a_recovery"), class: "label" %><%= text_field_tag :code, nil, required: true, autocomplete: "one-time-code", class: "input w-44" %></div>
+          <%= button_tag t(".new_recovery_codes"), type: "submit", formaction: recovery_codes_two_factor_path, class: "btn-secondary btn-sm" %>
+          <%= button_tag t(".turn_off"), type: "submit", name: "_method", value: "delete", class: "btn-secondary btn-sm", data: { turbo_confirm: t(".turn_off_two_factor_sign") } %>
+        <% end %>
+      <% else %>
+        <p class="mt-1 text-sm text-slate-600"><%= t(".add_a_code_from_an_html", enabled: (t(".signing_in_with_uses_its", so: Sso.label) if Sso.enabled?)) %></p>
+        <div class="mt-3"><%= link_to t(".set_up"), new_two_factor_path, class: "btn-secondary btn-sm" %></div>
       <% end %>
-    </ul>
-  <% end %>
-  <%= form_with model: UserCertificate.new, url: certificates_path, class: "mt-3 grid gap-2 sm:grid-cols-[1fr_8rem]" do |f| %>
-    <%= f.select :kind, UserCertificate::KINDS.invert, {}, class: "input", "aria-label": t(".kind_of_certificate") %>
-    <%= f.text_field :number, class: "input", placeholder: t(".number"), required: true, maxlength: 40, "aria-label": t(".certificate_number") %>
-    <div class="sm:col-span-2 flex flex-wrap items-end gap-2">
-      <div><%= f.label :expires_on, t(".expires_optional"), class: "label" %><%= f.date_field :expires_on, class: "input" %></div>
-      <%= f.submit t(".add_certificate"), class: "btn-secondary" %>
-    </div>
-    <p class="hint sm:col-span-2"><%= t(".an_inspection_authorization_expires_on") %></p>
-  <% end %>
-</section>
+    </section>
 
-<section class="card card-body mt-5 max-w-md space-y-4" id="device">
-  <h2 class="card-title"><%= t(".this_device") %></h2>
-  <div data-controller="install">
-    <h3 class="text-sm font-semibold"><%= t(".install_heading") %></h3>
-    <p class="hint"><%= t(".install_why") %></p>
-    <p class="mt-2 text-sm text-emerald-700" data-install-target="installed" hidden><%= t(".installed") %></p>
-    <button type="button" class="btn-secondary btn-sm mt-2" data-install-target="button" data-action="install#install" hidden><%= t(".install") %></button>
-    <p class="mt-2 text-sm text-slate-600" data-install-target="ios" hidden><%= t(".install_ios_html") %></p>
-    <p class="mt-2 text-sm text-slate-600" data-install-target="other" hidden><%= t(".install_other") %></p>
+    <section class="card card-body">
+      <h2 class="card-title"><%= t(".sessions") %></h2>
+      <% others = @user.sessions.where.not(id: Current.session.id).count %>
+      <p class="mt-1 text-sm text-slate-600">
+        <%= t(".you_re_signed_in_on", count: others) %>
+        <%= t(".sessions_unused_for_sign_out_html", days: (Authentication::SESSION_IDLE_TIMEOUT.in_days.to_i)) %>
+      </p>
+      <% if others.positive? %>
+        <div class="mt-3"><%= button_to t(".sign_out_everywhere_else"), other_sessions_path, method: :delete, class: "btn-secondary btn-sm" %></div>
+      <% end %>
+    </section>
   </div>
-  <div data-controller="push" data-push-key-value="<%= PushKeys.public_key %>" data-push-url-value="<%= push_subscription_path %>" data-push-test-url-value="<%= test_push_subscription_path %>">
-    <h3 class="text-sm font-semibold"><%= t(".notifications_heading") %></h3>
-    <p class="hint"><%= t(".notifications_what") %></p>
-    <p class="mt-2 whitespace-pre-line text-sm text-slate-600" data-push-target="status" role="status"></p>
-    <div class="mt-2 flex flex-wrap gap-2">
-      <button type="button" class="btn-secondary btn-sm" data-push-target="on" data-action="push#turnOn" hidden><%= t(".notifications_on") %></button>
-      <button type="button" class="btn-secondary btn-sm" data-push-target="off" data-action="push#turnOff" hidden><%= t(".notifications_off") %></button>
-      <button type="button" class="btn-secondary btn-sm" data-push-target="test" data-action="push#sendTest" hidden><%= t(".notifications_test") %></button>
-    </div>
+
+  <div class="space-y-5">
+    <section class="card card-body" id="calendar">
+      <h2 class="card-title"><%= t(".calendar_feed") %></h2>
+      <p class="mt-1 text-sm text-slate-600"><%= t(".what_s_coming_due_on") %></p>
+      <% if @user.calendar_token.present? %>
+        <% feed = "#{Sso.app_url}#{calendar_feed_path(@user.calendar_token)}" %>
+        <input class="input mt-3 font-mono text-xs" value="<%= feed %>" readonly aria-label="<%= t(".calendar_feed_address") %>">
+        <div class="mt-2 flex flex-wrap gap-2">
+          <%= link_to t(".subscribe"), feed.sub(%r{\Ahttps?://}, "webcal://"), class: "btn-secondary btn-sm" %>
+          <%= button_to t(".make_a_new_link"), calendar_token_path, class: "btn-secondary btn-sm",
+                form: { data: { turbo_confirm: t(".replace_the_calendar_link_calendars") } } %>
+        </div>
+        <p class="hint"><%= t(".anyone_with_this_link_can") %></p>
+      <% else %>
+        <div class="mt-3"><%= button_to t(".create_calendar_link"), calendar_token_path, class: "btn-secondary btn-sm" %></div>
+      <% end %>
+    </section>
+
+    <section class="card card-body" id="certificates">
+      <h2 class="card-title"><%= t(".certificates") %></h2>
+      <p class="mt-1 text-sm text-slate-600"><%= t(".your_faa_certificates_for_signing") %></p>
+      <% if @user.certificates.any? %>
+        <ul class="mt-3 divide-y divide-slate-100 rounded-md ring-1 ring-slate-200">
+          <% @user.certificates.each do |c| %>
+            <li class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
+              <span><span class="font-medium"><%= c.kind_label %></span> · <%= c.number %>
+                <% if c.expires_on %><span class="ml-1 <%= c.expired? ? 'badge-red' : (Date.current + UserCertificate::EXPIRY_WARNING_DAYS >= c.expires_on ? 'badge-orange' : 'badge-gray') %>"><%= c.expired? ? t(".expired") : t(".expires") %> <%= fmt_date(c.expires_on) %></span><% end %></span>
+              <%= button_to t(".remove"), certificate_path(c), method: :delete, class: "btn-secondary btn-sm", form: { data: { turbo_confirm: t(".remove_your_certificate", kind_label: c.kind_label) } } %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+      <%= form_with model: UserCertificate.new, url: certificates_path, class: "mt-3 grid gap-2 sm:grid-cols-[1fr_8rem]" do |f| %>
+        <%= f.select :kind, UserCertificate::KINDS.invert, {}, class: "input", "aria-label": t(".kind_of_certificate") %>
+        <%= f.text_field :number, class: "input", placeholder: t(".number"), required: true, maxlength: 40, "aria-label": t(".certificate_number") %>
+        <div class="sm:col-span-2 flex flex-wrap items-end gap-2">
+          <div><%= f.label :expires_on, t(".expires_optional"), class: "label" %><%= f.date_field :expires_on, class: "input" %></div>
+          <%= f.submit t(".add_certificate"), class: "btn-secondary" %>
+        </div>
+        <p class="hint sm:col-span-2"><%= t(".an_inspection_authorization_expires_on") %></p>
+      <% end %>
+    </section>
+
+    <section class="card card-body space-y-4" id="device">
+      <h2 class="card-title"><%= t(".this_device") %></h2>
+      <div data-controller="install">
+        <h3 class="text-sm font-semibold"><%= t(".install_heading") %></h3>
+        <p class="hint"><%= t(".install_why") %></p>
+        <p class="mt-2 text-sm text-emerald-700" data-install-target="installed" hidden><%= t(".installed") %></p>
+        <button type="button" class="btn-secondary btn-sm mt-2" data-install-target="button" data-action="install#install" hidden><%= t(".install") %></button>
+        <p class="mt-2 text-sm text-slate-600" data-install-target="ios" hidden><%= t(".install_ios_html") %></p>
+        <p class="mt-2 text-sm text-slate-600" data-install-target="other" hidden><%= t(".install_other") %></p>
+      </div>
+      <div data-controller="push" data-push-key-value="<%= PushKeys.public_key %>" data-push-url-value="<%= push_subscription_path %>" data-push-test-url-value="<%= test_push_subscription_path %>">
+        <h3 class="text-sm font-semibold"><%= t(".notifications_heading") %></h3>
+        <p class="hint"><%= t(".notifications_what") %></p>
+        <p class="mt-2 whitespace-pre-line text-sm text-slate-600" data-push-target="status" role="status"></p>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <button type="button" class="btn-secondary btn-sm" data-push-target="on" data-action="push#turnOn" hidden><%= t(".notifications_on") %></button>
+          <button type="button" class="btn-secondary btn-sm" data-push-target="off" data-action="push#turnOff" hidden><%= t(".notifications_off") %></button>
+          <button type="button" class="btn-secondary btn-sm" data-push-target="test" data-action="push#sendTest" hidden><%= t(".notifications_test") %></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card card-body">
+      <h2 class="card-title"><%= t(".integrations") %></h2>
+      <p class="mt-1 text-sm text-slate-600">
+        <%= link_to t(".airtrail_sync"), air_trail_connection_path, class: "link" %>:
+        <%= t(".push_the_flights_you_log_html", off: (current_user.air_trail_connection&.enabled? ? "on" : "off")) %>
+      </p>
+    </section>
   </div>
-</section>
-
-<section class="card card-body mt-5 max-w-md">
-  <h2 class="card-title"><%= t(".sessions") %></h2>
-  <% others = @user.sessions.where.not(id: Current.session.id).count %>
-  <p class="mt-1 text-sm text-slate-600">
-    <%= t(".you_re_signed_in_on", count: others) %>
-    <%= t(".sessions_unused_for_sign_out_html", days: (Authentication::SESSION_IDLE_TIMEOUT.in_days.to_i)) %>
-  </p>
-  <% if others.positive? %>
-    <div class="mt-3"><%= button_to t(".sign_out_everywhere_else"), other_sessions_path, method: :delete, class: "btn-secondary btn-sm" %></div>
-  <% end %>
-</section>
-
-<section class="card card-body mt-5 max-w-md">
-  <h2 class="card-title"><%= t(".integrations") %></h2>
-  <p class="mt-1 text-sm text-slate-600">
-    <%= link_to t(".airtrail_sync"), air_trail_connection_path, class: "link" %>:
-    <%= t(".push_the_flights_you_log_html", off: (current_user.air_trail_connection&.enabled? ? "on" : "off")) %>
-  </p>
-</section>
+</div>

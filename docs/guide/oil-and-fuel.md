@@ -8,7 +8,7 @@ It charts consumption and shows averages over the last 20 intervals, ignoring ou
 
 ## Oil analysis
 
-The **Oil Analysis** tab tracks lab results and charts wear metals over time.
+**Oil & Fuel → Oil analysis** tracks lab results and charts wear metals over time.
 
 - **Import report**: upload an AvLab or Blackstone PDF. Every sample on it, including earlier ones, is added unless it's already there.
 - **+ Add Oil Analysis**: enter results by hand.

@@ -14,6 +14,17 @@ module ApplicationHelper
     value ? value.in_time_zone.strftime("%b %-d, %Y %H:%M") : "—"
   end
 
+  # Secondary actions (imports, exports, printing, tools) behind one "More"
+  # button, so each section shows only its main action. The block gives the
+  # items: links or button_to forms with class "menu-item".
+  def more_menu(label = "More", small: false, &block)
+    tag.details(class: "relative", data: { controller: "dropdown", action: "click@window->dropdown#closeOutside keydown.esc@window->dropdown#close" }) do
+      tag.summary(class: [ "btn-secondary list-none [&::-webkit-details-marker]:hidden", ("btn-sm" if small) ], title: "More actions") do
+        safe_join([ label, tag.span("▾", class: "text-xs", "aria-hidden": true) ], " ")
+      end + tag.div(capture(&block), class: "menu")
+    end
+  end
+
   AIRWORTHINESS_COLORS = { "RED" => "red", "LIMITED" => "blue", "ORANGE" => "orange", "GREEN" => "green", "INFO" => "gray" }.freeze
 
   def airworthiness_badge(status, large: false)

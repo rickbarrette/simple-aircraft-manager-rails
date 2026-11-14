@@ -96,8 +96,8 @@
         [ "Backups kept", "#{Setting.integer('backups_kept')} (in storage/backups)" ],
         [ "Off-site backup", OffsiteConnection.connected? ? ((o = OffsiteRun.latest_backup) ? tag.span("#{o.ok ? 'OK' : 'FAILED'} #{fmt_date(o.created_at.to_date)}", class: (o.ok && o.recent? ? nil : "badge-orange")) + " · Google Drive (#{OffsiteConnection.current.account_email})" : "Google Drive connected, none yet") : link_to("not set up", admin_offsite_backup_path, class: "badge-orange") ],
         [ "Procedures", (r = ProceduresRevision.current) ? "Revision #{r.number}, adopted #{fmt_date(r.adopted_at.to_date)}" : tag.span("not adopted", class: "badge-orange") ],
-        [ "Last audit", AuditRun.latest ? "#{AuditRun.latest.performed_at.to_date} · #{AuditRun.latest.passed ? 'passed' : 'items not passed'}" : "none yet" ],
-        [ "Next audit due", AuditRun.due_soon? ? tag.span(AuditRun.next_due.to_s, class: "badge-orange") : AuditRun.next_due.to_s ]
+        [ "Last audit", AuditRun.latest ? "#{fmt_date(AuditRun.latest.performed_at.to_date)} · #{AuditRun.latest.passed ? 'passed' : 'items not passed'}" : "none yet" ],
+        [ "Next audit due", AuditRun.due_soon? ? tag.span(fmt_date(AuditRun.next_due), class: "badge-orange") : fmt_date(AuditRun.next_due) ]
       ] %>
   <% if check && !check.ok %>
     <ul class="list-disc space-y-1 px-8 pb-3 text-sm text-red-700"><% check.problems.each do |p| %><li><%= p %></li><% end %></ul>

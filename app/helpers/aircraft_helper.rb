@@ -6,8 +6,7 @@ module AircraftHelper
       [ "Components", aircraft_components_path(aircraft), %w[components] ],
       [ "Squawks", aircraft_squawks_path(aircraft), %w[squawks] ],
       [ "Flights", aircraft_flight_logs_path(aircraft), %w[flight_logs flight_imports air_trail_exports airport_codes] ],
-      [ "Oil & Fuel", aircraft_consumable_records_path(aircraft), %w[consumable_records] ],
-      [ "Oil Analysis", aircraft_oil_analyses_path(aircraft), %w[oil_analyses] ],
+      [ "Oil & Fuel", aircraft_consumable_records_path(aircraft), %w[consumable_records oil_analyses] ],
       [ "Logbook", aircraft_logbook_entries_path(aircraft), %w[logbook_entries] ],
       [ "Inspections", aircraft_inspections_path(aircraft), %w[inspections inspection_types inspection_records] ],
       [ "ADs", aircraft_airworthiness_directives_path(aircraft), %w[airworthiness_directives ad_compliances ad_imports] ],
@@ -15,9 +14,8 @@ module AircraftHelper
       [ "Major Records", aircraft_major_records_path(aircraft), %w[major_records] ],
       [ "W&B", aircraft_weight_balance_records_path(aircraft), %w[weight_balance_records loading_setups] ],
       [ "Notes", aircraft_notes_path(aircraft), %w[notes] ],
-      [ "Activity", aircraft_events_path(aircraft), %w[events record_versions] ],
-      ([ "Access & Sharing", aircraft_aircraft_roles_path(aircraft), %w[aircraft_roles share_tokens] ] if owner?)
-    ].compact
+      [ "Activity", aircraft_events_path(aircraft), %w[events record_versions] ]
+    ]
   end
 
   def component_options(aircraft, include_blank: true)

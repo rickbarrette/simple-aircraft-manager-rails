@@ -17,11 +17,11 @@ Never share your password or let someone else sign while you're signed in: a sig
 
 ## Mistakes
 
-A signed entry can't be edited or deleted. Open it and choose **Correct this entry** (owners): a new entry starts from the original. Fix it, save it and sign it. The original stays, marked “Superseded by a correction”, with a link to the correction.
+A signed entry can't be edited or deleted. Open it and choose **More → Correct this entry** (owners): a new entry starts from the original. Fix it, save it and sign it. The original stays, marked “Superseded by a correction”, with a link to the correction.
 
 ## Someone else did the work
 
-The owner can choose **Ask someone to sign** on the entry. The mechanic gets a one-time email link (valid for 14 days), signs in or creates their own account, adds their certificate and signs.
+The owner can choose **More → Ask someone to sign** on the entry. The mechanic gets a one-time email link (valid for 14 days), signs in or creates their own account, adds their certificate and signs.
 
 If they prefer paper, print the entry (**Print for logbook**), have it signed in ink, and keep the paper with the logbooks (scan it into Documents).
 

@@ -30,7 +30,7 @@ class DocumentBulkUploadTest < ActionDispatch::IntegrationTest
   test "owner sees the bulk page; pilots and outsiders can't use it" do
     sign_in @owner
     get aircraft_documents_path(@a)
-    assert_select "a[href='#{new_bulk_aircraft_documents_path(@a)}']", text: "Bulk Upload"
+    assert_select "a[href='#{new_bulk_aircraft_documents_path(@a)}']", text: "Upload several files"
     get new_bulk_aircraft_documents_path(@a)
     assert_response :success
     assert_select "form[data-controller='bulk-upload'][data-bulk-upload-url-value='/rails/active_storage/direct_uploads']"

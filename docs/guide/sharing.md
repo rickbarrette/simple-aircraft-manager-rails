@@ -1,6 +1,6 @@
 # Access, sharing and transfer
 
-The **Access & Sharing** tab is for the aircraft's owners.
+**Access & sharing** is for the aircraft's owners: open it from **More** at the top of the aircraft's pages.
 
 ## People
 
@@ -21,7 +21,7 @@ Give it a label and optionally an expiry. Documents only appear if their visibil
 
 ## Backup and transfer
 
-**Download .sam.zip** exports the whole aircraft with its files. Anyone can load it with **Fleet → Import** (in this app or the original Simple Aircraft Manager) to make a copy they own, for example when the aircraft is sold. Use a new tail number if the original is already in that app. If an older download arrived as a folder (Safari can unzip downloads by itself), compress the folder back into a zip (in Finder: right-click → Compress) and import that.
+**Download .sam.zip** exports the whole aircraft with its files. Anyone can load it with **Fleet → More → Import from a .sam.zip archive** (in this app or the original Simple Aircraft Manager) to make a copy they own, for example when the aircraft is sold. Use a new tail number if the original is already in that app. If an older download arrived as a folder (Safari can unzip downloads by itself), compress the folder back into a zip (in Finder: right-click → Compress) and import that.
 
 ## Activity
 

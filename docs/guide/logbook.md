@@ -27,7 +27,7 @@ Search the text, filter by logbook, and show only unverified transcribed entries
 
 ## Importing scanned logbooks
 
-**Import scans** uploads photos or PDFs of paper logbook pages as a document, in file-name order (name them `page-001`, `page-002`…). If the administrator has set an Anthropic API key, Claude reads them and adds each entry to the logbook.
+**More → Import scans** uploads photos or PDFs of paper logbook pages as a document, in file-name order (name them `page-001`, `page-002`…). If the administrator has set an Anthropic API key, Claude reads them and adds each entry to the logbook.
 
 Transcribed entries are marked **unverified** until someone compares each with the scan and chooses **Matches the scan: mark verified**; the app then moves to the next one. Fix any mistake with **Edit** first.
 
@@ -35,7 +35,7 @@ Mark the scans as **legacy records** (see [Documents](documents.md)): the paper 
 
 ## Printing entries for the paper logbook
 
-Tick entries and choose **Print selected**, or **Print for logbook** on one entry. Choose Avery 5163/8163 or 5164/8164 labels, or half-letter or letter pages (letter also fits full-sheet labels); on a part-used label sheet, pick the first free label. Print at 100% (“Actual size”), not “Fit to page”, and try a plain sheet first.
+Tick entries and choose **Print selected** (it appears once an entry is ticked), or **Print for logbook** on one entry (under **More** on an unsigned entry). Choose Avery 5163/8163 or 5164/8164 labels, or half-letter or letter pages (letter also fits full-sheet labels); on a part-used label sheet, pick the first free label. Print at 100% (“Actual size”), not “Fit to page”, and try a plain sheet first.
 
 Each printed entry has a line to sign by hand: a printed entry isn't a record until it's signed. An entry signed electronically prints with its electronic signature and fingerprint instead.
 

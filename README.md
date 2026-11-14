@@ -120,7 +120,7 @@ The app also makes a verified copy of the main database every night in `storage/
 
 For an off-site copy without extra tools, **Admin → Off-site Backup** connects a Google Drive account: each night the verified database copy and any new uploaded files are copied there, and a restore test checks them. Setup and restoring are in the [administration guide](docs/guide/administration.md#off-site-backup-to-google-drive). Keep `SECRET_KEY_BASE` somewhere safe off the server: stored secrets (API keys, the Drive connection) and electronic signature seals depend on it.
 
-To back up or move a single aircraft with all its files, use **Access & Sharing → Download .sam.zip** (or `bin/rails "sam:export[N12345]"`). Import it from **Fleet → Import** (or `bin/rails "sam:import[file.sam.zip,owner@example.com]"`). The archive format is the original Simple Aircraft Manager's, so archives move between the two apps.
+To back up or move a single aircraft with all its files, use **More → Download .sam.zip** on the aircraft (or `bin/rails "sam:export[N12345]"`). Import it from **Fleet → More → Import from a .sam.zip archive** (or `bin/rails "sam:import[file.sam.zip,owner@example.com]"`). The archive format is the original Simple Aircraft Manager's, so archives move between the two apps.
 
 ## Features
 

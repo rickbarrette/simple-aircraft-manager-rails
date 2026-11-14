@@ -12,15 +12,24 @@
       </h1>
       <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
         <%= airworthiness_badge(aw) %>
-        <%= aircraft_status_badge(aircraft) %>
+        <%= aircraft_status_badge(aircraft) unless aircraft.status == "AVAILABLE" %>
         <span class="text-slate-500">Tach <%= hours(aircraft.tach_time) %> · Hobbs <%= hours(aircraft.hobbs_time) %></span>
-        <span class="badge-gray"><%= current_role.capitalize %></span>
+        <span class="badge-gray" title="Your access to this aircraft"><%= (current_user.aircraft_roles.find_by(aircraft: aircraft)&.role || current_role).capitalize %></span>
       </div>
     </div>
   </div>
-  <div class="flex w-full gap-2 sm:w-auto [&>*]:flex-1 [&>*]:justify-center [&>*]:whitespace-nowrap max-sm:[&>*]:px-2 sm:[&>*]:flex-none">
+  <div class="flex w-full gap-2 sm:w-auto [&>a]:flex-1 [&>a]:justify-center [&>a]:whitespace-nowrap max-sm:[&>a]:px-2 sm:[&>a]:flex-none">
     <%= link_to "Log Flight", new_aircraft_flight_log_path(aircraft), class: "btn-primary" %>
     <%= link_to "Report Squawk", new_aircraft_squawk_path(aircraft), class: "btn-secondary" %>
+    <%= more_menu do %>
+      <%= link_to "Status report", aircraft_report_path(aircraft), class: "menu-item" %>
+      <% if owner? %>
+        <%= link_to "Access & sharing", aircraft_aircraft_roles_path(aircraft), class: "menu-item" %>
+        <%= link_to "Edit aircraft", edit_aircraft_path(aircraft), class: "menu-item" %>
+        <%= link_to "Download .sam.zip", aircraft_export_path(aircraft), class: "menu-item", data: { turbo: false } %>
+        <%= link_to "Download records package", aircraft_records_package_path(aircraft), class: "menu-item", data: { turbo: false } %>
+      <% end %>
+    <% end %>
   </div>
 </div>
 <% tabs = aircraft_tabs(aircraft) %>
@@ -28,7 +37,7 @@
 <%# Phones: the current section, with every section a tap away. %>
 <details class="relative mb-5 md:hidden" data-controller="dropdown" data-action="click@window->dropdown#closeOutside keydown.esc@window->dropdown#close">
   <summary class="flex cursor-pointer list-none items-center justify-between rounded-md bg-surface px-4 py-3 font-medium shadow-sm ring-1 ring-slate-200 [&::-webkit-details-marker]:hidden">
-    <span><span class="text-xs font-normal text-slate-500">Section</span><br><%= current_tab&.first || "Overview" %></span>
+    <span><span class="text-xs font-normal text-slate-500">Section</span><br><%= current_tab&.first || "Choose a section" %></span>
     <span aria-hidden="true" class="text-slate-500">▾</span>
   </summary>
   <nav class="absolute inset-x-0 z-30 mt-2 grid grid-cols-2 gap-1 rounded-md bg-surface p-2 shadow-lg ring-1 ring-slate-200" aria-label="Aircraft sections">

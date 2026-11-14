@@ -25,7 +25,7 @@ If **Enforce airworthiness** is on, neither works while the aircraft is grounded
 
 ## The Flights tab
 
-The **Flights** tab shows totals and hours by month, then the flight log grouped by day: each day shows the whole route flown (KOQU → KBID → KOQU; a "·" marks where the aircraft moved without a logged leg) and that day's tach and Hobbs time, fuel and oil. Click a day to see its legs, and a leg to open the flight. The most recent 30 days load with the page; earlier ones load as you scroll down (or with **Load more**). From there:
+The **Flights** tab shows totals and hours by month, then the flight log grouped by day: each day shows the whole route flown (KOQU → KBID → KOQU; a "·" marks where the aircraft moved without a logged leg) and that day's tach and Hobbs time, fuel and oil. Click a day to see its legs, and a leg to open the flight. The most recent 30 days load with the page; earlier ones load as you scroll down (or with **Load more**). The flight log's **More** button has:
 
 - **Import from spreadsheet** (owners): historical flights from `.xlsx` or `.csv` (Date, From, To, Tach, Hobbs, Oil Added, Fuel Added). A preview flags problems such as a tach going backwards and skips rows already imported. It only adds history: component hours don't change unless you choose to advance the meters.
 - **Export for AirTrail**: a file to import into AirTrail. For automatic syncing, see [Your profile](profile.md).

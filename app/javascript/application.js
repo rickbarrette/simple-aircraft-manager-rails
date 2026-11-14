@@ -51,7 +51,17 @@ document.addEventListener("click", (event) => {
   if (target.matches("[data-check-all]")) {
     target.closest("table")?.querySelectorAll("tbody input[type=checkbox]").forEach((box) => { box.checked = target.checked })
   }
+  if (target.type === "checkbox") showSelectionActions()
 })
+
+// Actions on ticked rows (e.g. "Print selected") appear once a row is ticked:
+// data-needs-selection names the form the row checkboxes belong to.
+function showSelectionActions() {
+  document.querySelectorAll("[data-needs-selection]").forEach((el) => {
+    el.hidden = !document.querySelector(`input[form="${el.dataset.needsSelection}"]:checked`)
+  })
+}
+document.addEventListener("turbo:load", showSelectionActions)
 
 document.addEventListener("change", (event) => {
   if (event.target.matches?.("[data-submit-on-change]")) event.target.form?.requestSubmit()

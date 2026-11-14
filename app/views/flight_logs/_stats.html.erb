@@ -1,8 +1,8 @@
 <%# Flying metrics. "Flight time" = Hobbs where recorded, else tach. %>
 <% periods = stats.periods %>
-<div class="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+<div class="mb-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
   <% [ [ "Past 30 days", periods[0] ], [ "This year", periods[2] ], [ "Past 12 months", periods[1] ], [ "Since #{fmt_date(stats.first_date)}", periods[4] ] ].each do |title, p| %>
-    <section class="card card-body">
+    <section class="card p-3 sm:p-4">
       <div class="text-xs font-medium uppercase tracking-wide text-slate-500"><%= title %></div>
       <div class="mt-1 text-2xl font-semibold tabular-nums"><%= hours(p.flight) %> <span class="text-sm font-normal text-slate-500">hrs</span></div>
       <div class="mt-1 text-xs text-slate-600"><%= pluralize(p.flights, "flight") %> · <%= hours(p.tach) %> tach · <%= number_with_delimiter(p.fuel) %> gal</div>
@@ -40,8 +40,9 @@
   </section>
 </div>
 
-<details class="card mb-5">
-  <summary class="card-header cursor-pointer"><span class="card-title">By year</span></summary>
+<% if stats.by_year.size > 1 %>
+<details class="card group mb-5">
+  <summary class="card-header cursor-pointer list-none [&::-webkit-details-marker]:hidden"><span class="card-title">By year</span><span aria-hidden="true" class="text-slate-500 transition group-open:rotate-180">▾</span></summary>
   <table class="table">
     <thead><tr><th>Year</th><th class="text-right">Flights</th><th class="text-right">Flight hrs</th><th class="text-right">Tach hrs</th><th class="text-right">Fuel (gal)</th><th class="text-right">Avg flight</th></tr></thead>
     <tbody>
@@ -59,3 +60,4 @@
   </table>
   <p class="px-4 pb-3 hint">Flight time is Hobbs time where recorded, otherwise tach time.</p>
 </details>
+<% end %>

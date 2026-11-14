@@ -1,5 +1,6 @@
 <% content_for :title, "#{@aircraft.tail_number} Oil & Fuel" %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= render "shared/oil_subnav", aircraft: @aircraft %>
 <div class="grid gap-5 lg:grid-cols-2">
   <% [@oil, @fuel].each do |stats| %>
     <section class="card">

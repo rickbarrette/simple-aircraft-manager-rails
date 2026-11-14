@@ -2,8 +2,10 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <div class="mb-4 flex flex-wrap justify-end gap-2">
   <% if owner? %>
-    <%= link_to "+ Collection", new_aircraft_document_collection_path(@aircraft), class: "btn-secondary" %>
-    <%= link_to "Bulk Upload", new_bulk_aircraft_documents_path(@aircraft), class: "btn-secondary" %>
+    <%= more_menu do %>
+      <%= link_to "Upload several files", new_bulk_aircraft_documents_path(@aircraft), class: "menu-item" %>
+      <%= link_to "New collection", new_aircraft_document_collection_path(@aircraft), class: "menu-item" %>
+    <% end %>
     <%= link_to "+ Upload Document", new_aircraft_document_path(@aircraft), class: "btn-primary" %>
   <% end %>
 </div>

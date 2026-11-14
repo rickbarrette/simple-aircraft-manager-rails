@@ -6,14 +6,17 @@
     <div class="flex flex-wrap items-center gap-2">
       <%= form_with url: aircraft_logbook_entries_path(@aircraft), method: :get, class: "flex w-full flex-wrap gap-2 sm:w-auto" do |f| %>
         <%= f.search_field :q, value: @query, placeholder: "Search entries…", class: "input min-w-0 flex-1 sm:w-48 sm:flex-none" %>
-        <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: "All logs", selected: @log_type }, class: "input w-32" %>
+        <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: "All logs", selected: @log_type }, class: "input w-32", data: { submit_on_change: true } %>
         <% if @unverified_count.positive? || @unverified_only %>
-          <label class="flex items-center gap-1 text-sm text-slate-700"><%= f.check_box :unverified, { checked: @unverified_only }, "1", nil %> Unverified (<%= @unverified_count %>)</label>
+          <label class="flex items-center gap-1 text-sm text-slate-700"><%= f.check_box :unverified, { checked: @unverified_only, data: { submit_on_change: true } }, "1", nil %> Unverified (<%= @unverified_count %>)</label>
         <% end %>
-        <%= f.submit "Filter", class: "btn-secondary" %>
+        <%= f.submit "Filter", class: "sr-only" %>
       <% end %>
-      <% if @entries.any? %><button type="submit" form="print-entries" class="btn-secondary" title="Print the ticked entries on labels or pages for the paper logbook">Print selected</button><% end %>
-      <% if owner? %><%= link_to "Import scans", new_aircraft_logbook_import_path(@aircraft), class: "btn-secondary" %><%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %><% end %>
+      <% if @entries.any? %><button type="submit" form="print-entries" class="btn-secondary" hidden data-needs-selection="print-entries" title="Print the ticked entries on labels or pages for the paper logbook">Print selected</button><% end %>
+      <% if owner? %>
+        <%= more_menu do %><%= link_to "Import scans", new_aircraft_logbook_import_path(@aircraft), class: "menu-item" %><% end %>
+        <%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %>
+      <% end %>
     </div>
   </div>
   <% if @entries.any? %>
@@ -24,7 +27,7 @@
         <tbody>
           <% @entries.each do |e| %>
             <tr>
-              <td class="whitespace-nowrap"><input type="checkbox" name="ids[]" value="<%= e.id %>" form="print-entries" class="mr-1 align-middle" aria-label="Select the <%= fmt_date(e.date) %> entry"><%= link_to e.date, aircraft_logbook_entry_path(@aircraft, e), class: "link" %></td>
+              <td class="whitespace-nowrap"><input type="checkbox" name="ids[]" value="<%= e.id %>" form="print-entries" class="mr-1 align-middle" aria-label="Select the <%= fmt_date(e.date) %> entry"><%= link_to fmt_date(e.date), aircraft_logbook_entry_path(@aircraft, e), class: "link" %></td>
               <td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
               <td class="text-xs"><%= LogbookEntry::ENTRY_TYPES[e.entry_type] %></td>
               <td class="text-right tabular-nums"><%= hours(e.aircraft_hours_at_entry) %></td>

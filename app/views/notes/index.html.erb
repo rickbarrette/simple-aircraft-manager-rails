@@ -9,7 +9,7 @@
           <div class="min-w-0 flex-1">
             <div class="text-sm"><%= markdown note.text %></div>
             <div class="mt-1 text-xs text-slate-500">
-              <%= note.user&.display_name || "Unknown" %> · <%= l note.created_at, format: :short %>
+              <%= note.user&.display_name || "Unknown" %> · <%= fmt_time(note.created_at) %>
               <%= "· edited" if note.edited_at %>
               <% if note.public? %><span class="badge-green ml-1">Visible on share links</span><% end %>
             </div>

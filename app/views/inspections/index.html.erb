@@ -2,7 +2,7 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
   <div class="card-header"><h2 class="card-title">Inspection Status</h2>
-    <% if owner? %><div class="flex flex-wrap gap-2"><%= link_to "Standard inspections", new_aircraft_standard_inspections_path(@aircraft), class: "btn-secondary" %><%= link_to "+ Inspection Type", new_aircraft_inspection_type_path(@aircraft), class: "btn-primary" %></div><% end %></div>
+    <% if owner? %><div class="flex flex-wrap gap-2"><%= more_menu do %><%= link_to "Add standard inspections", new_aircraft_standard_inspections_path(@aircraft), class: "menu-item" %><% end %><%= link_to "+ Inspection Type", new_aircraft_inspection_type_path(@aircraft), class: "btn-primary" %></div><% end %></div>
   <% if @rows.any? %>
     <div class="overflow-x-auto">
       <table class="table">

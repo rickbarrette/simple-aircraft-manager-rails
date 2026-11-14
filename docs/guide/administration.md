@@ -6,7 +6,7 @@ Admins see the **Admin** menu (on a phone, under ☰). Admins can see and edit e
 
 **Users** lists every account.
 
-- **+ New User**: name, email and a starting password. Tick **Administrator** to make them an admin. Then add them to aircraft from each aircraft's **Access & Sharing** tab (or they add their own aircraft).
+- **+ New User**: name, email and a starting password. Tick **Administrator** to make them an admin. Then add them to aircraft from each aircraft's **More → Access & sharing** (or they add their own aircraft).
 - **Edit** to change details or reset a password when email isn't set up.
 - **Locked** marks an account locked for 15 minutes after 10 failed sign-ins in a row (the user is emailed). **Unlock** clears it straight away, once you know it was really them.
 - **2FA** marks someone using an authenticator app. **Reset 2FA** turns it off for a user who lost their phone and recovery codes. Confirm it's really them first (call them); they can then set it up again.

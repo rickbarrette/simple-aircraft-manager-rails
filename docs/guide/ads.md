@@ -6,7 +6,7 @@ The **ADs** tab lists the ADs and bulletins that apply to the aircraft or its co
 
 - **+ New AD**: the number, type (AD, SAIB, SB, alert, other), standard or conditional, what it requires, whether it recurs (every so many hours and/or days, months or years; months and years are due at the end of the month) and a link to the AD. A conditional AD only applies when its trigger happens (“on prop strike”) and doesn't affect airworthiness. Non-mandatory bulletins can be tracked too.
 - **Link existing**: ADs are shared between aircraft; link one already entered for another aircraft.
-- **Import from FAA DRS**: export the ADs for the aircraft, engine and propeller from the FAA's Dynamic Regulatory System, preferably as `.xlsx` so each AD keeps its DRS link, and upload it. The preview suggests **Track**, **Not applicable** or **Skip** for each AD and flags superseded ADs, model mismatches, appliance and STC-only ADs, and recurring actions. Nothing is duplicated.
+- **Import from FAA DRS** (on the *AD baseline from FAA DRS* card): export the ADs for the aircraft, engine and propeller from the FAA's Dynamic Regulatory System, preferably as `.xlsx` so each AD keeps its DRS link, and upload it. The preview suggests **Track**, **Not applicable** or **Skip** for each AD and flags superseded ADs, model mismatches, appliance and STC-only ADs, and recurring actions. Nothing is duplicated.
 
 ## The AD baseline
 

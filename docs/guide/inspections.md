@@ -4,7 +4,7 @@ The **Inspections** tab shows each required inspection, when it was last done an
 
 ## Setting up
 
-**Standard inspections** adds the recurring inspections and checks Part 91 calls for (annual, 100-hour, pitot-static and altimeter, transponder, ELT…). Pick the ones that apply to how the aircraft is flown; each comes with its interval and what being overdue means, and you can change them afterwards.
+**More → Add standard inspections** adds the recurring inspections and checks Part 91 calls for (annual, 100-hour, pitot-static and altimeter, transponder, ELT…). Pick the ones that apply to how the aircraft is flown; each comes with its interval and what being overdue means, and you can change them afterwards.
 
 **+ Inspection Type** adds your own, for example a recurring inspection from an STC's instructions for continued airworthiness. Each type has:
 

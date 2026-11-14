@@ -62,7 +62,7 @@
           <div class="card-header"><h2 class="card-title">Flights that didn't sync</h2></div>
           <table class="table"><tbody>
             <% @failed.each do |s| f = s.flight_log %>
-              <tr><td class="whitespace-nowrap"><%= link_to f.date, aircraft_flight_log_path(f.aircraft, f), class: "link" %></td>
+              <tr><td class="whitespace-nowrap"><%= link_to fmt_date(f.date), aircraft_flight_log_path(f.aircraft, f), class: "link" %></td>
                   <td><%= f.route_summary %></td><td class="text-xs text-red-700"><%= s.last_error %></td></tr>
             <% end %>
           </tbody></table>

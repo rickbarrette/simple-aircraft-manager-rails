@@ -2,7 +2,7 @@
 
 ## The fleet
 
-**Fleet** shows every aircraft you have access to, with its airworthiness and its most pressing issues. **+ Add Aircraft** creates one (you become its owner). **Import** loads an aircraft from a `.sam.zip` archive (see [Access, sharing and transfer](sharing.md)).
+**Fleet** shows every aircraft you have access to, with its airworthiness and its most pressing issues. **+ Add Aircraft** creates one (you become its owner). **More → Import from a .sam.zip archive** loads an aircraft from a `.sam.zip` archive (see [Access, sharing and transfer](sharing.md)).
 
 ## An aircraft's overview
 
@@ -12,7 +12,7 @@ The **Overview** tab shows:
 - **Active squawks**, **Consumption** (oil and fuel rates), **Notes** and **Recent activity**.
 - **Last flight**: the most recent day's legs as one route, the meters at the end, and the fuel and oil left.
 - **Update Hours**: enter the current meter readings (see [Flights and hours](flights.md)).
-- **Details** and the **Status report** link.
+- **Details**. The **Status report** link is on the Airworthiness card, and under **More** at the top of every aircraft page.
 
 ## What the airworthiness status means
 

@@ -11,7 +11,7 @@
     <ul class="divide-y divide-slate-100 text-sm">
       <% @audits.each do |a| %>
         <li class="flex items-center justify-between px-4 py-2">
-          <span><%= link_to a.performed_at.to_date, admin_audit_path(a), class: "link" %> · <%= a.performed_by&.display_name %></span>
+          <span><%= link_to fmt_date(a.performed_at.to_date), admin_audit_path(a), class: "link" %> · <%= a.performed_by&.display_name %></span>
           <span class="<%= a.passed ? 'badge-green' : 'badge-orange' %>"><%= a.passed ? "Passed" : "Items not passed" %></span>
         </li>
       <% end %>

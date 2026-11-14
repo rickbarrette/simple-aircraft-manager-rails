@@ -1,5 +1,6 @@
 <% content_for :title, "#{@aircraft.tail_number} Oil Analysis" %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= render "shared/oil_subnav", aircraft: @aircraft %>
 <% recent = @analyses.first(OilAnalysesController::COMPARE_SAMPLES) %>
 <div class="space-y-5">
   <section class="card">

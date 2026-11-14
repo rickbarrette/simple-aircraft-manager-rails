@@ -34,8 +34,14 @@ class PwaTest < ActionDispatch::IntegrationTest
     assert_select "link[rel=manifest][href='/manifest.json'][crossorigin=use-credentials]" # behind an auth proxy (Authentik) the manifest needs cookies
     assert_select "meta[name=theme-color]"
     assert_select "link[rel=apple-touch-icon][href='/apple-touch-icon.png']"
-    assert_select "link[rel=icon][href='/favicon.svg']"
-    assert_includes Rails.public_path.join("favicon.svg").read, "✈️"
+    assert_select "link[rel=icon][href='/favicon.svg?v=2']"
+    assert_select "link[rel=icon][href='/favicon.ico']"
+    # The same design as the app icon (colours and plane), not an emoji.
+    favicon, icon = %w[favicon.svg icon.svg].map { Rails.public_path.join(_1).read }
+    plane = icon[/<path fill="#fff" d="([^"]+)"/, 1]
+    assert_includes favicon, plane
+    %w[#0f172a #0369a1].each { assert_includes favicon, _1 }
+    assert_equal [ 0, 1, 3 ], Rails.public_path.join("favicon.ico").binread(6).unpack("v3") # an icon file with 3 sizes
 
     token = create_aircraft(owner: create_user("o2@example.com")).share_tokens.create!(privilege: "status")
     get shared_path(token.token)

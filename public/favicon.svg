@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="50" font-size="88" text-anchor="middle" dominant-baseline="central">✈️</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0f172a"/>
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#0369a1" stroke-width="30"/>
+  <path fill="#fff" transform="translate(256 256) scale(1.08) translate(-256 -256)" d="M256 92C270 92 278 108 278 128L278 214L408 270L408 300L278 280L276 370L326 400L326 424L256 410L186 424L186 400L236 370L234 280L104 300L104 270L234 214L234 128C234 108 242 92 256 92Z"/>
+</svg>

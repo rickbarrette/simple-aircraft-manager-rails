@@ -24,7 +24,7 @@ const SHORTCUTS = { "/go/log-flight": "flight_logs", "/go/report-squawk": "squaw
 // A proxy in front of the app (Traefik, Authentik) answers these when the app
 // itself can't be reached: treat them like no connection.
 const UNREACHABLE = [ 502, 503, 504 ]
-const SHELL = [ "/offline", "/offline.js", "/icon.svg", "/icon-192.png" ]
+const SHELL = [ "/offline", "/offline.js", "/icon.svg", "/icon-192.png", "/favicon.svg" ]
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()))

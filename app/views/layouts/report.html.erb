@@ -10,7 +10,7 @@
     <%# Always a full page load: a Turbo visit would keep the app's dark theme
         on this white page, and leave this page's styles behind on Back. %>
     <meta name="turbo-visit-control" content="reload">
-    <% unless @standalone %><link rel="icon" href="/favicon.svg" type="image/svg+xml"><% end %>
+    <% unless @standalone %><link rel="icon" href="/favicon.ico" sizes="32x32"><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><% end %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%# No Turbo here (Back is then an ordinary page load); just the Print button. %>
     <script nonce="<%= content_security_policy_nonce %>">

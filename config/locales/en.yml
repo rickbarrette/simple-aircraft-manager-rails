@@ -654,7 +654,7 @@ en:
       'yes': 'yes'
       'no': 'no'
       environment: Environment
-      time_zone: Time zone
+      time_zone: Default time zone
       sso: Single sign-on
       sso_only: "%{provider}, password sign-in off"
       not_configured: not configured
@@ -3008,6 +3008,10 @@ en:
       notifications_on: Turn on
       notifications_off: Turn off
       notifications_test: Send a test
+      time_zone: Time zone
+      time_zone_automatic: 'Automatic: this device (%{zone})'
+      time_zone_unknown: not known yet
+      time_zone_hint: 'How times show and what “today” is, for example a new flight''s date. Now: %{now}. Signatures and the record history always show UTC.'
   record_versions:
     index:
       record_history: "%{tail_number} Record history"

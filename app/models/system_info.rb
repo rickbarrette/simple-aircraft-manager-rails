@@ -52,7 +52,7 @@ class SystemInfo
       "SQLite" => SQLite3::SQLITE_VERSION,
       "Bundler" => Bundler::VERSION,
       t(:environment) => Rails.env,
-      t(:time_zone) => Time.zone.name
+      t(:time_zone) => Time.zone_default.name
     }
   end
 

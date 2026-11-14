@@ -7,7 +7,7 @@ class ProfilesController < ApplicationController
   # left open somewhere can't be turned into a takeover of the account.
   def update
     @user = current_user
-    attrs = params.require(:user).permit(:name, :email_address, :password, :password_confirmation, :reminder_emails)
+    attrs = params.require(:user).permit(:name, :email_address, :password, :password_confirmation, :reminder_emails, :time_zone)
     attrs = attrs.except(:password, :password_confirmation) if attrs[:password].blank?
     new_email = User.normalize_value_for(:email_address, attrs[:email_address].to_s) if attrs.key?(:email_address)
     sensitive = (new_email && new_email != @user.email_address) || attrs.key?(:password)

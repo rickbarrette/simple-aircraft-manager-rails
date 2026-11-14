@@ -25,6 +25,12 @@ class ReminderMailer < ApplicationMailer
   end
 
   def weekly(user)
+    Time.use_zone(user.time_zone.presence || Time.zone_default) { weekly_in_zone(user) }
+  end
+
+  private
+
+  def weekly_in_zone(user)
     @user = user
     @items = self.class.items_for(user)
     @certificates = self.class.expiring_certificates_for(user)

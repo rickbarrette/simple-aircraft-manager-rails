@@ -8,6 +8,8 @@ Change your name, email and password. Leave the password blank to keep the curre
 
 **Weekly maintenance reminders**: on Mondays the app emails owners about anything overdue or coming due on their aircraft, and certificates about to expire. Untick it to stop them. (Emails need the administrator to have set up email.)
 
+**Time zone** is *Automatic* by default: times show in your device's zone, and "today" (for example a new flight's date) is your local date. Choose a zone to use it on every device. Signatures and the record history always show UTC.
+
 ## Two-factor sign-in
 
 **Set up** adds a code from an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, 1Password, Authy…) to password and emailed-link sign-in, so a stolen password alone can't get in. It also asks for the code when you sign a logbook entry with your password.

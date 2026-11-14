@@ -9,28 +9,30 @@
 #     priority: 2
 #     schedule: at 5am every day
 
+# Times are in the installation's time zone (TZ, default UTC).
+<% zone = ActiveSupport::TimeZone[ENV["TZ"].to_s]&.tzinfo&.identifier || "UTC" %>
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
   purge_abandoned_uploads:
     command: "ActiveStorage::Blob.unattached.where(created_at: ..2.days.ago).find_each(&:purge_later)"
-    schedule: every day at 4am
+    schedule: every day at 4am <%= zone %>
   dedupe_storage:
     command: "ActiveStorage::Blob.service.try(:sweep)"
-    schedule: every day at 4:30am
+    schedule: every day at 4:30am <%= zone %>
   weekly_reminders:
     class: WeeklyReminderJob
-    schedule: every monday at 12pm
+    schedule: every monday at 12pm <%= zone %>
   ad_watch:
     class: AdWatchJob
-    schedule: every sunday at 10am
+    schedule: every sunday at 10am <%= zone %>
   document_text:
     class: DocumentTextJob
-    schedule: every day at 2am
+    schedule: every day at 2am <%= zone %>
   overdue_notifications:
     class: OverdueNotificationJob
-    schedule: every day at 7am
+    schedule: every day at 7am <%= zone %>
   records_integrity:
     class: RecordsIntegrityJob
-    schedule: every day at 3:30am
+    schedule: every day at 3:30am <%= zone %>

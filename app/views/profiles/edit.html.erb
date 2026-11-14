@@ -5,6 +5,13 @@
   <%= f.field :email_address, as: :email, label: t(".email") %>
   <%= f.field :reminder_emails, as: :checkbox, label: t(".weekly_maintenance_reminders"),
         hint: t(MailSettings.configured? ? ".a_monday_email_about_overdue" : ".reminders_once_email_set_up") %>
+  <div>
+    <%= f.label :time_zone, t(".time_zone"), class: "label" %>
+    <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones,
+          { include_blank: t(".time_zone_automatic", zone: device_time_zone_label || t(".time_zone_unknown")) },
+          class: "input" %>
+    <p class="hint"><%= t(".time_zone_hint", now: fmt_time(Time.current)) %></p>
+  </div>
   <%= f.field :password, as: :password, label: t(".new_password"), hint: t(".leave_blank_to_keep_your", min: User::PASSWORD_MIN), autocomplete: "new-password" %>
   <%= f.field :password_confirmation, as: :password, label: t(".confirm_new_password"), autocomplete: "new-password" %>
   <div>

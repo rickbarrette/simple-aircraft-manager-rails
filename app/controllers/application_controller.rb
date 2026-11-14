@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   default_form_builder AppFormBuilder
   include Authentication
+  include TimeZones
   allow_browser versions: :modern
 
   prepend_before_action :redirect_to_setup

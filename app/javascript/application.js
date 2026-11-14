@@ -42,6 +42,15 @@ window.addEventListener("beforeinstallprompt", (event) => {
   document.dispatchEvent(new CustomEvent("install:available"))
 })
 
+// The device's time zone, so times show in it and "today" is the local date
+// (unless a zone is chosen in Profile).
+try {
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  if (zone && !document.cookie.split("; ").includes(`tz=${encodeURIComponent(zone)}`)) {
+    document.cookie = `tz=${encodeURIComponent(zone)}; path=/; max-age=31536000; samesite=lax`
+  }
+} catch (_) { /* no Intl */ }
+
 // Label each table cell with its column header, so phone CSS can show rows as
 // cards ("Status: In Service"). Skips tables marked .table-keep.
 function labelTableCells(root = document) {

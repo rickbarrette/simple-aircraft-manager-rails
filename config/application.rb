@@ -36,7 +36,11 @@ module SimpleAircraftManager
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    # The installation's time zone, from Docker's standard TZ (e.g.
+    # "America/New_York"): for scheduled jobs and for anyone whose device zone
+    # isn't known yet. Each person's own zone comes from Profile or their
+    # device (TimeZones). Not a zone name (unset, or e.g. ":/etc/localtime"): UTC.
+    config.time_zone = ActiveSupport::TimeZone[ENV["TZ"].to_s] ? ENV["TZ"] : "UTC"
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Small resized copies of photos (squawk thumbnails), made with libvips.

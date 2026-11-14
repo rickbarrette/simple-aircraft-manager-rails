@@ -800,9 +800,12 @@ en:
       added: "%{tail_number} added."
       aircraft_updated: Aircraft updated.
       deleted: "%{tail_number} deleted."
-      hours_updated: Hours updated (%{delta}).
+      hours_updated: "%{changes}. In-service components moved %{delta} hrs; no flight was logged."
       enter_a_valid_tach: Enter a valid tach reading.
       aircraft_details_updated: Aircraft details updated
+      meter_changed: "%{meter} %{from} → %{to} (%{delta})"
+      hours_corrected: 'Corrected: %{changes}. In-service components moved %{delta} hrs; no flight was logged.'
+      hours_unchanged: The readings didn't change.
     sso:
       try_again_later: Try again later.
       there_s_no_account: There's no account for %{email} here yet. Ask an administrator to add you, or sign in with your password and link %{provider} from your profile.
@@ -3845,6 +3848,12 @@ en:
       ios_install_first: On iPhone and iPad, install the app first (above); notifications can then be turned on in it.
       failed: Couldn't turn notifications on. Try again.
       test_sent: Test notification sent; it should arrive in a few seconds.
+    hours:
+      tach: Tach %{from} → %{to} (%{delta})
+      hobbs: Hobbs %{from} → %{to} (%{delta})
+      effect: Every in-service component's hours change by the same amount, and no flight is logged. To record a flight, use Log Flight instead.
+      lower: 'This lowers the reading: use it only to correct a mistake.'
+      no_change: 'These are the current readings: nothing to update.'
   counts:
     problem:
       one: "%{count} problem"

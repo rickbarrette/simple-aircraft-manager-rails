@@ -59,12 +59,14 @@
   <div class="space-y-5">
     <section class="card">
       <div class="card-header"><h2 class="card-title"><%= t(".update_hours") %></h2></div>
-      <%= form_with url: hours_aircraft_path(@aircraft), method: :patch, class: "card-body space-y-3" do |f| %>
+      <%= form_with url: hours_aircraft_path(@aircraft), method: :patch, class: "card-body space-y-3",
+            data: { controller: "hours-confirm", action: "submit->hours-confirm#confirm",
+                    hours_confirm_tach_value: @aircraft.tach_time.to_f, hours_confirm_hobbs_value: @aircraft.hobbs_time.to_f } do |f| %>
         <div class="grid grid-cols-2 gap-3">
           <div><%= f.label :tach_time, t(".tach"), class: "label" %>
-            <%= f.number_field :tach_time, value: @aircraft.tach_time, step: 0.1, class: "input", required: true %></div>
+            <%= f.number_field :tach_time, value: @aircraft.tach_time, step: 0.1, class: "input", required: true, data: { hours_confirm_target: "tach" } %></div>
           <div><%= f.label :hobbs_time, t(".hobbs"), class: "label" %>
-            <%= f.number_field :hobbs_time, value: @aircraft.hobbs_time, step: 0.1, class: "input" %></div>
+            <%= f.number_field :hobbs_time, value: @aircraft.hobbs_time, step: 0.1, class: "input", data: { hours_confirm_target: "hobbs" } %></div>
         </div>
         <p class="hint"><%= t(".enter_the_current_meter_readings_html", link: (link_to t(".log_flight"), new_aircraft_flight_log_path(@aircraft), class: "link")) %></p>
         <%= f.submit t(".update_hours"), class: "btn-primary" %>

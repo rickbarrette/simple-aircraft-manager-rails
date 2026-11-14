@@ -31,6 +31,20 @@ class PwaFeaturesTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{session_path}'][data-controller=sign-out]", minimum: 1
   end
 
+  test "updating the meters without a flight asks for confirmation, showing the change" do
+    sign_in @owner
+    get aircraft_path(@a)
+    assert_select "form[action='#{hours_aircraft_path(@a)}'][data-controller=hours-confirm][data-action='submit->hours-confirm#confirm'][data-hours-confirm-tach-value='1000.0']" do
+      assert_select "input[name=tach_time][data-hours-confirm-target=tach]"
+      assert_select "input[name=hobbs_time][data-hours-confirm-target=hobbs]"
+    end
+
+    patch hours_aircraft_path(@a), params: { tach_time: "1001.4", hobbs_time: "1.2" }
+    assert_equal "Tach 1,000.0 → 1,001.4 (+1.4) · Hobbs 0.0 → 1.2 (+1.2). In-service components moved +1.4 hrs; no flight was logged.", flash[:notice]
+    patch hours_aircraft_path(@a), params: { tach_time: "1001.0" }
+    assert_equal "Corrected: Tach 1,001.4 → 1,001.0 (−0.4). In-service components moved −0.4 hrs; no flight was logged.", flash[:notice]
+  end
+
   test "every page lists what to save ahead of time for working offline: each of your aircraft's forms and pages" do
     other = create_aircraft(tail_number: "N99999") # not this pilot's
     sign_in @pilot

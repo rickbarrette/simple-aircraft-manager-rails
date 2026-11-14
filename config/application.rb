@@ -39,7 +39,7 @@ module SimpleAircraftManager
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # Uploads are served as-is (no image variants), so libvips/image_processing is not needed.
-    config.active_storage.variant_processor = :disabled
+    # Small resized copies of photos (squawk thumbnails), made with libvips.
+    config.active_storage.variant_processor = :vips
   end
 end

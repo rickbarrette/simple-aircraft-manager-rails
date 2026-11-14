@@ -10,7 +10,7 @@ The port aims to be **easy to host**. It runs as one process with one SQLite dat
 
 - Ruby 4.0, Rails 8.1, SQLite. Solid Queue and Solid Cache both use SQLite, so there are no extra services. Background jobs (nightly backup and records check, weekly reminders and AD search) run in the web process.
 - Hotwire (Turbo and Stimulus) with importmap, so there is no Node build step. Tailwind CSS 4 runs through `tailwindcss-rails`.
-- Active Storage on local disk handles pictures, document pages, squawk attachments, and track logs. Identical files are stored once (hard links).
+- Active Storage on local disk handles pictures, document pages, squawk attachments, and track logs; libvips makes the photo thumbnails. Identical files are stored once (hard links).
 - Chartkick and Chart.js draw the oil and fuel charts.
 - Authentication uses the Rails 8 built-in generator (sessions plus password reset), emailed sign-in links, and optional OpenID Connect single sign-on (OmniAuth).
 - Prawn renders the printable logbook entries; Commonmarker renders Markdown notes and the user guide.

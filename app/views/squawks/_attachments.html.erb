@@ -1,21 +1,20 @@
-<%# A squawk's files: photos open in the in-app viewer, everything else opens in
-    a new tab. Every file has a download link. %>
+<%# A squawk's files: photos show as thumbnails that open the in-app viewer
+    (which has Download); other files open in a new tab and have a download link. %>
 <% files = squawk.attachments.to_a %>
 <% if files.any? %>
-  <% photos, others = files.partition(&:image?) %>
+  <% photos, others = files.partition { _1.image? && _1.variable? } %>
   <div class="mt-1" data-controller="gallery">
     <ul class="flex flex-wrap gap-1.5">
       <% photos.each do |file| %>
-        <li class="inline-flex items-center overflow-hidden rounded-md text-xs ring-1 ring-slate-300">
-          <%= link_to rails_blob_path(file, disposition: :inline), class: "px-2 py-1 text-sky-700 hover:bg-slate-100",
+        <li>
+          <%= link_to rails_blob_path(file, disposition: :inline),
+                class: "block overflow-hidden rounded-md ring-1 ring-slate-300 hover:ring-2 hover:ring-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500",
                 title: t(".preview", filename: file.filename),
                 data: { gallery_target: "item", action: "gallery#open", gallery_name: file.filename.to_s,
                         gallery_download: rails_blob_path(file, disposition: :attachment) } do %>
-            🖼 <%= file.filename.to_s.truncate(28, omission: "…") %>
+            <%= image_tag file.variant(resize_to_fill: [ 160, 160 ]), alt: file.filename.to_s, loading: "lazy", width: 64, height: 64,
+                  class: "block h-16 w-16 bg-slate-100 object-cover" %>
           <% end %>
-          <%= link_to "⬇", rails_blob_path(file, disposition: :attachment), download: file.filename.to_s,
-                class: "border-l border-slate-300 px-1.5 py-1 text-slate-500 hover:bg-slate-100 hover:text-sky-700",
-                title: t(".download", filename: file.filename), aria: { label: t(".download", filename: file.filename) } %>
         </li>
       <% end %>
       <% others.each do |file| %>

@@ -20,25 +20,39 @@ class SquawkAttachmentsTest < ActionDispatch::IntegrationTest
 
     get aircraft_squawks_path(@a)
     assert_select "[data-controller=gallery]" do
-      assert_select "a[data-gallery-target=item][data-action='gallery#open'][href*='front.jpg']", text: /🖼/
+      assert_select "a[data-gallery-target=item][data-action='gallery#open'][href*='front.jpg'] img[alt='front.jpg'][loading=lazy][src*='/representations/']"
       assert_select "a[data-gallery-target=item]", 1 # only photos open in the viewer
       assert_select "a[target=_blank][href*='notes.txt']", text: /📎/
       assert_select "dialog[data-gallery-target=dialog] a[data-gallery-target=download]"
     end
   end
 
-  test "every file has a download link that forces a download" do
-    @a.squawks.create!(priority: 1, issue_reported: "x", attachments: [ upload("pic.png", "image/png"), upload("log.pdf", "application/pdf") ])
+  test "every file can be downloaded: other files from their link, photos from the viewer" do
+    @a.squawks.create!(priority: 1, issue_reported: "x", attachments: [ upload("pic.png", "image/png", png), upload("log.pdf", "application/pdf") ])
     sign_in @pilot
     get aircraft_squawks_path(@a)
-    downloads = css_select("a[download]").reject { _1["data-gallery-target"] }
-    assert_equal %w[log.pdf pic.png], downloads.map { _1["download"] }.sort
-    downloads.each do |link|
-      get link["href"]
+    downloads = css_select("a[download]").reject { _1["data-gallery-target"] }.map { _1["href"] }
+    downloads << css_select("a[data-gallery-target=item]").sole["data-gallery-download"]
+    assert_equal 2, downloads.size
+    downloads.each do |href|
+      get href
       follow_redirect! while response.redirect?
       assert_match(/\Aattachment;/, response.headers["Content-Disposition"])
     end
   end
+
+  test "photo thumbnails are small resized copies" do
+    @a.squawks.create!(priority: 1, issue_reported: "x", attachments: [ upload("pic.png", "image/png", png) ])
+    sign_in @pilot
+    get aircraft_squawks_path(@a)
+    get css_select("a[data-gallery-target=item] img").sole["src"]
+    follow_redirect! while response.redirect?
+    assert_response :success
+    assert_equal [ 160, 160 ], Vips::Image.new_from_buffer(response.body, "").then { [ _1.width, _1.height ] }
+  end
+
+  # A 200 × 120 PNG (made when first needed: libvips must not start before the test processes fork).
+  def png = @png ||= Vips::Image.black(200, 120).write_to_buffer(".png")
 
   test "squawks with no photos get no viewer" do
     @a.squawks.create!(priority: 1, issue_reported: "x", attachments: [ upload("notes.txt") ])

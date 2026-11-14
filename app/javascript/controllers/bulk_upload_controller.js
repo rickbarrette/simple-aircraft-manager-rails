@@ -30,7 +30,7 @@ export default class extends Controller {
   add(event) {
     for (const file of event.target.files) {
       const item = { file, path: file.webkitRelativePath || file.name, state: "pending", progress: 0 }
-      if (file.size > this.maxBytesValue) Object.assign(item, { state: "error", error: `over the ${Math.round(this.maxBytesValue / 1048576)} MB limit` })
+      if (file.size > this.maxBytesValue) Object.assign(item, { state: "error", error: t("bulk_upload.over_limit", { mb: Math.round(this.maxBytesValue / 1048576) }) })
       this.items.push(item)
     }
     event.target.value = ""

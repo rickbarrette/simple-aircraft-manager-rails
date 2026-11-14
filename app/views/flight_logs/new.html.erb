@@ -1,10 +1,10 @@
 <% content_for :title, t(".log_flight") %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= form_with model: [@aircraft, @flight_log], class: "card card-body space-y-5 max-w-3xl",
-      data: { controller: "offline-flight", offline_flight_tail_value: @aircraft.tail_number,
-              action: "submit->offline-flight#submit turbo:submit-start->offline-flight#remember turbo:fetch-request-error->offline-flight#networkFailed turbo:before-fetch-response->offline-flight#gatewayFailed" } do |f| %>
-  <%= f.hidden_field :client_key, data: { offline_flight_target: "key" } %>
-  <div class="hidden rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-offline-flight-target="notice" role="status"></div>
+      data: { controller: "offline-form", offline_form_kind_value: "flight", offline_form_tail_value: @aircraft.tail_number,
+              action: "submit->offline-form#submit turbo:submit-start->offline-form#remember turbo:fetch-request-error->offline-form#networkFailed turbo:before-fetch-response->offline-form#gatewayFailed" } do |f| %>
+  <%= f.hidden_field :client_key, data: { offline_form_target: "key" } %>
+  <div class="hidden rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-offline-form-target="notice" role="status"></div>
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-3">
     <%= f.field :date, as: :date, required: true %>

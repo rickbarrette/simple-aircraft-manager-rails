@@ -15,9 +15,17 @@ class SquawksController < ApplicationController
   end
 
   def create
+    # Already received (sent again from the offline queue): don't report it twice.
+    if (key = params.dig(:squawk, :client_key).to_s.presence) && @aircraft.squawks.exists?(client_key: key.first(64))
+      return redirect_to(aircraft_squawks_path(@aircraft), notice: t("flash.squawks.already_reported"))
+    end
     @squawk = @aircraft.squawks.new(squawk_params.merge(reported_by: current_user))
     if @squawk.save
       log_event("squawk", t("flash.squawks.squawk_reported_2", priority_label: @squawk.priority_label), notes: @squawk.issue_reported.truncate(200))
+      if @squawk.grounding?
+        PushNotifier.notify(@aircraft.users.merge(User.active).where.not(id: current_user.id), :grounding_squawk, path: aircraft_squawks_path(@aircraft),
+                            tag: "squawk-#{@squawk.id}", tail: @aircraft.tail_number, issue: @squawk.issue_reported.truncate(120))
+      end
       redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.squawk_reported")
     else
       render :new, status: :unprocessable_entity
@@ -118,7 +126,8 @@ class SquawksController < ApplicationController
   end
 
   def squawk_params
-    params.require(:squawk).permit(:priority, :issue_reported, :component_id, :notes, attachments: [])
+    params.require(:squawk).permit(:priority, :issue_reported, :component_id, :notes, :client_key, attachments: [])
           .tap { |p| p[:component_id] = scoped_id(@aircraft.components, p[:component_id]) if p.key?(:component_id) }
+          .tap { |p| p[:client_key] = p[:client_key].to_s.first(64).presence if p.key?(:client_key) }
   end
 end

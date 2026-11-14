@@ -42,6 +42,15 @@ Anyone can add an aircraft and becomes its owner. You only see aircraft you have
 
 ## On a phone
 
-The app works on phones. The tabs collapse into a **Section** menu, and wide tables scroll sideways. You can install it like an app: in Safari use **Share → Add to Home Screen**, in Chrome **Install app**.
+The app works on phones. The tabs collapse into a **Section** menu, and wide tables scroll sideways.
+
+Install it like an app from **Profile → This device** (or in Safari: **Share → Add to Home Screen**). Installed, it:
+
+- opens from the home screen, with **Log Flight** and **Report Squawk** shortcuts on a long press of its icon;
+- logs flights and reports squawks without signal and sends them when the connection is back (see [Flights](flights.md) and [Squawks](squawks.md)); the number waiting shows on the icon;
+- opens without signal: while you're online it saves the **Fleet** page and, for each of your aircraft (up to 10), the **Overview**, **W&B**, **Log Flight** and **Report Squawk** pages and its photo, refreshed at most hourly. So at the plane you can check airworthiness and loading, and log or report as usual. A copy shown offline says when it was saved;
+- can show notifications (**Profile → This device**).
+
+When a new version is installed on the server, a notice offers **Reload**. Signing out clears the forms and pages the device kept; flights or squawks not yet sent stay and are sent the next time you sign in on that device. They're only ever sent under the account that saved them.
 
 The sun/moon button switches between light and dark themes.

@@ -898,6 +898,7 @@ en:
       squawk_deleted_2: Squawk deleted
       corrected_text: 'Corrected: %{issue}'
       resolved_logged: Squawk resolved and recorded in the logbook.
+      already_reported: Squawk already reported.
     logbook_prints:
       choose_the_entries_to: Choose the entries to print.
       logbook_entries_printed: Logbook entries printed (%{count})
@@ -964,7 +965,7 @@ en:
       too_many_invitations_try: Too many invitations; try again later.
       this_entry_is_already: This entry is already signed.
       email_isn_t_set: Email isn't set up, so invitations can't be sent (Admin → About).
-      invitation_sent_to_the: Invitation sent to %{email}. The link works once, for %{_}.
+      invitation_sent_to_the: Invitation sent to %{email}. The link works once, for %{days} days.
       signature_requested_from_entry: Signature requested from %{email} (%{date} entry)
     standard_inspections:
       added_record_when_each: Added %{items}. Record when each was last done to see when it's next due.
@@ -1551,7 +1552,7 @@ en:
         save: Save
         cancel: Cancel
         delete_user: Delete user
-        at_least_characters_not_one: At least %{_} characters; not one known from a data breach.
+        at_least_characters_not_one: At least %{min} characters; not one known from a data breach.
         leave_blank_to_keep_current: Leave blank to keep current password.
       index:
         users: Users
@@ -2457,6 +2458,8 @@ en:
       settings: Settings
       users: Users
       about: About
+      updated: Simple Aircraft Manager has been updated.
+      reload: Reload
     public:
       skip_to_content_html: <a href="#main" class="skip-link">Skip to content</a>
       simple_aircraft_manager: Simple Aircraft Manager
@@ -2965,6 +2968,18 @@ en:
       you_re_signed_in_on:
         one: You're signed in on %{count} other device or browser.
         other: You're signed in on %{count} other devices or browsers.
+      this_device: This device
+      install_heading: Install the app
+      install_why: Installed, it opens like an app, works for logging flights and squawks without signal, keeps each aircraft's overview for pre-flight, and can show notifications.
+      installed: 'Installed: you''re using the app.'
+      install: Install the app
+      install_ios_html: 'On iPhone or iPad: in Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.'
+      install_other: 'Use your browser''s menu: Install app, or Add to Home screen.'
+      notifications_heading: Notifications
+      notifications_what: A grounding squawk on your aircraft, items newly overdue on aircraft you own, and requests to sign a logbook entry.
+      notifications_on: Turn on
+      notifications_off: Turn off
+      notifications_test: Send a test
   record_versions:
     index:
       record_history: "%{tail_number} Record history"
@@ -3380,7 +3395,7 @@ en:
       fuel_flow: Fuel flow
       oil_pressure: Oil pressure
     oil_analyses:
-      over_the_lab_average: Over %{_}× the lab average
+      over_the_lab_average: Over %{ratio}× the lab average
     form:
       interval_unit: "%{label} unit"
   services:
@@ -3586,12 +3601,12 @@ en:
       the_archive_contains_a_link: The archive contains a link (%{entry}), which isn't allowed.
       the_archive_contains_an_unsafe: 'The archive contains an unsafe path: %{entry}'
       the_archive_is_too_large: The archive is too large once unpacked.
-      the_archive_is_compressed_suspiciously: The archive is compressed suspiciously well (over %{_}:1).
+      the_archive_is_compressed_suspiciously: The archive is compressed suspiciously well (over %{ratio}:1).
       the_archive_has_no_manifest: The archive has no manifest.json. Is it a .sam.zip export?
       manifest_json_is_too_large: manifest.json is too large.
       manifest_json_couldn_t_be: manifest.json couldn't be read (%{truncate})
       manifest_json_isn_t_a: manifest.json isn't a JSON object.
-      unsupported_archive_version_this_app: Unsupported archive version %{version} (this app reads versions 1–%{_}).
+      unsupported_archive_version_this_app: Unsupported archive version %{version} (this app reads versions 1–%{max}).
       manifest_json_is_missing: manifest.json is missing %{to_sentence}.
       manifest_json_must_be_a: manifest.json %{key} must be a list.
       component_unknown_component_type_skipped: 'Component %{manufacturer} %{model}: unknown component type, skipped.'
@@ -3751,6 +3766,8 @@ en:
       landing: Landing
       outside: "%{name} CG %{cg} in at %{weight} lb is outside the envelope."
       within_limits: Within the limits entered here.
+      over_station_gal: "%{label}: %{qty} is over its maximum of %{max} gal."
+      over_station_lb: "%{label}: %{qty} is over its maximum of %{max} lb."
     insert_text:
       confirm: Replace what's in the box with the suggested text?
     entry_template:
@@ -3758,15 +3775,34 @@ en:
     offline:
       sign_in: Sign in to send the flights logged offline.
       not_accepted: Not accepted (%{status}).
-      sent:
-        one: Sent %{count} flight logged offline.
-        other: Sent %{count} flights logged offline.
-      waiting:
-        one: "%{count} flight logged offline waiting for a connection."
-        other: "%{count} flights logged offline waiting for a connection."
       discard: Discard
-      no_storage: No connection, and this browser can't store the flight. Write it down and log it when you're back online.
-      saved_on_device: 'No connection: flight saved on this device. It''s sent automatically when you''re back online. Log the next leg below, or close the app.'
+      flight:
+        queued_here:
+          one: "%{count} flight logged offline on this device, waiting to send. This one starts where the last ended."
+          other: "%{count} flights logged offline on this device, waiting to send. This one starts where the last ended."
+        saved_on_device: 'No connection: flight saved on this device. It''s sent automatically when you''re back online. Log the next leg below, or close the app.'
+        no_storage: No connection, and this browser can't store the flight. Write it down and log it when you're back online.
+        sent:
+          one: Sent %{count} flight logged offline.
+          other: Sent %{count} flights logged offline.
+        waiting:
+          one: "%{count} flight logged offline waiting for a connection."
+          other: "%{count} flights logged offline waiting for a connection."
+        rejected: "%{tail} flight %{date} logged offline wasn't accepted: %{error}"
+      squawk:
+        queued_here:
+          one: "%{count} squawk reported offline on this device, waiting to send."
+          other: "%{count} squawks reported offline on this device, waiting to send."
+        saved_on_device: 'No connection: squawk saved on this device, with its photos. It''s sent automatically when you''re back online.'
+        no_storage: No connection, and this browser can't store the squawk. Write it down and report it when you're back online.
+        sent:
+          one: Sent %{count} squawk reported offline.
+          other: Sent %{count} squawks reported offline.
+        waiting:
+          one: "%{count} squawk reported offline waiting for a connection."
+          other: "%{count} squawks reported offline waiting for a connection."
+        rejected: "%{tail} squawk reported offline wasn't accepted: %{error}"
+      saved_copy: Offline copy saved %{time}. It may be out of date; it updates when you're back online.
     theme:
       label: 'Theme: %{choice}'
       system: 'Theme: System (%{theme})'
@@ -3786,6 +3822,7 @@ en:
       remove_red: Remove the files marked in red first.
       uploading: Uploading %{done} of %{total}…
       saving: Saving…
+      over_limit: over the %{mb} MB limit
     next_due:
       permanent: 'Permanent compliance or not applicable: never due again.'
       one_time: 'One-time: no recurring due date.'
@@ -3796,6 +3833,18 @@ en:
     markdown:
       loading: Loading preview…
       load_failed: Couldn't load the preview (%{message}).
+    sign_out:
+      unsent:
+        one: "%{count} item saved offline hasn't been sent yet. It stays on this device and is sent the next time you sign in here. Sign out?"
+        other: "%{count} items saved offline haven't been sent yet. They stay on this device and are sent the next time you sign in here. Sign out?"
+    push:
+      'on': Notifications are on for this device.
+      'off': Notifications are off for this device.
+      blocked: Notifications are blocked for this site in the browser's settings.
+      unsupported: This browser can't show notifications from the app.
+      ios_install_first: On iPhone and iPad, install the app first (above); notifications can then be turned on in it.
+      failed: Couldn't turn notifications on. Try again.
+      test_sent: Test notification sent; it should arrive in a few seconds.
   counts:
     problem:
       one: "%{count} problem"
@@ -3827,3 +3876,38 @@ en:
     file:
       one: "%{count} file"
       other: "%{count} files"
+  offline:
+    show:
+      title: Offline · Simple Aircraft Manager
+      heading: You're offline
+      needs_connection: Simple Aircraft Manager needs a connection to load your aircraft. Check your signal and try again.
+      try_again: Try again
+      still_can: 'You can still log a flight or report a squawk; it''s sent when you''re back online:'
+      log_flight: 'Log a flight: %{tail}'
+      report_squawk: 'Report a squawk: %{tail}'
+      saved_pages: 'Saved for pre-flight (may be out of date):'
+      saved_overview: "%{tail} overview"
+  push:
+    grounding_squawk:
+      title: "%{tail} grounded by a squawk"
+      body: "%{issue}"
+    signing_request:
+      title: Please sign a logbook entry for %{tail}
+      body: "%{name} asked you to sign it. Tap to review and sign."
+    overdue:
+      title:
+        one: "%{tail}: %{count} item overdue"
+        other: "%{tail}: %{count} items overdue"
+      body: "%{items}"
+    test:
+      title: Notifications are working
+      body: This device will get notifications from Simple Aircraft Manager.
+  shortcuts:
+    choose:
+      log_flight: 'Log Flight: choose the aircraft'
+      report_squawk: 'Report Squawk: choose the aircraft'
+      no_aircraft: You don't have access to any aircraft yet.
+  pwa:
+    description: Maintenance, inspections, ADs, squawks and flight logs for your aircraft.
+    log_flight: Log Flight
+    report_squawk: Report Squawk

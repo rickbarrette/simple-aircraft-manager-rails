@@ -88,6 +88,28 @@
   <% end %>
 </section>
 
+<section class="card card-body mt-5 max-w-md space-y-4" id="device">
+  <h2 class="card-title"><%= t(".this_device") %></h2>
+  <div data-controller="install">
+    <h3 class="text-sm font-semibold"><%= t(".install_heading") %></h3>
+    <p class="hint"><%= t(".install_why") %></p>
+    <p class="mt-2 text-sm text-emerald-700" data-install-target="installed" hidden><%= t(".installed") %></p>
+    <button type="button" class="btn-secondary btn-sm mt-2" data-install-target="button" data-action="install#install" hidden><%= t(".install") %></button>
+    <p class="mt-2 text-sm text-slate-600" data-install-target="ios" hidden><%= t(".install_ios_html") %></p>
+    <p class="mt-2 text-sm text-slate-600" data-install-target="other" hidden><%= t(".install_other") %></p>
+  </div>
+  <div data-controller="push" data-push-key-value="<%= PushKeys.public_key %>" data-push-url-value="<%= push_subscription_path %>" data-push-test-url-value="<%= test_push_subscription_path %>">
+    <h3 class="text-sm font-semibold"><%= t(".notifications_heading") %></h3>
+    <p class="hint"><%= t(".notifications_what") %></p>
+    <p class="mt-2 text-sm text-slate-600" data-push-target="status" role="status"></p>
+    <div class="mt-2 flex flex-wrap gap-2">
+      <button type="button" class="btn-secondary btn-sm" data-push-target="on" data-action="push#turnOn" hidden><%= t(".notifications_on") %></button>
+      <button type="button" class="btn-secondary btn-sm" data-push-target="off" data-action="push#turnOff" hidden><%= t(".notifications_off") %></button>
+      <button type="button" class="btn-secondary btn-sm" data-push-target="test" data-action="push#sendTest" hidden><%= t(".notifications_test") %></button>
+    </div>
+  </div>
+</section>
+
 <section class="card card-body mt-5 max-w-md">
   <h2 class="card-title"><%= t(".sessions") %></h2>
   <% others = @user.sessions.where.not(id: Current.session.id).count %>

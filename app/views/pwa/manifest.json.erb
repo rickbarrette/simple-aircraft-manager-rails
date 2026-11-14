@@ -2,7 +2,8 @@
   "id": "/",
   "name": "Simple Aircraft Manager",
   "short_name": "SAM",
-  "description": "Maintenance, inspections, ADs, squawks and flight logs for your aircraft.",
+  "description": <%= raw t("pwa.description").to_json %>,
+  "lang": "<%= I18n.locale %>",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -15,5 +16,9 @@
     { "src": "/icon.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
     { "src": "/icon-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
     { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": <%= raw t("pwa.log_flight").to_json %>, "url": "/go/log-flight", "icons": [ { "src": "/icon-192.png", "sizes": "192x192" } ] },
+    { "name": <%= raw t("pwa.report_squawk").to_json %>, "url": "/go/report-squawk", "icons": [ { "src": "/icon-192.png", "sizes": "192x192" } ] }
   ]
 }

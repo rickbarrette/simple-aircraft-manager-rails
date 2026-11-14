@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= I18n.locale %>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f172a">
-  <title>Offline · Simple Aircraft Manager</title>
+  <title><%= t(".title") %></title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <style>
     :root { --page: #f1f5f9; --surface: #fff; --text: #1e293b; --muted: #64748b; --accent: #0369a1; }
     @media (prefers-color-scheme: dark) {
-      :root { --page: #0b1220; --surface: #0f172a; --text: #e2e8f0; --muted: #94a3b8; }
+      :root:not([data-theme="light"]) { --page: #0b1220; --surface: #0f172a; --text: #e2e8f0; --muted: #94a3b8; }
     }
+    :root[data-theme="dark"] { --page: #0b1220; --surface: #0f172a; --text: #e2e8f0; --muted: #94a3b8; }
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
            background: var(--page); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -19,18 +20,21 @@
     img { width: 72px; height: 72px; }
     h1 { font-size: 1.25rem; margin: 16px 0 8px; }
     p { margin: 0 0 24px; color: var(--muted); }
-    #forms a { display: block; margin-top: 8px; color: var(--accent); font-weight: 600; }
+    #forms a, #pages a { display: block; margin-top: 8px; color: var(--accent); font-weight: 600; }
     button { font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 6px; padding: 10px 20px; cursor: pointer; }
   </style>
 </head>
 <body>
   <main>
     <img src="/icon.svg" alt="">
-    <h1>You're offline</h1>
-    <p>Simple Aircraft Manager needs a connection to load your aircraft. Check your signal and try again.</p>
-    <button type="button" onclick="location.reload()">Try again</button>
-    <div id="forms" hidden>
-      <p style="margin:24px 0 8px">You can still log a flight; it's sent when you're back online:</p>
+    <h1><%= t(".heading") %></h1>
+    <p><%= t(".needs_connection") %></p>
+    <button type="button" id="retry"><%= t(".try_again") %></button>
+    <div id="forms" hidden data-flight="<%= t(".log_flight") %>" data-squawk="<%= t(".report_squawk") %>">
+      <p style="margin:24px 0 8px"><%= t(".still_can") %></p>
+    </div>
+    <div id="pages" hidden data-label="<%= t(".saved_overview") %>">
+      <p style="margin:24px 0 8px"><%= t(".saved_pages") %></p>
     </div>
   </main>
   <script src="/offline.js"></script>

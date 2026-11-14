@@ -2,7 +2,7 @@
   <%= f.errors_summary %>
   <%= f.field :name %>
   <%= f.field :email_address, as: :email, label: t(".email"), required: true %>
-  <%= f.field :password, as: :password, hint: (user.persisted? ? t(".leave_blank_to_keep_current") : t(".at_least_characters_not_one", _: (User::PASSWORD_MIN))), autocomplete: "new-password" %>
+  <%= f.field :password, as: :password, hint: (user.persisted? ? t(".leave_blank_to_keep_current") : t(".at_least_characters_not_one", min: User::PASSWORD_MIN)), autocomplete: "new-password" %>
   <%= f.field :password_confirmation, as: :password %>
   <%= f.field :admin, as: :checkbox, label: t(".administrator"), hint: t(".admins_can_see_and_edit") %>
   <div class="flex gap-2"><%= f.submit t(".save") %><%= link_to t(".cancel"), admin_users_path, class: "btn-secondary" %></div>

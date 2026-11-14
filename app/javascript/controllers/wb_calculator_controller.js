@@ -24,7 +24,7 @@ export default class extends Controller {
       const fuel = input.dataset.fuel === "true"
       const max = parseFloat(input.dataset.max) || 0
       const label = input.closest("label").querySelector(".label").firstChild.textContent.trim()
-      if (max && qty > max) messages.push([ "bad", `${label}: ${qty} is over its maximum of ${max} ${fuel ? "gal" : "lb"}.` ])
+      if (max && qty > max) messages.push([ "bad", t(fuel ? "wb.over_station_gal" : "wb.over_station_lb", { label, qty, max }) ])
       const lbs = fuel ? qty * this.fuelDensityValue : qty
       weight += lbs
       moment += lbs * arm

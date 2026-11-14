@@ -20,10 +20,27 @@ styleCharts()
 document.addEventListener("turbo:load", restyleCharts)
 window.addEventListener("theme:change", restyleCharts)
 
-// Installable app (PWA): the service worker adds an offline page and caches static assets.
+// Installable app (PWA): the service worker keeps an offline page, forms and
+// pre-flight pages, sends saved items in the background and shows notifications.
 if ("serviceWorker" in navigator) {
+  // A new release's worker takes over open pages: offer a reload (not on the first install).
+  const hadWorker = !!navigator.serviceWorker.controller
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hadWorker) document.dispatchEvent(new CustomEvent("app:updated"))
+  })
+  // The worker sent saved items in the background: refresh the counts.
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data?.type === "queue-changed") document.dispatchEvent(new CustomEvent("offline-queue:changed"))
+  })
   window.addEventListener("load", () => navigator.serviceWorker.register("/service-worker.js", { scope: "/" }).catch(() => {}))
 }
+
+// Chrome and Android offer to install the app; keep the offer for the button on the profile page.
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault()
+  window.samInstallPrompt = event
+  document.dispatchEvent(new CustomEvent("install:available"))
+})
 
 // Label each table cell with its column header, so phone CSS can show rows as
 // cards ("Status: In Service"). Skips tables marked .table-keep.

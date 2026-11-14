@@ -24,7 +24,7 @@ module OilAnalysesHelper
     value = analysis.value(element)
     flagged = analysis.flagged?(element)
     content = tag.span(ppm(value), class: [ "tabular-nums", ("font-semibold text-red-700" if flagged) ],
-                                   title: (I18n.t("helpers.oil_analyses.over_the_lab_average", _: (OilAnalysis::FLAG_RATIO)) if flagged))
+                                   title: (I18n.t("helpers.oil_analyses.over_the_lab_average", ratio: OilAnalysis::FLAG_RATIO) if flagged))
     avg = analysis.average(element)
     avg ? safe_join([ content, tag.div("(#{ppm(avg)})", class: "text-xs text-slate-500 tabular-nums") ]) : content
   end

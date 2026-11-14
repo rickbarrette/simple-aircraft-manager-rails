@@ -74,6 +74,7 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 | `APP_HOST` | Host name the app is reached at, used in email links (password resets, sign-in links, signing invitations, reminders). |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | Optional. They enable email: password resets and **Email me a sign-in link**. Without them an admin resets passwords from **Users**. Check the setup with **Admin → About → Send test email**. |
 | `SMTP_TLS` | `true` for servers that use TLS from the start. That's the default on port 465; other ports upgrade with STARTTLS. |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Optional. The key pair that signs push notifications (generate with `bin/rails runner 'k = WebPush.generate_key; puts k.public_key, k.private_key'`). Without them the app generates a pair once and keeps it in `storage/vapid_keys.json`. Changing it turns notifications off on every device until they're turned on again. |
 | `APP_LOCALE` | Optional. The app's language, e.g. `es` for `config/locales/es.yml` (see [Translating](#translating)). Default `en`. |
 | `ANTHROPIC_API_KEY` | Optional. Lets Claude transcribe scanned logbook pages into entries (**Logbook → Import scans**). Without it, scans are only uploaded. |
 | `LOGBOOK_AI_MODEL`, `LOGBOOK_AI_EFFORT` | Optional. The Claude model and effort used for transcription (default `claude-opus-5-5`, `high`). |
@@ -197,7 +198,7 @@ The MCP server for AI agents, invitation codes, per-aircraft feature switches, t
 
 ### Added in this port
 
-AirTrail sync and export, an airport database, FAA DRS AD import, spreadsheet flight import, engine monitor data (CGR-30P/C) with interactive charts, AvLab and Blackstone oil analysis import with trends, multiple squawk attachments with a photo viewer, AI logbook transcription with Claude (images and PDFs), printable logbook entries, electronic signatures and recordkeeping along the lines of AC 120-78B (record history, nightly integrity checks, records package, procedures and audits), off-site backup to Google Drive, a user guide, and an installable PWA.
+AirTrail sync and export, an airport database, FAA DRS AD import, spreadsheet flight import, engine monitor data (CGR-30P/C) with interactive charts, AvLab and Blackstone oil analysis import with trends, multiple squawk attachments with a photo viewer, AI logbook transcription with Claude (images and PDFs), printable logbook entries, electronic signatures and recordkeeping along the lines of AC 120-78B (record history, nightly integrity checks, records package, procedures and audits), off-site backup to Google Drive, a user guide, and an installable app (PWA) that logs flights and squawks offline, keeps pre-flight pages for use without signal, and sends push notifications.
 
 ## Translating
 

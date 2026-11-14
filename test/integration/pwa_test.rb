@@ -9,6 +9,8 @@ class PwaTest < ActionDispatch::IntegrationTest
     assert_equal "standalone", manifest["display"]
     assert_includes manifest["icons"].map { _1["purpose"] }, "maskable"
     manifest["icons"].each { |icon| assert Rails.public_path.join(icon["src"].delete_prefix("/")).exist?, icon["src"] }
+    assert_equal "en", manifest["lang"]
+    assert_equal %w[/go/log-flight /go/report-squawk], manifest["shortcuts"].map { _1["url"] }
   end
 
   test "service worker is public and precaches files that exist" do
@@ -16,8 +18,14 @@ class PwaTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "javascript", response.media_type
     shell = response.body[/const SHELL = \[(.*?)\]/, 1].scan(/"([^"]+)"/).flatten
-    assert_includes shell, "/offline.html"
-    shell.each { |path| assert Rails.public_path.join(path.delete_prefix("/")).exist?, path }
+    assert_includes shell, "/offline"
+    shell.each do |path|
+      next assert(Rails.public_path.join(path.delete_prefix("/")).exist?, path) if path.include?(".")
+      get path
+      assert_response :success, path # rendered pages (the offline page) work signed out
+    end
+    get pwa_service_worker_path(format: :js)
+    assert_match(/const VERSION = "#{SystemInfo.new.revision}-en"/, response.body) # a new build refreshes the cached shell
   end
 
   test "signed-in and shared pages link the manifest and register the worker" do

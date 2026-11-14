@@ -18,11 +18,17 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <meta name="rendered-at" content="<%= Time.current.iso8601 %>">
+    <% if current_user %><meta name="current-user" content="<%= current_user.id %>"><% end %>
     <script type="application/json" id="i18n" nonce="<%= content_security_policy_nonce %>"><%= json_escape(t("js").to_json).html_safe %></script>
   </head>
 
-  <body class="min-h-full text-slate-800" data-controller="offline-sync">
+  <body class="min-h-full text-slate-800" data-controller="offline-sync page-age app-update<%= " offline-prep" if current_user %>"<% if current_user %> data-offline-prep-aircraft-value="<%= offline_pages.to_json %>"<% end %>>
     <%= t(".skip_to_content_html") %>
+    <div class="hidden bg-sky-50 px-4 py-2 text-center text-sm text-sky-900 ring-1 ring-sky-200" data-page-age-target="banner" role="status"></div>
+    <div class="hidden bg-sky-50 px-4 py-2 text-center text-sm text-sky-900 ring-1 ring-sky-200" data-app-update-target="banner" role="status">
+      <%= t(".updated") %> <button type="button" class="btn-secondary btn-sm ml-1" data-action="app-update#reload"><%= t(".reload") %></button>
+    </div>
     <div class="hidden space-y-1 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900 ring-1 ring-amber-200" data-offline-sync-target="banner" role="status"></div>
     <header class="bg-header text-white">
       <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
@@ -47,7 +53,7 @@
                     <%= link_to label, path, class: "block px-4 py-2.5 hover:bg-slate-100" %>
                   <% end %>
                 <% end %>
-                <div class="border-t border-slate-100"><%= button_to t(".sign_out"), session_path, method: :delete, class: "block w-full px-4 py-2.5 text-left hover:bg-slate-100" %></div>
+                <div class="border-t border-slate-100"><%= button_to t(".sign_out"), session_path, method: :delete, class: "block w-full px-4 py-2.5 text-left hover:bg-slate-100", form: { data: { controller: "sign-out", action: "submit->sign-out#clean" } } %></div>
               </div>
             </details>
           </nav>
@@ -73,7 +79,7 @@
             <%= link_to t(".help"), help_path, class: "hover:text-sky-300" %>
             <%= link_to current_user.display_name, edit_profile_path, class: "text-white/70 hover:text-sky-300 hidden sm:inline" %>
             <%= render "shared/theme_toggle" %>
-            <%= button_to t(".sign_out"), session_path, method: :delete, class: "rounded bg-white/10 px-2 py-1 hover:bg-white/20" %>
+            <%= button_to t(".sign_out"), session_path, method: :delete, class: "rounded bg-white/10 px-2 py-1 hover:bg-white/20", form: { data: { controller: "sign-out", action: "submit->sign-out#clean" } } %>
           </nav>
         <% end %>
       </div>

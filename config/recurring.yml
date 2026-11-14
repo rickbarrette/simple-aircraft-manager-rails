@@ -28,6 +28,9 @@ production:
   document_text:
     class: DocumentTextJob
     schedule: every day at 2am
+  overdue_notifications:
+    class: OverdueNotificationJob
+    schedule: every day at 7am
   records_integrity:
     class: RecordsIntegrityJob
     schedule: every day at 3:30am

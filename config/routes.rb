@@ -21,6 +21,12 @@ Rails.application.routes.draw do
   resources :passwords, param: :token, only: %i[new create edit update]
   resource :setup, only: %i[new create], controller: "setup"
   resource :profile, only: %i[edit update]
+  resource :push_subscription, path: "profile/push", only: %i[create destroy] do
+    post :test
+  end
+  # Home-screen shortcuts: the form for your aircraft, or a choice of aircraft.
+  get "go/log-flight", to: "shortcuts#log_flight", as: :log_flight_shortcut
+  get "go/report-squawk", to: "shortcuts#report_squawk", as: :report_squawk_shortcut
   resources :certificates, path: "profile/certificates", controller: "user_certificates", only: %i[create update destroy]
   resource :air_trail_connection, path: "profile/airtrail", only: %i[show create update destroy] do
     post :test
@@ -173,6 +179,7 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  get "offline" => "offline#show", as: :offline
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   root "aircraft#index"
 end

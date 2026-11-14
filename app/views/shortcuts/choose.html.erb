@@ -1,0 +1,14 @@
+<% content_for :title, @title %>
+<h1 class="mb-4 text-xl font-bold"><%= @title %></h1>
+<% if @choices.any? %>
+  <ul class="card max-w-md divide-y divide-slate-100">
+    <% @choices.each do |aircraft, path| %>
+      <li><%= link_to path, class: "flex items-baseline justify-between gap-3 px-4 py-3 hover:bg-slate-50" do %>
+        <span class="font-semibold"><%= aircraft.tail_number %></span>
+        <span class="text-sm text-slate-500"><%= [ aircraft.make, aircraft.model ].compact_blank.join(" ") %></span>
+      <% end %></li>
+    <% end %>
+  </ul>
+<% else %>
+  <%= empty_state t("shortcuts.choose.no_aircraft") %>
+<% end %>

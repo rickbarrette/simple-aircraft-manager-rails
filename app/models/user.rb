@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :aircraft_roles, dependent: :destroy
+  has_many :push_subscriptions, dependent: :delete_all
   has_many :aircraft, through: :aircraft_roles
   has_one :air_trail_connection, dependent: :destroy
   has_many :certificates, -> { ordered }, class_name: "UserCertificate", dependent: :destroy

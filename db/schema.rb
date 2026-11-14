@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -150,6 +150,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_030000) do
     t.string "ad_watch_terms"
     t.datetime "ad_watch_checked_at"
     t.date "electronic_records_since"
+    t.json "notified_issue_keys", default: [], null: false
   end
 
   create_table "aircraft_airworthiness_directives", id: false, force: :cascade do |t|
@@ -695,6 +696,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_030000) do
     t.index ["number"], name: "index_procedures_revisions_on_number", unique: true
   end
 
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.text "endpoint", null: false
+    t.string "p256dh", null: false
+    t.string "auth", null: false
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
+  end
+
   create_table "record_versions", force: :cascade do |t|
     t.integer "aircraft_id"
     t.string "item_type", null: false
@@ -788,6 +801,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_030000) do
     t.string "deferral_action"
     t.text "deferral_notes"
     t.integer "logbook_entry_id"
+    t.string "client_key"
+    t.index ["aircraft_id", "client_key"], name: "index_squawks_on_aircraft_id_and_client_key", unique: true
     t.index ["aircraft_id"], name: "index_squawks_on_aircraft_id"
     t.index ["component_id"], name: "index_squawks_on_component_id"
     t.index ["logbook_entry_id"], name: "index_squawks_on_logbook_entry_id"
@@ -907,6 +922,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_030000) do
   add_foreign_key "oil_analyses", "aircraft"
   add_foreign_key "oil_analyses", "components"
   add_foreign_key "procedures_revisions", "users", column: "adopted_by_id", on_delete: :nullify
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "share_tokens", "aircraft"
   add_foreign_key "share_tokens", "users", column: "created_by_id", on_delete: :nullify

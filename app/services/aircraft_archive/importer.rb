@@ -71,7 +71,7 @@ module AircraftArchive
         compressed += entry.compressed_size
         raise Error, I18n.t("services.aircraft_archive.the_archive_is_too_large") if uncompressed > ARCHIVE_MAX_BYTES
       end
-      raise Error, I18n.t("services.aircraft_archive.the_archive_is_compressed_suspiciously", _: MAX_RATIO) if compressed.positive? && uncompressed / compressed > MAX_RATIO
+      raise Error, I18n.t("services.aircraft_archive.the_archive_is_compressed_suspiciously", ratio: MAX_RATIO) if compressed.positive? && uncompressed / compressed > MAX_RATIO
 
       entry = zip.find_entry("#{root_prefix(zip)}manifest.json") or raise Error, I18n.t("services.aircraft_archive.the_archive_has_no_manifest")
       raise Error, I18n.t("services.aircraft_archive.manifest_json_is_too_large") if entry.size > MANIFEST_MAX_BYTES
@@ -84,7 +84,7 @@ module AircraftArchive
 
       version = manifest["schema_version"]
       unless version.is_a?(Integer) && version.between?(1, SCHEMA_VERSION)
-        raise Error, I18n.t("services.aircraft_archive.unsupported_archive_version_this_app", version: version.inspect, _: SCHEMA_VERSION)
+        raise Error, I18n.t("services.aircraft_archive.unsupported_archive_version_this_app", version: version.inspect, max: SCHEMA_VERSION)
       end
       required = TOP_LEVEL_KEYS - OPTIONAL_KEYS - (version < 2 ? %w[flight_logs] : [])
       missing = required - manifest.keys

@@ -1,0 +1,214 @@
+// Makes the app installable and keeps what's needed to work without signal:
+// - the offline page (rendered in the app's language) and its script and icons;
+// - fingerprinted /assets/ once fetched;
+// - the Log Flight and Report Squawk forms you've opened (tail number and
+//   meter readings only), so they can be filled in offline and sent later;
+// - the Fleet page and each aircraft's Overview and weight and balance page,
+//   so the app opens and you can get around without signal (shown with the
+//   time they were saved).
+// - each aircraft's photo (put in sam-images ahead of time), shown when offline.
+// The forms and pages are saved ahead of time for all your aircraft
+// (offline_prep_controller.js), not only the ones you've opened.
+// Nothing else is cached; signing out clears the forms and pages.
+// The version changes with every build, so a release refreshes the cached shell.
+const VERSION = "<%= j "#{SystemInfo.new.revision}-#{I18n.locale}" %>"
+const SHELL_CACHE = `sam-shell-${VERSION}`
+const FORM_CACHE = "sam-forms"
+const PAGE_CACHE = "sam-pages"
+const IMAGE_CACHE = "sam-images"
+const ASSET_CACHE = "sam-assets"
+const MAX_ASSETS = 80
+const FORMS = /^\/aircraft\/\d+\/(flight_logs|squawks)\/new$/
+const PAGES = /^\/$|^\/aircraft\/\d+(\/weight_balance)?$/
+const SHORTCUTS = { "/go/log-flight": "flight_logs", "/go/report-squawk": "squawks" }
+// A proxy in front of the app (Traefik, Authentik) answers these when the app
+// itself can't be reached: treat them like no connection.
+const UNREACHABLE = [ 502, 503, 504 ]
+const SHELL = [ "/offline", "/offline.js", "/icon.svg", "/icon-192.png" ]
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()))
+})
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => (k.startsWith("sam-shell-") && k !== SHELL_CACHE) || k === "sam-flight-forms").map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  )
+})
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request
+  if (request.method !== "GET") return
+  const url = new URL(request.url)
+  if (url.origin !== self.location.origin) return
+
+  // Turbo opens pages with fetch(), not a navigation, so match those too or
+  // the form is never kept when reached by tapping a link.
+  const wantsHtml = request.mode === "navigate" || (request.headers.get("Accept") || "").includes("text/html")
+  if (wantsHtml && FORMS.test(url.pathname)) {
+    event.respondWith(keptPage(request, FORM_CACHE))
+  } else if (wantsHtml && PAGES.test(url.pathname)) {
+    event.respondWith(keptPage(request, PAGE_CACHE))
+  } else if (request.mode === "navigate" && SHORTCUTS[url.pathname]) {
+    event.respondWith(shortcut(request, SHORTCUTS[url.pathname]))
+  } else if (request.mode === "navigate") {
+    // Always go to the network for pages; show the offline page if it's unreachable.
+    event.respondWith(fetch(request)
+      .then((response) => UNREACHABLE.includes(response.status) ? offlinePage() : response)
+      .catch(() => offlinePage()))
+  } else if (SHELL.includes(url.pathname)) {
+    // The offline page's own script and icon: fresh when online, kept copy when not.
+    event.respondWith(fetch(request).then((r) => r.ok ? r : caches.match(url.pathname).then((hit) => hit || r))
+      .catch(() => caches.match(url.pathname)))
+  } else if (url.pathname.startsWith("/assets/")) {
+    event.respondWith(cachedAsset(request))
+  } else if (url.pathname.startsWith("/rails/active_storage/blobs/redirect/")) {
+    // Uploaded files come from the network; an aircraft photo saved for
+    // offline use stands in when there's none.
+    event.respondWith(fetch(request)
+      .then((response) => UNREACHABLE.includes(response.status) ? savedImage(request, response) : response)
+      .catch(() => savedImage(request)))
+  }
+})
+
+const offlinePage = () => caches.match("/offline")
+const savedImage = async (request, response) => {
+  const key = imageKey(request.url)
+  return (key && await caches.open(IMAGE_CACHE).then((c) => c.match(key))) || response || Response.error()
+}
+
+// Photo links carry an expiry, so they change with every page; the saved copy
+// is filed under the upload's id instead (same rule in offline_prep_controller.js).
+function imageKey(url) {
+  try {
+    const signed = new URL(url, self.location.origin).pathname.match(/\/blobs\/redirect\/([^/]+?)--/)[1]
+    return `${self.location.origin}/offline-image/${JSON.parse(atob(decodeURIComponent(signed)))._rails.data}`
+  } catch (_) { return null }
+}
+
+// Fingerprinted assets never change, so serve them from cache once fetched.
+async function cachedAsset(request) {
+  const cache = await caches.open(ASSET_CACHE)
+  const hit = await cache.match(request)
+  if (hit) return hit
+  const response = await fetch(request)
+  if (response.ok) {
+    await cache.put(request, response.clone())
+    trim(cache)
+  }
+  return response
+}
+
+// Old deploys' assets pile up; keep only the most recent entries.
+async function trim(cache) {
+  const keys = await cache.keys()
+  await Promise.all(keys.slice(0, Math.max(0, keys.length - MAX_ASSETS)).map((k) => cache.delete(k)))
+}
+
+// A kept form or page: fresh from the network when there is one (and kept),
+// the kept copy when there isn't.
+async function keptPage(request, cacheName) {
+  const cache = await caches.open(cacheName)
+  const key = request.url.split("?")[0]
+  try {
+    const response = await fetch(request)
+    if (UNREACHABLE.includes(response.status)) {
+      const kept = await cache.match(key)
+      if (kept) return kept
+      return request.mode === "navigate" ? offlinePage() : response
+    }
+    const html = (response.headers.get("Content-Type") || "").includes("text/html")
+    if (response.ok && !response.redirected && html) await cache.put(key, response.clone())
+    return response
+  } catch (error) {
+    const kept = await cache.match(key)
+    if (kept) return kept
+    // A Turbo fetch gets the error, so Turbo falls back to a full page load.
+    if (request.mode !== "navigate") throw error
+    return offlinePage()
+  }
+}
+
+// The home-screen shortcuts: offline, open the kept form if there's only one
+// of that kind (one aircraft), otherwise the offline page, which lists them.
+async function shortcut(request, kind) {
+  try {
+    const response = await fetch(request)
+    if (!UNREACHABLE.includes(response.status)) return response
+  } catch (_) { /* offline */ }
+  const cache = await caches.open(FORM_CACHE)
+  const forms = (await cache.keys()).filter((r) => new URL(r.url).pathname.includes(`/${kind}/new`))
+  return forms.length === 1 ? cache.match(forms[0]) : offlinePage()
+}
+
+// ---- Sending saved items in the background (Chrome, Edge, Android) ----
+// The page normally sends them (offline_sync_controller); this also does it
+// when the app is closed. Anything the server doesn't accept is left for the
+// page to report.
+
+self.addEventListener("sync", (event) => {
+  if (event.tag === "sam-queue") event.waitUntil(sendQueued())
+})
+
+function queueStore(mode) {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open("sam-offline", 1)
+    req.onupgradeneeded = () => req.result.createObjectStore("flights", { keyPath: "id" })
+    req.onsuccess = () => resolve(req.result.transaction("flights", mode).objectStore("flights"))
+    req.onerror = () => reject(req.error)
+  })
+}
+
+const idb = (store, method, arg) => new Promise((resolve, reject) => {
+  const req = store[method](arg)
+  req.onsuccess = () => resolve(req.result)
+  req.onerror = () => reject(req.error)
+})
+
+async function sendQueued() {
+  const items = ((await idb(await queueStore("readonly"), "getAll")) || []).filter((i) => !i.error)
+    .sort((a, b) => a.savedAt.localeCompare(b.savedAt))
+  if (!items.length) return
+  // A page of the app gives the session's CSRF token and who's signed in.
+  const page = await fetch("/profile/edit", { credentials: "same-origin", headers: { Accept: "text/html" } })
+  if (!page.ok || page.redirected) return
+  const html = await page.text()
+  const token = (html.match(/<meta name="csrf-token" content="([^"]+)"/) || [])[1]
+  const user = (html.match(/<meta name="current-user" content="([^"]+)"/) || [])[1]
+  if (!token || !user) return
+  let sent = 0
+  for (const item of items) {
+    if (item.user && item.user !== user) continue
+    const body = new FormData()
+    for (const [ name, value ] of item.fields) body.append(name, value)
+    body.append("authenticity_token", token)
+    const response = await fetch(item.url, { method: "POST", body, credentials: "same-origin", headers: { Accept: "text/html" } })
+    if (UNREACHABLE.includes(response.status)) break
+    if (!response.ok || response.url.includes("/session/new")) continue // left for the page to report
+    await idb(await queueStore("readwrite"), "delete", item.id)
+    sent++
+  }
+  if (sent) (await self.clients.matchAll()).forEach((client) => client.postMessage({ type: "queue-changed" }))
+}
+
+// ---- Push notifications ----
+
+self.addEventListener("push", (event) => {
+  let data = {}
+  try { data = event.data ? event.data.json() : {} } catch (_) { data = { title: event.data?.text() } }
+  event.waitUntil(self.registration.showNotification(data.title || "Simple Aircraft Manager", {
+    body: data.body, tag: data.tag, icon: "/icon-192.png", badge: "/icon-192.png", data: { path: data.path || "/" }
+  }))
+})
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close()
+  const target = new URL(event.notification.data?.path || "/", self.location.origin).href
+  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+    const open = windows.find((w) => w.url.startsWith(self.location.origin))
+    if (open) return open.navigate(target).then((w) => (w || open).focus())
+    return self.clients.openWindow(target)
+  }))
+})

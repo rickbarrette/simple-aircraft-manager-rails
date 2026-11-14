@@ -34,6 +34,18 @@ Add each certificate you sign maintenance records with: its kind (A&P, IA, airfr
 
 If the app offers single sign-on, **Link** your account to it here so you can sign in with it, or **Unlink** it.
 
+## This device
+
+**Install the app** adds Simple Aircraft Manager to the home screen (or the computer's apps), for offline flights and squawks, pre-flight pages without signal and notifications; see [On a phone](getting-started.md#on-a-phone). On iPhone and iPad, install from Safari's **Share → Add to Home Screen**.
+
+**Notifications → Turn on** lets this device show:
+
+- a **Ground Aircraft** squawk on an aircraft you have access to (not one you reported);
+- items that newly become overdue, or newly limit the aircraft (VFR only, no transponder), on aircraft you own; checked each morning, each item once;
+- a request to sign a logbook entry sent to your email address.
+
+Turn it on on each phone or computer you want them on; **Send a test** checks it works. On iPhone and iPad, notifications work in the installed app (iOS 16.4 or later). If the browser blocked them, allow notifications for the site in its settings.
+
 ## Sessions
 
 **Sign out everywhere else** ends your sessions on other devices, for example after using a shared computer or losing a phone.

@@ -12,9 +12,9 @@ class OfflineFlightsTest < ActionDispatch::IntegrationTest
 
   test "the form carries a one-time key and the offline controller; the same key is logged once" do
     get new_aircraft_flight_log_path(@a)
-    assert_select "form[data-controller=offline-flight][data-offline-flight-tail-value=N12345]"
+    assert_select "form[data-controller=offline-form][data-offline-form-kind-value=flight][data-offline-form-tail-value=N12345]"
     assert_select "input[type=hidden][name='flight_log[client_key]']"
-    assert_select "body[data-controller=offline-sync] [data-offline-sync-target=banner]"
+    assert_select "body[data-controller~=offline-sync] [data-offline-sync-target=banner]"
 
     params = { flight_log: { date: "2026-11-08", tach_out: 1000, tach_in: 1001.2, departure_location: "KOQU", destination_location: "KBID", client_key: "key-1" } }
     post aircraft_flight_logs_path(@a), params: params
@@ -27,8 +27,7 @@ class OfflineFlightsTest < ActionDispatch::IntegrationTest
 
   test "the service worker keeps Log Flight forms and the offline page links them" do
     get pwa_service_worker_path(format: :js)
-    assert_includes response.body, "FLIGHT_FORM"
-    assert_includes response.body, %q(const FLIGHT_FORM = /^\/aircraft\/\d+\/flight_logs\/new$/)
+    assert_includes response.body, %q(const FORMS = /^\/aircraft\/\d+\/(flight_logs|squawks)\/new$/)
     assert Rails.public_path.join("offline.js").read.include?("sam-offline-forms")
   end
 end

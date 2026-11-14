@@ -13,7 +13,7 @@ Every hour flown is added to the aircraft and to each installed component, which
 
 ### With no signal
 
-On a phone or tablet with the app installed (see [Getting started](getting-started.md)), you can log a flight without a connection, as long as you've opened **Log Flight** for that aircraft on that device before. Without signal, the form opens from the copy the device kept, and **Log Flight** saves the flight on the device instead of sending it. The next leg starts where the last one ended. When the connection is back, the app sends the saved flights by itself and says so at the top of the page. A flight that's rejected (for example a typo in the tach) stays there with the reason, to log again by hand or discard. Sending twice never logs a flight twice.
+On a phone or tablet with the app installed (see [Getting started](getting-started.md)), you can log a flight without a connection. While you're online, the app saves what it needs on the device for each of your aircraft (up to 10), so without signal you open the app, tap the aircraft and **Log Flight** as usual: the form opens from the saved copy, and **Log Flight** saves the flight on the device instead of sending it. The next leg starts where the last one ended. When the connection is back, the app sends the saved flights by itself (on Android, even if the app is closed) and says so at the top of the page. The device asks the browser to keep them safe until then. A flight that's rejected (for example a typo in the tach) stays there with the reason, to log again by hand or discard. Sending twice never logs a flight twice.
 
 Track and engine data files attached offline are kept and sent too.
 

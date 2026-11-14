@@ -2,8 +2,9 @@ import { Controller } from "@hotwired/stimulus"
 import { t } from "i18n"
 import { queue } from "controllers/offline_queue"
 
-// On every page: sends flights logged offline once there's a connection, and
-// says what happened. A rejected flight stays until it's discarded.
+// On every page: sends the flights and squawks this user saved offline once
+// there's a connection, says what happened, and shows the count on the app
+// icon. A rejected item stays until it's discarded.
 export default class extends Controller {
   static targets = [ "banner" ]
 
@@ -21,21 +22,21 @@ export default class extends Controller {
 
   async sync() {
     let items
-    try { items = await queue.all() } catch (_) { return }
-    if (!items.length) return this.show("")
+    try { items = await queue.mine() } catch (_) { return }
+    if (!items.length) { this.badge(0); return this.show("") }
     if (!navigator.onLine || this.running) return this.status(items)
     this.running = true
-    let sent = 0
+    const sent = []
     try {
       for (const item of items.filter((i) => !i.error)) {
         const result = await this.send(item)
-        if (result === "sent") { await queue.remove(item.id); sent++ }
+        if (result === "sent") { await queue.remove(item.id); sent.push(item) }
         else if (result === "signin") { this.show(t("offline.sign_in")); return }
         else if (result === "offline") break
         else { item.error = result; await queue.put(item) }
       }
     } finally { this.running = false }
-    this.status(await queue.all(), sent)
+    this.status(await queue.mine(), sent)
   }
 
   async send(item) {
@@ -56,13 +57,22 @@ export default class extends Controller {
     return message || t("offline.not_accepted", { status: response.status })
   }
 
-  status(items, sent = 0) {
+  status(items, sent = []) {
     const failed = items.filter((i) => i.error)
-    const waiting = items.length - failed.length
+    const waiting = items.filter((i) => !i.error)
     const parts = []
-    if (sent) parts.push(t("offline.sent", { count: sent }))
-    if (waiting) parts.push(t("offline.waiting", { count: waiting }))
+    for (const kind of [ "flight", "squawk" ]) {
+      const count = (list) => list.filter((i) => (i.kind || "flight") === kind).length
+      if (count(sent)) parts.push(t(`offline.${kind}.sent`, { count: count(sent) }))
+      if (count(waiting)) parts.push(t(`offline.${kind}.waiting`, { count: count(waiting) }))
+    }
     this.show(parts.join(" "), failed)
+    this.badge(items.length)
+  }
+
+  // The number of unsent items on the installed app's icon.
+  badge(count) {
+    try { count ? navigator.setAppBadge?.(count) : navigator.clearAppBadge?.() } catch (_) { /* not supported */ }
   }
 
   show(text, failed = []) {
@@ -72,7 +82,7 @@ export default class extends Controller {
     for (const item of failed) {
       const date = (item.fields.find(([ n ]) => n === "flight_log[date]") || [])[1] || ""
       const row = document.createElement("p")
-      row.textContent = `${item.tail} flight ${date} logged offline wasn't accepted: ${item.error} `
+      row.textContent = `${t(`offline.${item.kind || "flight"}.rejected`, { tail: item.tail, date, error: item.error })} `
       const discard = Object.assign(document.createElement("button"), { type: "button", textContent: t("offline.discard"), className: "btn-secondary btn-sm ml-1" })
       discard.addEventListener("click", async () => { await queue.remove(item.id); this.sync() })
       row.append(discard)

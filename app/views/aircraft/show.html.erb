@@ -1,4 +1,5 @@
 <% content_for :title, @aircraft.tail_number %>
+<% content_for :head do %><meta name="aircraft-tail" content="<%= @aircraft.tail_number %>"><% end %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 
 <div class="grid gap-5 lg:grid-cols-3">

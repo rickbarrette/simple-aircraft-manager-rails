@@ -1,25 +1,27 @@
 import { Controller } from "@hotwired/stimulus"
 import { t } from "i18n"
-import { queue, formFields, newKey } from "controllers/offline_queue"
+import { queue, formFields, newKey, currentUser } from "controllers/offline_queue"
 
-// The Log Flight form: with no connection, the flight is kept on this device
-// and sent later (see offline_sync_controller). The next leg starts where the
-// last saved one ended.
+// Log Flight and Report Squawk: with no connection, the form is kept on this
+// device and sent later (see offline_sync_controller). For flights, the next
+// leg starts where the last saved one ended.
 export default class extends Controller {
   static targets = [ "key", "notice" ]
-  static values = { tail: String }
+  static values = { kind: { type: String, default: "flight" }, tail: String }
 
   async connect() {
     if (!this.keyTarget.value) this.keyTarget.value = newKey()
     try {
-      const mine = (await queue.all()).filter((i) => i.url === this.element.action)
+      const mine = (await queue.mine()).filter((i) => i.url === this.element.action)
       if (mine.length) {
-        this.prefillFrom(mine[mine.length - 1])
-        this.say(`${mine.length} flight${mine.length > 1 ? "s" : ""} logged offline on this device, waiting to send. This one starts where the last ended.`)
+        if (this.flight) this.prefillFrom(mine[mine.length - 1])
+        this.say(t(`offline.${this.kindValue}.queued_here`, { count: mine.length }))
       }
     } catch (_) { /* no IndexedDB: nothing queued */ }
     this.rememberForm()
   }
+
+  get flight() { return this.kindValue === "flight" }
 
   // No connection: keep it here instead of submitting.
   async submit(event) {
@@ -36,8 +38,8 @@ export default class extends Controller {
     if (this.pending) await this.save(this.pending)
   }
 
-  // A proxy answered because the app is unreachable (502/503/504): keep the
-  // flight instead of showing the proxy's error page.
+  // A proxy answered because the app is unreachable (502/503/504): keep it
+  // instead of showing the proxy's error page.
   async gatewayFailed(event) {
     if (![ 502, 503, 504 ].includes(event.detail.fetchResponse.statusCode) || !this.pending) return
     event.preventDefault()
@@ -45,19 +47,20 @@ export default class extends Controller {
   }
 
   async save(fields) {
-    const item = { id: this.keyTarget.value, url: this.element.action, tail: this.tailValue, savedAt: new Date().toISOString(), fields }
+    const item = { id: this.keyTarget.value, kind: this.kindValue, url: this.element.action, tail: this.tailValue,
+                   user: currentUser(), savedAt: new Date().toISOString(), fields }
     try {
       await queue.add(item)
     } catch (_) {
-      this.say(t("offline.no_storage"))
+      this.say(t(`offline.${this.kindValue}.no_storage`))
       return
     }
-    this.prefillFrom(item)
-    this.clearLegFields()
+    if (this.flight) this.prefillFrom(item)
+    this.clearFields()
     this.keyTarget.value = newKey()
     this.pending = null
     window.scrollTo({ top: 0 })
-    this.say(t("offline.saved_on_device"))
+    this.say(t(`offline.${this.kindValue}.saved_on_device`))
     document.dispatchEvent(new CustomEvent("offline-queue:changed"))
   }
 
@@ -69,19 +72,22 @@ export default class extends Controller {
     set("departure_location", value("destination_location"))
   }
 
-  clearLegFields() {
-    for (const name of [ "tach_in", "tach_time", "hobbs_in", "hobbs_time", "destination_location", "route", "notes",
-      "oil_added", "oil_level_after", "fuel_added", "fuel_level_after", "track_log", "engine_data" ]) {
-      const el = this.element.querySelector(`[name="flight_log[${name}]"]`)
+  clearFields() {
+    const names = this.flight
+      ? [ "tach_in", "tach_time", "hobbs_in", "hobbs_time", "destination_location", "route", "notes",
+          "oil_added", "oil_level_after", "fuel_added", "fuel_level_after", "track_log", "engine_data" ].map((n) => `flight_log[${n}]`)
+      : [ "squawk[issue_reported]", "squawk[attachments][]" ]
+    for (const name of names) {
+      const el = this.element.querySelector(`[name="${name}"]`)
       if (el) el.value = ""
     }
   }
 
-  // Lets the offline page offer this form for this aircraft.
+  // Lets the offline page and the home-screen shortcuts offer this form.
   rememberForm() {
     try {
       const forms = JSON.parse(localStorage.getItem("sam-offline-forms") || "{}")
-      forms[location.pathname] = this.tailValue
+      forms[location.pathname] = { tail: this.tailValue, kind: this.kindValue }
       localStorage.setItem("sam-offline-forms", JSON.stringify(forms))
     } catch (_) { /* storage off */ }
   }

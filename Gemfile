@@ -78,4 +78,7 @@ gem "omniauth-rails_csrf_protection", "~> 2.0"
 
 gem "prawn", "~> 2.5" # printable logbook entries
 gem "rotp", "~> 6.3" # authenticator app (TOTP) codes
+
+# Push notifications to installed apps and browsers (Web Push, VAPID)
+gem "web-push", "~> 3.1"
 gem "rqrcode", "~> 3.1" # QR code for setting up the authenticator

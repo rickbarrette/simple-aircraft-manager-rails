@@ -43,4 +43,12 @@ class MoreMenuTest < ActionDispatch::IntegrationTest
     assert_select "span[title='Your access to this aircraft']", "Owner"
     assert_select "span.badge-green", text: "Available", count: 0
   end
+
+  test "the description keeps its paragraphs inside the Details card" do
+    @a.update!(description: "First line.\n\nSecond paragraph.")
+    sign_in @owner
+    get aircraft_path(@a)
+    # simple_format makes <p>s, so the box around them must not be a <p> (they'd spill out of it).
+    assert_select "div.border-t > p", 2
+  end
 end

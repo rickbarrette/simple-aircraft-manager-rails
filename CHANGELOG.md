@@ -2,6 +2,30 @@
 
 Each release has a **version** (year.month.release, e.g. 2026.11.0) and a **build** (the exact source commit, shown on Admin → About). The newest release is first.
 
+## 2026.11.5
+
+### Changes
+
+- **Faster photos.** Aircraft photos load as small copies on the Fleet page and the aircraft header (they were the full original, slow on mobile). The offline copies use the small versions too.
+- **Detail cards read one item per row on a phone**: flights, engine data, components and major repairs and alterations. Wider screens show two columns.
+- **Profile uses the width of a desktop screen**: your account and its security on the left; calendar, certificates, this device and integrations on the right.
+- **Notifications:** opening Profile on a device records its notification subscription again, so a device whose subscription was never saved starts receiving them. **Send test** lists each device and whether its push service accepted the notification, with the reason if not. If turning notifications on fails, the browser's error is shown.
+
+### For administrators
+
+- **The app won't start with a placeholder or short `SECRET_KEY_BASE`** (under 32 characters), since anyone who knows it can sign in as anyone. `sam:doctor` flags one under 64 characters. Use the output of `bin/rails secret`.
+- **First-run setup asks for a one-time code** printed in the server log (`docker compose logs web | grep "Setup code"`), so only whoever runs the server can create the admin account.
+- **HTTPS without a proxy:** `docker-compose.direct.yml` with `TLS_DOMAIN` gets and renews a Let's Encrypt certificate by itself.
+- **The app answers only for its own names** when `APP_HOST` is set: `APP_HOST`, the `APP_URL` host, `localhost`, IP addresses, and any names listed in the new `ALLOWED_HOSTS`. Other names get a short explanation. If you reach the app by another name (such as a LAN name), add it to `ALLOWED_HOSTS`.
+- **AirTrail servers on a private network** can be connected only by an administrator, or by anyone when listed in `AIRTRAIL_ALLOWED_HOSTS`. The server itself and link-local addresses are always refused.
+- The project is released into the public domain (LICENSE, The Unlicense).
+
+### Fixes
+
+- A file that isn't a photo, or an empty one, chosen as the aircraft photo now shows "must be an image" instead of an error page. An image that can't be read is shown as the original file.
+- A component can't be set as a part of its own parts; that made the logbook entry and squawk resolution pages fail.
+- Many malformed requests that caused error pages now get a proper answer: pages requested in another format, blank required values, links to records that don't exist, numbers too large to store, and text sent where a file belongs.
+
 ## 2026.11.4
 
 ### Changes

@@ -20,7 +20,8 @@
   </head>
   <body class="min-h-full text-slate-800">
     <%= t(".skip_to_content_html") %>
-    <header class="bg-header text-white">
+    <%# Solid and stuck to the top: iOS 26 home-screen apps then extend its color under the status bar instead of blurring it. %>
+    <header class="sticky top-0 z-40 bg-header text-white">
       <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3"><span class="font-semibold"><span class="text-xl">✈</span> <%= t(".simple_aircraft_manager") %></span><%= render "shared/theme_toggle" %></div>
     </header>
     <main id="main" tabindex="-1" class="mx-auto max-w-7xl px-4 py-6 focus:outline-none">

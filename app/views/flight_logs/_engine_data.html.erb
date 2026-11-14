@@ -17,15 +17,15 @@
     <% if tail.present? && tail.upcase != @aircraft.tail_number.to_s.upcase %>
       <p class="border-b border-slate-100 bg-amber-50 px-4 py-2 text-xs text-amber-800"><%= t(".this_recording_is_from_not_html", tail: tail, tail_number: @aircraft.tail_number) %></p>
     <% end %>
-    <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
-      <dt class="text-slate-500"><%= t(".recorded") %></dt>
-      <dd class="col-span-3"><%= t(".monitor_time_html", start: (recording.local(recording.started_at).strftime("%Y-%m-%d %H:%M")), end: (recording.local(recording.ended_at).strftime("%H:%M"))) %>
-        <span class="text-xs text-slate-500"><%= t(".samples_html", file_format: recording.format, flight_number: (" flight ##{recording.metadata[:flight_number]}" if recording.metadata[:flight_number]), samples: (number_with_delimiter(recording.samples))) %></span></dd>
-      <dt class="text-slate-500"><%= t(".engine_run") %></dt><dd><%= recording.engine_start ? run_duration(recording.run_time) : t(".engine_not_run") %></dd>
-      <dt class="text-slate-500"><%= t(".fuel_burned") %></dt><dd><%= engine_value(recording.fuel_burned, "gal", precision: 1) %></dd>
-      <dt class="text-slate-500"><%= t(".tach") %></dt><dd class="tabular-nums"><%= hours_line.(:tach, 2) %></dd>
-      <dt class="text-slate-500"><%= t(".engine_hrs") %></dt><dd class="tabular-nums"><%= hours_line.(:engine_hours, 2) %></dd>
-      <% if (flt = recording.last(:flight_hours)) %><dt class="text-slate-500"><%= t(".airborne") %></dt><dd><%= flt.zero? ? t(".no_ground_run") : "#{number_with_precision(flt, precision: 2)} hrs" %></dd><% end %>
+    <dl class="card-body grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+      <div class="detail-row sm:col-span-2"><dt><%= t(".recorded") %></dt>
+      <dd><%= t(".monitor_time_html", start: (recording.local(recording.started_at).strftime("%Y-%m-%d %H:%M")), end: (recording.local(recording.ended_at).strftime("%H:%M"))) %>
+        <span class="text-xs text-slate-500"><%= t(".samples_html", file_format: recording.format, flight_number: (" flight ##{recording.metadata[:flight_number]}" if recording.metadata[:flight_number]), samples: (number_with_delimiter(recording.samples))) %></span></dd></div>
+      <div class="detail-row"><dt><%= t(".engine_run") %></dt><dd><%= recording.engine_start ? run_duration(recording.run_time) : t(".engine_not_run") %></dd></div>
+      <div class="detail-row"><dt><%= t(".fuel_burned") %></dt><dd><%= engine_value(recording.fuel_burned, "gal", precision: 1) %></dd></div>
+      <div class="detail-row"><dt><%= t(".tach") %></dt><dd class="tabular-nums"><%= hours_line.(:tach, 2) %></dd></div>
+      <div class="detail-row"><dt><%= t(".engine_hrs") %></dt><dd class="tabular-nums"><%= hours_line.(:engine_hours, 2) %></dd></div>
+      <% if (flt = recording.last(:flight_hours)) %><div class="detail-row"><dt><%= t(".airborne") %></dt><dd><%= flt.zero? ? t(".no_ground_run") : "#{number_with_precision(flt, precision: 2)} hrs" %></dd></div><% end %>
     </dl>
 
     <div class="overflow-x-auto border-t border-slate-100">

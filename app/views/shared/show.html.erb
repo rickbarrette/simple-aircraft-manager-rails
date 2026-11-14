@@ -1,7 +1,7 @@
 <% content_for :title, @aircraft.tail_number %>
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
   <div class="flex items-center gap-3">
-    <% if @aircraft.picture.attached? %><%= image_tag rails_blob_path(@aircraft.picture, disposition: :inline), class: "h-16 w-16 rounded-md object-cover", alt: t(".photo_of", tail_number: @aircraft.tail_number) %><% end %>
+    <% if @aircraft.picture.attached? %><%= image_tag @aircraft.picture_for(:thumb), width: 64, height: 64, class: "h-16 w-16 rounded-md object-cover", alt: t(".photo_of", tail_number: @aircraft.tail_number) %><% end %>
     <div>
       <h1 class="text-2xl font-bold"><%= @aircraft.tail_number %> <span class="text-base font-normal text-slate-500"><%= [@aircraft.make, @aircraft.model].compact_blank.join(" ") %></span></h1>
       <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">

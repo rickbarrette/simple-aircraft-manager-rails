@@ -184,3 +184,9 @@
   .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8125rem; }
   .btn-primary, .btn-secondary, .btn-danger { min-height: 2.5rem; }
 }
+
+/* A label and its value on one row (label column, then value), e.g. a flight's details. */
+@utility detail-row {
+  @apply grid grid-cols-[6.5rem_minmax(0,1fr)] items-baseline gap-x-3;
+  & > dt { @apply text-slate-500; }
+}

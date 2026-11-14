@@ -208,7 +208,7 @@ class AircraftArchiveTest < ActiveSupport::TestCase
     assert_raises(RuntimeError) { importer.run }
     assert_equal before[0, 2], [ Aircraft.count, Component.count ]
     assert_equal 0, Aircraft.where(tail_number: "N999").count
-    perform_enqueued_jobs
+    perform_enqueued_jobs(only: ActiveStorage::PurgeJob) # (the stand-in photo isn't a real image to resize)
     assert_equal before[2], ActiveStorage::Blob.count
   end
 end

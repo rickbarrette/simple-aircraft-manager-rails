@@ -11,28 +11,28 @@
         </div>
       <% end %>
     </div>
-    <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
-      <dt class="text-slate-500"><%= t(".manufacturer") %></dt><dd><%= @component.manufacturer %></dd>
-      <dt class="text-slate-500"><%= t(".model") %></dt><dd><%= @component.model %></dd>
-      <dt class="text-slate-500"><%= t(".serial") %></dt><dd><%= @component.serial_number.presence || "—" %></dd>
-      <dt class="text-slate-500"><%= t(".status") %></dt><dd><%= @component.status_label %></dd>
-      <dt class="text-slate-500"><%= t(".parent") %></dt><dd><%= @component.parent_component ? link_to(@component.parent_component, aircraft_component_path(@aircraft, @component.parent_component), class: "link") : "—" %></dd>
-      <dt class="text-slate-500"><%= t(".location") %></dt><dd><%= @component.install_location.presence || "—" %></dd>
-      <dt class="text-slate-500"><%= t(".in_service_since") %></dt><dd><%= fmt_date(@component.date_in_service) %></dd>
-      <dt class="text-slate-500"><%= t(".last_oh_service") %></dt><dd><%= fmt_date(@component.overhaul_date) %></dd>
-      <dt class="text-slate-500"><%= t(".hours_in_service") %></dt><dd><%= hours(@component.hours_in_service) %></dd>
-      <dt class="text-slate-500"><%= t(".since_oh_service") %></dt><dd><%= hours(@component.hours_since_overhaul) %></dd>
-      <dt class="text-slate-500"><%= t(".tbo") %></dt><dd><%= @component.tbo_hours ? t(".h_remaining", tbo_hours: @component.tbo_hours, hours_to_tbo: (hours(@component.hours_to_tbo))) : "—" %></dd>
-      <dt class="text-slate-500"><%= t(".replacement") %></dt><dd>
+    <dl class="card-body grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+      <div class="detail-row"><dt><%= t(".manufacturer") %></dt><dd><%= @component.manufacturer %></dd></div>
+      <div class="detail-row"><dt><%= t(".model") %></dt><dd><%= @component.model %></dd></div>
+      <div class="detail-row"><dt><%= t(".serial") %></dt><dd><%= @component.serial_number.presence || "—" %></dd></div>
+      <div class="detail-row"><dt><%= t(".status") %></dt><dd><%= @component.status_label %></dd></div>
+      <div class="detail-row"><dt><%= t(".parent") %></dt><dd><%= @component.parent_component ? link_to(@component.parent_component, aircraft_component_path(@aircraft, @component.parent_component), class: "link") : "—" %></dd></div>
+      <div class="detail-row"><dt><%= t(".location") %></dt><dd><%= @component.install_location.presence || "—" %></dd></div>
+      <div class="detail-row"><dt><%= t(".in_service_since") %></dt><dd><%= fmt_date(@component.date_in_service) %></dd></div>
+      <div class="detail-row"><dt><%= t(".last_oh_service") %></dt><dd><%= fmt_date(@component.overhaul_date) %></dd></div>
+      <div class="detail-row"><dt><%= t(".hours_in_service") %></dt><dd><%= hours(@component.hours_in_service) %></dd></div>
+      <div class="detail-row"><dt><%= t(".since_oh_service") %></dt><dd><%= hours(@component.hours_since_overhaul) %></dd></div>
+      <div class="detail-row"><dt><%= t(".tbo") %></dt><dd><%= @component.tbo_hours ? t(".h_remaining", tbo_hours: @component.tbo_hours, hours_to_tbo: (hours(@component.hours_to_tbo))) : "—" %></dd></div>
+      <div class="detail-row"><dt><%= t(".replacement") %></dt><dd>
         <%= [@component.replacement_hours && "#{@component.replacement_hours} h", @component.replacement_interval_label].compact.join(" / ").presence&.then { @component.replacement_from_install? ? t(".since_installed", interval: _1) : _1 } || "—" %>
         <% if (d = @component.next_replacement_date) %><div class="text-xs text-slate-500"><%= t(".next_by_html", d: (fmt_date(d))) %></div><% end %>
-      </dd>
-      <dt class="text-slate-500"><%= t(".flags") %></dt>
-      <dd class="col-span-3 flex flex-wrap gap-1">
+      </dd></div>
+      <div class="detail-row sm:col-span-2"><dt><%= t(".flags") %></dt>
+      <dd class="flex flex-wrap gap-1">
         <% { tbo_critical: t(".tbo_critical"), replacement_critical: t(".replacement_critical"), on_condition: t(".on_condition") }.each do |flag, label| %>
           <% if @component.public_send("#{flag}?") %><span class="badge-blue"><%= label %></span><% end %>
         <% end %>
-      </dd>
+      </dd></div>
     </dl>
     <% if @component.notes.present? %><div class="border-t border-slate-100 px-4 py-3 text-sm"><%= simple_format @component.notes %></div><% end %>
   </section>

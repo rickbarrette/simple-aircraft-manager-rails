@@ -14,18 +14,34 @@ export default class extends Controller {
     this.registration = await navigator.serviceWorker.ready
     const subscription = await this.registration.pushManager.getSubscription()
     if (Notification.permission === "denied") return this.show(t("push.blocked"), null)
-    this.show(t(subscription ? "push.on" : "push.off"), !!subscription)
+    if (!subscription) return this.show(t("push.off"), false)
+    // The browser keeps its subscription even if the app never recorded it
+    // (or forgot it), so record it again on every visit.
+    const error = await this.save(subscription)
+    this.show(error ? t("push.not_saved", { reason: error }) : t("push.on"), true)
   }
 
   async turnOn() {
     if (await Notification.requestPermission() !== "granted") return this.show(t("push.blocked"), null)
+    let subscription
     try {
-      const subscription = await this.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: this.keyBytes() })
+      subscription = await this.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: this.keyBytes() })
+    } catch (e) {
+      return this.show(t("push.failed", { reason: e.message || e.name }), false)
+    }
+    const error = await this.save(subscription)
+    this.show(error ? t("push.failed", { reason: error }) : t("push.on"), !error)
+    if (error) await subscription.unsubscribe()
+  }
+
+  // Records the subscription with the app: null, or why it couldn't.
+  async save(subscription) {
+    try {
       const response = await this.request("POST", this.urlValue, { subscription: subscription.toJSON() })
-      if (!response.ok) throw new Error(response.status)
-      this.show(t("push.on"), true)
-    } catch (_) {
-      this.show(t("push.failed"), false)
+      if (response.ok) return null
+      return (await response.json().catch(() => ({}))).error || `HTTP ${response.status}`
+    } catch (e) {
+      return e.message
     }
   }
 
@@ -38,9 +54,18 @@ export default class extends Controller {
     this.show(t("push.off"), false)
   }
 
+  // Sends one to each of your devices and lists which push services took it.
   async sendTest() {
-    await this.request("POST", this.testUrlValue, {})
-    this.statusTarget.textContent = t("push.test_sent")
+    this.statusTarget.textContent = t("push.test_sending")
+    try {
+      const { devices } = await (await this.request("POST", this.testUrlValue, {})).json()
+      const lines = devices.length
+        ? [ ...devices.map((d) => d.error ? t("push.test_failed", { device: d.device, reason: d.error }) : t("push.test_ok", { device: d.device })), t("push.test_hint") ]
+        : [ t("push.test_none") ]
+      this.statusTarget.textContent = lines.join("\n")
+    } catch (e) {
+      this.statusTarget.textContent = t("push.failed", { reason: e.message })
+    }
   }
 
   // on: true / false, or null when it can't be changed here.

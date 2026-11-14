@@ -57,12 +57,14 @@ class PwaFeaturesTest < ActionDispatch::IntegrationTest
 
     @a.picture.attach(io: StringIO.new(file_fixture_png), filename: "plane.png", content_type: "image/png")
     get root_path
-    picture = JSON.parse(css_select("body").first["data-offline-prep-aircraft-value"]).first["picture"]
-    shown = css_select("img[src*='/rails/active_storage/blobs/redirect/']").first["src"]
-    # Links expire, so they differ; both carry the same upload id, which the saved copy is filed under.
-    blob_id = ->(url) { JSON.parse(Base64.decode64(CGI.unescape(url[%r{/blobs/redirect/([^/]+?)--}, 1])))["_rails"]["data"] }
-    assert_equal @a.picture.blob.id, blob_id.(picture)
-    assert_equal @a.picture.blob.id, blob_id.(shown)
+    pictures = JSON.parse(css_select("body").first["data-offline-prep-aircraft-value"]).first["pictures"]
+    shown = css_select("img[src*='/rails/active_storage/representations/redirect/']").first["src"]
+    # Links expire, so they differ; both carry the same upload id and size,
+    # which the saved copy is filed under (the thumbnail and the Fleet card).
+    key = ->(url) { url.match(%r{/representations/redirect/([^/]+?)--[^/]+/([^/]+)/}).then { [ JSON.parse(Base64.decode64(CGI.unescape(_1[1])))["_rails"]["data"], _1[2] ] } }
+    assert_equal 2, pictures.size
+    assert_equal [ @a.picture.blob.id ], pictures.map { key.(_1).first }.uniq
+    assert_includes pictures.map(&key), key.(shown)
   end
 
   test "squawks can be reported offline and are received once" do
@@ -121,11 +123,32 @@ class PwaFeaturesTest < ActionDispatch::IntegrationTest
     assert_response :created
     post push_subscription_path, params: { subscription: subscription_params("https://internal.example.com/b") }, as: :json
     assert_response :unprocessable_entity
+    assert_includes response.parsed_body["error"], "internal.example.com"
     assert_equal [ "https://fcm.googleapis.com/fcm/send/a" ], @owner.push_subscriptions.pluck(:endpoint)
 
-    assert_enqueued_with(job: PushNotificationJob) { post test_push_subscription_path, as: :json }
     delete push_subscription_path, params: { endpoint: "https://fcm.googleapis.com/fcm/send/a" }, as: :json
     assert_empty @owner.push_subscriptions.reload
+  end
+
+  test "the test notification is sent now and says which devices took it" do
+    sign_in @owner
+    ok = subscribe(@owner, "https://fcm.googleapis.com/fcm/send/phone")
+    ok.update!(user_agent: "Mozilla/5.0 (Linux; Android 16; Pixel) AppleWebKit/537.36 Chrome/142.0 Mobile Safari/537.36")
+    refused = subscribe(@owner, "https://web.push.apple.com/tablet")
+    refused.update!(user_agent: "Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Safari/604.1")
+    stub_request(:post, ok.endpoint).to_return(status: 201)
+    stub_request(:post, refused.endpoint).to_return(status: 400, body: "BadJwtToken")
+
+    post test_push_subscription_path, as: :json
+    devices = response.parsed_body["devices"]
+    assert_equal [ "Chrome · Android", nil ], devices.first.values_at("device", "error")
+    assert_equal "Safari · iPad", devices.last["device"]
+    assert_match "BadJwtToken", devices.last["error"]
+  end
+
+  test "Google's other push hosts are accepted" do
+    assert subscribe(@owner, "https://jmt17.google.com/fcm/send/x").persisted?
+    assert subscribe(@owner, "https://fcm.googleapis.com/wp/y").persisted?
   end
 
   test "notifications are encrypted to each device; gone devices are forgotten" do

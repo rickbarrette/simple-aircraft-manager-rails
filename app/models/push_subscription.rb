@@ -2,7 +2,7 @@
 class PushSubscription < ApplicationRecord
   # The browsers' push services. The server posts to the endpoint, so only
   # these hosts are accepted (not, say, an address inside the network).
-  PUSH_SERVICES = /\A(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|([\w-]+\.)*push\.apple\.com|([\w-]+\.)*notify\.windows\.com)\z/
+  PUSH_SERVICES = /\A(([\w-]+\.)*googleapis\.com|([\w-]+\.)*google\.com|updates\.push\.services\.mozilla\.com|([\w-]+\.)*push\.apple\.com|([\w-]+\.)*notify\.windows\.com)\z/
 
   belongs_to :user
 

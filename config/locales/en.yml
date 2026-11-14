@@ -704,6 +704,9 @@ en:
           envelope_weights: Envelope weights must be more than 0
           fuel_weight: Fuel weight per gallon must be between 4 and 9 lb
   flash:
+    push_subscriptions:
+      not_saved: "This browser's push service (%{host}) isn't one the app sends to."
+      unknown_device: Unknown browser
     sign_in_links:
       try_again_later: Try again later.
       try_again_later_2: Try again later.
@@ -3876,8 +3879,13 @@ en:
       blocked: Notifications are blocked for this site in the browser's settings.
       unsupported: This browser can't show notifications from the app.
       ios_install_first: On iPhone and iPad, install the app first (above); notifications can then be turned on in it.
-      failed: Couldn't turn notifications on. Try again.
-      test_sent: Test notification sent; it should arrive in a few seconds.
+      failed: "Couldn't turn notifications on: %{reason}"
+      not_saved: "Notifications are on in this browser, but the app couldn't record it: %{reason}"
+      test_sending: Sending…
+      test_none: No device has notifications on. Turn them on again here.
+      test_ok: "%{device}: sent"
+      test_failed: "%{device}: not sent (%{reason})"
+      test_hint: Sent ones should arrive within a few seconds. If this device's doesn't, check that notifications are allowed for the app in the phone's settings.
     hours:
       tach: Tach %{from} → %{to} (%{delta})
       hobbs: Hobbs %{from} → %{to} (%{delta})

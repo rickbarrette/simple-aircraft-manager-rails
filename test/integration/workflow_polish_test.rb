@@ -74,4 +74,22 @@ class WorkflowPolishTest < ActionDispatch::IntegrationTest
     get aircraft_path(@a)
     assert_select "[data-controller=dismiss]", 0
   end
+
+  test "aircraft pages show a small copy of the photo, made when it's uploaded" do
+    perform_enqueued_jobs { @a.picture.attach(io: StringIO.new(Vips::Image.black(1200, 900).jpegsave_buffer), filename: "plane.jpg", content_type: "image/jpeg") }
+    assert_equal 2, @a.picture.blob.variant_records.count, "both sizes are made on upload"
+    sign_in @owner
+    get aircraft_path(@a)
+    assert_select "img[src*='/representations/'][width='48']"
+    get aircraft_index_path
+    assert_select "img[src*='/representations/'][loading='lazy']"
+  end
+
+  test "a flight's details are one label and value per row" do
+    flight = @a.flight_logs.create!(date: Date.current, tach_out: 100, tach_in: 101, hobbs_out: 50, hobbs_in: 51, user: @owner)
+    sign_in @owner
+    get aircraft_flight_log_path(@a, flight)
+    assert_select "dl > div.detail-row > dt", minimum: 6
+    assert_select "dl dd.col-span-3", 0
+  end
 end

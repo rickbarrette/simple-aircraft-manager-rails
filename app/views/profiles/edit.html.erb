@@ -108,7 +108,7 @@
   <div data-controller="push" data-push-key-value="<%= PushKeys.public_key %>" data-push-url-value="<%= push_subscription_path %>" data-push-test-url-value="<%= test_push_subscription_path %>">
     <h3 class="text-sm font-semibold"><%= t(".notifications_heading") %></h3>
     <p class="hint"><%= t(".notifications_what") %></p>
-    <p class="mt-2 text-sm text-slate-600" data-push-target="status" role="status"></p>
+    <p class="mt-2 whitespace-pre-line text-sm text-slate-600" data-push-target="status" role="status"></p>
     <div class="mt-2 flex flex-wrap gap-2">
       <button type="button" class="btn-secondary btn-sm" data-push-target="on" data-action="push#turnOn" hidden><%= t(".notifications_on") %></button>
       <button type="button" class="btn-secondary btn-sm" data-push-target="off" data-action="push#turnOff" hidden><%= t(".notifications_off") %></button>

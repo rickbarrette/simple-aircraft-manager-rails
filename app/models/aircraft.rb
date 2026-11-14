@@ -1,7 +1,12 @@
 class Aircraft < ApplicationRecord
   STATUSES = LabelSet.new("aircraft.statuses", %w[AVAILABLE MX GROUND UNAVAILABLE])
 
-  has_one_attached :picture
+  # Small copies of the photo for the pages (the original can be several MB):
+  # made when it's uploaded; see #picture_for.
+  has_one_attached :picture do |picture|
+    picture.variant :thumb, resize_to_fill: [ 192, 192 ], preprocessed: true
+    picture.variant :card, resize_to_fill: [ 960, 432 ], preprocessed: true
+  end
 
   has_many :roles, class_name: "AircraftRole", dependent: :destroy
   has_many :users, through: :roles
@@ -75,6 +80,12 @@ class Aircraft < ApplicationRecord
 
   def log_event!(category, event_name, user: Current.user, notes: nil)
     events.create!(category: category, event_name: event_name, user: user, notes: notes)
+  end
+
+  # The photo at a page's size (:thumb or :card), or the original when it
+  # isn't a kind that can be resized.
+  def picture_for(size)
+    picture.variable? ? picture.variant(size) : picture
   end
 
   private

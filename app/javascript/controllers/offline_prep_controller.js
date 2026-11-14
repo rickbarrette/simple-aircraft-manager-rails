@@ -36,7 +36,7 @@ export default class extends Controller {
       await new Promise((resolve) => (window.requestIdleCallback || setTimeout)(resolve, { timeout: 2000 }))
       try { await fetch(path, { credentials: "same-origin", headers: { Accept: "text/html" } }) } catch (_) { return }
     }
-    await this.savePictures(this.aircraftValue.map((a) => a.picture).filter(Boolean))
+    await this.savePictures(this.aircraftValue.flatMap((a) => a.pictures || []))
     try {
       localStorage.setItem("sam-offline-forms", JSON.stringify({ ...JSON.parse(localStorage.getItem("sam-offline-forms") || "{}"), ...forms }))
       localStorage.setItem("sam-offline-prep", JSON.stringify({ signature, at: Date.now() }))
@@ -58,10 +58,11 @@ export default class extends Controller {
 }
 
 // Photo links carry an expiry, so they change with every page; the saved copy
-// is filed under the upload's id instead (same rule in service-worker.js).
+// is filed under the upload's id (and size) instead (same rule in service-worker.js).
 function imageKey(url) {
   try {
-    const signed = new URL(url, location.origin).pathname.match(/\/blobs\/redirect\/([^/]+?)--/)[1]
-    return `${location.origin}/offline-image/${JSON.parse(atob(decodeURIComponent(signed)))._rails.data}`
+    const [ , signed, size ] = new URL(url, location.origin).pathname.match(/\/(?:blobs|representations)\/redirect\/([^/]+?)--[^/]+\/(?:([^/]+)\/)?/)
+    const id = JSON.parse(atob(decodeURIComponent(signed)))._rails.data
+    return `${location.origin}/offline-image/${id}${size ? `/${size}` : ""}`
   } catch (_) { return null }
 }

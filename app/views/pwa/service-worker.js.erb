@@ -64,7 +64,7 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(url.pathname)))
   } else if (url.pathname.startsWith("/assets/")) {
     event.respondWith(cachedAsset(request))
-  } else if (url.pathname.startsWith("/rails/active_storage/blobs/redirect/")) {
+  } else if (/^\/rails\/active_storage\/(blobs|representations)\/redirect\//.test(url.pathname)) {
     // Uploaded files come from the network; an aircraft photo saved for
     // offline use stands in when there's none.
     event.respondWith(fetch(request)
@@ -80,11 +80,12 @@ const savedImage = async (request, response) => {
 }
 
 // Photo links carry an expiry, so they change with every page; the saved copy
-// is filed under the upload's id instead (same rule in offline_prep_controller.js).
+// is filed under the upload's id (and size) instead (same rule in offline_prep_controller.js).
 function imageKey(url) {
   try {
-    const signed = new URL(url, self.location.origin).pathname.match(/\/blobs\/redirect\/([^/]+?)--/)[1]
-    return `${self.location.origin}/offline-image/${JSON.parse(atob(decodeURIComponent(signed)))._rails.data}`
+    const [ , signed, size ] = new URL(url, self.location.origin).pathname.match(/\/(?:blobs|representations)\/redirect\/([^/]+?)--[^/]+\/(?:([^/]+)\/)?/)
+    const id = JSON.parse(atob(decodeURIComponent(signed)))._rails.data
+    return `${self.location.origin}/offline-image/${id}${size ? `/${size}` : ""}`
   } catch (_) { return null }
 }
 

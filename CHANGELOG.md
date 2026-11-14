@@ -2,6 +2,26 @@
 
 Each release has a **version** (year.month.release, e.g. 2026.11.0) and a **build** (the exact source commit, shown on Admin → About). The newest release is first.
 
+## 2026.11.4
+
+### Changes
+
+- **Time zones.** Times show in your own zone and "today" is your local date (a new flight no longer defaults to tomorrow in the evening). It follows your device automatically, or choose one in Profile. The administrator sets the installation's zone with `TZ` (e.g. `America/New_York`), which also sets when the nightly and weekly jobs run. Signatures and the record history still show UTC.
+- **Update Hours asks first**, showing each reading's change and that every in-service component moves without logging a flight; the message afterwards says exactly what changed. A lowered reading is marked as a correction.
+- **Squawk photos show as thumbnails** that open the photo viewer.
+- **Save and log next leg** on Log Flight: saves the flight and opens the form for the next one, starting where it ended.
+- **Setup checklist** on a new aircraft's Overview: components, standard inspections, ADs from DRS, registration and airworthiness certificate, weight and balance.
+- The component form groups its limits into **Replacement and expiry** and **Overhaul and TBO**, opened only when used.
+- Choosing **Ground Aircraft** on a squawk says what it does before you submit.
+- The logbook entry form shows **Inspection result** only for inspection entries.
+- A new document is named from its file when you leave the name blank.
+- Dates read the same way everywhere, including the logbook-entry pickers, the activity log and the airworthiness list.
+
+### Fixes
+
+- On iPad and iPhone home-screen apps, the top bar stays sharp (it's now fixed to the top of the screen).
+- An aircraft's description stays inside the Details card.
+
 ## 2026.11.3
 
 ### Installed app

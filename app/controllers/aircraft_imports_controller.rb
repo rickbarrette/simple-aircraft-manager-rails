@@ -8,7 +8,7 @@ class AircraftImportsController < ApplicationController
 
   def create
     file = params[:archive]
-    return redirect_to(new_aircraft_import_path, alert: t("flash.aircraft_imports.choose_a_sam_zip")) if file.blank?
+    return redirect_to(new_aircraft_import_path, alert: t("flash.aircraft_imports.choose_a_sam_zip")) unless file.respond_to?(:tempfile)
 
     preview = AircraftArchive::Importer.check(file.tempfile.path)
     tail = params[:tail_number].to_s.strip.upcase.presence || preview.tail_number.to_s.upcase

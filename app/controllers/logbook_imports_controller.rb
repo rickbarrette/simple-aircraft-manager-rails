@@ -10,7 +10,7 @@ class LogbookImportsController < ApplicationController
   end
 
   def create
-    files = Array(params[:pages]).compact_blank
+    files = Array(params[:pages]).select { _1.respond_to?(:original_filename) } # uploaded files only
     return redirect_to(new_aircraft_logbook_import_path(@aircraft), alert: t("flash.logbook_imports.choose_the_scanned_pages")) if files.empty?
 
     # Page order follows the file names ("page-002" before "page-010").

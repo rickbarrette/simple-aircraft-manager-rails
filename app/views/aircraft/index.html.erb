@@ -18,7 +18,7 @@
       <% aw = aircraft.airworthiness %>
       <%= link_to aircraft_path(aircraft), class: "card block overflow-hidden transition hover:shadow-md" do %>
         <div class="flex h-36 items-center justify-center bg-slate-200">
-          <% if aircraft.picture.attached? %>
+          <% if aircraft.picture_shown? %>
             <%= image_tag aircraft.picture_for(:card), class: "h-full w-full object-cover", loading: "lazy", alt: t(".photo_of", tail_number: aircraft.tail_number) %>
           <% else %>
             <span class="text-5xl text-slate-400" aria-hidden="true">✈</span>

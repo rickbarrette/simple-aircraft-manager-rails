@@ -82,16 +82,20 @@ class Aircraft < ApplicationRecord
     events.create!(category: category, event_name: event_name, user: user, notes: notes)
   end
 
+  # A saved photo to show (not one just rejected by validation, which has no
+  # address yet).
+  def picture_shown? = picture.attached? && picture.attachment.persisted?
+
   # The photo at a page's size (:thumb or :card), or the original when it
-  # isn't a kind that can be resized.
+  # can't be resized (see ActiveStorage::Blob#resizable_image?).
   def picture_for(size)
-    picture.variable? ? picture.variant(size) : picture
+    picture.blob.resizable_image? ? picture.variant(size) : picture
   end
 
   private
 
   def picture_is_image
-    if picture.attached? && !picture.content_type.to_s.start_with?("image/")
+    if picture.attached? && (!picture.content_type.to_s.start_with?("image/") || picture.blob.byte_size.zero?)
       errors.add(:picture, :not_image)
     end
   end

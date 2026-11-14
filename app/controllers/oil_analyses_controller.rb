@@ -35,7 +35,7 @@ class OilAnalysesController < ApplicationController
   # earlier samples, so samples already on file are skipped rather than duplicated.
   def import
     file = params[:report]
-    return redirect_to(new_aircraft_oil_analysis_path(@aircraft), alert: t("flash.oil_analyses.choose_a_lab_report")) if file.blank?
+    return redirect_to(new_aircraft_oil_analysis_path(@aircraft), alert: t("flash.oil_analyses.choose_a_lab_report")) unless file.respond_to?(:tempfile)
 
     report = OilReportParser.from_pdf(file.tempfile)
     file.rewind

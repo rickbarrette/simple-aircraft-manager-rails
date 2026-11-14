@@ -44,13 +44,23 @@ class Component < ApplicationRecord
     OVERHAUL_ABBREVIATIONS.fetch(overhaul_kind) { engine? || propeller? ? "TSO" : I18n.t("models.component.since_service") }
   end
 
-  # Its sub-components, and theirs.
-  def descendant_ids
-    child_components.flat_map { [ _1.id, *_1.descendant_ids ] }
+  # Its sub-components, and theirs. (Stops at a loop, should one exist.)
+  def descendant_ids(seen = Set[id])
+    child_components.flat_map do |child|
+      next [] unless seen.add?(child.id)
+      [ child.id, *child.descendant_ids(seen) ]
+    end
   end
 
+  # Its parent, the parent's parent, and so on up.
   def ancestor_ids
-    parent_component ? [ parent_component_id, *parent_component.ancestor_ids ] : []
+    ids = []
+    node = self
+    while (parent_id = node.parent_component_id) && parent_id != id && !ids.include?(parent_id)
+      ids << parent_id
+      node = Component.find_by(id: parent_id) or break
+    end
+    ids
   end
   def engine? = component_type&.name.to_s.match?(/engine/i)
   def propeller? = component_type&.name.to_s.match?(/propell?er|\bprop\b/i)
@@ -133,6 +143,7 @@ class Component < ApplicationRecord
   def parent_on_same_aircraft
     return unless parent_component
     errors.add(:parent_component, :itself) if parent_component_id == id && id
+    errors.add(:parent_component, :own_part) if id && parent_component.ancestor_ids.include?(id) # would make a loop
     errors.add(:parent_component, :other_aircraft) if parent_component.aircraft_id != aircraft_id
   end
 end

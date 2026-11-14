@@ -8,7 +8,7 @@ module AircraftHelper
     current_user.accessible_aircraft.ordered.limit(OFFLINE_AIRCRAFT).map do |a|
       { tail: a.tail_number, pages: [ aircraft_path(a), aircraft_weight_balance_records_path(a) ],
         flight: new_aircraft_flight_log_path(a), squawk: new_aircraft_squawk_path(a),
-        pictures: (%i[thumb card].map { url_for(a.picture_for(_1)) }.uniq if a.picture.attached?) }.compact
+        pictures: (%i[thumb card].map { url_for(a.picture_for(_1)) }.uniq if a.picture_shown?) }.compact
     end
   end
   # Tabs on the aircraft pages: [label, path, controller names that highlight it, owner_only]

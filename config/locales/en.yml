@@ -301,6 +301,7 @@ en:
           attributes:
             parent_component:
               itself: can't be itself
+              own_part: can't be one of its own parts
               other_aircraft: must be on the same aircraft
         user:
           attributes:
@@ -919,6 +920,7 @@ en:
       certificate_removed: Certificate removed.
     application:
       admins_only: Admins only.
+      invalid_input: Something in that form couldn't be saved. Check what you entered and try again.
     oil_analyses:
       oil_analysis_saved: Oil analysis saved.
       choose_a_lab_report: Choose a lab report PDF.

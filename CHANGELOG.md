@@ -2,6 +2,31 @@
 
 Each release has a **version** (year.month.release, e.g. 2026.11.0) and a **build** (the exact source commit, shown on Admin → About). The newest release is first.
 
+## 2026.11.3
+
+### Installed app
+
+- **Works without signal.** While you're online the app saves, for each of your aircraft, the Overview, weight and balance, Log Flight and Report Squawk pages and its photo, plus the Fleet page. At the plane with no signal, open the app and use it as usual; a saved copy says when it was saved.
+- **Report Squawk offline**, photos included, like Log Flight. Saved items are sent when the connection is back (on Android even with the app closed), only ever under the account that saved them, and the number waiting shows on the app icon.
+- **Notifications** (Profile → This device): a grounding squawk on your aircraft, items newly overdue on aircraft you own (checked each morning), and requests to sign a logbook entry. On iPhone and iPad they work in the installed app.
+- **Shortcuts**: a long press on the app icon offers Log Flight and Report Squawk.
+- **Install help** on Profile, and a **Reload** notice when a new version is installed.
+- Signing out clears what the device saved for offline use.
+
+### Changes
+
+- Each section shows its main action as a button; imports, exports, printing and tools are under **More**. The aircraft's **More** menu has the status report and, for owners, Access & sharing, editing the aircraft and its downloads.
+- Oil Analysis is under **Oil & Fuel**; the tabs fit on one line.
+- The header shows your role on the aircraft, and no longer shows "Available" (the usual status).
+- **Print selected** in the logbook appears once an entry is ticked; the logbook filter applies as you change it.
+- Dates read the same everywhere (the logbook list, notes, audits, About).
+- All the app's text is in one translation file; see Translating in the README.
+
+### Fixes
+
+- The flight statistics' cards fit two to a row on phones, and **By year** shows that it opens.
+- Various unused code removed.
+
 ## 2026.11.2
 
 ### Changes

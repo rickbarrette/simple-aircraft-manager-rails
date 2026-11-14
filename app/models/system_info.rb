@@ -3,14 +3,14 @@
 class SystemInfo
   KEY_GEMS = %w[
     puma thruster propshaft importmap-rails turbo-rails stimulus-rails tailwindcss-rails tailwindcss-ruby
-    solid_queue solid_cache solid_cable sqlite3 chartkick commonmarker anthropic
+    solid_queue solid_cache sqlite3 chartkick commonmarker anthropic
     omniauth omniauth_openid_connect rubyzip roo pdf-reader bcrypt
   ].freeze
 
   # Where the source lives; APP_REPOSITORY_URL overrides it for a fork.
   REPOSITORY_URL = ENV["APP_REPOSITORY_URL"].presence || "https://github.com/rickbarrette/simple-aircraft-manager-rails"
 
-  DATABASES = { "Main" => :primary, "Cache" => :cache, "Jobs" => :queue, "Cable" => :cable }.freeze
+  DATABASES = { "Main" => :primary, "Cache" => :cache, "Jobs" => :queue }.freeze
 
   # The release version, YYYY.MM.N (the repository's VERSION file).
   def version

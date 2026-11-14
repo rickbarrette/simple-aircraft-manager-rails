@@ -26,7 +26,6 @@ class EntrySignature < ApplicationRecord
 
   def imported? = origin.present?
   def certificate_label = UserCertificate::SHORT_LABELS.fetch(certificate_kind, certificate_kind)
-  def short_id = content_digest.first(12)
 
   def compute_seal
     payload = [ logbook_entry_id, user_id, signer_name, certificate_kind, certificate_number, statement,

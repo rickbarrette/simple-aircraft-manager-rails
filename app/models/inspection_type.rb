@@ -28,15 +28,7 @@ class InspectionType < ApplicationRecord
 
   scope :ordered, -> { order(:name) }
 
-  # Applies to the aircraft directly, or to one of its components.
-  def self.applicable_to(aircraft)
-    direct = joins(:aircraft).where(aircraft: { id: aircraft.id }).select(:id)
-    via_component = joins(:components).where(components: { aircraft_id: aircraft.id }).select(:id)
-    where(id: direct).or(where(id: via_component))
-  end
-
   def to_s = name
-  def effect_label = EFFECTS[effect]
   def limitation = LIMITATIONS[effect]
   def advisory? = effect == "advisory"
 
@@ -45,8 +37,6 @@ class InspectionType < ApplicationRecord
   def records_for(aircraft)
     InspectionRecord.for_aircraft(aircraft).where(inspection_type_id: [ id, *satisfied_by.ids ])
   end
-
-  def latest_record_for(aircraft) = records_for(aircraft).recent_first.first
 
   def due_rule
     { hours: recurring_hours.to_f, months: recurring_months, days: recurring_days } if recurring?

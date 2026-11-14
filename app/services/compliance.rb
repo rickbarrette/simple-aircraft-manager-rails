@@ -38,31 +38,9 @@ module Compliance
     return Result.new(rank: OVERDUE) unless compliance
     return Result.new(rank: COMPLIANT) if compliance.closed?
 
-    rank = COMPLIANT
-    result = Result.new
-
+    due_date = next_due(ad.due_rule, date: compliance.date_complied, hours: nil)[:date] if ad.recurring? && ad.recurring_calendar?
     due_hours = compliance.next_due_at_time.to_d
-    if due_hours > 0
-      result.next_due_hours = due_hours
-      if current_hours >= due_hours
-        rank = OVERDUE
-      elsif current_hours + Airworthiness::HOURS_WARNING >= due_hours
-        rank = [ rank, DUE_SOON ].max
-      end
-    end
-
-    if ad.recurring? && ad.recurring_calendar?
-      due = next_due(ad.due_rule, date: compliance.date_complied, hours: nil)[:date]
-      result.next_due_date = due
-      if today > due
-        rank = OVERDUE
-      elsif today + Airworthiness::DAYS_WARNING >= due
-        rank = [ rank, DUE_SOON ].max
-      end
-    end
-
-    result.rank = rank
-    result
+    due_result(due_date, (due_hours if due_hours.positive?), current_hours, today)
   end
 
   # `records` are those that count for the type (InspectionType#records_for).
@@ -77,32 +55,17 @@ module Compliance
     return Result.new(rank: OVERDUE) unless last_record
     return Result.new(rank: COMPLIANT) unless type.recurring?
 
-    rank = COMPLIANT
-    result = Result.new
+    due_date = next_due(type.due_rule, date: last_record.date, hours: nil)[:date]
+    due_result(due_date, next_due_hours(type, records), current_hours, today)
+  end
 
-    if type.recurring_months.positive? || type.recurring_days.positive?
-      due = last_record.date
-      due = end_of_month_after(due, type.recurring_months) if type.recurring_months.positive?
-      due += type.recurring_days.days if type.recurring_days.positive?
-      result.next_due_date = due
-      if today > due
-        rank = OVERDUE
-      elsif today + Airworthiness::DAYS_WARNING >= due
-        rank = [ rank, DUE_SOON ].max
-      end
-    end
-
-    if (due_hours = next_due_hours(type, records))
-      result.next_due_hours = due_hours
-      if current_hours >= due_hours
-        rank = OVERDUE
-      elsif current_hours + Airworthiness::HOURS_WARNING >= due_hours
-        rank = [ rank, DUE_SOON ].max
-      end
-    end
-
-    result.rank = rank
-    result
+  # Overdue once the date has passed or the hours are reached; due soon
+  # within the warning window of either.
+  def due_result(due_date, due_hours, current_hours, today)
+    overdue = (due_date && today > due_date) || (due_hours && current_hours >= due_hours)
+    soon = (due_date && today + Airworthiness::DAYS_WARNING >= due_date) ||
+           (due_hours && current_hours + Airworthiness::HOURS_WARNING >= due_hours)
+    Result.new(rank: overdue ? OVERDUE : (soon ? DUE_SOON : COMPLIANT), next_due_date: due_date, next_due_hours: due_hours)
   end
 
   def next_due_hours(type, records)

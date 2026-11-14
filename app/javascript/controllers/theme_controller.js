@@ -6,8 +6,6 @@ const LABELS = { system: "System", light: "Light", dark: "Dark" }
 // Light / dark / follow-the-OS theme toggle. The choice is kept in
 // localStorage; the layout's inline script applies it before first paint.
 export default class extends Controller {
-  static targets = ["button"]
-
   connect() {
     this.media = window.matchMedia("(prefers-color-scheme: dark)")
     this.onSystemChange = () => { if (this.choice === "system") this.apply() }

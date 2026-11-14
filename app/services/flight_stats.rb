@@ -24,7 +24,6 @@ class FlightStats
   def total_fuel = @fuel.sum { _2.to_f }.round(1)
 
   def average_flight = count.zero? ? nil : (total_flight / count).round(1)
-  def shortest_flight = @flights.map { flight_hours(_1) }.min&.round(1)
   def longest_flight = @flights.map { flight_hours(_1) }.max&.round(1)
 
   # Gallons per tach hour over all fuel records.

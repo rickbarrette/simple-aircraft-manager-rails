@@ -37,7 +37,7 @@ class FlightStatsTest < ActiveSupport::TestCase
     s = stats
     assert_equal 3, s.count
     assert_equal 1.8, s.average_flight
-    assert_equal [ 0.6, 3.5 ], [ s.shortest_flight, s.longest_flight ]
+    assert_equal 3.5, s.longest_flight
     assert_equal 3, s.airports_visited
     assert_equal [ "KOQU", 3 ], s.top_airports.first
 

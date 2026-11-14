@@ -27,7 +27,6 @@ class Airworthiness
     def limited? = status == LIMITED
     def orange? = status == ORANGE
     def green? = status == GREEN
-    def can_fly? = !red?
     def red_issues = issues.select { |i| i.severity == RED }
     def limitations = issues.filter_map(&:limitation).uniq
 

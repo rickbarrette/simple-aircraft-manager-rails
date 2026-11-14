@@ -21,11 +21,6 @@ module ApplicationHelper
                            title: Airworthiness::DISCLAIMER)
   end
 
-  def airworthiness_dot(status)
-    color = { "RED" => "bg-red-500", "LIMITED" => "bg-sky-500", "ORANGE" => "bg-amber-400", "GREEN" => "bg-emerald-500" }[status.status]
-    tag.span(class: "inline-block h-3 w-3 rounded-full #{color}", title: status.label)
-  end
-
   # Badge class (or text class) for one airworthiness issue.
   def issue_badge_class(issue) = "badge-#{AIRWORTHINESS_COLORS[issue.severity]}"
 

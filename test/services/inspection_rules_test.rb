@@ -16,7 +16,8 @@ class InspectionRulesTest < ActiveSupport::TestCase
     xpdr = type("Transponder (91.413)", recurring_months: 24, effect: "no_transponder")
     done(xpdr, 3.years.ago.to_date)
     aw = @a.reload.airworthiness
-    assert [ aw.limited?, aw.can_fly? ].all?
+    assert aw.limited?
+    assert_not aw.red?
     assert_equal "No transponder", aw.label
     assert_equal "LIMITED", aw.issues.sole.severity
 
@@ -30,7 +31,7 @@ class InspectionRulesTest < ActiveSupport::TestCase
     annual = type("Annual", recurring_months: 12)
     done(annual, 13.months.ago.to_date)
     aw = @a.reload.airworthiness
-    assert_equal [ "RED", "Grounded", false ], [ aw.status, aw.label, aw.can_fly? ]
+    assert_equal [ "RED", "Grounded" ], [ aw.status, aw.label ]
     assert_raises(AircraftGroundedError) { HoursService.new(@a).enforce_airworthiness! }
   end
 

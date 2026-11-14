@@ -30,12 +30,6 @@ class AirworthinessDirective < ApplicationRecord
     find_by("upper(replace(name, ' ', '')) = ?", normalize_number(number).delete(" "))
   end
 
-  def self.applicable_to(aircraft)
-    direct = joins(:aircraft).where(aircraft: { id: aircraft.id }).select(:id)
-    via_component = joins(:components).where(components: { aircraft_id: aircraft.id }).select(:id)
-    where(id: direct).or(where(id: via_component))
-  end
-
   def to_s = name
 
   # [url, label] for this AD's document, when we have its link (DRS Excel

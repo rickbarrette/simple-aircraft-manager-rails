@@ -15,6 +15,15 @@ module SharedRecordHistory
     before_destroy { linked_aircraft_ids.each { |id| history!(id, "destroy", attributes.except(*IGNORED)) } }
   end
 
+  class_methods do
+    # Records that apply to the aircraft directly, or to one of its components.
+    def applicable_to(aircraft)
+      direct = joins(:aircraft).where(aircraft: { id: aircraft.id }).select(:id)
+      via_component = joins(:components).where(components: { aircraft_id: aircraft.id }).select(:id)
+      where(id: direct).or(where(id: via_component))
+    end
+  end
+
   # Aircraft this record applies to, directly or through a component.
   def linked_aircraft_ids = (aircraft_ids + components.map(&:aircraft_id)).compact.uniq
 

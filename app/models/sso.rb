@@ -33,13 +33,4 @@ module Sso
     ENV["APP_URL"].presence&.chomp("/") ||
       "#{ENV.fetch('FORCE_SSL', 'true') == 'true' ? 'https' : 'http'}://#{ENV.fetch('APP_HOST', 'localhost:3000')}"
   end
-
-  # Origin of the provider, for the CSP form-action list (the sign-in POST
-  # redirects there).
-  def issuer_origin
-    uri = URI.parse(ENV["OIDC_ISSUER"].to_s)
-    uri.host && "#{uri.scheme}://#{uri.host}#{":#{uri.port}" unless uri.port == uri.default_port}"
-  rescue URI::InvalidURIError
-    nil
-  end
 end

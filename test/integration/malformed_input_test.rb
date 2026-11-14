@@ -75,13 +75,18 @@ class MalformedInputTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-  test "an image that can't be read is shown as the file, never resized" do
-    @a.picture.attach(io: StringIO.new("GIF89a not really"), filename: "broken.gif", content_type: "image/gif")
-    @a.picture.blob.update!(metadata: { identified: true, analyzed: true }) # analysis found no dimensions
-    assert_kind_of ActiveStorage::Attached::One, @a.picture_for(:thumb)
+  test "photos measured without dimensions (uploaded before image processing) still get thumbnails" do
+    jpeg = Vips::Image.black(400, 300).jpegsave_buffer
+    @a.picture.attach(io: StringIO.new(jpeg), filename: "old.jpg", content_type: "image/jpeg")
+    @a.picture.blob.update!(metadata: { identified: true, analyzed: true }) # as older uploads were recorded
     get aircraft_path(@a)
-    assert_response :success
-    assert_select "img[src*='/representations/']", 0
+    assert_select "img[src*='/representations/']"
+
+    squawk = @a.squawks.create!(issue_reported: "Leak", reported_by: @owner)
+    squawk.attachments.attach(io: StringIO.new(jpeg), filename: "PXL_1.jpg", content_type: "image/jpeg")
+    squawk.attachments.first.blob.update!(metadata: { identified: true, analyzed: true })
+    get aircraft_squawks_path(@a)
+    assert_select "a[data-gallery-target=item] img[src*='/representations/']"
   end
 
   test "if resizing a photo fails anyway, the original is sent instead of an error" do

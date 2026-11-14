@@ -2,8 +2,7 @@
     (which has Download); other files open in a new tab and have a download link. %>
 <% files = squawk.attachments.to_a %>
 <% if files.any? %>
-  <%# Thumbnails for images that can be resized; others are listed as files. %>
-  <% photos, others = files.partition { _1.image? && _1.blob.resizable_image? } %>
+  <% photos, others = files.partition { _1.image? && _1.variable? } %>
   <div class="mt-1" data-controller="gallery">
     <ul class="flex flex-wrap gap-1.5">
       <% photos.each do |file| %>

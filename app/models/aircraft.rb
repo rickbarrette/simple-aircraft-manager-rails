@@ -87,9 +87,10 @@ class Aircraft < ApplicationRecord
   def picture_shown? = picture.attached? && picture.attachment.persisted?
 
   # The photo at a page's size (:thumb or :card), or the original when it
-  # can't be resized (see ActiveStorage::Blob#resizable_image?).
+  # isn't a kind that can be resized. (One that can't be read is sent as the
+  # original too: see config/initializers/active_storage_images.rb.)
   def picture_for(size)
-    picture.blob.resizable_image? ? picture.variant(size) : picture
+    picture.variable? ? picture.variant(size) : picture
   end
 
   private

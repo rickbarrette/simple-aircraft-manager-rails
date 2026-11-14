@@ -30,7 +30,7 @@ class WeightBalanceRecordsController < ApplicationController
 
   def update
     if @record.update(record_params)
-      log_event("aircraft", t("flash.weight_balance_records.weight_balance_updated_2", date: @record.date))
+      log_event("aircraft", t("flash.weight_balance_records.weight_balance_updated_2", date: l(@record.date, format: :app)))
       redirect_to aircraft_weight_balance_records_path(@aircraft), notice: t("flash.weight_balance_records.weight_balance_updated")
     else
       render :edit, status: :unprocessable_entity
@@ -39,7 +39,7 @@ class WeightBalanceRecordsController < ApplicationController
 
   def destroy
     @record.destroy!
-    log_event("aircraft", t("flash.weight_balance_records.weight_balance_record_deleted", date: @record.date))
+    log_event("aircraft", t("flash.weight_balance_records.weight_balance_record_deleted", date: l(@record.date, format: :app)))
     redirect_to aircraft_weight_balance_records_path(@aircraft), notice: t("flash.weight_balance_records.record_deleted")
   end
 

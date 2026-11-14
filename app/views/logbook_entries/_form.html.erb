@@ -1,4 +1,4 @@
-<%= form_with model: [aircraft, entry], class: "card card-body space-y-4 max-w-3xl", data: { controller: "entry-template signer component-times", component_times_aircraft_hours_value: aircraft.current_hours.to_f } do |f| %>
+<%= form_with model: [aircraft, entry], class: "card card-body space-y-4 max-w-3xl", data: { controller: "entry-template signer component-times show-when", component_times_aircraft_hours_value: aircraft.current_hours.to_f } do |f| %>
   <%= f.errors_summary %>
   <% if entry.supersedes %>
     <%= f.hidden_field :supersedes_id %>
@@ -25,7 +25,8 @@
     <%= f.field :date, as: :date %>
     <%= f.field :log_type, as: :select, label: t(".logbook"), collection: LogbookEntry::LOG_TYPES.invert,
           data: { component_times_target: "logType", entry_template_target: "logType", action: "component-times#logTypeChanged" } %>
-    <%= f.field :entry_type, as: :select, label: t(".entry_type"), collection: LogbookEntry::ENTRY_TYPES.invert, data: { entry_template_target: "entryType" } %>
+    <%= f.field :entry_type, as: :select, label: t(".entry_type"), collection: LogbookEntry::ENTRY_TYPES.invert,
+          data: { entry_template_target: "entryType", show_when_target: "source", action: "show-when#update" } %>
     <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: t(".airframe_total_time"),
           data: { component_times_target: "airframe", action: "input->component-times#airframeChanged" } %>
   </div>
@@ -57,8 +58,10 @@
     <%= f.field :signoff_certificate_number, label: t(".certificate_number"), placeholder: "e.g. 1234567", data: { signer_target: "number" } %>
   </div>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :inspection_result, as: :select, label: t(".inspection_result"), include_blank: t(".not_an_inspection"),
-          collection: LogbookEntry::INSPECTION_RESULTS.invert, hint: t(".for_inspection_entries_43_11") %>
+    <div data-show-when-target="item" data-show-when-value="INSPECTION">
+      <%= f.field :inspection_result, as: :select, label: t(".inspection_result"), include_blank: t(".not_an_inspection"),
+            collection: LogbookEntry::INSPECTION_RESULTS.invert, hint: t(".for_inspection_entries_43_11") %>
+    </div>
     <%= f.field :signoff_location, label: t(".location_shop") %>
     <%= f.field :document_id, as: :select, label: t(".scanned_page_document"), collection: document_options(aircraft) %>
     <%= f.field :page_number, as: :number, label: t(".page_in_document") %>

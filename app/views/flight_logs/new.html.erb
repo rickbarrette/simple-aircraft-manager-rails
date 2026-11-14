@@ -39,5 +39,9 @@
     <%= f.field :engine_data, as: :file, label: t(".engine_monitor_data"), hint: t(".cgr_30p_cgr_30c_flight"), accept: ".csv,text/csv" %>
   </div>
   <p class="hint"><%= t(".saving_adds_the_tach_time") %></p>
-  <div class="flex gap-2"><%= f.submit t(".log_flight") %><%= link_to t(".cancel"), aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %></div>
+  <div class="flex flex-wrap gap-2">
+    <%= f.submit t(".log_flight") %>
+    <%= f.submit t(".log_and_next_leg"), name: "next_leg", class: "btn-secondary", title: t(".log_and_next_leg_title") %>
+    <%= link_to t(".cancel"), aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %>
+  </div>
 <% end %>

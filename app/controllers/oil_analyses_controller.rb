@@ -24,7 +24,7 @@ class OilAnalysesController < ApplicationController
   def create
     @analysis = @aircraft.oil_analyses.new(analysis_params)
     if @analysis.save
-      log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_added_sampled", sample_date: @analysis.sample_date))
+      log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_added_sampled", sample_date: l(@analysis.sample_date, format: :app)))
       redirect_to aircraft_oil_analysis_path(@aircraft, @analysis), notice: t("flash.oil_analyses.oil_analysis_saved")
     else
       render :new, status: :unprocessable_entity
@@ -69,7 +69,7 @@ class OilAnalysesController < ApplicationController
 
   def update
     if @analysis.update(analysis_params)
-      log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_updated_sampled", sample_date: @analysis.sample_date))
+      log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_updated_sampled", sample_date: l(@analysis.sample_date, format: :app)))
       redirect_to aircraft_oil_analysis_path(@aircraft, @analysis), notice: t("flash.oil_analyses.oil_analysis_updated")
     else
       render :edit, status: :unprocessable_entity
@@ -78,7 +78,7 @@ class OilAnalysesController < ApplicationController
 
   def destroy
     @analysis.destroy!
-    log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_deleted_sampled", sample_date: @analysis.sample_date))
+    log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_deleted_sampled", sample_date: l(@analysis.sample_date, format: :app)))
     redirect_to aircraft_oil_analyses_path(@aircraft), notice: t("flash.oil_analyses.oil_analysis_deleted")
   end
 

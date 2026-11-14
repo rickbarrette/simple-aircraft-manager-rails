@@ -23,11 +23,11 @@ class SiteSearch
     return {} unless searchable?
     @results ||= {
       "logbook" => find(LogbookEntry.where(aircraft_id: @ids).order(date: :desc), %w[text signoff_person signoff_location]) { |e, s|
-        [ I18n.t("services.site_search.logbook", date: e.date, log: LogbookEntry::LOG_TYPES[e.log_type]), s, @urls.aircraft_logbook_entry_path(e.aircraft_id, e) ] },
+        [ I18n.t("services.site_search.logbook", date: I18n.l(e.date, format: :app), log: LogbookEntry::LOG_TYPES[e.log_type]), s, @urls.aircraft_logbook_entry_path(e.aircraft_id, e) ] },
       "squawk" => find(Squawk.where(aircraft_id: @ids).order(created_at: :desc), %w[issue_reported notes deferral_notes]) { |q, s|
         [ q.resolved? ? I18n.t("services.site_search.resolved", issue: q.issue_reported.truncate(80)) : q.issue_reported.truncate(80), s, @urls.aircraft_squawks_path(q.aircraft_id) ] },
       "note" => find(AircraftNote.where(aircraft_id: @ids).order(created_at: :desc), %w[text]) { |n, s|
-        [ I18n.t("services.site_search.note", date: n.created_at.to_date), s, @urls.aircraft_notes_path(n.aircraft_id) ] },
+        [ I18n.t("services.site_search.note", date: I18n.l(n.created_at.to_date, format: :app)), s, @urls.aircraft_notes_path(n.aircraft_id) ] },
       "ad" => ads,
       "document" => find(Document.where(aircraft_id: @ids).order(:name), %w[name description pages_text]) { |d, s|
         [ d.name, s, @urls.aircraft_document_path(d.aircraft_id, d) ] },

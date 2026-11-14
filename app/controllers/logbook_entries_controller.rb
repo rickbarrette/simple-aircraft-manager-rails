@@ -18,7 +18,7 @@ class LogbookEntriesController < ApplicationController
   # Someone has checked a transcribed entry against the scan.
   def verify
     @entry.update!(verified: true)
-    log_event("logbook", t("flash.logbook_entries.transcribed_logbook_entry_verified", date: @entry.date))
+    log_event("logbook", t("flash.logbook_entries.transcribed_logbook_entry_verified", date: l(@entry.date, format: :app)))
     next_entry = @aircraft.logbook_entries.unverified.order(:date, :id).first
     redirect_to next_entry ? aircraft_logbook_entry_path(@aircraft, next_entry) : aircraft_logbook_entries_path(@aircraft),
                 notice: next_entry ? t("flash.logbook_entries.verified_next") : t("flash.logbook_entries.verified_all")
@@ -36,7 +36,7 @@ class LogbookEntriesController < ApplicationController
     @entry.supersedes = correctable(params.dig(:logbook_entry, :supersedes_id))
     @entry.assign_parts(parts_params, @aircraft)
     if @entry.save
-      log_event("logbook", t(@entry.supersedes ? "flash.logbook_entries.correction_added_event" : "flash.logbook_entries.logbook_entry_added", date: @entry.date))
+      log_event("logbook", t(@entry.supersedes ? "flash.logbook_entries.correction_added_event" : "flash.logbook_entries.logbook_entry_added", date: l(@entry.date, format: :app)))
       record_parts_service
       record_inspections
       redirect_to aircraft_logbook_entry_path(@aircraft, @entry),
@@ -52,7 +52,7 @@ class LogbookEntriesController < ApplicationController
     @entry.assign_attributes(entry_params)
     @entry.assign_parts(parts_params, @aircraft)
     if @entry.save
-      log_event("logbook", t("flash.logbook_entries.logbook_entry_updated_2", date: @entry.date))
+      log_event("logbook", t("flash.logbook_entries.logbook_entry_updated_2", date: l(@entry.date, format: :app)))
       redirect_to aircraft_logbook_entry_path(@aircraft, @entry), notice: t("flash.logbook_entries.logbook_entry_updated")
     else
       render :edit, status: :unprocessable_entity
@@ -61,7 +61,7 @@ class LogbookEntriesController < ApplicationController
 
   def destroy
     @entry.destroy!
-    log_event("logbook", t("flash.logbook_entries.logbook_entry_deleted_2", date: @entry.date))
+    log_event("logbook", t("flash.logbook_entries.logbook_entry_deleted_2", date: l(@entry.date, format: :app)))
     redirect_to aircraft_logbook_entries_path(@aircraft), notice: t("flash.logbook_entries.logbook_entry_deleted")
   end
 
@@ -98,8 +98,8 @@ class LogbookEntriesController < ApplicationController
       next unless p["include"] == "1" && %w[serviced replaced].include?(p["service"])
       part = @entry.parts.find { _1.component_id == id.to_i } or next
       component = part.component
-      component.service_from_entry!(date: @entry.date, hours_at_entry: part.hours_at_entry, flown_since: flown, replaced: p["service"] == "replaced")
-      log_event("component", t(p["service"] == "replaced" ? "flash.logbook_entries.replaced_event" : "flash.logbook_entries.serviced_event", component: component, date: @entry.date))
+      component.service_from_entry!(date: l(@entry.date, format: :app), hours_at_entry: part.hours_at_entry, flown_since: flown, replaced: p["service"] == "replaced")
+      log_event("component", t(p["service"] == "replaced" ? "flash.logbook_entries.replaced_event" : "flash.logbook_entries.serviced_event", component: component, date: l(@entry.date, format: :app)))
     end
   end
 
@@ -108,9 +108,9 @@ class LogbookEntriesController < ApplicationController
   def record_inspections
     ids = Array(params.dig(:logbook_entry, :inspection_type_ids)).compact_blank
     @aircraft.applicable_inspection_types.where(id: ids).find_each do |type|
-      @aircraft.inspection_records.create!(inspection_type: type, logbook_entry: @entry, date: @entry.date,
+      @aircraft.inspection_records.create!(inspection_type: type, logbook_entry: @entry, date: l(@entry.date, format: :app),
                                            aircraft_hours: @entry.aircraft_hours_at_entry)
-      log_event("inspection", t("flash.logbook_entries.inspection_completed_logbook_entry", name: type.name, date: @entry.date))
+      log_event("inspection", t("flash.logbook_entries.inspection_completed_logbook_entry", name: type.name, date: l(@entry.date, format: :app)))
     end
   end
 

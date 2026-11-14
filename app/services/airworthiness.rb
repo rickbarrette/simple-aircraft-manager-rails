@@ -95,7 +95,7 @@ class Airworthiness
     end
     @aircraft.squawks.deferred.find_each do |squawk|
       add("DEFERRED", INFO, t(:inoperative, issue: squawk.issue_reported.to_s.truncate(80)),
-          t(:deferred, date: squawk.deferred_at.to_date, name: squawk.deferred_by_name), squawk)
+          t(:deferred, date: I18n.l(squawk.deferred_at.to_date, format: :app), name: squawk.deferred_by_name), squawk)
     end
   end
 
@@ -134,9 +134,9 @@ class Airworthiness
       grounds = Document::GROUNDING_EXPIRY_TYPES.include?(doc.doc_type)
       if doc.expired?(@today)
         add("DOCUMENT", grounds ? RED : ORANGE, t(:expired_title, name: doc.name),
-            t(grounds ? :document_expired_grounds : :document_expired, type: doc.type_label, date: doc.expires_on), doc)
+            t(grounds ? :document_expired_grounds : :document_expired, type: doc.type_label, date: I18n.l(doc.expires_on, format: :app)), doc)
       elsif @today + doc.expiry_warning_days >= doc.expires_on
-        add("DOCUMENT", ORANGE, t(:expires_soon_title, name: doc.name), t(:document_expires, type: doc.type_label, date: doc.expires_on), doc)
+        add("DOCUMENT", ORANGE, t(:expires_soon_title, name: doc.name), t(:document_expires, type: doc.type_label, date: I18n.l(doc.expires_on, format: :app)), doc)
       end
     end
   end
@@ -163,7 +163,7 @@ class Airworthiness
       if c.replacement_critical? && (due = c.next_replacement_date)
         if @today >= due
           overdue = true
-          desc = t(c.replacement_from_install? ? :replace_every_installed : :replace_every_serviced, interval: c.replacement_interval_label, date: c.replacement_counted_from)
+          desc = t(c.replacement_from_install? ? :replace_every_installed : :replace_every_serviced, interval: c.replacement_interval_label, date: c.replacement_counted_from && I18n.l(c.replacement_counted_from, format: :app))
         elsif @today + DAYS_WARNING >= due
           approaching = true
           desc = t(:replace_in_days, count: (due - @today).to_i)
@@ -174,11 +174,11 @@ class Airworthiness
       if c.expires_on
         if c.expired?(@today)
           expired = true
-          desc = t(:component_expired, date: c.expires_on)
+          desc = t(:component_expired, date: I18n.l(c.expires_on, format: :app))
         elsif @today + DAYS_WARNING >= c.expires_on
           approaching = true
           expiring = true
-          desc = t(:component_expires, date: c.expires_on)
+          desc = t(:component_expires, date: I18n.l(c.expires_on, format: :app))
         end
       end
 

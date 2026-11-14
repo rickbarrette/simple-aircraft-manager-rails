@@ -1,12 +1,16 @@
 <%= form_with model: [aircraft, squawk], multipart: true, class: "card card-body space-y-4 max-w-2xl",
-      data: (squawk.new_record? ? { controller: "offline-form", offline_form_kind_value: "squawk", offline_form_tail_value: aircraft.tail_number,
-                                    action: "submit->offline-form#submit turbo:submit-start->offline-form#remember turbo:fetch-request-error->offline-form#networkFailed turbo:before-fetch-response->offline-form#gatewayFailed" } : {}) do |f| %>
+      data: (squawk.new_record? ? { controller: "offline-form show-when", offline_form_kind_value: "squawk", offline_form_tail_value: aircraft.tail_number,
+                                    action: "submit->offline-form#submit turbo:submit-start->offline-form#remember turbo:fetch-request-error->offline-form#networkFailed turbo:before-fetch-response->offline-form#gatewayFailed" } : { controller: "show-when" }) do |f| %>
   <% if squawk.new_record? %>
     <%= f.hidden_field :client_key, data: { offline_form_target: "key" } %>
     <div class="hidden rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-offline-form-target="notice" role="status"></div>
   <% end %>
   <%= f.errors_summary %>
-  <%= f.field :priority, as: :select, collection: Squawk::PRIORITIES.invert, hint: t(".ground_aircraft_makes_the_aircraft") %>
+  <%= f.field :priority, as: :select, collection: Squawk::PRIORITIES.invert, hint: t(".ground_aircraft_makes_the_aircraft"),
+        data: { show_when_target: "source", action: "show-when#update" } %>
+  <p class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 ring-1 ring-red-200" role="alert" data-show-when-target="item" data-show-when-value="0" hidden>
+    <%= t(".grounding_warning", tail_number: aircraft.tail_number) %>
+  </p>
   <%= f.field :issue_reported, as: :textarea, label: t(".issue"), required: true, autofocus: true %>
   <%= f.field :component_id, as: :select, label: t(".component_optional"), collection: component_options(aircraft) %>
   <%= f.field :attachments, as: :file, multiple: true, label: squawk.attachments.attached? ? t(".add_photos_files") : t(".photos_files"),

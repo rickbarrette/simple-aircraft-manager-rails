@@ -33,7 +33,7 @@ class EntrySigner
         auth_method: @auth_method, ip_address: @request&.remote_ip, user_agent: @request&.user_agent.to_s.first(255)
       )
       @entry.supersedes&.update_column(:superseded_at, signature.signed_at)
-      @entry.aircraft.log_event!("logbook", "Logbook entry signed electronically (#{@entry.date})",
+      @entry.aircraft.log_event!("logbook", I18n.t("services.entry_signer.signed_event", date: I18n.l(@entry.date, format: :app)),
                                  notes: I18n.t("services.entry_signer.text", signer_name: signature.signer_name, certificate_label: signature.certificate_label, certificate_number: signature.certificate_number), user: @user)
       signature
     end

@@ -3,7 +3,6 @@
 <section class="card">
   <div class="card-header">
     <h2 class="card-title"><%= t(".open_squawks") %></h2>
-    <%= link_to t(".report_squawk"), new_aircraft_squawk_path(@aircraft), class: "btn-primary" %>
   </div>
   <% if @active.any? %><%= render "squawks/table", squawks: @active, aircraft: @aircraft %><% else %><%= empty_state t(".no_open_squawks") %><% end %>
 </section>

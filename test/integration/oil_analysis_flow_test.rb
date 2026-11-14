@@ -26,7 +26,7 @@ class OilAnalysisFlowTest < ActionDispatch::IntegrationTest
     latest = @aircraft.oil_analyses.recent_first.first
     assert_redirected_to aircraft_oil_analysis_path(@aircraft, latest)
     assert latest.report.attached?
-    assert_equal [ "Oil analysis added (sampled 2026-08-01)" ], @aircraft.events.where(category: "oil_analysis").limit(1).pluck(:event_name)
+    assert_equal [ "Oil analysis added (sampled Aug 1, 2026)" ], @aircraft.events.where(category: "oil_analysis").limit(1).pluck(:event_name)
 
     get aircraft_oil_analyses_path(@aircraft)
     assert_response :success

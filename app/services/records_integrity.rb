@@ -23,7 +23,7 @@ class RecordsIntegrity
       next if sig.imported? || sig.status != :altered
       entry = sig.logbook_entry
       problems << I18n.t(sig.seal_valid? ? "services.records_integrity.entry_changed" : "services.records_integrity.signature_altered",
-                         tail_number: entry.aircraft.tail_number, date: entry.date, signer: sig.signer_name)
+                         tail_number: entry.aircraft.tail_number, date: I18n.l(entry.date, format: :app), signer: sig.signer_name)
     end
     AppRevision.touch_current!
     IntegrityCheck.create!(ok: problems.empty?, versions_checked: versions, signatures_checked: signatures, problems: problems.first(200))

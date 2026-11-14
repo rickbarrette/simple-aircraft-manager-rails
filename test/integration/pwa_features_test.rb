@@ -68,7 +68,7 @@ class PwaFeaturesTest < ActionDispatch::IntegrationTest
   test "squawks can be reported offline and are received once" do
     sign_in @pilot
     get new_aircraft_squawk_path(@a)
-    assert_select "form[data-controller=offline-form][data-offline-form-kind-value=squawk][data-offline-form-tail-value=N12345]"
+    assert_select "form[data-controller~=offline-form][data-offline-form-kind-value=squawk][data-offline-form-tail-value=N12345]"
     assert_select "input[type=hidden][name='squawk[client_key]']"
 
     params = { squawk: { priority: 1, issue_reported: "Left landing light inop", client_key: "sq-1" } }
@@ -78,7 +78,7 @@ class PwaFeaturesTest < ActionDispatch::IntegrationTest
     get edit_aircraft_squawk_path(@a, @a.squawks.last) # pilots can't edit; owners' edit form isn't queued
     sign_in @owner
     get edit_aircraft_squawk_path(@a, @a.squawks.last)
-    assert_select "form[data-controller=offline-form]", count: 0
+    assert_select "form[data-controller~=offline-form]", count: 0
   end
 
   test "home-screen shortcuts open the form for your only aircraft, or let you choose" do

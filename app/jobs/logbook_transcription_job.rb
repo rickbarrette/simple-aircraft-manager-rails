@@ -112,7 +112,7 @@ class LogbookTranscriptionJob < ApplicationJob
     text = entry["text"].to_s.strip.presence || I18n.t("jobs.logbook_transcription.no_text")
     unless date
       text = "#{I18n.t('jobs.logbook_transcription.date_unreadable')} #{text}"
-      warn(@last_date ? I18n.t("jobs.logbook_transcription.no_date_previous", page: page_number, date: @last_date)
+      warn(@last_date ? I18n.t("jobs.logbook_transcription.no_date_previous", page: page_number, date: I18n.l(@last_date, format: :app))
                       : I18n.t("jobs.logbook_transcription.no_date_today", page: page_number))
     end
     date ||= @last_date || Date.current
@@ -129,7 +129,7 @@ class LogbookTranscriptionJob < ApplicationJob
       verified: false, transcription_confidence: (entry["confidence"] if %w[high medium low].include?(entry["confidence"]))
     )
     @import.increment!(:entries_created)
-    warn(I18n.t("jobs.logbook_transcription.hard_to_read", date: date, page: page_number)) if entry["confidence"] == "low"
+    warn(I18n.t("jobs.logbook_transcription.hard_to_read", date: I18n.l(date, format: :app), page: page_number)) if entry["confidence"] == "low"
   end
 
   def note_skipped(result, label)

@@ -36,7 +36,7 @@ class UserCertificatesTest < ActionDispatch::IntegrationTest
     @owner.certificates.create!(kind: "IA", number: "7654321", expires_on: 1.day.ago.to_date) # expired: not offered
     sign_in @owner
     get new_aircraft_logbook_entry_path(@a)
-    assert_select "form[data-controller='entry-template signer component-times']"
+    assert_select "form[data-controller~=signer]"
     assert_select "select[data-signer-target=choice] option[data-kind=AP][data-number='7654321'][data-name='Sam Mechanic']"
     assert_select "select[data-signer-target=choice] option[data-kind=IA]", 0
     assert_select "input[name='logbook_entry[signoff_person]'][data-signer-target=name]"

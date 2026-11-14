@@ -14,6 +14,7 @@ class DocumentsController < ApplicationController
 
   def new
     @document = @aircraft.documents.new(document_collection_id: params[:collection_id])
+    @document.doc_type = params[:doc_type] if Document::TYPES.key?(params[:doc_type])
   end
 
   def create

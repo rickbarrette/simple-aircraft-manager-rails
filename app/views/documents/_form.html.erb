@@ -1,7 +1,7 @@
-<%= form_with model: [aircraft, document], class: "card card-body space-y-4 max-w-3xl", multipart: true do |f| %>
+<%= form_with model: [aircraft, document], class: "card card-body space-y-4 max-w-3xl", multipart: true, data: { controller: "name-from-file" } do |f| %>
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :name, required: true %>
+    <%= f.field :name, required: true, data: { name_from_file_target: "name" } %>
     <%= f.field :doc_type, as: :select, label: t(".type"), collection: Document::TYPES.invert %>
     <%= f.field :document_collection_id, as: :select, label: t(".collection"),
           collection: [[t(".none"), nil]] + aircraft.document_collections.ordered.map { [_1.name, _1.id] } %>
@@ -14,7 +14,7 @@
         hint: t(".optional_registration_good_for_7") %>
   <%= f.field :description, as: :textarea, rows: 2 %>
   <%= f.field :pages, as: :file, multiple: true, label: document.persisted? ? t(".add_files") : t(".files"),
-        hint: t(".images_pdfs_or_text_up", max_upload_mb: Setting.max_upload_mb) %>
+        hint: t(".images_pdfs_or_text_up", max_upload_mb: Setting.max_upload_mb), data: { name_from_file_target: "file", action: "name-from-file#fill" } %>
   <% if document.persisted? && document.pages.any? %>
     <div>
       <p class="label"><%= t(".remove_existing_files") %></p>

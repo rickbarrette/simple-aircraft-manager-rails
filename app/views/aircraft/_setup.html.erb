@@ -1,0 +1,28 @@
+<%# Shown to owners until the aircraft is set up; Hide keeps it hidden on this device. %>
+<% steps = setup_steps(aircraft) %>
+<% if steps.any? { !_2 } %>
+  <section class="card" data-controller="dismiss" data-dismiss-key-value="sam-setup-hidden-<%= aircraft.id %>">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title"><%= t(".title", tail_number: aircraft.tail_number) %></h2>
+        <p class="text-xs text-slate-500"><%= t(".progress", done: steps.count { _2 }, total: steps.size) %></p>
+      </div>
+      <button type="button" class="btn-secondary btn-sm" data-action="dismiss#hide"><%= t(".hide") %></button>
+    </div>
+    <ol class="divide-y divide-slate-100">
+      <% steps.each do |key, done, path| %>
+        <li class="flex items-start gap-3 px-4 py-3">
+          <span aria-hidden="true" class="<%= done ? "text-emerald-600" : "text-slate-400" %>"><%= done ? "✓" : "○" %></span>
+          <div class="min-w-0 flex-1 text-sm">
+            <% if done %>
+              <span class="text-slate-500 line-through"><%= t(".#{key}.title") %></span>
+            <% else %>
+              <%= link_to t(".#{key}.title"), path, class: "link font-medium" %>
+              <p class="hint"><%= t(".#{key}.why") %></p>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  </section>
+<% end %>

@@ -61,7 +61,7 @@ class LogbookEntryPartsTest < ActionDispatch::IntegrationTest
     # dated to the entry; the 10 hours flown since the entry carry over
     assert_equal [ Date.new(2026, 8, 20), 10.0, 120.5 ], [ @filter.overhaul_date, @filter.hours_since_overhaul.to_f, @filter.hours_in_service.to_f ]
     assert_equal [ 10.0, 10.0, Date.new(2026, 8, 20) ], [ oil.hours_since_overhaul.to_f, oil.hours_in_service.to_f, oil.date_in_service ]
-    assert @a.events.exists?(event_name: "Replaced: #{oil} (logbook entry 2026-08-20)")
+    assert @a.events.exists?(event_name: "Replaced: #{oil} (logbook entry Aug 20, 2026)")
 
     entry = @a.logbook_entries.last # editing doesn't offer it again (it would apply twice)
     get edit_aircraft_logbook_entry_path(@a, entry)
@@ -84,7 +84,7 @@ class LogbookEntryPartsTest < ActionDispatch::IntegrationTest
     entry = @a.logbook_entries.sole
     record = @a.inspection_records.sole
     assert_equal [ oil_change, entry, Date.new(2026, 8, 20), 4200.3 ], [ record.inspection_type, record.logbook_entry, record.date, record.aircraft_hours.to_f ]
-    assert @a.events.exists?(event_name: "Inspection completed: Oil Change (logbook entry 2026-08-20)")
+    assert @a.events.exists?(event_name: "Inspection completed: Oil Change (logbook entry Aug 20, 2026)")
 
     get edit_aircraft_logbook_entry_path(@a, entry) # not offered again on edit (it would record twice)
     assert_select "input[name='logbook_entry[inspection_type_ids][]']", 0

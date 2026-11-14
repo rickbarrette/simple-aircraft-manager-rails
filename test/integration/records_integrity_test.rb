@@ -51,7 +51,7 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
     RecordVersion.where(id: victim.id).delete_all
     check = RecordsIntegrity.check!
     refute check.ok
-    assert(check.problems.any? { _1.include?("the 2026-10-01 logbook entry (signed by Sam Mechanic) changed after it was signed") })
+    assert(check.problems.any? { _1.include?("the Oct 1, 2026 logbook entry (signed by Sam Mechanic) changed after it was signed") })
     assert(check.problems.any? { _1.include?("doesn't follow the one before it") || _1.include?("missing") } || RecordVersion.where(aircraft_id: other.id).count.zero?)
 
     RecordVersion.where(aircraft_id: @a.id).last.then { RecordVersion.where(id: _1.id).update_all(payload: _1.payload.sub("Changed oil", "Changed gas")) }

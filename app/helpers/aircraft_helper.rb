@@ -30,6 +30,17 @@ module AircraftHelper
     ]
   end
 
+  # Getting a new aircraft set up (Overview): [key, done?, path] for each step.
+  def setup_steps(aircraft)
+    [
+      [ :components, aircraft.components.exists?, new_aircraft_component_path(aircraft) ],
+      [ :inspections, aircraft.applicable_inspection_types.exists?, new_aircraft_standard_inspections_path(aircraft) ],
+      [ :ads, aircraft.drs_imports.exists? || aircraft.applicable_ads.exists?, new_aircraft_ad_import_path(aircraft) ],
+      [ :documents, aircraft.documents.where(doc_type: %w[REGISTRATION AIRWORTHINESS_CERT]).exists?, new_aircraft_document_path(aircraft, doc_type: "REGISTRATION") ],
+      [ :weight_balance, aircraft.weight_balance_records.exists?, new_aircraft_weight_balance_record_path(aircraft) ]
+    ]
+  end
+
   def component_options(aircraft, include_blank: true)
     opts = aircraft.components.where.not(status: "DISPOSED").includes(:component_type).map { [ _1.to_s, _1.id ] }
     include_blank ? [ [ I18n.t("helpers.aircraft.none"), nil ] ] + opts : opts
@@ -40,6 +51,6 @@ module AircraftHelper
   end
 
   def logbook_options(aircraft)
-    [ [ I18n.t("helpers.aircraft.none"), nil ] ] + aircraft.logbook_entries.recent_first.limit(300).map { [ I18n.t("helpers.aircraft.text", date: _1.date, truncate: (_1.text.truncate(60))), _1.id ] }
+    [ [ I18n.t("helpers.aircraft.none"), nil ] ] + aircraft.logbook_entries.recent_first.limit(300).map { [ I18n.t("helpers.aircraft.entry_option", date: fmt_date(_1.date), text: _1.text.truncate(60)), _1.id ] }
   end
 end

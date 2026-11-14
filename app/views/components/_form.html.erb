@@ -21,30 +21,40 @@
     <%= f.field :hours_in_service, as: :number, step: 0.1, label: t(".total_time_hours") %>
     <%= f.field :overhaul_date, as: :date, label: t(".last_overhaul_service") %>
     <%= f.field :hours_since_overhaul, as: :number, step: 0.1, label: t(".hours_since_oh_service") %>
-    <%= f.field :overhaul_kind, as: :select, label: t(".overhaul_type"), include_blank: "—", collection: Component::OVERHAUL_KINDS.invert,
-          wrapper: { class: "sm:col-span-2" }, hint: t(".for_engines_and_propellers_printed") %>
   </fieldset>
 
-  <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold text-slate-900"><%= t(".limits") %></legend>
-    <%= f.field :replacement_hours, as: :number, label: t(".replace_every_hrs") %>
-    <%= f.interval :replacement, label: t(".replace_every") %>
-    <%= f.field :replacement_from_install, as: :select, label: t(".replacement_counts_from"),
-          collection: [ [ t(".last_service"), false ], [ t(".installation_life_limit"), true ] ],
-          hint: t(".installation_for_a_part_that") %>
-    <%= f.field :replacement_critical, as: :checkbox, label: t(".replacement_critical"), hint: t(".overdue_replacement_or_expiry_grounds") %>
-    <%= f.field :expires_on, as: :date, label: t(".expires_on"),
-          hint: t(".the_date_marked_on_the") %>
-    <%= f.field :tbo_hours, as: :number, label: t(".tbo_hrs") %>
-    <%= f.interval :tbo, label: t(".tbo_calendar") %>
-    <div class="space-y-2">
-      <%= f.field :tbo_critical, as: :checkbox, label: t(".treat_tbo_as_a_hard"),
-            hint: t(".under_part_91_tbo_is") %>
-      <%= f.field :on_condition, as: :checkbox, label: t(".on_condition_part_91"),
-            hint: t(".run_past_tbo_based_on") %>
+  <%# Limits, in two groups that open when they're in use (most parts need one or neither). %>
+  <% c = component %>
+  <% replacement_open = c.replacement_hours.present? || c.replacement_calendar? || c.replacement_critical? || c.expires_on.present? ||
+                        %i[replacement_hours replacement_every expires_on].any? { c.errors[_1].any? } %>
+  <% tbo_open = c.tbo_hours.present? || c.tbo_calendar? || c.overhaul_kind.present? || c.on_condition? || %i[tbo_hours tbo_every].any? { c.errors[_1].any? } %>
+  <details class="rounded-md ring-1 ring-slate-200" <%= "open" if replacement_open %>>
+    <summary class="cursor-pointer px-3 py-2 text-sm font-semibold text-slate-900"><%= t(".replacement_group") %>
+      <span class="font-normal text-slate-500"><%= t(".replacement_group_hint") %></span></summary>
+    <div class="grid gap-4 border-t border-slate-200 p-3 sm:grid-cols-3">
+      <%= f.field :replacement_hours, as: :number, label: t(".replace_every_hrs") %>
+      <%= f.interval :replacement, label: t(".replace_every") %>
+      <%= f.field :replacement_from_install, as: :select, label: t(".replacement_counts_from"),
+            collection: [ [ t(".last_service"), false ], [ t(".installation_life_limit"), true ] ],
+            hint: t(".installation_for_a_part_that") %>
+      <%= f.field :replacement_critical, as: :checkbox, label: t(".replacement_critical"), hint: t(".overdue_replacement_or_expiry_grounds") %>
+      <%= f.field :expires_on, as: :date, label: t(".expires_on"),
+            hint: t(".the_date_marked_on_the") %>
     </div>
-    <p class="hint sm:col-span-3"><%= t(".recurring_inspections_of_this_part") %></p>
-  </fieldset>
+  </details>
+  <details class="rounded-md ring-1 ring-slate-200" <%= "open" if tbo_open %>>
+    <summary class="cursor-pointer px-3 py-2 text-sm font-semibold text-slate-900"><%= t(".tbo_group") %>
+      <span class="font-normal text-slate-500"><%= t(".tbo_group_hint") %></span></summary>
+    <div class="grid gap-4 border-t border-slate-200 p-3 sm:grid-cols-3">
+      <%= f.field :tbo_hours, as: :number, label: t(".tbo_hrs") %>
+      <%= f.interval :tbo, label: t(".tbo_calendar") %>
+      <%= f.field :overhaul_kind, as: :select, label: t(".overhaul_type"), include_blank: "—", collection: Component::OVERHAUL_KINDS.invert,
+            hint: t(".for_engines_and_propellers_printed") %>
+      <%= f.field :tbo_critical, as: :checkbox, label: t(".treat_tbo_as_a_hard"), hint: t(".under_part_91_tbo_is") %>
+      <%= f.field :on_condition, as: :checkbox, label: t(".on_condition_part_91"), hint: t(".run_past_tbo_based_on") %>
+    </div>
+  </details>
+  <p class="hint"><%= t(".recurring_inspections_of_this_part") %></p>
 
   <%= f.field :notes, as: :textarea, rows: 3 %>
   <div class="flex gap-2">

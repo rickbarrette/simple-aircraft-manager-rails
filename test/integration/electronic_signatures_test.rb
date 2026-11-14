@@ -44,7 +44,7 @@ class ElectronicSignaturesTest < ActionDispatch::IntegrationTest
     assert_equal [ @entry.content_digest, :valid ], [ sig.content_digest, sig.status ]
     assert_equal "Replaced left landing light lamp P/N 4509.", JSON.parse(sig.content_snapshot)["text"]
     assert_equal "You signed a logbook entry for N12345", ActionMailer::Base.deliveries.last.subject
-    assert_equal "Logbook entry signed electronically (2026-10-01)", @a.events.last.event_name
+    assert_equal "Logbook entry signed electronically (Oct 1, 2026)", @a.events.last.event_name
 
     get aircraft_logbook_entry_path(@a, @entry)
     assert_includes response.body, "Certified by Sam Mechanic, A&amp;P 7654321"

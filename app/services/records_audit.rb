@@ -27,7 +27,7 @@ class RecordsAudit
       drs_item,
       Item.new("procedures", t(:procedures), true,
                revision.present? && @policy.complete?,
-               revision ? t(:revision, number: revision.number, date: revision.adopted_at.to_date) : t(:not_adopted)),
+               revision ? t(:revision, number: revision.number, date: I18n.l(revision.adopted_at.to_date, format: :app)) : t(:not_adopted)),
       Item.new("signatures", t(:signatures), true,
                check.present? && check.ok, t(:signed_since, count: signatures_since.count, since: since_label)),
       Item.new("certificates", t(:certificates), true, true,

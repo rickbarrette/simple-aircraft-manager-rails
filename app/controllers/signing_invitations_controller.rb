@@ -21,7 +21,7 @@ class SigningInvitationsController < ApplicationController
         PushNotifier.notify(invitee, :signing_request, path: invited_signing_path(@invitation.token), tag: "sign-#{@invitation.id}",
                                                        tail: @aircraft.tail_number, name: current_user.display_name)
       end
-      log_event("logbook", t("flash.signing_invitations.signature_requested_from_entry", email: @invitation.email, date: @entry.date))
+      log_event("logbook", t("flash.signing_invitations.signature_requested_from_entry", email: @invitation.email, date: l(@entry.date, format: :app)))
       redirect_to aircraft_logbook_entry_path(@aircraft, @entry), notice: t("flash.signing_invitations.invitation_sent_to_the", email: @invitation.email, days: SigningInvitation::VALID_FOR.in_days.to_i)
     else
       render :new, status: :unprocessable_entity

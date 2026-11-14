@@ -49,7 +49,13 @@ class FlightLogsController < ApplicationController
   def new
     # Aircraft almost always depart from where they last landed.
     last = @aircraft.flight_logs.where.not(destination_location: [ nil, "" ]).recent_first.first
-    @flight_log = @aircraft.flight_logs.new(date: Date.current, tach_out: @aircraft.tach_time,
+    # "Save and log next leg" comes back here with that flight's date.
+    date = begin
+      Date.iso8601(params[:date].to_s)
+    rescue Date::Error
+      Date.current
+    end
+    @flight_log = @aircraft.flight_logs.new(date: date, tach_out: @aircraft.tach_time,
                                             hobbs_out: @aircraft.hobbs_time,
                                             departure_location: last&.destination_location)
   end
@@ -62,7 +68,12 @@ class FlightLogsController < ApplicationController
     @flight_log = @aircraft.flight_logs.new(flight_log_params)
     if @flight_log.valid?
       HoursService.new(@aircraft).log_flight!(@flight_log)
-      redirect_to aircraft_flight_logs_path(@aircraft), notice: t("flash.flight_logs.flight_logged_hrs", tach_time: @flight_log.tach_time)
+      notice = t("flash.flight_logs.flight_logged_hrs", tach_time: @flight_log.tach_time)
+      if params[:next_leg].present?
+        redirect_to new_aircraft_flight_log_path(@aircraft, date: @flight_log.date.iso8601), notice: "#{notice} #{t('flash.flight_logs.next_leg')}"
+      else
+        redirect_to aircraft_flight_logs_path(@aircraft), notice: notice
+      end
     else
       render :new, status: :unprocessable_entity
     end

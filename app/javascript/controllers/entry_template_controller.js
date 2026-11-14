@@ -13,7 +13,10 @@ export default class extends Controller {
     if (this.textTarget.value.trim() && !confirm(t("entry_template.confirm"))) return
     const { text, entryType, logType, certificate } = option.dataset
     this.textTarget.value = text
-    if (entryType && this.hasEntryTypeTarget) this.entryTypeTarget.value = entryType
+    if (entryType && this.hasEntryTypeTarget) {
+      this.entryTypeTarget.value = entryType
+      this.entryTypeTarget.dispatchEvent(new Event("change", { bubbles: true }))
+    }
     if (logType && this.hasLogTypeTarget && this.logTypeTarget.value !== logType) {
       this.logTypeTarget.value = logType
       this.logTypeTarget.dispatchEvent(new Event("change", { bubbles: true }))

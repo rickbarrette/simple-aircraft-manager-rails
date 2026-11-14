@@ -4,6 +4,7 @@
 
 <div class="grid gap-5 lg:grid-cols-3">
   <div class="space-y-5 lg:col-span-2">
+    <% if owner? %><%= render "aircraft/setup", aircraft: @aircraft %><% end %>
     <section class="card">
       <div class="card-header">
         <h2 class="card-title"><%= t(".airworthiness") %></h2>

@@ -789,6 +789,7 @@ en:
       flight_log_deleted: Flight log deleted
       track_unreadable: 'Couldn''t read track: %{message}'
       engine_data_unreadable: 'Couldn''t read engine data: %{message}'
+      next_leg: The next leg starts where it ended.
     inspection_records:
       inspection_recorded: Inspection recorded.
       inspection_record_updated: Inspection record updated.
@@ -1690,6 +1691,25 @@ en:
       recent_activity: Recent Activity
       all: All →
       public: "· public"
+    setup:
+      title: Set up %{tail_number}
+      progress: "%{done} of %{total} done"
+      hide: Hide
+      components:
+        title: Add the components you track
+        why: 'The engine and propeller, and parts with limits: oil, filters, the ELT battery, magnetos. Flight hours are added to each one.'
+      inspections:
+        title: Add the standard inspections
+        why: 'Annual, 100-hour, transponder, pitot-static, ELT: pick the ones that apply, then record when each was last done.'
+      ads:
+        title: Import the ADs from FAA DRS
+        why: Export the ADs for the aircraft, engine and propeller from drs.faa.gov and upload the file.
+      documents:
+        title: Upload the registration and airworthiness certificate
+        why: With the registration's expiry date, you're reminded before it lapses.
+      weight_balance:
+        title: Enter the weight and balance
+        why: The empty weight and CG from the latest W&B, for the loading calculator.
   aircraft_imports:
     new:
       import_aircraft: Import Aircraft
@@ -1920,7 +1940,6 @@ en:
       hours_since_oh_service: Hours since OH / service
       overhaul_type: Overhaul type
       for_engines_and_propellers_printed: 'For engines and propellers: printed in logbook entries as SMOH, SFOH or SNEW.'
-      limits: Limits
       replace_every_hrs: Replace every (hrs)
       replace_every: Replace every
       replacement_counts_from: Replacement counts from
@@ -1944,6 +1963,10 @@ en:
       last_service: Last service
       none: "— None —"
       save: Save
+      replacement_group: Replacement and expiry
+      replacement_group_hint: "· oil, filters, ELT battery, life-limited parts"
+      tbo_group: Overhaul and TBO
+      tbo_group_hint: "· engines and propellers"
     index:
       components: "%{tail_number} Components"
       components_2: Components
@@ -1960,7 +1983,7 @@ en:
       tbo_h_html: 'TBO: %{tbo_hours} h%{on_condition}<br>'
       expires_html: 'Expires: %{expires_on}'
       edit: Edit
-      service: Service
+      service: Record service
       since_installed: " since installed"
       on_condition: " (on condition)"
       hide_disposed: Hide disposed
@@ -2296,6 +2319,8 @@ en:
       cgr_30p_cgr_30c_flight: CGR-30P / CGR-30C flight recording (.csv).
       saving_adds_the_tach_time: Saving adds the tach time to the aircraft and all in-service components, and records any oil/fuel added.
       cancel: Cancel
+      log_and_next_leg: Save and log next leg
+      log_and_next_leg_title: Saves this flight and opens the form for the next one, starting where it ended
     show:
       flight_on_html: Flight on %{date}
       delete_this_flight_log_aircraft: Delete this flight log? Aircraft and component hours will NOT be rolled back.
@@ -3235,10 +3260,10 @@ en:
       photos_files: Photos / files
       report_squawk: Report Squawk
       save: Save
+      grounding_warning: 'This grounds %{tail_number}: it shows Grounded until the squawk is resolved or deferred, and its owners and pilots who turned on notifications are told.'
     index:
       squawks: "%{tail_number} Squawks"
       open_squawks: Open Squawks
-      report_squawk: "+ Report Squawk"
       no_open_squawks: No open squawks.
       resolved: Resolved
       priority: Priority
@@ -3373,8 +3398,8 @@ en:
       notes: Notes
       activity: Activity
       none: "— None —"
-      text: "%{date} – %{truncate}"
       w_b: W&B
+      entry_option: "%{date} – %{text}"
     application:
       more: More
       are_you_sure: Are you sure?
@@ -3635,6 +3660,7 @@ en:
       that_certificate_isn_t_yours: That certificate isn't yours
       this_entry_can_t_be: 'This entry can''t be signed: %{to_sentence}'
       text: "%{signer_name}, %{certificate_label} %{certificate_number}"
+      signed_event: Logbook entry signed electronically (%{date})
     air_trail:
       can_t_reach_airtrail_at: 'Can''t reach AirTrail at %{host}: %{message}'
       airtrail_username_must_be_3: AirTrail username must be 3–20 letters, numbers, “.”, “_” or “-”

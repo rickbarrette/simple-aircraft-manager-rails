@@ -13,8 +13,8 @@ require "roo"
 class AdImport
   class Error < StandardError; end
 
-  ACTIONS = { "track" => "Track", "na" => "Not applicable", "skip" => "Skip" }.freeze
-  NA_NOTE = "Not applicable (marked during FAA DRS import)".freeze
+  ACTIONS = LabelSet.new("ad_import.actions", %w[track na skip])
+  def self.na_note = I18n.t("services.ad_import.na_note")
 
   # DRS export headers, normalized (lowercase letters only).
   HEADERS = {
@@ -27,15 +27,15 @@ class AdImport
   # AD attributes that come from the FAA and are refreshed on every import:
   # attribute => [label shown in the preview, value from the row].
   FAA_FIELDS = {
-    short_description: [ "Subject", ->(r) { r.subject.to_s.truncate(254).presence } ],
-    required_action: [ "Summary", ->(r) { r.summary } ],
-    effective_date: [ "Effective date", ->(r) { r.effective_date } ],
-    docket_number: [ "Docket", ->(r) { r.docket } ],
-    supersedes: [ "Supersedes", ->(r) { r.supersedes.join(", ").presence } ],
-    superseded_by: [ "Superseded by", ->(r) { r.superseded_by.join(", ").presence } ],
-    applicable_models: [ "Models", ->(r) { r.models.join(", ").presence } ],
-    product_type: [ "Product type", ->(r) { r.product_type } ],
-    document_url: [ "DRS link", ->(r) { r.url } ]
+    short_description: [ :short_description, ->(r) { r.subject.to_s.truncate(254).presence } ],
+    required_action: [ :required_action, ->(r) { r.summary } ],
+    effective_date: [ :effective_date, ->(r) { r.effective_date } ],
+    docket_number: [ :docket_number, ->(r) { r.docket } ],
+    supersedes: [ :supersedes, ->(r) { r.supersedes.join(", ").presence } ],
+    superseded_by: [ :superseded_by, ->(r) { r.superseded_by.join(", ").presence } ],
+    applicable_models: [ :applicable_models, ->(r) { r.models.join(", ").presence } ],
+    product_type: [ :product_type, ->(r) { r.product_type } ],
+    document_url: [ :document_url, ->(r) { r.url } ]
   }.freeze
 
   Row = Struct.new(:line, :number, :subject, :status, :effective_date, :docket, :models, :product_type,
@@ -76,7 +76,7 @@ class AdImport
         if action == "na"
           unless ad.latest_compliance_for(@aircraft)&.not_applicable?
             ad.ad_compliances.create!(aircraft: @aircraft, date_complied: Date.current,
-                                      not_applicable: true, compliance_notes: NA_NOTE)
+                                      not_applicable: true, compliance_notes: AdImport.na_note)
           end
           result[:not_applicable] += 1
         else
@@ -84,9 +84,9 @@ class AdImport
         end
       end
       imported = result[:tracked] + result[:not_applicable]
-      raise Error, "Nothing selected to import." if imported.zero?
+      raise Error, I18n.t("services.ad_import.nothing_selected") if imported.zero?
       @aircraft.log_event!("ad", "Imported #{imported} ADs from FAA DRS", user: user,
-                           notes: "#{@filename}: #{result[:tracked]} tracked, #{result[:not_applicable]} N/A, #{result[:skipped]} skipped")
+                           notes: I18n.t("services.ad_import.event_notes", file: @filename, tracked: result[:tracked], not_applicable: result[:not_applicable], skipped: result[:skipped]))
     end
     result
   end
@@ -126,31 +126,31 @@ class AdImport
       row.suggested = "track"
 
       if row.existing
-        prefix = row.tracked ? "Already tracked" : "Matches an AD already in the system; it will be linked"
-        row.note(row.changes.any? ? "#{prefix}. Will update: #{row.changes.join(', ')}" : "#{prefix}. Up to date")
+        prefix = I18n.t(row.tracked ? "services.ad_import.already_tracked" : "services.ad_import.will_link")
+        row.note(row.changes.any? ? I18n.t("services.ad_import.will_update", prefix: prefix, fields: row.changes.join(", ")) : I18n.t("services.ad_import.up_to_date", prefix: prefix))
       end
 
       # Reasons not to add a NEW AD. An AD that's already tracked is still
       # updated (so supersession and links reach it), just flagged for review.
       skip_reasons = []
-      skip_reasons << "FAA status: #{row.status}" if row.status.present? && !row.status.casecmp?("current")
-      skip_reasons << "Superseded by #{row.superseded_by.join(', ')}" if row.superseded_by.any?
+      skip_reasons << I18n.t("services.ad_import.faa_status", status: row.status) if row.status.present? && !row.status.casecmp?("current")
+      skip_reasons << I18n.t("services.ad_import.superseded_by", ads: row.superseded_by.join(", ")) if row.superseded_by.any?
       if model_names.any? && row.models.any? && (row.models.map { AirworthinessDirective.normalize_number(_1) } & model_names).empty?
-        skip_reasons << "Your model (#{@aircraft.model}) isn't in this AD's model list"
+        skip_reasons << I18n.t("services.ad_import.model_not_listed", model: @aircraft.model)
       end
-      skip_reasons.each { row.note(row.tracked ? "#{_1}: review whether it still applies" : _1) }
+      skip_reasons.each { row.note(row.tracked ? I18n.t("services.ad_import.review", reason: _1) : _1) }
       row.suggested = "skip" if skip_reasons.any? && !row.tracked
       if row.product_type&.casecmp?("appliance")
-        row.note("Appliance AD: applies only if that equipment is installed")
+        row.note(I18n.t("services.ad_import.appliance"))
       end
       if row.summary =~ /Supplemental Type Certificate|\bSTC\b/i
-        row.note("Mentions an STC: may apply only if that modification is installed")
+        row.note(I18n.t("services.ad_import.stc"))
       end
       if row.summary =~ /repetitive|recurring|reinspect/i
-        row.note("Mentions repetitive actions: set the recurrence after import")
+        row.note(I18n.t("services.ad_import.repetitive"))
       end
       (row.supersedes & tracked_numbers.to_a).each do |old|
-        row.note("Supersedes #{old}, which this aircraft still tracks; consider removing it")
+        row.note(I18n.t("services.ad_import.supersedes_tracked", ad: old))
       end
       row
     end
@@ -172,7 +172,7 @@ class AdImport
   end
 
   def changed_fields(ad, row)
-    faa_attributes(row).filter_map { |attr, value| FAA_FIELDS[attr][0] if ad.public_send(attr) != value }
+    faa_attributes(row).filter_map { |attr, value| I18n.t(attr, scope: "services.ad_import.fields") if ad.public_send(attr) != value }
   end
 
   def locate_header
@@ -189,15 +189,15 @@ class AdImport
         return [ sheet, i, cols ]
       end
     end
-    raise Error, "This doesn't look like an FAA DRS export: no “AD Number” column found."
+    raise Error, I18n.t("services.ad_import.not_drs")
   end
 
   def open_spreadsheet
     ext = File.extname(@filename).delete(".").downcase
-    raise Error, "Upload an .xlsx or .csv file." unless ext.in?(%w[xlsx csv])
+    raise Error, I18n.t("flash.uploads.spreadsheet_only") unless ext.in?(%w[xlsx csv])
     Roo::Spreadsheet.open(@path, extension: ext.to_sym)
   rescue Zip::Error, ArgumentError, CSV::MalformedCSVError => e
-    raise Error, "Couldn't read the file (#{e.message})."
+    raise Error, I18n.t("services.ad_import.unreadable", message: e.message)
   end
 
   # Link to the AD document: a hyperlink on any cell in the row (Excel exports),

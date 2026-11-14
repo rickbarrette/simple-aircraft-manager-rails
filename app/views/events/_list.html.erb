@@ -6,11 +6,11 @@
           <span><%= e.event_name %></span>
           <span class="badge-gray"><%= AircraftEvent::CATEGORIES[e.category] %></span>
         </div>
-        <div class="text-xs text-slate-500"><%= e.user&.display_name || "System" %> · <%= time_ago_in_words(e.created_at) %> ago</div>
+        <div class="text-xs text-slate-500"><%= t(".ago_html", who: (e.user&.display_name || t(".system")), created_at: (time_ago_in_words(e.created_at))) %></div>
         <% if e.notes.present? && local_assigns[:full] %><div class="mt-1 text-xs text-slate-600"><%= e.notes %></div><% end %>
       </li>
     <% end %>
   </ul>
 <% else %>
-  <%= empty_state "No activity yet." %>
+  <%= empty_state t(".no_activity_yet") %>
 <% end %>

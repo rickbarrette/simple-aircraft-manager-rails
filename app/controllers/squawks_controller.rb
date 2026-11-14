@@ -17,8 +17,8 @@ class SquawksController < ApplicationController
   def create
     @squawk = @aircraft.squawks.new(squawk_params.merge(reported_by: current_user))
     if @squawk.save
-      log_event("squawk", "Squawk reported: #{@squawk.priority_label}", notes: @squawk.issue_reported.truncate(200))
-      redirect_to aircraft_squawks_path(@aircraft), notice: "Squawk reported."
+      log_event("squawk", t("flash.squawks.squawk_reported_2", priority_label: @squawk.priority_label), notes: @squawk.issue_reported.truncate(200))
+      redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.squawk_reported")
     else
       render :new, status: :unprocessable_entity
     end
@@ -30,8 +30,8 @@ class SquawksController < ApplicationController
     @squawk.assign_attributes(squawk_params.except(:attachments))
     change_attachments
     if @squawk.save
-      log_event("squawk", "Squawk updated")
-      redirect_to aircraft_squawks_path(@aircraft), notice: "Squawk updated."
+      log_event("squawk", t("flash.squawks.squawk_updated_2"))
+      redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.squawk_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -42,7 +42,7 @@ class SquawksController < ApplicationController
   def resolution
     @entry = @aircraft.logbook_entries.new(date: Date.current, entry_type: "MAINTENANCE", log_type: "AC",
                                            aircraft_hours_at_entry: @aircraft.current_hours,
-                                           text: "Corrected: #{@squawk.issue_reported}", component: @squawk.component,
+                                           text: t("flash.squawks.corrected_text", issue: @squawk.issue_reported), component: @squawk.component,
                                            component_hours_at_entry: @squawk.component&.hours_in_service,
                                            component_since_overhaul_at_entry: @squawk.component&.hours_since_overhaul)
     @entry.log_type = "ENG" if @squawk.component&.engine?
@@ -56,13 +56,13 @@ class SquawksController < ApplicationController
         @entry = @aircraft.logbook_entries.new(resolution_entry_params.merge(entry_type: "MAINTENANCE"))
         @entry.assign_parts(params.fetch(:logbook_entry, {}).permit(parts: {})[:parts]&.to_h || {}, @aircraft)
         return render(:resolution, status: :unprocessable_entity) unless @entry.save
-        log_event("logbook", "Logbook entry added: #{@entry.date}")
+        log_event("logbook", t("flash.squawks.logbook_entry_added", date: @entry.date))
         @entry
       when "existing" then @aircraft.logbook_entries.find_by(id: params[:logbook_entry_id])
       end
     @squawk.resolve!(notes: params[:resolution_notes], logbook_entry: entry)
-    log_event("squawk", "Squawk resolved", notes: @squawk.issue_reported.truncate(200))
-    redirect_to aircraft_squawks_path(@aircraft), notice: "Squawk resolved#{' and recorded in the logbook' if entry}."
+    log_event("squawk", t("flash.squawks.squawk_resolved_2"), notes: @squawk.issue_reported.truncate(200))
+    redirect_to aircraft_squawks_path(@aircraft), notice: t(entry ? "flash.squawks.resolved_logged" : "flash.squawks.squawk_resolved")
   end
 
   def deferral; end
@@ -70,8 +70,8 @@ class SquawksController < ApplicationController
   def defer
     if @squawk.defer(checks: params[:checks], name: params[:deferred_by_name], role: params[:deferred_by_role],
                      action: params[:deferral_action], notes: params[:deferral_notes])
-      log_event("squawk", "Inoperative item deferred (91.213(d))", notes: @squawk.issue_reported.truncate(200))
-      redirect_to aircraft_squawks_path(@aircraft), notice: "Deferred. Keep the placard in place until it's fixed."
+      log_event("squawk", t("flash.squawks.inoperative_item_deferred_91"), notes: @squawk.issue_reported.truncate(200))
+      redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.deferred_keep_the_placard")
     else
       render :deferral, status: :unprocessable_entity
     end
@@ -79,20 +79,20 @@ class SquawksController < ApplicationController
 
   def undefer
     @squawk.undefer!
-    log_event("squawk", "Deferral removed", notes: @squawk.issue_reported.truncate(200))
-    redirect_to aircraft_squawks_path(@aircraft), notice: "Deferral removed."
+    log_event("squawk", t("flash.squawks.deferral_removed_2"), notes: @squawk.issue_reported.truncate(200))
+    redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.deferral_removed")
   end
 
   def reopen
     @squawk.update!(resolved: false, resolved_at: nil)
-    log_event("squawk", "Squawk reopened")
-    redirect_to aircraft_squawks_path(@aircraft), notice: "Squawk reopened."
+    log_event("squawk", t("flash.squawks.squawk_reopened_2"))
+    redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.squawk_reopened")
   end
 
   def destroy
     @squawk.destroy!
-    log_event("squawk", "Squawk deleted")
-    redirect_to aircraft_squawks_path(@aircraft), notice: "Squawk deleted."
+    log_event("squawk", t("flash.squawks.squawk_deleted_2"))
+    redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.squawk_deleted")
   end
 
   private

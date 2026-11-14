@@ -43,9 +43,9 @@ class TrackParser
       when "gpx" then parse_gpx
       when "kml" then parse_kml
       when "csv" then parse_csv
-      else raise Error, "Unsupported track format"
+      else raise Error, I18n.t("services.track.unsupported_track_format")
       end
-    raise Error, "Track has fewer than 2 points" if coords.size < 2
+    raise Error, I18n.t("services.track.track_has_fewer_than_2") if coords.size < 2
     times = nil unless times && times.size == coords.size
     coords, times = downsample(coords, times)
     Track.new(coordinates: coords, times: times, source_format: format, source_name: @filename)
@@ -117,7 +117,7 @@ class TrackParser
     headers = rows.headers.compact
     find = ->(names) { headers.find { |h| names.include?(h.to_s.strip.downcase.gsub(/[^a-z_]/, "")) } }
     lat_h, lon_h, alt_h, time_h = find.(LAT_HEADERS), find.(LON_HEADERS), find.(ALT_HEADERS), find.(TIME_HEADERS)
-    raise Error, "CSV track needs latitude and longitude columns" unless lat_h && lon_h
+    raise Error, I18n.t("services.track.csv_track_needs_latitude_and") unless lat_h && lon_h
 
     coords = []
     times = []
@@ -131,7 +131,7 @@ class TrackParser
     end
     [ coords, times.all? ? times : nil ]
   rescue CSV::MalformedCSVError => e
-    raise Error, "Couldn't read CSV track (#{e.message})"
+    raise Error, I18n.t("services.track.couldn_t_read_csv_track", message: e.message)
   end
 
   def coordinate(lon, lat, alt)

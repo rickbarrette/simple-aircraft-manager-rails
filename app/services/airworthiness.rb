@@ -18,9 +18,12 @@ class Airworthiness
   INFO = "INFO" # listed for awareness; doesn't change the status (a deferred inoperative item)
   ORANGE = "ORANGE"
   GREEN = "GREEN"
-  DISCLAIMER = "Based on the records in this app. Before each flight the pilot in command decides whether the aircraft is airworthy (14 CFR 91.7)."
+  def self.disclaimer = I18n.t("services.airworthiness.disclaimer")
+  def self.t(key, **opts) = I18n.t(key, scope: "services.airworthiness", **opts)
 
-  Issue = Struct.new(:category, :severity, :title, :description, :item, :limitation, keyword_init: true)
+  Issue = Struct.new(:category, :severity, :title, :description, :item, :limitation, keyword_init: true) do
+    def category_label = Airworthiness.t(category, scope: "services.airworthiness.categories")
+  end
 
   Status = Struct.new(:status, :issues, keyword_init: true) do
     def red? = status == RED
@@ -32,10 +35,10 @@ class Airworthiness
 
     def label
       case status
-      when RED then "Grounded"
+      when RED then Airworthiness.t(:grounded)
       when LIMITED then limitations.join(" · ")
-      when ORANGE then "Due soon"
-      else "Current"
+      when ORANGE then Airworthiness.t(:due_soon)
+      else Airworthiness.t(:current)
       end
     end
   end
@@ -65,6 +68,8 @@ class Airworthiness
 
   private
 
+  def t(key, **opts) = self.class.t(key, **opts)
+
   def add(category, severity, title, description, item, limitation: nil)
     @issues << Issue.new(category:, severity:, title:, description:, item:, limitation:)
   end
@@ -76,21 +81,21 @@ class Airworthiness
       label = ad.bulletin_label
       case res.rank
       when Compliance::OVERDUE
-        desc = compliance ? "#{ad.short_description}. Compliance overdue." : "#{ad.short_description}. No compliance record found."
-        add("AD", RED, "#{label} #{ad.name} - Overdue", desc, ad)
+        desc = t(compliance ? :ad_overdue : :ad_no_record, description: ad.short_description)
+        add("AD", RED, t(:ad_overdue_title, label: label, name: ad.name), desc, ad)
       when Compliance::DUE_SOON
-        add("AD", ORANGE, "#{label} #{ad.name} - Due Soon", "#{ad.short_description}. Compliance due soon.", ad)
+        add("AD", ORANGE, t(:ad_due_soon_title, label: label, name: ad.name), t(:ad_due_soon, description: ad.short_description), ad)
       end
     end
   end
 
   def check_grounding_squawks
     @aircraft.squawks.active.where(priority: 0, deferred_at: nil).find_each do |squawk|
-      add("SQUAWK", RED, "Grounding Squawk", squawk.issue_reported.to_s.truncate(100).presence || "No description", squawk)
+      add("SQUAWK", RED, t(:grounding_squawk), squawk.issue_reported.to_s.truncate(100).presence || t(:no_description), squawk)
     end
     @aircraft.squawks.deferred.find_each do |squawk|
-      add("DEFERRED", INFO, "Inoperative: #{squawk.issue_reported.to_s.truncate(80)}",
-          "Deferred under 91.213(d) on #{squawk.deferred_at.to_date} by #{squawk.deferred_by_name}. Fix at the next inspection.", squawk)
+      add("DEFERRED", INFO, t(:inoperative, issue: squawk.issue_reported.to_s.truncate(80)),
+          t(:deferred, date: squawk.deferred_at.to_date, name: squawk.deferred_by_name), squawk)
     end
   end
 
@@ -100,14 +105,14 @@ class Airworthiness
       res = Compliance.inspection_status(type, records, @hours, @today)
       case res.rank
       when Compliance::OVERDUE
-        title = "#{type.name} - #{records.any? ? 'Overdue' : 'Never Completed'}"
+        title = t(records.any? ? :inspection_overdue_title : :inspection_never_title, name: type.name)
         if (limitation = type.limitation)
-          add("INSPECTION", LIMITED, title, "#{limitation} until it's done.", type, limitation: limitation)
+          add("INSPECTION", LIMITED, title, t(:limited_until_done, limitation: limitation), type, limitation: limitation)
         else
           add("INSPECTION", RED, title, overdue_description(type, records, res), type)
         end
       when Compliance::DUE_SOON
-        add("INSPECTION", ORANGE, "#{type.name} - Due Soon", "Inspection due soon.", type)
+        add("INSPECTION", ORANGE, t(:inspection_due_soon_title, name: type.name), t(:inspection_due_soon), type)
       end
     end
   end
@@ -115,13 +120,12 @@ class Airworthiness
   # The 100-hour may be overflown by up to its tolerance only to reach a
   # place where it can be done (91.409(b)); say so while that's still open.
   def overdue_description(type, records, res)
-    return "Required inspection has no completion record." if records.empty?
+    return t(:no_completion_record) if records.empty?
     over = res.next_due_hours && @hours - res.next_due_hours
     if over && type.hours_tolerance.positive? && over <= type.hours_tolerance
-      "Inspection overdue. It may be flown up to #{type.hours_tolerance.to_s.sub(/\.0\z/, '')} hrs past due only to reach " \
-        "a place where it can be done; that time counts toward the next interval (91.409(b))."
+      t(:inspection_overdue_tolerance, hours: type.hours_tolerance.to_s.sub(/\.0\z/, ""))
     else
-      "Inspection overdue."
+      t(:inspection_overdue)
     end
   end
 
@@ -129,10 +133,10 @@ class Airworthiness
     @aircraft.documents.expiring.find_each do |doc|
       grounds = Document::GROUNDING_EXPIRY_TYPES.include?(doc.doc_type)
       if doc.expired?(@today)
-        add("DOCUMENT", grounds ? RED : ORANGE, "#{doc.name} - Expired",
-            "#{doc.type_label} expired #{doc.expires_on}.#{' The aircraft may not be flown without a current registration (91.203).' if grounds}", doc)
+        add("DOCUMENT", grounds ? RED : ORANGE, t(:expired_title, name: doc.name),
+            t(grounds ? :document_expired_grounds : :document_expired, type: doc.type_label, date: doc.expires_on), doc)
       elsif @today + doc.expiry_warning_days >= doc.expires_on
-        add("DOCUMENT", ORANGE, "#{doc.name} - Expires Soon", "#{doc.type_label} expires #{doc.expires_on}.", doc)
+        add("DOCUMENT", ORANGE, t(:expires_soon_title, name: doc.name), t(:document_expires, type: doc.type_label, date: doc.expires_on), doc)
       end
     end
   end
@@ -142,26 +146,27 @@ class Airworthiness
     scope.includes(:component_type).find_each do |c|
       overdue = false
       approaching = false
+      expiring = false
       desc = ""
 
       if c.replacement_critical? && c.replacement_hours
         used = c.replacement_hours_used
         if used >= c.replacement_hours
           overdue = true
-          desc = "Replace every #{c.replacement_hours} hrs. Current: #{used} hrs#{' since installed' if c.replacement_from_install?}."
+          desc = t(c.replacement_from_install? ? :replace_every_hours_installed : :replace_every_hours, hours: c.replacement_hours, used: used)
         elsif used + HOURS_WARNING >= c.replacement_hours
           approaching = true
-          desc = "Replace in #{c.replacement_hours - used} hrs."
+          desc = t(:replace_in_hours, hours: c.replacement_hours - used)
         end
       end
 
       if c.replacement_critical? && (due = c.next_replacement_date)
         if @today >= due
           overdue = true
-          desc = "Replace every #{c.replacement_interval_label}. #{c.replacement_from_install? ? 'Installed' : 'Last serviced'} #{c.replacement_counted_from}."
+          desc = t(c.replacement_from_install? ? :replace_every_installed : :replace_every_serviced, interval: c.replacement_interval_label, date: c.replacement_counted_from)
         elsif @today + DAYS_WARNING >= due
           approaching = true
-          desc = "Replace in #{(due - @today).to_i} days."
+          desc = t(:replace_in_days, count: (due - @today).to_i)
         end
       end
 
@@ -169,19 +174,20 @@ class Airworthiness
       if c.expires_on
         if c.expired?(@today)
           expired = true
-          desc = "Expired #{c.expires_on}."
+          desc = t(:component_expired, date: c.expires_on)
         elsif @today + DAYS_WARNING >= c.expires_on
           approaching = true
-          desc = "Expires #{c.expires_on}."
+          expiring = true
+          desc = t(:component_expires, date: c.expires_on)
         end
       end
 
       if overdue || (expired && c.replacement_critical?)
-        add("COMPONENT", RED, "#{c} - #{expired ? 'Expired' : 'Replacement Overdue'}", desc, c)
+        add("COMPONENT", RED, t(expired ? :expired_title : :replacement_overdue_title, name: c), desc, c)
       elsif expired
-        add("COMPONENT", ORANGE, "#{c} - Expired", desc, c)
+        add("COMPONENT", ORANGE, t(:expired_title, name: c), desc, c)
       elsif approaching
-        add("COMPONENT", ORANGE, "#{c} - #{c.expires_on && desc.start_with?('Expires') ? 'Expires Soon' : 'Replacement Due Soon'}", desc, c)
+        add("COMPONENT", ORANGE, t(expiring ? :expires_soon_title : :replacement_due_soon_title, name: c), desc, c)
       end
     end
   end

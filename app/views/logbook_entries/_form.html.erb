@@ -3,41 +3,41 @@
   <% if entry.supersedes %>
     <%= f.hidden_field :supersedes_id %>
     <p class="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
-      Correcting the signed <%= link_to "#{fmt_date(entry.supersedes.date)} entry", aircraft_logbook_entry_path(aircraft, entry.supersedes), class: "link" %>.
-      Change what's wrong, save, then sign it: the original's signature is then marked superseded (it's kept, not deleted).
+      <%= t(".correcting_the_signed_html", link: (link_to t(".entry", date: fmt_date(entry.supersedes.date)), aircraft_logbook_entry_path(aircraft, entry.supersedes), class: "link")) %>
+      <%= t(".change_what_s_wrong_save") %>
     </p>
   <% end %>
   <% templates = entry.new_record? ? LogbookTemplate.ordered.to_a : [] %>
   <% if templates.any? %>
     <div>
-      <%= label_tag :template, "Template", class: "label" %>
+      <%= label_tag :template, t(".template"), class: "label" %>
       <select id="template" class="input" data-entry-template-target="template" data-action="entry-template#apply">
-        <option value="">— Write it yourself —</option>
+        <option value=""><%= t(".write_it_yourself") %></option>
         <% templates.each do |t| %>
           <option value="<%= t.id %>" data-text="<%= t.text %>" data-entry-type="<%= t.entry_type %>" data-log-type="<%= t.log_type %>"
                   data-certificate="<%= t.certificate_type %>"><%= t.label %></option>
         <% end %>
       </select>
-      <p class="hint">Fill in the blanks (__). The built-in ones are for a pilot doing preventive maintenance on an aircraft they own or operate (14 CFR 43.3(g)); their wording is paraphrased from Part 43 Appendix A(c), which sets each item's limits.<% if current_user.admin? %> <%= link_to "Edit templates", admin_logbook_templates_path, class: "link" %><% end %></p>
+      <p class="hint"><%= t(".fill_in_the_blanks_the") %><% if current_user.admin? %> <%= link_to t(".edit_templates"), admin_logbook_templates_path, class: "link" %><% end %></p>
     </div>
   <% end %>
   <div class="grid gap-4 sm:grid-cols-4">
     <%= f.field :date, as: :date %>
-    <%= f.field :log_type, as: :select, label: "Logbook", collection: LogbookEntry::LOG_TYPES.invert,
+    <%= f.field :log_type, as: :select, label: t(".logbook"), collection: LogbookEntry::LOG_TYPES.invert,
           data: { component_times_target: "logType", entry_template_target: "logType", action: "component-times#logTypeChanged" } %>
-    <%= f.field :entry_type, as: :select, label: "Entry type", collection: LogbookEntry::ENTRY_TYPES.invert, data: { entry_template_target: "entryType" } %>
-    <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: "Airframe total time",
+    <%= f.field :entry_type, as: :select, label: t(".entry_type"), collection: LogbookEntry::ENTRY_TYPES.invert, data: { entry_template_target: "entryType" } %>
+    <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: t(".airframe_total_time"),
           data: { component_times_target: "airframe", action: "input->component-times#airframeChanged" } %>
   </div>
   <%= render "logbook_entries/component_fields", f: f, aircraft: aircraft %>
-  <%= f.field :text, as: :textarea, label: "Entry text", rows: 8, data: { entry_template_target: "text" } %>
-  <p class="hint !mt-1">A maintenance entry needs a description of the work, the date, and the name, signature, certificate number and kind of certificate of whoever approved the return to service (14 CFR 43.9). An inspection entry also needs the type and extent of the inspection, the aircraft's time in service, and the result (43.11).</p>
+  <%= f.field :text, as: :textarea, label: t(".entry_text"), rows: 8, data: { entry_template_target: "text" } %>
+  <p class="hint !mt-1"><%= t(".a_maintenance_entry_needs_a") %></p>
   <%= render "shared/sign_as" %>
   <% if entry.new_record? && (types = aircraft.applicable_inspection_types.order(:name)).any? %>
     <%# Recurring items this work completes (e.g. an oil change): recorded on the Inspections tab, dated to this entry. %>
     <% ticked = Array(params.dig(:logbook_entry, :inspection_type_ids)).map(&:to_s) %>
     <fieldset>
-      <legend class="label">Inspections completed</legend>
+      <legend class="label"><%= t(".inspections_completed") %></legend>
       <div class="grid gap-x-4 gap-y-1 sm:grid-cols-3">
         <% types.each do |t| %>
           <label class="flex items-center gap-2 text-sm">
@@ -47,25 +47,25 @@
           </label>
         <% end %>
       </div>
-      <p class="hint">Ticked ones are recorded as done on the Inspections tab, at this entry's date and airframe time, linked to this entry.</p>
+      <p class="hint"><%= t(".ticked_ones_are_recorded_as") %></p>
     </fieldset>
   <% end %>
   <div class="grid gap-4 sm:grid-cols-3">
-    <%= f.field :signoff_person, label: "Signed off by", placeholder: "Name", data: { signer_target: "name" } %>
-    <%= f.field :signoff_certificate_type, as: :select, label: "Kind of certificate", include_blank: "—",
+    <%= f.field :signoff_person, label: t(".signed_off_by"), placeholder: t(".name"), data: { signer_target: "name" } %>
+    <%= f.field :signoff_certificate_type, as: :select, label: t(".kind_of_certificate"), include_blank: "—",
           collection: LogbookEntry::CERTIFICATE_TYPES.invert, data: { entry_template_target: "certificate", signer_target: "kind" } %>
-    <%= f.field :signoff_certificate_number, label: "Certificate number", placeholder: "e.g. 1234567", data: { signer_target: "number" } %>
+    <%= f.field :signoff_certificate_number, label: t(".certificate_number"), placeholder: "e.g. 1234567", data: { signer_target: "number" } %>
   </div>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :inspection_result, as: :select, label: "Inspection result", include_blank: "— Not an inspection —",
-          collection: LogbookEntry::INSPECTION_RESULTS.invert, hint: "For inspection entries (43.11)." %>
-    <%= f.field :signoff_location, label: "Location / shop" %>
-    <%= f.field :document_id, as: :select, label: "Scanned page document", collection: document_options(aircraft) %>
-    <%= f.field :page_number, as: :number, label: "Page # in document" %>
+    <%= f.field :inspection_result, as: :select, label: t(".inspection_result"), include_blank: t(".not_an_inspection"),
+          collection: LogbookEntry::INSPECTION_RESULTS.invert, hint: t(".for_inspection_entries_43_11") %>
+    <%= f.field :signoff_location, label: t(".location_shop") %>
+    <%= f.field :document_id, as: :select, label: t(".scanned_page_document"), collection: document_options(aircraft) %>
+    <%= f.field :page_number, as: :number, label: t(".page_in_document") %>
   </div>
   <% if entry.persisted? && !entry.verified_was %>
-    <%= f.field :verified, as: :checkbox, label: "I've checked this against the scan", hint: "Transcribed by Claude; it stays marked unverified until someone checks it." %>
+    <%= f.field :verified, as: :checkbox, label: t(".i_ve_checked_this_against"), hint: t(".transcribed_by_claude_it_stays") %>
   <% end %>
-  <div class="flex gap-2"><%= f.submit "Save Entry" %><%= link_to "Cancel", aircraft_logbook_entries_path(aircraft), class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= f.submit t(".save_entry") %><%= link_to t(".cancel"), aircraft_logbook_entries_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
-<% if entry.persisted? %><div class="mt-4"><%= delete_button "Delete entry", aircraft_logbook_entry_path(aircraft, entry) %></div><% end %>
+<% if entry.persisted? %><div class="mt-4"><%= delete_button t(".delete_entry"), aircraft_logbook_entry_path(aircraft, entry) %></div><% end %>

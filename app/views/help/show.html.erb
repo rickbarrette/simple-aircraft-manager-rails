@@ -1,8 +1,8 @@
-<% content_for :title, "Help: #{@page.title}" %>
+<% content_for :title, t(".help", title: @page.title) %>
 <div class="grid gap-5 lg:grid-cols-[14rem_1fr]">
-  <nav aria-label="Help pages" class="lg:order-none">
+  <nav aria-label="<%= t(".help_pages") %>" class="lg:order-none">
     <details class="card lg:hidden">
-      <summary class="card-header cursor-pointer"><span class="card-title">Help: <%= @page.title %></span></summary>
+      <summary class="card-header cursor-pointer"><span class="card-title"><%= t(".help_html", title: @page.title) %></span></summary>
       <ul class="p-2 text-sm"><% @pages.each do |p| %><li><%= link_to p.title, help_page_url_for(p.slug), class: [ "block rounded px-3 py-2 hover:bg-slate-100", ("bg-slate-100 font-semibold text-sky-700" if p == @page) ] %></li><% end %></ul>
     </details>
     <ul class="sticky top-4 hidden space-y-0.5 text-sm lg:block">

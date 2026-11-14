@@ -1,56 +1,56 @@
-<% content_for :title, "AirTrail sync" %>
-<h1 class="mb-1 text-2xl font-bold">AirTrail sync</h1>
-<p class="mb-5 text-sm text-slate-600">Push the flights you log to your <a href="https://github.com/johanohly/AirTrail" class="link" target="_blank" rel="noopener noreferrer">AirTrail</a> flight map, with GPS tracks.</p>
+<% content_for :title, t(".airtrail_sync") %>
+<h1 class="mb-1 text-2xl font-bold"><%= t(".airtrail_sync") %></h1>
+<p class="mb-5 text-sm text-slate-600"><%= t(".push_the_flights_you_log_html") %></p>
 
 <div class="grid gap-5 lg:grid-cols-3">
   <div class="space-y-5 lg:col-span-2">
     <%= form_with model: @connection, url: air_trail_connection_path, method: (@connection.persisted? ? :patch : :post), class: "card card-body space-y-4" do |f| %>
-      <h2 class="card-title">Connection</h2>
+      <h2 class="card-title"><%= t(".connection") %></h2>
       <%= f.errors_summary %>
-      <%= f.field :base_url, label: "AirTrail URL", placeholder: "https://airtrail.example.com", required: true %>
-      <%= f.field :api_key, as: :password, label: "API key", autocomplete: "off",
-            placeholder: (@connection.persisted? ? "•••••••• (leave blank to keep)" : ""),
-            hint: "Create one in AirTrail under Settings → Security → API keys." %>
-      <%= f.field :enabled, as: :checkbox, label: "Sync automatically", hint: "Flights you log, or delete, are pushed to AirTrail in the background." %>
+      <%= f.field :base_url, label: t(".airtrail_url"), placeholder: "https://airtrail.example.com", required: true %>
+      <%= f.field :api_key, as: :password, label: t(".api_key"), autocomplete: "off",
+            placeholder: (@connection.persisted? ? t(".leave_blank_to_keep") : ""),
+            hint: t(".create_one_in_airtrail_under") %>
+      <%= f.field :enabled, as: :checkbox, label: t(".sync_automatically"), hint: t(".flights_you_log_or_delete") %>
       <div class="flex flex-wrap gap-2">
-        <%= f.submit(@connection.persisted? ? "Save & test" : "Connect") %>
+        <%= f.submit(@connection.persisted? ? t(".save_test") : t(".connect")) %>
       </div>
     <% end %>
 
     <% if @connection.persisted? %>
       <section class="card">
         <div class="card-header">
-          <h2 class="card-title">Status</h2>
-          <% if @connection.ok? %><span class="badge-green">Connected as <%= @connection.remote_username %></span><% else %><span class="badge-red">Needs attention</span><% end %>
+          <h2 class="card-title"><%= t(".status") %></h2>
+          <% if @connection.ok? %><span class="badge-green"><%= t(".connected_as_html", remote_username: @connection.remote_username) %></span><% else %><span class="badge-red"><%= t(".needs_attention") %></span><% end %>
         </div>
         <div class="card-body space-y-3 text-sm">
           <% if @connection.last_error.present? %><p class="rounded-md bg-red-50 px-3 py-2 text-red-800 ring-1 ring-red-200"><%= @connection.last_error %></p><% end %>
           <div class="grid grid-cols-3 gap-3 text-center">
-            <div><div class="text-2xl font-semibold"><%= @counts["synced"] %></div><div class="text-xs text-slate-500">synced</div></div>
-            <div><div class="text-2xl font-semibold"><%= @counts["pending"] %></div><div class="text-xs text-slate-500">pending</div></div>
-            <div><div class="text-2xl font-semibold <%= 'text-red-700' if @counts['error'].positive? %>"><%= @counts["error"] %></div><div class="text-xs text-slate-500">failed</div></div>
+            <div><div class="text-2xl font-semibold"><%= @counts["synced"] %></div><div class="text-xs text-slate-500"><%= t(".synced") %></div></div>
+            <div><div class="text-2xl font-semibold"><%= @counts["pending"] %></div><div class="text-xs text-slate-500"><%= t(".pending") %></div></div>
+            <div><div class="text-2xl font-semibold <%= 'text-red-700' if @counts['error'].positive? %>"><%= @counts["error"] %></div><div class="text-xs text-slate-500"><%= t(".failed") %></div></div>
           </div>
-          <p class="text-xs text-slate-500">You've logged <%= pluralize(@flight_count, "flight") %>.
-            <%= @connection.backfilled_at ? "Last full sync #{time_ago_in_words(@connection.backfilled_at)} ago." : "Run a full sync to send your existing flights." %></p>
+          <p class="text-xs text-slate-500"><%= t(".you_ve_logged_html", flight: (t("counts.flight", count: @flight_count))) %>
+            <%= @connection.backfilled_at ? t(".last_full_sync_ago", backfilled_at: (time_ago_in_words(@connection.backfilled_at))) : t(".run_a_full_sync_to") %></p>
           <div class="flex flex-wrap gap-2">
-            <%= button_to "Sync all my flights now", sync_air_trail_connection_path, class: "btn-primary" %>
-            <%= button_to "Test connection", test_air_trail_connection_path, class: "btn-secondary" %>
+            <%= button_to t(".sync_all_my_flights_now"), sync_air_trail_connection_path, class: "btn-primary" %>
+            <%= button_to t(".test_connection"), test_air_trail_connection_path, class: "btn-secondary" %>
           </div>
-          <p class="hint">A full sync first links flights that are already in AirTrail (e.g. from a file import), so nothing is duplicated, then sends the rest.</p>
+          <p class="hint"><%= t(".a_full_sync_first_links") %></p>
         </div>
       </section>
 
       <% if @unresolved.any? %>
         <section class="card">
-          <div class="card-header"><h2 class="card-title">Airports AirTrail doesn't know</h2></div>
+          <div class="card-header"><h2 class="card-title"><%= t(".airports_airtrail_doesn_t_know") %></h2></div>
           <div class="card-body space-y-2">
-            <p class="text-xs text-slate-600">Flights using these codes can't sync yet. Enter the code AirTrail uses for the same airport (e.g. its ICAO or GPS code).</p>
+            <p class="text-xs text-slate-600"><%= t(".flights_using_these_codes_can") %></p>
             <% @unresolved.each do |code| %>
               <%= form_with url: map_airport_air_trail_connection_path, class: "flex items-center gap-2" do |f| %>
                 <%= hidden_field_tag :code, code %>
                 <span class="w-16 font-mono text-sm"><%= code %></span><span class="text-slate-400">→</span>
-                <%= text_field_tag :airtrail_code, nil, class: "input w-32", placeholder: "AirTrail code", required: true %>
-                <%= f.submit "Map", class: "btn-secondary btn-sm" %>
+                <%= text_field_tag :airtrail_code, nil, class: "input w-32", placeholder: t(".airtrail_code"), required: true %>
+                <%= f.submit t(".map"), class: "btn-secondary btn-sm" %>
               <% end %>
             <% end %>
           </div>
@@ -59,7 +59,7 @@
 
       <% if @failed.any? %>
         <section class="card">
-          <div class="card-header"><h2 class="card-title">Flights that didn't sync</h2></div>
+          <div class="card-header"><h2 class="card-title"><%= t(".flights_that_didn_t_sync") %></h2></div>
           <table class="table"><tbody>
             <% @failed.each do |s| f = s.flight_log %>
               <tr><td class="whitespace-nowrap"><%= link_to fmt_date(f.date), aircraft_flight_log_path(f.aircraft, f), class: "link" %></td>
@@ -69,15 +69,15 @@
         </section>
       <% end %>
 
-      <div><%= delete_button "Disconnect AirTrail", air_trail_connection_path, confirm: "Stop syncing to AirTrail? Flights already there stay." %></div>
+      <div><%= delete_button t(".disconnect_airtrail"), air_trail_connection_path, confirm: t(".stop_syncing_to_airtrail_flights") %></div>
     <% end %>
   </div>
 
   <section class="card card-body space-y-2 text-sm text-slate-700">
-    <h3 class="font-semibold">Setting up the API key</h3>
-    <p class="text-xs">In AirTrail, open <strong>Settings → Security</strong> and create an API key with these scopes:</p>
+    <h3 class="font-semibold"><%= t(".setting_up_the_api_key") %></h3>
+    <p class="text-xs"><%= t(".in_airtrail_open_settings_security_html") %></p>
     <ul class="list-disc pl-5 font-mono text-xs"><% AirTrailConnection::REQUIRED_SCOPES.each do |s| %><li><%= s %></li><% end %></ul>
-    <p class="text-xs">The key is stored encrypted. Flights go to the AirTrail account of the pilot who logged them, with you in the pilot seat, the tail number as registration, and the GPS track if one is attached.</p>
-    <p class="text-xs">Each aircraft's <strong>ICAO type</strong> (Edit aircraft) sets the aircraft type in AirTrail.</p>
+    <p class="text-xs"><%= t(".the_key_is_stored_encrypted") %></p>
+    <p class="text-xs"><%= t(".each_aircraft_s_icao_type_html") %></p>
   </section>
 </div>

@@ -2,13 +2,7 @@ class Document < ApplicationRecord
   include Versioned
   include UploadValidation
 
-  TYPES = {
-    "LOG" => "Logbook", "ALTER" => "Alteration Record", "REPORT" => "Report",
-    "ESTIMATE" => "Estimate", "DISC" => "Discrepancy List", "INVOICE" => "Receipt / Invoice",
-    "AIRCRAFT" => "Aircraft Record", "REGISTRATION" => "Registration Certificate",
-    "AIRWORTHINESS_CERT" => "Airworthiness Certificate", "INSURANCE" => "Insurance Policy",
-    "RADIO" => "Radio Station License", "OTHER" => "Other"
-  }.freeze
+  TYPES = LabelSet.new("document.types", %w[LOG ALTER REPORT ESTIMATE DISC INVOICE AIRCRAFT REGISTRATION AIRWORTHINESS_CERT INSURANCE RADIO OTHER])
   # An expired registration means the aircraft may not be flown (14 CFR
   # 91.203(a)(2)); renewal takes a while, so warn earlier.
   GROUNDING_EXPIRY_TYPES = %w[REGISTRATION].freeze

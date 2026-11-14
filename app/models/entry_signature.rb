@@ -7,10 +7,9 @@
 # by this server, so the signature record can't be altered unnoticed either.
 class EntrySignature < ApplicationRecord
   include Versioned
-  AUTH_METHODS = { "password" => "password re-entered", "password_totp" => "password and authenticator code re-entered",
-                   "sso" => "single sign-on, signed in again" }.freeze
+  AUTH_METHODS = LabelSet.new("entry_signature.auth_methods", %w[password password_totp sso])
   # "Certified by" conveys the intent to sign (2.2.2).
-  LABEL = "Certified by".freeze
+  def self.label = I18n.t("labels.entry_signature.certified_by")
 
   belongs_to :logbook_entry
   belongs_to :user, optional: true
@@ -43,6 +42,6 @@ class EntrySignature < ApplicationRecord
   end
 
   def status_label
-    { valid: "Valid", superseded: "Superseded by a correction", altered: "Altered since signing" }[status]
+    I18n.t(status, scope: "models.entry_signature.statuses")
   end
 end

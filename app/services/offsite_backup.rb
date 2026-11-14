@@ -18,14 +18,14 @@ class OffsiteBackup
   end
 
   def run!(database_path)
-    raise "Google Drive isn't connected" unless @connection.connected?
+    raise I18n.t("services.offsite_backup.not_connected") unless @connection.connected?
     drive = @connection.client
     @connection.ensure_folders!(drive)
     bytes = upload_database(drive, database_path)
     pruned = prune(drive)
     uploaded, failed = upload_files(drive)
-    message = "Database copy uploaded (#{ActiveSupport::NumberHelper.number_to_human_size(bytes)}); #{uploaded.size} new #{'file'.pluralize(uploaded.size)} copied"
-    message += "; #{failed.size} couldn't be copied: #{failed.first(3).join('; ')}" if failed.any?
+    message = I18n.t("services.offsite_backup.uploaded", size: ActiveSupport::NumberHelper.number_to_human_size(bytes), count: uploaded.size)
+    message += I18n.t("services.offsite_backup.failed", count: failed.size, files: failed.first(3).join("; ")) if failed.any?
     OffsiteRun.create!(kind: "backup", ok: failed.empty?, bytes: bytes + uploaded.sum, files_uploaded: uploaded.size, message: message,
                        details: { "account" => @connection.account_email, "pruned" => pruned, "failed" => failed.first(20) })
   rescue StandardError => e
@@ -36,13 +36,13 @@ class OffsiteBackup
   # Downloads the newest database copy from Drive, opens it and checks it,
   # and downloads a few random files and checks them against their checksums.
   def restore_test!
-    raise "Google Drive isn't connected" unless @connection.connected?
+    raise I18n.t("services.offsite_backup.not_connected") unless @connection.connected?
     drive = @connection.client
     latest = drive.list(@connection.database_folder_id).select { _1["name"].end_with?(".sqlite3.gz") }.max_by { _1["name"] } or raise "no database copy in Google Drive yet"
     db_result = Dir.mktmpdir("sam-restore") { |dir| check_database(drive, latest, dir) }
     samples = OffsiteFile.includes(:blob).order(Arel.sql("RANDOM()")).limit(SAMPLE_FILES).to_a
     bad = samples.reject { check_file(drive, _1) }
-    message = "#{latest['name']}: #{db_result}. #{samples.size - bad.size} of #{samples.size} sampled files match their checksums"
+    message = I18n.t("services.offsite_backup.restore_result", name: latest["name"], result: db_result, good: samples.size - bad.size, total: samples.size)
     OffsiteRun.create!(kind: "restore_test", ok: bad.empty?, message: message,
                        details: { "database" => latest["name"], "files_checked" => samples.map { _1.blob.filename.to_s }, "mismatched" => bad.map { _1.blob.filename.to_s } })
   rescue StandardError => e
@@ -98,7 +98,7 @@ class OffsiteBackup
     result = db.get_first_value("PRAGMA integrity_check")
     raise "integrity check of the downloaded copy failed: #{result}" unless result == "ok"
     entries, signatures = %w[logbook_entries entry_signatures].map { db.get_first_value("SELECT COUNT(*) FROM #{_1}") }
-    "opened, SQLite integrity check ok, #{entries} logbook entries and #{signatures} signatures (#{LogbookEntry.count} and #{EntrySignature.count} now)"
+    I18n.t("services.offsite_backup.restore_db", entries: entries, signatures: signatures, entries_now: LogbookEntry.count, signatures_now: EntrySignature.count)
   ensure
     db&.close
   end

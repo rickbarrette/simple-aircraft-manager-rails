@@ -11,7 +11,7 @@ class LogbookImportsController < ApplicationController
 
   def create
     files = Array(params[:pages]).compact_blank
-    return redirect_to(new_aircraft_logbook_import_path(@aircraft), alert: "Choose the scanned pages to upload.") if files.empty?
+    return redirect_to(new_aircraft_logbook_import_path(@aircraft), alert: t("flash.logbook_imports.choose_the_scanned_pages")) if files.empty?
 
     # Page order follows the file names ("page-002" before "page-010").
     files = files.sort_by { |f| f.original_filename.to_s.downcase.scan(/\d+|\D+/).map { _1.match?(/\d/) ? [ 0, _1.to_i ] : [ 1, _1 ] } }
@@ -32,7 +32,7 @@ class LogbookImportsController < ApplicationController
       import = @aircraft.logbook_imports.create!(user: current_user, document: document, log_type: params[:log_type],
                                                  transcribe: params[:transcribe] == "1" && LogbookImport.ai_available?)
     end
-    log_event("document", "Logbook pages uploaded: #{document.name} (#{files.size} #{'page'.pluralize(files.size)})")
+    log_event("document", t("flash.logbook_imports.pages_uploaded", name: document.name, count: files.size))
     LogbookTranscriptionJob.perform_later(import.id)
     redirect_to aircraft_logbook_import_path(@aircraft, import)
   end

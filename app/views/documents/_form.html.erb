@@ -2,30 +2,30 @@
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-2">
     <%= f.field :name, required: true %>
-    <%= f.field :doc_type, as: :select, label: "Type", collection: Document::TYPES.invert %>
-    <%= f.field :document_collection_id, as: :select, label: "Collection",
-          collection: [["— None —", nil]] + aircraft.document_collections.ordered.map { [_1.name, _1.id] } %>
-    <%= f.field :visibility, as: :select, label: "Share-link visibility",
-          collection: [["Inherit from collection", nil]] + DocumentCollection::VISIBILITIES.invert.to_a %>
+    <%= f.field :doc_type, as: :select, label: t(".type"), collection: Document::TYPES.invert %>
+    <%= f.field :document_collection_id, as: :select, label: t(".collection"),
+          collection: [[t(".none"), nil]] + aircraft.document_collections.ordered.map { [_1.name, _1.id] } %>
+    <%= f.field :visibility, as: :select, label: t(".share_link_visibility"),
+          collection: [[t(".inherit_from_collection"), nil]] + DocumentCollection::VISIBILITIES.invert.to_a %>
   </div>
-  <%= f.field :legacy_record, as: :checkbox, label: "Legacy record (a scan of the paper logbooks or records)",
-        hint: "Records from before the electronic records began. Keep the paper originals." %>
-  <%= f.field :expires_on, as: :date, label: "Expires on", wrapper: { class: "max-w-xs" },
-        hint: "Optional. Registration (good for 7 years, 14 CFR 47.40), insurance, radio license… You'll be reminded before it expires; an expired registration shows the aircraft grounded." %>
+  <%= f.field :legacy_record, as: :checkbox, label: t(".legacy_record_a_scan_of"),
+        hint: t(".records_from_before_the_electronic") %>
+  <%= f.field :expires_on, as: :date, label: t(".expires_on"), wrapper: { class: "max-w-xs" },
+        hint: t(".optional_registration_good_for_7") %>
   <%= f.field :description, as: :textarea, rows: 2 %>
-  <%= f.field :pages, as: :file, multiple: true, label: document.persisted? ? "Add files" : "Files",
-        hint: "Images, PDFs or text, up to #{Setting.max_upload_mb} MB each. Each file is a page in the viewer, in upload order." %>
+  <%= f.field :pages, as: :file, multiple: true, label: document.persisted? ? t(".add_files") : t(".files"),
+        hint: t(".images_pdfs_or_text_up", max_upload_mb: Setting.max_upload_mb) %>
   <% if document.persisted? && document.pages.any? %>
     <div>
-      <p class="label">Remove existing files</p>
+      <p class="label"><%= t(".remove_existing_files") %></p>
       <% document.pages.each do |p| %>
         <label class="flex items-center gap-2 text-sm"><%= check_box_tag "remove_page_ids[]", p.id, false %> <%= p.filename %></label>
       <% end %>
     </div>
   <% end %>
   <% unless document.persisted? %>
-    <p class="text-sm text-slate-500">Lots of files? <%= link_to "Bulk upload", new_bulk_aircraft_documents_path(aircraft, collection_id: document.document_collection_id), class: "link" %> makes a document from each one.</p>
+    <p class="text-sm text-slate-500"><%= t(".lots_of_files_makes_a_html", link: (link_to t(".bulk_upload"), new_bulk_aircraft_documents_path(aircraft, collection_id: document.document_collection_id), class: "link")) %></p>
   <% end %>
-  <div class="flex gap-2"><%= f.submit "Save Document" %><%= link_to "Cancel", aircraft_documents_path(aircraft), class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= f.submit t(".save_document") %><%= link_to t(".cancel"), aircraft_documents_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
-<% if document.persisted? %><div class="mt-4"><%= delete_button "Delete document", aircraft_document_path(aircraft, document) %></div><% end %>
+<% if document.persisted? %><div class="mt-4"><%= delete_button t(".delete_document"), aircraft_document_path(aircraft, document) %></div><% end %>

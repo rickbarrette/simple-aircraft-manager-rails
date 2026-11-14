@@ -23,8 +23,8 @@ class AirworthinessDirectivesController < ApplicationController
       @ad.save!
       apply_applicability(@ad, to_airframe: applies_to_airframe?, component_ids: applicable_component_ids)
     end
-    log_event("ad", "#{@ad.bulletin_label} added: #{@ad.name}")
-    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: "#{@ad.bulletin_label} added."
+    log_event("ad", t("flash.airworthiness_directives.added_2", bulletin_label: @ad.bulletin_label, name: @ad.name))
+    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: t("flash.airworthiness_directives.added", bulletin_label: @ad.bulletin_label)
   rescue ActiveRecord::RecordInvalid
     @applies_to_airframe = applies_to_airframe?
     render :new, status: :unprocessable_entity
@@ -34,8 +34,8 @@ class AirworthinessDirectivesController < ApplicationController
   def attach
     ad = AirworthinessDirective.find(params[:airworthiness_directive_id])
     ad.aircraft << @aircraft unless ad.aircraft.include?(@aircraft)
-    log_event("ad", "#{ad.bulletin_label} linked: #{ad.name}")
-    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: "#{ad.name} linked."
+    log_event("ad", t("flash.airworthiness_directives.linked_2", bulletin_label: ad.bulletin_label, name: ad.name))
+    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: t("flash.airworthiness_directives.linked", name: ad.name)
   end
 
   def edit
@@ -47,8 +47,8 @@ class AirworthinessDirectivesController < ApplicationController
       @ad.update!(ad_params)
       apply_applicability(@ad, to_airframe: applies_to_airframe?, component_ids: applicable_component_ids)
     end
-    log_event("ad", "#{@ad.bulletin_label} updated: #{@ad.name}")
-    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: "#{@ad.bulletin_label} updated."
+    log_event("ad", t("flash.airworthiness_directives.updated_2", bulletin_label: @ad.bulletin_label, name: @ad.name))
+    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: t("flash.airworthiness_directives.updated", bulletin_label: @ad.bulletin_label)
   rescue ActiveRecord::RecordInvalid
     @applies_to_airframe = applies_to_airframe?
     render :edit, status: :unprocessable_entity
@@ -57,8 +57,8 @@ class AirworthinessDirectivesController < ApplicationController
   # Removes the AD from this aircraft (the shared AD record survives if other aircraft use it).
   def destroy
     detach_from_aircraft(@ad)
-    log_event("ad", "#{@ad.bulletin_label} removed: #{@ad.name}")
-    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: "#{@ad.name} removed from #{@aircraft.tail_number}."
+    log_event("ad", t("flash.airworthiness_directives.removed", bulletin_label: @ad.bulletin_label, name: @ad.name))
+    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: t("flash.airworthiness_directives.removed_from", name: @ad.name, tail_number: @aircraft.tail_number)
   end
 
   private

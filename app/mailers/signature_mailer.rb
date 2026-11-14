@@ -3,6 +3,6 @@ class SignatureMailer < ApplicationMailer
   def signed(signature)
     @signature = signature
     @entry = signature.logbook_entry
-    mail subject: "You signed a logbook entry for #{@entry.aircraft.tail_number}", to: signature.signer_email
+    mail subject: t(".subject", tail_number: @entry.aircraft.tail_number), to: signature.signer_email
   end
 end

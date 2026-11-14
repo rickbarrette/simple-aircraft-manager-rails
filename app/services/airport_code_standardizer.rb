@@ -64,7 +64,7 @@ class AirportCodeStandardizer
         elsif airport.code != code
           renamed = !airport.code.end_with?(code) # e.g. 4MB → K5M3, not just a K prefix
           note = if airport.kind == "closed" then "Closed airport. Check it's the right one"
-          elsif renamed then "Different identifier, not just a prefix. Check it's the right field"
+          elsif renamed then I18n.t("services.airport_codes.different_identifier_not_just_a")
           end
           changes << Change.new(from: code, to: airport.code, airport: airport, flights: n,
                                 suggested: airport.kind != "closed", note: note)

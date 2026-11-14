@@ -18,17 +18,17 @@ class RecordVersionsController < ApplicationController
   def restore
     version = RecordVersion.where(aircraft_id: @aircraft.id, event: "unlink", item_type: SHARED.keys).find(params[:id])
     record = SHARED.fetch(version.item_type).find_by(id: version.item_id)
-    return redirect_to(aircraft_record_versions_path(@aircraft), alert: "That record no longer exists.") unless record
+    return redirect_to(aircraft_record_versions_path(@aircraft), alert: t("flash.record_versions.that_record_no_longer")) unless record
     c = version.changes_hash
     if c["applies_to"] == "component"
       component = @aircraft.components.find_by(id: c["component_id"])
-      return redirect_to(aircraft_record_versions_path(@aircraft), alert: "That component no longer exists; edit the record's applicability instead.") unless component
+      return redirect_to(aircraft_record_versions_path(@aircraft), alert: t("flash.record_versions.that_component_no_longer")) unless component
       record.components << component unless record.components.include?(component)
     else
       record.aircraft << @aircraft unless record.aircraft.include?(@aircraft)
     end
     log_event(version.item_type == "AirworthinessDirective" ? "ad" : "inspection", "Restored: #{record} applies again")
-    redirect_to aircraft_record_versions_path(@aircraft), notice: "#{record} applies to #{@aircraft.tail_number} again."
+    redirect_to aircraft_record_versions_path(@aircraft), notice: t("flash.record_versions.applies_to_again", record: record, tail_number: @aircraft.tail_number)
   end
 
   # Whether an unlink can still be undone (the record exists and isn't linked that way now).

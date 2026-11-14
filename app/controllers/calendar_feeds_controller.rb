@@ -8,14 +8,14 @@ class CalendarFeedsController < ApplicationController
 
   def show
     user = User.active.find_by(calendar_token: params[:token].to_s) or return head(:not_found)
-    cal = Ical.new("Aircraft maintenance")
+    cal = Ical.new(t("flash.calendar_feeds.name"))
     host = Sso.app_url
     user.accessible_aircraft.ordered.each do |aircraft|
       DueList.new(aircraft).items.each do |i|
-        when_text = [ ("projected from recent flying" if i.projected), ("at #{i.due_hours} hrs" if i.due_hours) ].compact.join(", ")
+        when_text = [ (t("flash.calendar_feeds.projected") if i.projected), (t("flash.calendar_feeds.at_hours", hours: i.due_hours) if i.due_hours) ].compact.join(", ")
         cal.add(uid: "#{aircraft.id}-#{i.key}@simple-aircraft-manager", date: i.date,
-                summary: "#{aircraft.tail_number}: #{i.title}#{' (overdue)' if i.overdue?}",
-                description: [ "#{aircraft.tail_number}: #{i.title}", when_text.presence ].compact.join("\n"), url: "#{host}#{i.path}")
+                summary: t(i.overdue? ? "flash.calendar_feeds.summary_overdue" : "flash.calendar_feeds.summary", tail_number: aircraft.tail_number, title: i.title),
+                description: [ t("flash.calendar_feeds.summary", tail_number: aircraft.tail_number, title: i.title), when_text.presence ].compact.join("\n"), url: "#{host}#{i.path}")
       end
     end
     send_data cal.to_s, type: "text/calendar; charset=utf-8", disposition: "inline", filename: "aircraft-maintenance.ics"

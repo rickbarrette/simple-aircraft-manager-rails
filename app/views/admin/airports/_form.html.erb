@@ -1,16 +1,16 @@
 <%= form_with model: [:admin, airport], class: "card card-body space-y-4 max-w-2xl" do |f| %>
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-3">
-    <%= f.field :ident, label: "Code", required: true, hint: "The code you log, e.g. 0R8." %>
+    <%= f.field :ident, label: t(".code"), required: true, hint: t(".the_code_you_log_e") %>
     <%= f.field :name, required: true, wrapper: { class: "sm:col-span-2" } %>
-    <%= f.field :kind, as: :select, label: "Type", collection: Airport::KINDS.map { [_1.humanize, _1] } %>
-    <%= f.field :municipality, label: "Town" %>
-    <%= f.field :region, placeholder: "US-RI", hint: "ISO region" %>
+    <%= f.field :kind, as: :select, label: t(".type"), collection: Airport::KINDS.map { [_1.humanize, _1] } %>
+    <%= f.field :municipality, label: t(".town") %>
+    <%= f.field :region, placeholder: t(".us_ri"), hint: t(".iso_region") %>
     <%= f.field :latitude, as: :number, step: "any" %>
     <%= f.field :longitude, as: :number, step: "any" %>
-    <%= f.field :elevation_ft, as: :number, label: "Elevation (ft)" %>
+    <%= f.field :elevation_ft, as: :number, label: t(".elevation_ft") %>
   </div>
-  <p class="hint">Custom airports are kept when the database is updated from OurAirports. To sync flights at this airport to AirTrail, add it there too with the same code (or map it on your AirTrail sync page).</p>
-  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", admin_airports_path, class: "btn-secondary" %></div>
+  <p class="hint"><%= t(".custom_airports_are_kept_when") %></p>
+  <div class="flex gap-2"><%= f.submit t(".save") %><%= link_to t(".cancel"), admin_airports_path, class: "btn-secondary" %></div>
 <% end %>
-<% if airport.persisted? %><div class="mt-4"><%= delete_button "Remove #{airport.ident}", admin_airport_path(airport) %></div><% end %>
+<% if airport.persisted? %><div class="mt-4"><%= delete_button t(".remove", ident: airport.ident), admin_airport_path(airport) %></div><% end %>

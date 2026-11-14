@@ -1,5 +1,5 @@
 class ConsumableRecord < ApplicationRecord
-  TYPES = { "oil" => "Oil", "fuel" => "Fuel" }.freeze
+  TYPES = LabelSet.new("consumable_record.types", %w[oil fuel])
   UNITS = { "oil" => "qt", "fuel" => "gal" }.freeze
 
   belongs_to :aircraft

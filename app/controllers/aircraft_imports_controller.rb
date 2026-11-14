@@ -8,14 +8,14 @@ class AircraftImportsController < ApplicationController
 
   def create
     file = params[:archive]
-    return redirect_to(new_aircraft_import_path, alert: "Choose a .sam.zip file.") if file.blank?
+    return redirect_to(new_aircraft_import_path, alert: t("flash.aircraft_imports.choose_a_sam_zip")) if file.blank?
 
     preview = AircraftArchive::Importer.check(file.tempfile.path)
     tail = params[:tail_number].to_s.strip.upcase.presence || preview.tail_number.to_s.upcase
     if Aircraft.where("UPPER(tail_number) = ?", tail).exists?
       @preview = preview
       @conflict = tail
-      flash.now[:alert] = "An aircraft #{tail} already exists. Choose another tail number for the imported one."
+      flash.now[:alert] = t("flash.aircraft_imports.an_aircraft_already_exists", tail: tail)
       return render :new, status: :unprocessable_entity
     end
 
@@ -24,7 +24,7 @@ class AircraftImportsController < ApplicationController
     AircraftImportJob.perform_later(import.id)
     redirect_to aircraft_import_path(import)
   rescue AircraftArchive::Error => e
-    redirect_to new_aircraft_import_path, alert: "That archive can't be imported: #{e.message}"
+    redirect_to new_aircraft_import_path, alert: t("flash.aircraft_imports.that_archive_can_t", message: e.message)
   end
 
   def show; end

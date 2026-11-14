@@ -1,13 +1,13 @@
-<% content_for :title, "#{@aircraft.tail_number} Major Records" %>
+<% content_for :title, t(".major_records", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
-  <div class="card-header"><h2 class="card-title">Major Repairs & Alterations</h2>
+  <div class="card-header"><h2 class="card-title"><%= t(".major_repairs_alterations") %></h2>
     <% if owner? %><div class="flex gap-2">
-      <%= link_to "+ Repair", new_aircraft_major_record_path(@aircraft, type: "repair"), class: "btn-secondary" %>
-      <%= link_to "+ Alteration", new_aircraft_major_record_path(@aircraft, type: "alteration"), class: "btn-primary" %></div><% end %></div>
+      <%= link_to t(".repair"), new_aircraft_major_record_path(@aircraft, type: "repair"), class: "btn-secondary" %>
+      <%= link_to t(".alteration"), new_aircraft_major_record_path(@aircraft, type: "alteration"), class: "btn-primary" %></div><% end %></div>
   <% if @records.any? %>
     <table class="table">
-      <thead><tr><th>Date</th><th>Type</th><th>Title</th><th>Performed by</th><th>STC</th><th>ICA</th></tr></thead>
+      <thead><tr><th><%= t(".date") %></th><th><%= t(".type") %></th><th><%= t(".title") %></th><th><%= t(".performed_by") %></th><th><%= t(".stc") %></th><th><%= t(".ica") %></th></tr></thead>
       <tbody>
         <% @records.each do |r| %>
           <tr>
@@ -22,6 +22,6 @@
       </tbody>
     </table>
   <% else %>
-    <%= empty_state "No major repairs or alterations recorded." %>
+    <%= empty_state t(".no_major_repairs_or_alterations") %>
   <% end %>
 </section>

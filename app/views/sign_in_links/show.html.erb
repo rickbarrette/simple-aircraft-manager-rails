@@ -1,9 +1,9 @@
-<% content_for :title, "Sign in" %>
+<% content_for :title, t(".sign_in") %>
 <div class="mx-auto max-w-sm">
-  <h1 class="mb-4 text-2xl font-bold">Sign in</h1>
+  <h1 class="mb-4 text-2xl font-bold"><%= t(".sign_in") %></h1>
   <div class="card card-body space-y-4">
-    <p class="text-sm text-slate-600">Continue as <strong><%= @user.email_address %></strong>?</p>
-    <%= button_to "Sign in", consume_sign_in_link_path(params[:token]), class: "btn-primary w-full justify-center" %>
-    <p class="text-center text-sm"><%= link_to "Not you? Back to sign in", new_session_path, class: "link" %></p>
+    <p class="text-sm text-slate-600"><%= t(".continue_as_html", email_address: @user.email_address) %></p>
+    <%= button_to t(".sign_in"), consume_sign_in_link_path(params[:token]), class: "btn-primary w-full justify-center" %>
+    <p class="text-center text-sm"><%= link_to t(".not_you_back_to_sign"), new_session_path, class: "link" %></p>
   </div>
 </div>

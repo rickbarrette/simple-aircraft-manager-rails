@@ -5,19 +5,19 @@
   <div class="space-y-5 lg:col-span-2">
     <section class="card">
       <div class="card-header">
-        <h2 class="card-title">Airworthiness</h2>
+        <h2 class="card-title"><%= t(".airworthiness") %></h2>
         <div class="flex items-center gap-2">
-          <%= link_to "Status report", aircraft_report_path(@aircraft), class: "btn-secondary btn-sm", title: "Printable maintenance status (91.417)" %>
+          <%= link_to t(".status_report"), aircraft_report_path(@aircraft), class: "btn-secondary btn-sm", title: t(".printable_maintenance_status_91_417") %>
         </div>
       </div>
       <div class="card-body">
         <% if @airworthiness.issues.empty? %>
-          <p class="text-sm text-emerald-700">Nothing overdue or due soon. All tracked ADs, inspections, components and squawks are current.</p>
+          <p class="text-sm text-emerald-700"><%= t(".nothing_overdue_or_due_soon") %></p>
         <% else %>
           <ul class="divide-y divide-slate-100">
             <% @airworthiness.issues.each do |issue| %>
               <li class="flex items-start gap-3 py-2">
-                <span class="<%= issue_badge_class(issue) %> mt-0.5"><%= issue.category %></span>
+                <span class="<%= issue_badge_class(issue) %> mt-0.5"><%= issue.category_label %></span>
                 <div>
                   <div class="text-sm font-medium"><%= issue.title %></div>
                   <div class="text-xs text-slate-500"><%= issue.description %></div>
@@ -27,46 +27,46 @@
           </ul>
         <% end %>
         <% if @aircraft.airworthiness_enforcement? %>
-          <p class="hint mt-3">Airworthiness enforcement is on: flights and hours updates are blocked while the aircraft shows Grounded.</p>
+          <p class="hint mt-3"><%= t(".airworthiness_enforcement_is_on_flights") %></p>
         <% end %>
-        <p class="hint mt-3"><%= Airworthiness::DISCLAIMER %></p>
+        <p class="hint mt-3"><%= Airworthiness.disclaimer %></p>
       </div>
     </section>
 
     <section class="card">
       <div class="card-header">
-        <h2 class="card-title">Active Squawks</h2>
-        <%= link_to "All squawks →", aircraft_squawks_path(@aircraft), class: "link text-sm" %>
+        <h2 class="card-title"><%= t(".active_squawks") %></h2>
+        <%= link_to t(".all_squawks"), aircraft_squawks_path(@aircraft), class: "link text-sm" %>
       </div>
       <% if @active_squawks.any? %>
         <%= render "squawks/table", squawks: @active_squawks, aircraft: @aircraft %>
       <% else %>
-        <%= empty_state "No open squawks." %>
+        <%= empty_state t(".no_open_squawks") %>
       <% end %>
     </section>
 
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Consumption</h2>
-        <%= link_to "Oil & fuel →", aircraft_consumable_records_path(@aircraft), class: "link text-sm" %></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".consumption") %></h2>
+        <%= link_to t(".oil_fuel"), aircraft_consumable_records_path(@aircraft), class: "link text-sm" %></div>
       <div class="card-body grid grid-cols-2 gap-4 text-center">
-        <div><div class="text-2xl font-semibold"><%= @oil.recent || "—" %></div><div class="text-xs text-slate-500">Oil, hrs/qt (last ~100 hrs)</div></div>
-        <div><div class="text-2xl font-semibold"><%= @fuel.recent || "—" %></div><div class="text-xs text-slate-500">Fuel burn, gal/hr (last ~50 hrs)</div></div>
+        <div><div class="text-2xl font-semibold"><%= @oil.recent || "—" %></div><div class="text-xs text-slate-500"><%= t(".oil_hrs_qt_last_100") %></div></div>
+        <div><div class="text-2xl font-semibold"><%= @fuel.recent || "—" %></div><div class="text-xs text-slate-500"><%= t(".fuel_burn_gal_hr_last") %></div></div>
       </div>
     </section>
   </div>
 
   <div class="space-y-5">
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Update Hours</h2></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".update_hours") %></h2></div>
       <%= form_with url: hours_aircraft_path(@aircraft), method: :patch, class: "card-body space-y-3" do |f| %>
         <div class="grid grid-cols-2 gap-3">
-          <div><%= f.label :tach_time, "Tach", class: "label" %>
+          <div><%= f.label :tach_time, t(".tach"), class: "label" %>
             <%= f.number_field :tach_time, value: @aircraft.tach_time, step: 0.1, class: "input", required: true %></div>
-          <div><%= f.label :hobbs_time, "Hobbs", class: "label" %>
+          <div><%= f.label :hobbs_time, t(".hobbs"), class: "label" %>
             <%= f.number_field :hobbs_time, value: @aircraft.hobbs_time, step: 0.1, class: "input" %></div>
         </div>
-        <p class="hint">Enter the current meter readings. The difference is applied to every in-service component. For a single flight, use <%= link_to "Log Flight", new_aircraft_flight_log_path(@aircraft), class: "link" %>.</p>
-        <%= f.submit "Update Hours", class: "btn-primary" %>
+        <p class="hint"><%= t(".enter_the_current_meter_readings_html", link: (link_to t(".log_flight"), new_aircraft_flight_log_path(@aircraft), class: "link")) %></p>
+        <%= f.submit t(".update_hours"), class: "btn-primary" %>
       <% end %>
     </section>
 
@@ -74,14 +74,14 @@
 
     <section class="card">
       <div class="card-header">
-        <h2 class="card-title">Details</h2>
-        <% if owner? %><%= link_to "Edit", edit_aircraft_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+        <h2 class="card-title"><%= t(".details") %></h2>
+        <% if owner? %><%= link_to t(".edit"), edit_aircraft_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
       </div>
       <dl class="card-body grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-        <dt class="text-slate-500">Serial</dt><dd><%= @aircraft.serial_number.presence || "—" %></dd>
-        <dt class="text-slate-500">Purchased</dt><dd><%= fmt_date(@aircraft.purchased) %></dd>
-        <dt class="text-slate-500">Tach offset</dt><dd><%= hours(@aircraft.tach_time_offset) %></dd>
-        <dt class="text-slate-500">Hobbs offset</dt><dd><%= hours(@aircraft.hobbs_time_offset) %></dd>
+        <dt class="text-slate-500"><%= t(".serial") %></dt><dd><%= @aircraft.serial_number.presence || "—" %></dd>
+        <dt class="text-slate-500"><%= t(".purchased") %></dt><dd><%= fmt_date(@aircraft.purchased) %></dd>
+        <dt class="text-slate-500"><%= t(".tach_offset") %></dt><dd><%= hours(@aircraft.tach_time_offset) %></dd>
+        <dt class="text-slate-500"><%= t(".hobbs_offset") %></dt><dd><%= hours(@aircraft.hobbs_time_offset) %></dd>
       </dl>
       <% if @aircraft.description.present? %>
         <p class="border-t border-slate-100 px-4 py-3 text-sm text-slate-600"><%= simple_format @aircraft.description %></p>
@@ -89,25 +89,25 @@
     </section>
 
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Notes</h2>
-        <%= link_to "+ Add", new_aircraft_note_path(@aircraft), class: "btn-secondary btn-sm" %></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".notes") %></h2>
+        <%= link_to t(".add"), new_aircraft_note_path(@aircraft), class: "btn-secondary btn-sm" %></div>
       <% if @notes.any? %>
         <ul class="divide-y divide-slate-100">
           <% @notes.each do |note| %>
             <li class="px-4 py-2 text-sm">
               <div><%= markdown_excerpt note.text %></div>
-              <div class="text-xs text-slate-500"><%= note.user&.display_name %> · <%= time_ago_in_words(note.created_at) %> ago <%= "· public" if note.public? %></div>
+              <div class="text-xs text-slate-500"><%= t(".ago_html", display_name: note.user&.display_name, created_at: (time_ago_in_words(note.created_at)), public: (t(".public") if note.public?)) %></div>
             </li>
           <% end %>
         </ul>
       <% else %>
-        <%= empty_state "No notes." %>
+        <%= empty_state t(".no_notes") %>
       <% end %>
     </section>
 
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Recent Activity</h2>
-        <%= link_to "All →", aircraft_events_path(@aircraft), class: "link text-sm" %></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".recent_activity") %></h2>
+        <%= link_to t(".all"), aircraft_events_path(@aircraft), class: "link text-sm" %></div>
       <%= render "events/list", events: @recent_events %>
     </section>
   </div>

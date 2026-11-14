@@ -17,8 +17,8 @@ class MajorRecordsController < ApplicationController
   def create
     @record = @aircraft.major_records.new(record_params)
     if @record.save
-      log_event("major_record", "#{@record.type_label} added: #{@record.title}")
-      redirect_to aircraft_major_records_path(@aircraft), notice: "Record added."
+      log_event("major_record", t("flash.major_records.added", type_label: @record.type_label, title: @record.title))
+      redirect_to aircraft_major_records_path(@aircraft), notice: t("flash.major_records.record_added")
     else
       render :new, status: :unprocessable_entity
     end
@@ -28,8 +28,8 @@ class MajorRecordsController < ApplicationController
 
   def update
     if @record.update(record_params)
-      log_event("major_record", "#{@record.type_label} updated: #{@record.title}")
-      redirect_to aircraft_major_record_path(@aircraft, @record), notice: "Record updated."
+      log_event("major_record", t("flash.major_records.updated", type_label: @record.type_label, title: @record.title))
+      redirect_to aircraft_major_record_path(@aircraft, @record), notice: t("flash.major_records.record_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -37,8 +37,8 @@ class MajorRecordsController < ApplicationController
 
   def destroy
     @record.destroy!
-    log_event("major_record", "#{@record.type_label} deleted: #{@record.title}")
-    redirect_to aircraft_major_records_path(@aircraft), notice: "Record deleted."
+    log_event("major_record", t("flash.major_records.deleted", type_label: @record.type_label, title: @record.title))
+    redirect_to aircraft_major_records_path(@aircraft), notice: t("flash.major_records.record_deleted")
   end
 
   private

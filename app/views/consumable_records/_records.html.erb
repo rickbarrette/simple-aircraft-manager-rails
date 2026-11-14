@@ -8,7 +8,7 @@
         <col class="w-28"><col class="w-24"><col class="w-24"><col class="w-24"><col><col class="w-24"><col><col class="w-20">
       </colgroup>
       <% if page == 1 %>
-        <thead><tr><th>Date</th><th>Type</th><th class="text-right">Added</th><th class="text-right">Level after</th><th>Product</th><th class="text-right">Tach</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th><%= t(".date") %></th><th><%= t(".type") %></th><th class="text-right"><%= t(".added") %></th><th class="text-right"><%= t(".level_after") %></th><th><%= t(".product") %></th><th class="text-right"><%= t(".tach") %></th><th><%= t(".notes") %></th><th></th></tr></thead>
       <% end %>
       <tbody>
         <% records.each do |r| %>
@@ -19,8 +19,8 @@
             <td class="text-right tabular-nums" data-label="Level after"><%= r.level_after ? "#{r.level_after} #{r.unit}" : "" %></td>
             <td class="truncate" data-label="Product"><%= r.consumable_type %></td>
             <td class="text-right tabular-nums" data-label="Tach"><%= hours(r.flight_hours) %></td>
-            <td class="text-xs text-slate-500 break-words"><%= r.notes %><%= " (excluded from average)" if r.excluded_from_averages? %></td>
-            <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_consumable_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+            <td class="text-xs text-slate-500 break-words"><%= r.notes %><%= t(".excluded_from_average") if r.excluded_from_averages? %></td>
+            <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_consumable_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>
       </tbody>
@@ -29,7 +29,7 @@
   <% if more %>
     <%= turbo_frame_tag "consumable-records-#{page + 1}", src: aircraft_consumable_records_path(@aircraft, page: page + 1), loading: :lazy, target: "_top", class: "block" do %>
       <p class="px-4 py-4 text-center text-sm text-slate-500">
-        Loading earlier records… <%= link_to "Load more", aircraft_consumable_records_path(@aircraft, page: page + 1), class: "link", data: { turbo_frame: "consumable-records-#{page + 1}" } %>
+        <%= t(".loading_earlier_records_html", link: (link_to t(".load_more"), aircraft_consumable_records_path(@aircraft, page: page + 1), class: "link", data: { turbo_frame: "consumable-records-#{page + 1}" })) %>
       </p>
     <% end %>
   <% end %>

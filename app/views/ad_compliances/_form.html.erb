@@ -3,30 +3,30 @@
 <%= form_with model: compliance, url: compliance.new_record? ? aircraft_ad_compliances_path(aircraft) : aircraft_ad_compliance_path(aircraft, compliance),
               class: "card card-body space-y-4 max-w-2xl", data: { controller: "next-due", next_due_rules_value: rules.to_json } do |f| %>
   <%= f.errors_summary %>
-  <%= f.field :airworthiness_directive_id, as: :select, label: "AD", collection: ads.map { ["#{_1.name} – #{_1.short_description.truncate(50)}", _1.id] },
+  <%= f.field :airworthiness_directive_id, as: :select, label: t(".ad"), collection: ads.map { ["#{_1.name} – #{_1.short_description.truncate(50)}", _1.id] },
         data: { next_due_target: "rule", action: "change->next-due#changed" } %>
   <div class="grid gap-4 sm:grid-cols-2">
     <%= f.field :date_complied, as: :date, data: { next_due_target: "date", action: "change->next-due#changed" } %>
-    <%= f.field :aircraft_hours_at_compliance, as: :number, step: 0.1, label: "Aircraft hours (#{aircraft.time_basis_label.downcase})",
+    <%= f.field :aircraft_hours_at_compliance, as: :number, step: 0.1, label: t(".aircraft_hours", time_basis_label: aircraft.time_basis_label.downcase),
           data: { next_due_target: "hours", action: "input->next-due#changed" } %>
-    <%= f.field :next_due_at_time, as: :number, step: 0.1, label: "Next due at #{aircraft.time_basis_label.downcase} reading",
-          hint: "Calculated from the AD's recurrence; you can override it. Leave 0 if not hour-based.",
+    <%= f.field :next_due_at_time, as: :number, step: 0.1, label: t(".next_due_at_reading", time_basis_label: aircraft.time_basis_label.downcase),
+          hint: t(".calculated_from_the_ad_s"),
           data: { next_due_target: "dueHours", action: "input->next-due#markManual" } %>
-    <%= f.field :component_id, as: :select, label: "Component", collection: component_options(aircraft) %>
-    <%= f.field :logbook_entry_id, as: :select, label: "Logbook entry", collection: logbook_options(aircraft) %>
+    <%= f.field :component_id, as: :select, label: t(".component"), collection: component_options(aircraft) %>
+    <%= f.field :logbook_entry_id, as: :select, label: t(".logbook_entry"), collection: logbook_options(aircraft) %>
   </div>
   <p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-next-due-target="preview" hidden></p>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :compliance_method, as: :select, label: "Method of compliance", collection: AdCompliance::METHODS.invert,
+    <%= f.field :compliance_method, as: :select, label: t(".method_of_compliance"), collection: AdCompliance::METHODS.invert,
           data: { next_due_target: "permanent", action: "change->next-due#changed" } %>
-    <%= f.field :ad_revision, label: "AD revision complied with", placeholder: "e.g. 2011-10-09 R1, effective 2011-06-01",
-          hint: "AD number and revision or effective date (91.417(a)(2)(v)). Left blank, it's taken from the AD." %>
+    <%= f.field :ad_revision, label: t(".ad_revision_complied_with"), placeholder: t(".e_g_2011_10_09"),
+          hint: t(".ad_number_and_revision_or") %>
   </div>
-  <%= f.field :permanent, as: :checkbox, label: "No further action required (ends the recurring requirement)",
-        hint: "Set automatically for terminating action; tick it for an AMOC that ends the recurrence.",
+  <%= f.field :permanent, as: :checkbox, label: t(".no_further_action_required_ends"),
+        hint: t(".set_automatically_for_terminating_action"),
         data: { next_due_target: "permanent", action: "change->next-due#changed" } %>
-  <%= f.field :compliance_notes, as: :textarea, label: "Details", rows: 3, required: true,
-        hint: "What was done and per which paragraph of the AD; for not applicable, why (e.g. serial number outside the affected range, equipment not installed)." %>
-  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_airworthiness_directives_path(aircraft), class: "btn-secondary" %></div>
+  <%= f.field :compliance_notes, as: :textarea, label: t(".details"), rows: 3, required: true,
+        hint: t(".what_was_done_and_per") %>
+  <div class="flex gap-2"><%= f.submit t(".save") %><%= link_to t(".cancel"), aircraft_airworthiness_directives_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
-<% if compliance.persisted? %><div class="mt-4"><%= delete_button "Delete record", aircraft_ad_compliance_path(aircraft, compliance) %></div><% end %>
+<% if compliance.persisted? %><div class="mt-4"><%= delete_button t(".delete_record"), aircraft_ad_compliance_path(aircraft, compliance) %></div><% end %>

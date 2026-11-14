@@ -8,7 +8,7 @@ class LoadingSetup
 
   Station = Data.define(:name, :arm, :max, :fuel)
 
-  ENVELOPE_UNITS = { "cg" => "CG (inches aft of datum)", "moment" => "Moment (lb-in / 1000)" }.freeze
+  ENVELOPE_UNITS = LabelSet.new("loading_setup.envelope_units", %w[cg moment])
 
   attr_accessor :stations, :envelope, :fuel_lb_per_gal
   attr_writer :envelope_unit
@@ -55,11 +55,11 @@ class LoadingSetup
   validate do
     raw_s = @raw_stations || []
     raw_e = @raw_envelope || []
-    errors.add(:base, "Every station needs a name and a numeric arm (inches)") if raw_s.size != stations.size || stations.any? { _1.name.blank? }
-    errors.add(:base, "Every envelope point needs a numeric weight and CG") if raw_e.size != envelope.size
-    errors.add(:base, "The CG envelope needs at least 3 points, or none") if envelope.size.between?(1, 2)
-    errors.add(:base, "Envelope weights must be more than 0") if envelope.any? { |w, _| !w.positive? }
-    errors.add(:base, "Fuel weight per gallon must be between 4 and 9 lb") unless fuel_lb_per_gal.to_d.between?(4, 9)
+    errors.add(:base, :stations) if raw_s.size != stations.size || stations.any? { _1.name.blank? }
+    errors.add(:base, :envelope_points) if raw_e.size != envelope.size
+    errors.add(:base, :envelope_size) if envelope.size.between?(1, 2)
+    errors.add(:base, :envelope_weights) if envelope.any? { |w, _| !w.positive? }
+    errors.add(:base, :fuel_weight) unless fuel_lb_per_gal.to_d.between?(4, 9)
   end
 
   def stations_json

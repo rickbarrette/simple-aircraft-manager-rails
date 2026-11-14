@@ -11,9 +11,9 @@ class RecordsIntegrity
       prev = nil
       RecordVersion.where(aircraft_id: aircraft_id).chronological.find_each do |v|
         versions += 1
-        tail = Aircraft.find_by(id: aircraft_id)&.tail_number || "aircraft #{aircraft_id.inspect}"
-        problems << "#{tail}: history entry #{v.id} doesn't follow the one before it (missing or reordered history)" if v.prev_hash != prev
-        problems << "#{tail}: history entry #{v.id} was altered" if v.chain_hash != RecordVersion.digest(v.prev_hash, v.payload)
+        tail = Aircraft.find_by(id: aircraft_id)&.tail_number || I18n.t("services.records_integrity.aircraft", aircraft_id: aircraft_id.inspect)
+        problems << I18n.t("services.records_integrity.history_entry_doesn_t_follow", tail: tail, id: v.id) if v.prev_hash != prev
+        problems << I18n.t("services.records_integrity.history_entry_was_altered", tail: tail, id: v.id) if v.chain_hash != RecordVersion.digest(v.prev_hash, v.payload)
         prev = v.chain_hash
       end
     end
@@ -22,8 +22,8 @@ class RecordsIntegrity
       signatures += 1
       next if sig.imported? || sig.status != :altered
       entry = sig.logbook_entry
-      problems << "#{entry.aircraft.tail_number}: the #{entry.date} logbook entry (signed by #{sig.signer_name}) " \
-                  "#{sig.seal_valid? ? 'changed after it was signed' : 'has an altered signature'}"
+      problems << I18n.t(sig.seal_valid? ? "services.records_integrity.entry_changed" : "services.records_integrity.signature_altered",
+                         tail_number: entry.aircraft.tail_number, date: entry.date, signer: sig.signer_name)
     end
     AppRevision.touch_current!
     IntegrityCheck.create!(ok: problems.empty?, versions_checked: versions, signatures_checked: signatures, problems: problems.first(200))

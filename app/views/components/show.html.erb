@@ -6,30 +6,30 @@
       <h2 class="card-title"><%= @component %> <%= life_badge(@component.life_status) %></h2>
       <% if owner? %>
         <div class="flex gap-2">
-          <%= link_to "+ Sub-component", new_aircraft_component_path(@aircraft, parent_id: @component.id), class: "btn-secondary btn-sm" %>
-          <%= link_to "Edit", edit_aircraft_component_path(@aircraft, @component), class: "btn-secondary btn-sm" %>
+          <%= link_to t(".sub_component"), new_aircraft_component_path(@aircraft, parent_id: @component.id), class: "btn-secondary btn-sm" %>
+          <%= link_to t(".edit"), edit_aircraft_component_path(@aircraft, @component), class: "btn-secondary btn-sm" %>
         </div>
       <% end %>
     </div>
     <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
-      <dt class="text-slate-500">Manufacturer</dt><dd><%= @component.manufacturer %></dd>
-      <dt class="text-slate-500">Model</dt><dd><%= @component.model %></dd>
-      <dt class="text-slate-500">Serial</dt><dd><%= @component.serial_number.presence || "—" %></dd>
-      <dt class="text-slate-500">Status</dt><dd><%= @component.status_label %></dd>
-      <dt class="text-slate-500">Parent</dt><dd><%= @component.parent_component ? link_to(@component.parent_component, aircraft_component_path(@aircraft, @component.parent_component), class: "link") : "—" %></dd>
-      <dt class="text-slate-500">Location</dt><dd><%= @component.install_location.presence || "—" %></dd>
-      <dt class="text-slate-500">In service since</dt><dd><%= fmt_date(@component.date_in_service) %></dd>
-      <dt class="text-slate-500">Last OH / service</dt><dd><%= fmt_date(@component.overhaul_date) %></dd>
-      <dt class="text-slate-500">Hours in service</dt><dd><%= hours(@component.hours_in_service) %></dd>
-      <dt class="text-slate-500">Since OH / service</dt><dd><%= hours(@component.hours_since_overhaul) %></dd>
-      <dt class="text-slate-500">TBO</dt><dd><%= @component.tbo_hours ? "#{@component.tbo_hours} h (#{hours(@component.hours_to_tbo)} remaining)" : "—" %></dd>
-      <dt class="text-slate-500">Replacement</dt><dd>
-        <%= [@component.replacement_hours && "#{@component.replacement_hours} h", @component.replacement_interval_label].compact.join(" / ").presence&.then { @component.replacement_from_install? ? "#{_1} since installed" : _1 } || "—" %>
-        <% if (d = @component.next_replacement_date) %><div class="text-xs text-slate-500">Next by <%= fmt_date(d) %></div><% end %>
+      <dt class="text-slate-500"><%= t(".manufacturer") %></dt><dd><%= @component.manufacturer %></dd>
+      <dt class="text-slate-500"><%= t(".model") %></dt><dd><%= @component.model %></dd>
+      <dt class="text-slate-500"><%= t(".serial") %></dt><dd><%= @component.serial_number.presence || "—" %></dd>
+      <dt class="text-slate-500"><%= t(".status") %></dt><dd><%= @component.status_label %></dd>
+      <dt class="text-slate-500"><%= t(".parent") %></dt><dd><%= @component.parent_component ? link_to(@component.parent_component, aircraft_component_path(@aircraft, @component.parent_component), class: "link") : "—" %></dd>
+      <dt class="text-slate-500"><%= t(".location") %></dt><dd><%= @component.install_location.presence || "—" %></dd>
+      <dt class="text-slate-500"><%= t(".in_service_since") %></dt><dd><%= fmt_date(@component.date_in_service) %></dd>
+      <dt class="text-slate-500"><%= t(".last_oh_service") %></dt><dd><%= fmt_date(@component.overhaul_date) %></dd>
+      <dt class="text-slate-500"><%= t(".hours_in_service") %></dt><dd><%= hours(@component.hours_in_service) %></dd>
+      <dt class="text-slate-500"><%= t(".since_oh_service") %></dt><dd><%= hours(@component.hours_since_overhaul) %></dd>
+      <dt class="text-slate-500"><%= t(".tbo") %></dt><dd><%= @component.tbo_hours ? t(".h_remaining", tbo_hours: @component.tbo_hours, hours_to_tbo: (hours(@component.hours_to_tbo))) : "—" %></dd>
+      <dt class="text-slate-500"><%= t(".replacement") %></dt><dd>
+        <%= [@component.replacement_hours && "#{@component.replacement_hours} h", @component.replacement_interval_label].compact.join(" / ").presence&.then { @component.replacement_from_install? ? t(".since_installed", interval: _1) : _1 } || "—" %>
+        <% if (d = @component.next_replacement_date) %><div class="text-xs text-slate-500"><%= t(".next_by_html", d: (fmt_date(d))) %></div><% end %>
       </dd>
-      <dt class="text-slate-500">Flags</dt>
+      <dt class="text-slate-500"><%= t(".flags") %></dt>
       <dd class="col-span-3 flex flex-wrap gap-1">
-        <% { tbo_critical: "TBO critical", replacement_critical: "Replacement critical", on_condition: "On condition" }.each do |flag, label| %>
+        <% { tbo_critical: t(".tbo_critical"), replacement_critical: t(".replacement_critical"), on_condition: t(".on_condition") }.each do |flag, label| %>
           <% if @component.public_send("#{flag}?") %><span class="badge-blue"><%= label %></span><% end %>
         <% end %>
       </dd>
@@ -39,15 +39,15 @@
 
   <% if owner? %>
     <section class="card" id="service">
-      <div class="card-header"><h2 class="card-title">Service / Replace</h2></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".service_replace") %></h2></div>
       <%= form_with url: reset_service_aircraft_component_path(@aircraft, @component), method: :post, class: "card-body space-y-3",
-                    data: { turbo_confirm: "Reset hours for #{@component}?" } do |f| %>
-        <p class="text-sm text-slate-600">Resets <strong>hours since overhaul</strong> to 0 and sets the service date to today.</p>
+                    data: { turbo_confirm: t(".reset_hours_for", component: @component) } do |f| %>
+        <p class="text-sm text-slate-600"><%= t(".resets_hours_since_overhaul_to_html") %></p>
         <label class="flex items-start gap-2 text-sm">
           <%= f.check_box :reset_in_service, class: "mt-0.5 h-4 w-4" %>
-          <span>Part was physically <strong>replaced</strong> — also reset hours in service and in-service date.</span>
+          <span><%= t(".part_was_physically_replaced_also_html") %></span>
         </label>
-        <%= f.submit "Record Service", class: "btn-primary" %>
+        <%= f.submit t(".record_service"), class: "btn-primary" %>
       <% end %>
     </section>
   <% end %>
@@ -56,16 +56,16 @@
 <% if @inspection_rows.any? || owner? %>
   <section class="card mt-5" id="inspections">
     <div class="card-header">
-      <h2 class="card-title">Inspections of this component</h2>
-      <% if owner? %><%= link_to "+ Inspection", new_aircraft_inspection_type_path(@aircraft, component_id: @component.id), class: "btn-secondary btn-sm" %><% end %>
+      <h2 class="card-title"><%= t(".inspections_of_this_component") %></h2>
+      <% if owner? %><%= link_to t(".inspection"), new_aircraft_inspection_type_path(@aircraft, component_id: @component.id), class: "btn-secondary btn-sm" %><% end %>
     </div>
     <% if @inspection_rows.any? %>
       <table class="table">
-        <thead><tr><th>Inspection</th><th>Interval</th><th>Last done</th><th>Next due</th><th>Status</th></tr></thead>
+        <thead><tr><th><%= t(".inspection_2") %></th><th><%= t(".interval") %></th><th><%= t(".last_done") %></th><th><%= t(".next_due") %></th><th><%= t(".status") %></th></tr></thead>
         <tbody>
           <% @inspection_rows.each do |row| %>
             <tr>
-              <td class="font-medium"><%= row.type.name %><%= tag.span(" advisory", class: "text-xs text-slate-500") if row.type.advisory? %></td>
+              <td class="font-medium"><%= row.type.name %><%= tag.span(t(".advisory"), class: "text-xs text-slate-500") if row.type.advisory? %></td>
               <td class="text-xs"><%= row.type.interval_description %></td>
               <td class="text-xs"><%= row.latest ? "#{fmt_date(row.latest.date)} @ #{hours(row.latest.hours_at_inspection)} h" : "—" %></td>
               <td class="text-xs"><%= [row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} h"].compact.join(" / ").presence || "—" %></td>
@@ -75,14 +75,14 @@
         </tbody>
       </table>
     <% else %>
-      <p class="card-body text-sm text-slate-500">None. Add one for a recurring inspection of this part (e.g. a 500-hour magneto inspection); it's tracked on the Inspections tab and can be completed from a logbook entry.</p>
+      <p class="card-body text-sm text-slate-500"><%= t(".none_add_one_for_a") %></p>
     <% end %>
   </section>
 <% end %>
 
 <% if @squawks.any? %>
   <section class="card mt-5">
-    <div class="card-header"><h2 class="card-title">Squawks on this component</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".squawks_on_this_component") %></h2></div>
     <%= render "squawks/table", squawks: @squawks, aircraft: @aircraft %>
   </section>
 <% end %>

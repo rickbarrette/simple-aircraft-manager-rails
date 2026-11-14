@@ -1,8 +1,8 @@
-<p>You electronically signed a logbook entry.</p>
-<p>Aircraft: <strong><%= @entry.aircraft.tail_number %></strong><br>
-Entry: <%= fmt_date(@entry.date) %>, <%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log<br>
-Certified by: <%= @signature.signer_name %>, <%= @signature.certificate_label %> <%= @signature.certificate_number %><br>
-Signed: <%= @signature.signed_at.utc.strftime("%Y-%m-%d %H:%M:%S UTC") %></p>
-<p>Statement: <em><%= @signature.statement %></em></p>
-<p style="color:#64748b;font-size:12px">Fingerprint: <%= @signature.content_digest %></p>
-<p>If you didn't sign this, tell the aircraft's owner right away.</p>
+<p><%= t(".you_electronically_signed_a_logbook") %></p>
+<p><%= t(".aircraft_html", tail_number: @entry.aircraft.tail_number) %>
+<%= t(".entry_log_html", date: (fmt_date(@entry.date)), log_type: (LogbookEntry::LOG_TYPES[@entry.log_type])) %>
+<%= t(".certified_by_html", signer_name: @signature.signer_name, certificate_label: @signature.certificate_label, certificate_number: @signature.certificate_number) %>
+<%= t(".signed_html", d: (@signature.signed_at.utc.strftime("%Y-%m-%d %H:%M:%S UTC"))) %></p>
+<p><%= t(".statement_html", statement: @signature.statement) %></p>
+<p style="color:#64748b;font-size:12px"><%= t(".fingerprint_html", content_digest: @signature.content_digest) %></p>
+<p><%= t(".if_you_didn_t_sign") %></p>

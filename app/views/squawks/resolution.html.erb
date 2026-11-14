@@ -1,8 +1,8 @@
-<% content_for :title, "Resolve squawk" %>
+<% content_for :title, t(".resolve_squawk") %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= form_with url: resolve_aircraft_squawk_path(@aircraft, @squawk), method: :patch, class: "card card-body max-w-3xl space-y-4" do %>
   <div>
-    <h2 class="card-title">Resolve squawk</h2>
+    <h2 class="card-title"><%= t(".resolve_squawk") %></h2>
     <p class="mt-1 rounded-md bg-slate-50 p-3 text-sm"><%= @squawk.issue_reported %><%= " · #{@squawk.component}" if @squawk.component %></p>
   </div>
   <% if @entry.errors.any? %>
@@ -12,39 +12,39 @@
   <% end %>
   <% choice = params[:logbook].presence || "new" %>
   <fieldset class="space-y-2 text-sm">
-    <legend class="label">Logbook</legend>
-    <label class="flex items-center gap-2"><%= radio_button_tag :logbook, "new", choice == "new" %> Record the fix as a new logbook entry</label>
-    <label class="flex items-center gap-2"><%= radio_button_tag :logbook, "existing", choice == "existing" %> Link an existing entry:
+    <legend class="label"><%= t(".logbook") %></legend>
+    <label class="flex items-center gap-2"><%= t(".record_the_fix_as_a_html", radio: (radio_button_tag :logbook, "new", choice == "new")) %></label>
+    <label class="flex items-center gap-2"><%= t(".link_an_existing_entry_html", existing: (radio_button_tag :logbook, "existing", choice == "existing")) %>
       <%= select_tag :logbook_entry_id, options_for_select(logbook_options(@aircraft).reject { _2.nil? }, params[:logbook_entry_id]), class: "input w-auto" %></label>
-    <label class="flex items-center gap-2"><%= radio_button_tag :logbook, "none", choice == "none" %> No logbook entry (e.g. it wasn't a defect)</label>
+    <label class="flex items-center gap-2"><%= t(".no_logbook_entry_e_g_html", none: (radio_button_tag :logbook, "none", choice == "none")) %></label>
   </fieldset>
 
   <div class="space-y-4 rounded-md border border-slate-200 p-3" data-controller="signer component-times"
        data-component-times-aircraft-hours-value="<%= @aircraft.current_hours.to_f %>">
-    <p class="text-xs text-slate-500">For a new entry. 14 CFR 43.9: what was done, the date, and the name, certificate number and kind of certificate of whoever approved the return to service.</p>
+    <p class="text-xs text-slate-500"><%= t(".for_a_new_entry_14") %></p>
     <%= render "shared/sign_as" %>
     <%= fields_for :logbook_entry, @entry do |f| %>
       <div class="grid gap-4 sm:grid-cols-3">
         <%= f.field :date, as: :date %>
-        <%= f.field :log_type, as: :select, label: "Logbook", collection: LogbookEntry::LOG_TYPES.invert,
+        <%= f.field :log_type, as: :select, label: t(".logbook"), collection: LogbookEntry::LOG_TYPES.invert,
               data: { component_times_target: "logType", action: "component-times#logTypeChanged" } %>
-        <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: "Airframe total time",
+        <%= f.field :aircraft_hours_at_entry, as: :number, step: 0.1, label: t(".airframe_total_time"),
               data: { component_times_target: "airframe", action: "input->component-times#airframeChanged" } %>
       </div>
       <%= render "logbook_entries/component_fields", f: f, aircraft: @aircraft %>
-      <%= f.field :text, as: :textarea, label: "Work performed", rows: 3 %>
+      <%= f.field :text, as: :textarea, label: t(".work_performed"), rows: 3 %>
       <div class="grid gap-4 sm:grid-cols-3">
-        <%= f.field :signoff_person, label: "Signed off by", data: { signer_target: "name" } %>
-        <%= f.field :signoff_certificate_type, as: :select, label: "Kind of certificate", include_blank: "—", collection: LogbookEntry::CERTIFICATE_TYPES.invert,
+        <%= f.field :signoff_person, label: t(".signed_off_by"), data: { signer_target: "name" } %>
+        <%= f.field :signoff_certificate_type, as: :select, label: t(".kind_of_certificate"), include_blank: "—", collection: LogbookEntry::CERTIFICATE_TYPES.invert,
               data: { signer_target: "kind" } %>
-        <%= f.field :signoff_certificate_number, label: "Certificate number", data: { signer_target: "number" } %>
+        <%= f.field :signoff_certificate_number, label: t(".certificate_number"), data: { signer_target: "number" } %>
       </div>
     <% end %>
   </div>
 
   <div>
-    <%= label_tag :resolution_notes, "Resolution notes (optional)", class: "label" %>
+    <%= label_tag :resolution_notes, t(".resolution_notes_optional"), class: "label" %>
     <%= text_area_tag :resolution_notes, params[:resolution_notes], rows: 2, class: "input" %>
   </div>
-  <div class="flex gap-2"><%= submit_tag "Resolve", class: "btn-primary" %><%= link_to "Cancel", aircraft_squawks_path(@aircraft), class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= submit_tag t(".resolve"), class: "btn-primary" %><%= link_to t(".cancel"), aircraft_squawks_path(@aircraft), class: "btn-secondary" %></div>
 <% end %>

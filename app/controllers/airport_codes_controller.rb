@@ -14,6 +14,6 @@ class AirportCodesController < ApplicationController
     fixes = params.fetch(:fixes, {}).permit(*standardizer.unknown.map(&:code)).to_h
                   .select { |code, _| Array(params[:fix]).include?(code) }
     updated = standardizer.apply!(codes, fixes: fixes)
-    redirect_to aircraft_flight_logs_path(@aircraft), notice: "Updated #{updated} airport entries across your flights."
+    redirect_to aircraft_flight_logs_path(@aircraft), notice: t("flash.airport_codes.updated_airport_entries_across", count: updated)
   end
 end

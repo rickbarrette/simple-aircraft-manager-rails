@@ -15,21 +15,22 @@ Prawn::Fonts::AFM.hide_m17n_warning = true # text is reduced to what the built-i
 class LogbookEntryPdf
   IN = 72 # points per inch
 
-  Layout = Data.define(:key, :label, :page, :cols, :rows, :width, :height, :left, :top, :col_gap, :row_gap, :padding) do
+  Layout = Data.define(:key, :page, :cols, :rows, :width, :height, :left, :top, :col_gap, :row_gap, :padding) do
+    def label = I18n.t(key, scope: "services.logbook_entry_pdf.layouts")
     def per_page = cols * rows
     def labels? = per_page > 1 || page != [ width, height ]
   end
 
   LAYOUTS = [
-    Layout.new(key: "avery_5164", label: "Labels: Avery 5164 / 8164 (3⅓ × 4 in, 6 per sheet)", page: [ 8.5 * IN, 11 * IN ],
+    Layout.new(key: "avery_5164", page: [ 8.5 * IN, 11 * IN ],
                cols: 2, rows: 3, width: 4 * IN, height: 3.333 * IN, left: 0.156 * IN, top: 0.5 * IN,
                col_gap: 0.188 * IN, row_gap: 0, padding: 0.15 * IN),
-    Layout.new(key: "avery_5163", label: "Labels: Avery 5163 / 8163 (2 × 4 in, 10 per sheet)", page: [ 8.5 * IN, 11 * IN ],
+    Layout.new(key: "avery_5163", page: [ 8.5 * IN, 11 * IN ],
                cols: 2, rows: 5, width: 4 * IN, height: 2 * IN, left: 0.156 * IN, top: 0.5 * IN,
                col_gap: 0.188 * IN, row_gap: 0, padding: 0.12 * IN),
-    Layout.new(key: "half_letter", label: "Half-letter pages (5½ × 8½ in)", page: [ 5.5 * IN, 8.5 * IN ],
+    Layout.new(key: "half_letter", page: [ 5.5 * IN, 8.5 * IN ],
                cols: 1, rows: 1, width: 5.5 * IN, height: 8.5 * IN, left: 0, top: 0, col_gap: 0, row_gap: 0, padding: 0.4 * IN),
-    Layout.new(key: "letter", label: "Letter pages (8½ × 11 in, also full-sheet labels)", page: [ 8.5 * IN, 11 * IN ],
+    Layout.new(key: "letter", page: [ 8.5 * IN, 11 * IN ],
                cols: 1, rows: 1, width: 8.5 * IN, height: 11 * IN, left: 0, top: 0, col_gap: 0, row_gap: 0, padding: 0.6 * IN)
   ].freeze
 
@@ -50,15 +51,17 @@ class LogbookEntryPdf
 
   def filename = "#{@aircraft.tail_number.downcase}-logbook-entries.pdf"
 
+  def t(key, **opts) = I18n.t(key, scope: "services.logbook_entry_pdf", **opts)
+
   def render
-    info = { Title: "#{@aircraft.tail_number} logbook entries", Creator: "Simple Aircraft Manager" }
+    info = { Title: t(:title, tail_number: @aircraft.tail_number), Creator: "Simple Aircraft Manager" }
     if @layout.labels?
       @pdf = Prawn::Document.new(page_size: @layout.page, margin: 0, info: info)
       @entries.each { place_on_labels(_1) }
     else
       @pdf = Prawn::Document.new(page_size: @layout.page, margin: @layout.padding, info: info)
       @entries.each { place_on_pages(_1) }
-      @pdf.number_pages clean("#{@aircraft.tail_number}  ·  page <page> of <total>"), at: [ 0, -@layout.padding / 2 ],
+      @pdf.number_pages clean(t(:page_number, tail_number: @aircraft.tail_number)), at: [ 0, -@layout.padding / 2 ],
                                                                                   width: @pdf.bounds.width, align: :right, size: 7, color: "777777"
     end
     @pdf.render
@@ -132,7 +135,7 @@ class LogbookEntryPdf
     leftover = nil
     @pdf.bounding_box([ x, y ], width: w, height: h) do
       @pdf.text_box clean(header_line), at: [ 0, h ], width: w * 0.68, height: small + 2, size: small, style: :bold, overflow: :truncate
-      @pdf.text_box clean("#{LogbookEntry::LOG_TYPES[entry.log_type]} log#{' (continued)' if continued}"),
+      @pdf.text_box clean(t(continued ? :log_continued : :log, log: LogbookEntry::LOG_TYPES[entry.log_type])),
                     at: [ w * 0.68, h ], width: w * 0.32, height: small + 2, size: small, align: :right, overflow: :truncate
       line_y = h - small - 3
       detail_lines(entry).each do |line|
@@ -153,39 +156,39 @@ class LogbookEntryPdf
 
   def header_line
     [ @aircraft.tail_number, [ @aircraft.make, @aircraft.model ].compact_blank.join(" ").presence,
-      (@aircraft.serial_number.present? ? "S/N #{@aircraft.serial_number}" : nil) ].compact.join("  ·  ")
+      (@aircraft.serial_number.present? ? t(:serial, serial: @aircraft.serial_number) : nil) ].compact.join("  ·  ")
   end
 
   # Date and airframe total time; for engine / propeller entries (or any with
   # a component) the component's serial number, total time and since overhaul.
   def detail_lines(entry)
     airframe = entry.aircraft_hours_at_entry ? "#{hrs(entry.aircraft_hours_at_entry)} (#{@aircraft.time_basis})" : "________"
-    lines = [ "Date: #{entry.date&.strftime('%b %-d, %Y')}     Airframe total time: #{airframe}" ]
+    lines = [ t(:date_line, date: entry.date && I18n.l(entry.date, format: :app), airframe: airframe) ]
     component = entry.component
     noun = component_noun(entry, component)
     if component
       model = [ component.manufacturer, component.model ].compact_blank.join(" ")
-      serial = component.serial_number.present? ? "  S/N #{component.serial_number}" : "  S/N __________"
+      serial = "  #{t(:serial, serial: component.serial_number.presence || '__________')}"
       lines << [ "#{noun}: #{model}#{serial}",
-                 "#{noun} total time: #{blank_or_hours(entry.component_hours_at_entry)}",
+                 t(:component_total_time, noun: noun, hours: blank_or_hours(entry.component_hours_at_entry)),
                  "#{component.since_overhaul_abbreviation}: #{blank_or_hours(entry.component_since_overhaul_at_entry)}" ].join("     ")
     elsif noun
-      lines << "#{noun}: ______________  S/N __________     #{noun} total time: ________     SMOH / SFOH: ________"
+      lines << t(:component_blank, noun: noun)
     end
     entry.parts.each do |part|
       c = part.component
-      name = c.component_type&.name || "Part"
+      name = c.component_type&.name || t(:part)
       model = [ c.manufacturer, c.model ].compact_blank.join(" ")
-      lines << [ "#{name}: #{model}#{"  S/N #{c.serial_number}" if c.serial_number.present?}",
-                 "Total time: #{blank_or_hours(part.hours_at_entry)}",
+      lines << [ "#{name}: #{model}#{"  #{t(:serial, serial: c.serial_number)}" if c.serial_number.present?}",
+                 t(:total_time, hours: blank_or_hours(part.hours_at_entry)),
                  "#{c.since_overhaul_abbreviation}: #{blank_or_hours(part.since_overhaul_at_entry)}" ].join("     ")
     end
     lines
   end
 
   def component_noun(entry, component)
-    return "Engine" if component&.engine? || (component.nil? && entry.log_type == "ENG")
-    return "Propeller" if component&.propeller? || (component.nil? && entry.log_type == "PROP")
+    return t(:engine) if component&.engine? || (component.nil? && entry.log_type == "ENG")
+    return t(:propeller) if component&.propeller? || (component.nil? && entry.log_type == "PROP")
     component&.component_type&.name
   end
 
@@ -198,17 +201,17 @@ class LogbookEntryPdf
     return electronic_signature_block(entry, w, height, small, more: more) if entry.signature
     @pdf.bounding_box([ 0, height ], width: w, height: height) do
       if more
-        @pdf.text_box "Continued on the next #{more}.", at: [ 0, height ], width: w, height: small + 2, size: small,
+        @pdf.text_box clean(t(:"continued_#{more}")), at: [ 0, height ], width: w, height: small + 2, size: small,
                                                         style: :italic, overflow: :truncate
       end
       line_y = height - (small + 3) * 1.6
       @pdf.stroke_color "555555"
       @pdf.line_width 0.5
       @pdf.stroke_horizontal_line 0, w * 0.62, at: line_y
-      @pdf.text_box "Signature", at: [ 0, line_y - 1 ], width: w * 0.6, height: small, size: small - 1, overflow: :truncate
+      @pdf.text_box clean(t(:signature)), at: [ 0, line_y - 1 ], width: w * 0.6, height: small, size: small - 1, overflow: :truncate
       @pdf.text_box clean(certificate(entry)), at: [ w * 0.64, line_y + small + 1 ], width: w * 0.36, height: small * 2 + 4,
                                                 size: small, overflow: :shrink_to_fit, min_font_size: 5
-      who = [ entry.signoff_person.presence || "Name: ____________________", entry.signoff_location.presence ].compact.join("  ·  ")
+      who = [ entry.signoff_person.presence || t(:name_blank), entry.signoff_location.presence ].compact.join("  ·  ")
       @pdf.text_box clean(who), at: [ 0, line_y - small - 1 ], width: w, height: small + 2, size: small, overflow: :truncate
     end
   end
@@ -219,23 +222,21 @@ class LogbookEntryPdf
     @pdf.bounding_box([ 0, height ], width: w, height: height) do
       top = height
       if more
-        @pdf.text_box "Continued on the next #{more}.", at: [ 0, top ], width: w, height: small + 2, size: small, style: :italic, overflow: :truncate
+        @pdf.text_box clean(t(:"continued_#{more}")), at: [ 0, top ], width: w, height: small + 2, size: small, style: :italic, overflow: :truncate
       end
       top -= small + 3
-      @pdf.text_box clean("#{EntrySignature::LABEL} #{sig.signer_name}, #{sig.certificate_label} #{sig.certificate_number}" \
-                          "#{'  (SUPERSEDED BY A CORRECTION)' if entry.superseded?}"),
+      @pdf.text_box clean("#{EntrySignature.label} #{sig.signer_name}, #{sig.certificate_label} #{sig.certificate_number}" \
+                          "#{"  #{t(:superseded)}" if entry.superseded?}"),
                     at: [ 0, top ], width: w, height: small + 2, size: small, style: :bold, overflow: :shrink_to_fit, min_font_size: 5
       top -= small + 3
-      @pdf.text_box clean("Signed electronically #{sig.signed_at.utc.strftime('%Y-%m-%d %H:%M UTC')}  ·  fingerprint #{sig.content_digest.first(16)}"),
+      @pdf.text_box clean(t(:signed_electronically, time: sig.signed_at.utc.strftime("%Y-%m-%d %H:%M UTC"), fingerprint: sig.content_digest.first(16))),
                     at: [ 0, top ], width: w, height: small + 2, size: small - 1, overflow: :shrink_to_fit, min_font_size: 5
     end
   end
 
   def certificate(entry)
-    kind = { "AP" => "A&P", "IA" => "A&P/IA", "A" => "A", "P" => "P", "REPAIR_STATION" => "Repair station", "REPAIRMAN" => "Repairman",
-             "PILOT" => "Pilot", "OTHER" => "" }[entry.signoff_certificate_type].to_s
-    number = entry.signoff_certificate_number.presence || "__________"
-    "#{kind.presence || 'Cert.'} No. #{number}"
+    kind = (t(entry.signoff_certificate_type, scope: "services.logbook_entry_pdf.certificate_kinds", default: "") if entry.signoff_certificate_type.present?)
+    t(:certificate_number, kind: kind.presence || t(:certificate), number: entry.signoff_certificate_number.presence || "__________")
   end
 
   # The entry text, plus the 43.11(a)(5) statement for an inspection whose
@@ -244,24 +245,7 @@ class LogbookEntryPdf
     text = entry.text.to_s.strip
     return "#{text}\n\n#{entry.signature.statement}" if entry.signature
     return text unless entry.entry_type == "INSPECTION" && entry.inspection_result.present? && !text.match?(/I certify/i)
-    type = inspection_kind(entry, text)
-    statement =
-      if entry.inspection_result == "approved"
-        "I certify that this aircraft has been inspected in accordance with #{type} inspection and was determined to be in airworthy condition."
-      else
-        "I certify that this aircraft has been inspected in accordance with #{type} inspection and a list of discrepancies and unairworthy items " \
-          "dated #{entry.date&.strftime('%b %-d, %Y')} has been provided for the aircraft owner or operator."
-      end
-    "#{text}\n\n#{statement}"
-  end
-
-  # "an annual" / "a 100-hour": from a linked inspection record, else the text.
-  def inspection_kind(entry, text)
-    name = entry.inspection_records.first&.inspection_type&.name.to_s.sub(/\s*\(.*\)\z/, "").sub(/\s*inspection\z/i, "").strip.downcase
-    name = "annual" if name.empty? && text.match?(/annual/i)
-    name = "100-hour" if name.empty? && text.match?(/100[- ]?h(ou)?r/i)
-    return "a ______________" if name.empty?
-    "#{name.match?(/\A[aeiou]/) ? 'an' : 'a'} #{name}"
+    "#{text}\n\n#{entry.certification_statement(entry.signoff_certificate_type)}"
   end
 
   # The built-in PDF fonts cover Windows-1252; anything else becomes "?".

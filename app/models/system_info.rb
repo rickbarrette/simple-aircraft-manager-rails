@@ -10,7 +10,7 @@ class SystemInfo
   # Where the source lives; APP_REPOSITORY_URL overrides it for a fork.
   REPOSITORY_URL = ENV["APP_REPOSITORY_URL"].presence || "https://github.com/rickbarrette/simple-aircraft-manager-rails"
 
-  DATABASES = { "Main" => :primary, "Cache" => :cache, "Jobs" => :queue }.freeze
+  DATABASES = %i[primary cache queue].freeze
 
   # The release version, YYYY.MM.N (the repository's VERSION file).
   def version
@@ -18,7 +18,7 @@ class SystemInfo
   end
 
   # "2026.11.0 (build 87e3094)"
-  def version_label = "#{version} (build #{revision})"
+  def version_label = t(:version_label, version: version, revision: revision)
 
   # The build: the commit it was made from. Set by the Docker build (see
   # Dockerfile); in development, read from git.
@@ -47,12 +47,12 @@ class SystemInfo
   def runtime
     {
       "Ruby" => "#{RUBY_VERSION}p#{RUBY_PATCHLEVEL} (#{RUBY_PLATFORM})",
-      "YJIT" => defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled? ? "on" : "off",
+      "YJIT" => t(defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled? ? :on : :off),
       "Rails" => Rails.version,
       "SQLite" => SQLite3::SQLITE_VERSION,
       "Bundler" => Bundler::VERSION,
-      "Environment" => Rails.env,
-      "Time zone" => Time.zone.name
+      t(:environment) => Rails.env,
+      t(:time_zone) => Time.zone.name
     }
   end
 
@@ -65,17 +65,18 @@ class SystemInfo
   # Configured or not; secret values are never read out.
   def features
     {
-      "Single sign-on" => Sso.enabled? ? "#{Sso.label}#{', password sign-in off' unless Sso.password_login?}" : "not configured",
-      "AI logbook transcription" => ENV["ANTHROPIC_API_KEY"].present? ? "on (#{LogbookTranscriber::MODEL})" : "no API key",
-      "Email" => MailSettings.configured? ? ActionMailer::Base.delivery_method.to_s.upcase : "not configured",
-      "Upload limit" => "#{Setting.max_upload_mb} MB per file",
-      "HTTPS enforced" => Rails.application.config.force_ssl ? "yes" : "no",
-      "File storage" => ActiveStorage::Blob.service.class.name.demodulize.delete_suffix("Service")
+      t(:sso) => Sso.enabled? ? (Sso.password_login? ? Sso.label : t(:sso_only, provider: Sso.label)) : t(:not_configured),
+      t(:transcription) => ENV["ANTHROPIC_API_KEY"].present? ? t(:on_with, detail: LogbookTranscriber::MODEL) : t(:no_api_key),
+      t(:email) => MailSettings.configured? ? ActionMailer::Base.delivery_method.to_s.upcase : t(:not_configured),
+      t(:upload_limit) => t(:upload_limit_value, mb: Setting.max_upload_mb),
+      t(:https) => t(Rails.application.config.force_ssl ? :yes : :no),
+      t(:file_storage) => ActiveStorage::Blob.service.class.name.demodulize.delete_suffix("Service")
     }
   end
 
   def databases
-    DATABASES.filter_map do |label, name|
+    DATABASES.filter_map do |name|
+      label = I18n.t(name, scope: "models.system_info.databases")
       config = ActiveRecord::Base.configurations.configs_for(env_name: Rails.env, name: name.to_s)
       next unless config
       path = Rails.root.join(config.database.to_s)
@@ -84,8 +85,8 @@ class SystemInfo
   end
 
   def record_counts
-    { "Users" => User.count, "Aircraft" => Aircraft.count, "Documents" => Document.count,
-      "Logbook entries" => LogbookEntry.count, "Flights" => FlightLog.count, "Squawks" => Squawk.count }
+    { t(:users) => User.count, t(:aircraft) => Aircraft.count, t(:documents) => Document.count,
+      t(:logbook_entries) => LogbookEntry.count, t(:flights) => FlightLog.count, t(:squawks) => Squawk.count }
   end
 
   # Bytes saved by storing identical files once, estimated from checksums.
@@ -109,6 +110,8 @@ class SystemInfo
   end
 
   private
+
+  def t(key, **opts) = I18n.t(key, scope: "models.system_info", **opts)
 
   def specs = Gem.loaded_specs
 

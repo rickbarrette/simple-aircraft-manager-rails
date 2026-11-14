@@ -26,12 +26,12 @@ class FlightLogsController < ApplicationController
     begin
       @track = TrackParser.parse_attachment(@flight_log.track_log)
     rescue TrackParser::Error => e
-      @track_error = "Couldn't read track: #{e.message}"
+      @track_error = t("flash.flight_logs.track_unreadable", message: e.message)
     end
     begin
       @engine_data = EngineDataParser.parse_attachment(@flight_log.engine_data)
     rescue EngineDataParser::Error, ActiveStorage::FileNotFoundError => e
-      @engine_data_error = "Couldn't read engine data: #{e.message}"
+      @engine_data_error = t("flash.flight_logs.engine_data_unreadable", message: e.message)
     end
     @air_trail_connection = @flight_log.user&.air_trail_connection
     @air_trail_sync = @flight_log.air_trail_syncs.first
@@ -57,12 +57,12 @@ class FlightLogsController < ApplicationController
   def create
     # Already received (sent again from the offline queue): don't log it twice.
     if (key = params.dig(:flight_log, :client_key).to_s.presence) && @aircraft.flight_logs.exists?(client_key: key.first(64))
-      return redirect_to(aircraft_flight_logs_path(@aircraft), notice: "Flight already logged.")
+      return redirect_to(aircraft_flight_logs_path(@aircraft), notice: t("flash.flight_logs.flight_already_logged"))
     end
     @flight_log = @aircraft.flight_logs.new(flight_log_params)
     if @flight_log.valid?
       HoursService.new(@aircraft).log_flight!(@flight_log)
-      redirect_to aircraft_flight_logs_path(@aircraft), notice: "Flight logged (#{@flight_log.tach_time} hrs)."
+      redirect_to aircraft_flight_logs_path(@aircraft), notice: t("flash.flight_logs.flight_logged_hrs", tach_time: @flight_log.tach_time)
     else
       render :new, status: :unprocessable_entity
     end
@@ -73,11 +73,11 @@ class FlightLogsController < ApplicationController
 
   def attach_engine_data
     file = params.dig(:flight_log, :engine_data)
-    return redirect_to(aircraft_flight_log_path(@aircraft, @flight_log), alert: "Choose an engine data file.") if file.blank?
+    return redirect_to(aircraft_flight_log_path(@aircraft, @flight_log), alert: t("flash.flight_logs.choose_an_engine_data")) if file.blank?
 
     @flight_log.engine_data = file
     if @flight_log.save
-      redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: "Engine data attached."
+      redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: t("flash.flight_logs.engine_data_attached")
     else
       redirect_to aircraft_flight_log_path(@aircraft, @flight_log), alert: @flight_log.errors.full_messages.to_sentence
     end
@@ -85,14 +85,14 @@ class FlightLogsController < ApplicationController
 
   def remove_engine_data
     @flight_log.engine_data.purge_later
-    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: "Engine data removed."
+    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: t("flash.flight_logs.engine_data_removed")
   end
 
   # Deleting a flight does not roll back hours; correct those with an hours update.
   def destroy
     @aircraft.flight_logs.find(params[:id]).destroy!
-    log_event("flight", "Flight log deleted")
-    redirect_to aircraft_flight_logs_path(@aircraft), notice: "Flight log deleted. Aircraft hours were not changed."
+    log_event("flight", t("flash.flight_logs.flight_log_deleted"))
+    redirect_to aircraft_flight_logs_path(@aircraft), notice: t("flash.flight_logs.flight_log_deleted_aircraft")
   end
 
   private
@@ -108,7 +108,7 @@ class FlightLogsController < ApplicationController
 
   def require_engine_data_access!
     return if manage_engine_data?
-    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), alert: "Only owners or the flight's pilot can do that."
+    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), alert: t("flash.flight_logs.only_owners_or_the")
   end
 
   def flight_log_params

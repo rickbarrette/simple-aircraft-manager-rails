@@ -6,23 +6,23 @@ class UserCertificatesController < ApplicationController
     certificate = current_user.certificates.new(certificate_params)
     back = safe_return_to || edit_profile_path(anchor: "certificates")
     if certificate.save
-      redirect_to back, notice: "#{certificate.kind_label} certificate added."
+      redirect_to back, notice: t("flash.user_certificates.certificate_added", kind_label: certificate.kind_label)
     else
-      redirect_to back, alert: "Certificate not added: #{certificate.errors.full_messages.to_sentence}."
+      redirect_to back, alert: t("flash.user_certificates.certificate_not_added", items: certificate.errors.full_messages.to_sentence)
     end
   end
 
   def update
     if @certificate.update(certificate_params)
-      redirect_to edit_profile_path(anchor: "certificates"), notice: "Certificate updated."
+      redirect_to edit_profile_path(anchor: "certificates"), notice: t("flash.user_certificates.certificate_updated")
     else
-      redirect_to edit_profile_path(anchor: "certificates"), alert: "Certificate not updated: #{@certificate.errors.full_messages.to_sentence}."
+      redirect_to edit_profile_path(anchor: "certificates"), alert: t("flash.user_certificates.certificate_not_updated", items: @certificate.errors.full_messages.to_sentence)
     end
   end
 
   def destroy
     @certificate.destroy!
-    redirect_to edit_profile_path(anchor: "certificates"), notice: "Certificate removed."
+    redirect_to edit_profile_path(anchor: "certificates"), notice: t("flash.user_certificates.certificate_removed")
   end
 
   private

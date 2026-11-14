@@ -9,7 +9,7 @@
 module CalendarInterval
   extend ActiveSupport::Concern
 
-  UNITS = { "days" => "days", "months" => "months", "years" => "years" }.freeze
+  UNITS = LabelSet.new("calendar_interval.units", %w[days months years])
 
   # [count, unit] for display, from the stored columns.
   def self.split(days, months)
@@ -22,7 +22,7 @@ module CalendarInterval
 
   def self.label(days, months)
     count, unit = split(days, months)
-    count && "#{count} #{count == 1 ? unit.singularize : unit}"
+    count && I18n.t("models.calendar_interval.counts.#{unit}", count: count)
   end
 
   class_methods do
@@ -70,7 +70,7 @@ module CalendarInterval
         next unless instance_variable_defined?(every_ivar)
         raw = instance_variable_get(every_ivar).to_s.strip
         next if raw.empty? || Integer(raw, 10, exception: false)&.positive?
-        errors.add(:"#{name}_every", "must be a whole number more than 0")
+        errors.add(:"#{name}_every", :positive_whole_number)
       end
     end
   end

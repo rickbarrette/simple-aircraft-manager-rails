@@ -1,78 +1,77 @@
-<% content_for :title, "About" %>
+<% content_for :title, t(".about") %>
 <% info = @info %>
 
-<h1 class="mb-1 text-2xl font-bold">About</h1>
-<p class="mb-5 text-sm text-slate-500">Simple Aircraft Manager: what's running, and how it's set up.</p>
+<h1 class="mb-1 text-2xl font-bold"><%= t(".about") %></h1>
+<p class="mb-5 text-sm text-slate-500"><%= t(".simple_aircraft_manager_what_s") %></p>
 
 <section class="card card-body mb-5">
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
-      <p class="text-xs uppercase tracking-wide text-slate-500">Version</p>
+      <p class="text-xs uppercase tracking-wide text-slate-500"><%= t(".version") %></p>
       <p class="font-mono text-2xl font-semibold" data-version><%= info.version %></p>
-      <p class="text-sm text-slate-600" data-revision>Build
-        <%= info.revision_url ? link_to(info.revision, info.revision_url, class: "link font-mono", target: "_blank", rel: "noopener", title: "This commit on GitHub") : tag.span(info.revision, class: "font-mono") %></p>
-      <p class="mt-1 flex flex-wrap gap-x-3 text-sm"><%= link_to "What's new", help_page_path("changelog"), class: "link" %><%= link_to "Disclaimer", help_page_path("disclaimer"), class: "link" %><% if info.repository_url %><%= link_to "Source code", info.repository_url, class: "link", target: "_blank", rel: "noopener" %><% end %></p>
+      <p class="text-sm text-slate-600" data-revision><%= t(".build_html", build: (info.revision_url ? link_to(info.revision, info.revision_url, class: "link font-mono", target: "_blank", rel: "noopener", title: t(".this_commit_on_github")) : tag.span(info.revision, class: "font-mono"))) %></p>
+      <p class="mt-1 flex flex-wrap gap-x-3 text-sm"><%= link_to t(".what_s_new"), help_page_path("changelog"), class: "link" %><%= link_to t(".disclaimer"), help_page_path("disclaimer"), class: "link" %><% if info.repository_url %><%= link_to t(".source_code"), info.repository_url, class: "link", target: "_blank", rel: "noopener" %><% end %></p>
     </div>
     <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
-      <div><dt class="text-slate-500">Built</dt><dd class="font-medium"><%= info.built_at ? fmt_time(info.built_at.in_time_zone) : "—" %></dd></div>
-      <div><dt class="text-slate-500">Started</dt><dd class="font-medium"><%= fmt_time(info.booted_at.in_time_zone) %></dd></div>
-      <div><dt class="text-slate-500">Uptime</dt><dd class="font-medium"><%= distance_of_time_in_words(info.booted_at, Time.current) %></dd></div>
+      <div><dt class="text-slate-500"><%= t(".built") %></dt><dd class="font-medium"><%= info.built_at ? fmt_time(info.built_at.in_time_zone) : "—" %></dd></div>
+      <div><dt class="text-slate-500"><%= t(".started") %></dt><dd class="font-medium"><%= fmt_time(info.booted_at.in_time_zone) %></dd></div>
+      <div><dt class="text-slate-500"><%= t(".uptime") %></dt><dd class="font-medium"><%= distance_of_time_in_words(info.booted_at, Time.current) %></dd></div>
     </dl>
   </div>
 </section>
 
 <div class="grid gap-5 lg:grid-cols-2">
   <section class="card">
-    <div class="card-header"><h2 class="card-title">Runtime</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".runtime") %></h2></div>
     <%= render "pairs", pairs: info.runtime %>
   </section>
 
   <section class="card">
-    <div class="card-header"><h2 class="card-title">Features</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".features") %></h2></div>
     <%= render "pairs", pairs: info.features %>
   </section>
 
   <section class="card">
-    <div class="card-header"><h2 class="card-title">Key components</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".key_components") %></h2></div>
     <%= render "pairs", pairs: info.key_gems %>
   </section>
 
   <div class="space-y-5">
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Storage</h2></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".storage") %></h2></div>
       <% s = info.storage %>
       <%= render "pairs", pairs: [
-            [ "Uploaded files", "#{number_with_delimiter(s[:files])} (#{number_to_human_size(s[:bytes])})" ],
-            [ "Saved by storing duplicates once", number_to_human_size(s[:shared_bytes]) ],
-            [ "Free disk space", s[:free_bytes] && number_to_human_size(s[:free_bytes]) ]
+            [ t(".uploaded_files"), "#{number_with_delimiter(s[:files])} (#{number_to_human_size(s[:bytes])})" ],
+            [ t(".saved_by_storing_duplicates_once"), number_to_human_size(s[:shared_bytes]) ],
+            [ t(".free_disk_space"), s[:free_bytes] && number_to_human_size(s[:free_bytes]) ]
           ] + info.databases.map { |label, bytes| [ "#{label} database", bytes && number_to_human_size(bytes) ] } %>
     </section>
 
     <section class="card">
       <div class="card-header">
-        <h2 class="card-title">Email</h2>
-        <%= button_to "Send test email", admin_test_email_path, class: "btn-secondary btn-sm", disabled: !MailSettings.configured?,
-              data: { turbo_submits_with: "Sending…" }, title: "Sends to #{current_user.email_address}" %>
+        <h2 class="card-title"><%= t(".email") %></h2>
+        <%= button_to t(".send_test_email"), admin_test_email_path, class: "btn-secondary btn-sm", disabled: !MailSettings.configured?,
+              data: { turbo_submits_with: t(".sending") }, title: t(".sends_to", email_address: current_user.email_address) %>
       </div>
-      <%= render "pairs", pairs: MailSettings.summary.merge("Weekly reminders" => "Mondays, to owners who haven't turned them off") %>
-      <div class="px-4 pb-3"><%= button_to "Send me this week's reminder", admin_test_reminder_path, class: "btn-secondary btn-sm", disabled: !MailSettings.configured? %></div>
+      <%= render "pairs", pairs: MailSettings.summary.merge(t(".weekly_reminders") => t(".mondays_to_owners_who_haven")) %>
+      <div class="px-4 pb-3"><%= button_to t(".send_me_this_week_s"), admin_test_reminder_path, class: "btn-secondary btn-sm", disabled: !MailSettings.configured? %></div>
     </section>
 
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Background jobs</h2></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".background_jobs") %></h2></div>
       <% if (j = info.jobs) %>
         <%= render "pairs", pairs: [
-              [ "Workers running", j[:workers].zero? ? tag.span("none", class: "badge-red") : j[:workers] ],
-              [ "Waiting", j[:ready] ], [ "Scheduled", j[:scheduled] ],
-              [ "Failed", j[:failed].positive? ? tag.span(j[:failed], class: "badge-orange") : 0 ]
+              [ t(".workers_running"), j[:workers].zero? ? tag.span("none", class: "badge-red") : j[:workers] ],
+              [ t(".waiting"), j[:ready] ], [ t(".scheduled"), j[:scheduled] ],
+              [ t(".failed"), j[:failed].positive? ? tag.span(j[:failed], class: "badge-orange") : 0 ]
             ] %>
       <% else %>
-        <%= empty_state "Job queue not available." %>
+        <%= empty_state t(".job_queue_not_available") %>
       <% end %>
     </section>
 
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Records</h2></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".records") %></h2></div>
       <%= render "pairs", pairs: info.record_counts.transform_values { number_with_delimiter(_1) } %>
     </section>
   </div>
@@ -81,23 +80,23 @@
 <section class="card mt-5" id="records">
   <div class="card-header">
     <div>
-      <h2 class="card-title">Records integrity</h2>
-      <p class="text-xs text-slate-500">Nightly: a verified database backup, then a check of the record history chains and every electronic signature (AC 120-78B 3.2).</p>
+      <h2 class="card-title"><%= t(".records_integrity") %></h2>
+      <p class="text-xs text-slate-500"><%= t(".nightly_a_verified_database_backup") %></p>
     </div>
-    <%= button_to "Back up and check now", admin_check_records_path, class: "btn-secondary btn-sm", data: { turbo_submits_with: "Checking…" } %>
+    <%= button_to t(".back_up_and_check_now"), admin_check_records_path, class: "btn-secondary btn-sm", data: { turbo_submits_with: t(".checking") } %>
   </div>
   <% check = IntegrityCheck.latest %>
   <% backup = BackupRun.latest %>
   <%= render "pairs", pairs: [
-        [ "Last check", check ? "#{fmt_time(check.created_at)} · #{check.ok ? 'no problems' : pluralize(check.problems.size, 'problem')}" : "not run yet" ],
-        [ "Checked", check ? "#{number_with_delimiter(check.versions_checked)} history entries, #{number_with_delimiter(check.signatures_checked)} signatures" : nil ],
-        [ "Last backup", backup ? "#{fmt_time(backup.created_at)} · #{backup.ok ? number_to_human_size(backup.bytes) : 'FAILED'}" : "not run yet" ],
-        [ "Backup check", backup&.message ],
-        [ "Backups kept", "#{Setting.integer('backups_kept')} (in storage/backups)" ],
-        [ "Off-site backup", OffsiteConnection.connected? ? ((o = OffsiteRun.latest_backup) ? tag.span("#{o.ok ? 'OK' : 'FAILED'} #{fmt_date(o.created_at.to_date)}", class: (o.ok && o.recent? ? nil : "badge-orange")) + " · Google Drive (#{OffsiteConnection.current.account_email})" : "Google Drive connected, none yet") : link_to("not set up", admin_offsite_backup_path, class: "badge-orange") ],
-        [ "Procedures", (r = ProceduresRevision.current) ? "Revision #{r.number}, adopted #{fmt_date(r.adopted_at.to_date)}" : tag.span("not adopted", class: "badge-orange") ],
-        [ "Last audit", AuditRun.latest ? "#{fmt_date(AuditRun.latest.performed_at.to_date)} · #{AuditRun.latest.passed ? 'passed' : 'items not passed'}" : "none yet" ],
-        [ "Next audit due", AuditRun.due_soon? ? tag.span(fmt_date(AuditRun.next_due), class: "badge-orange") : fmt_date(AuditRun.next_due) ]
+        [ t(".last_check"), check ? "#{fmt_time(check.created_at)} · #{check.ok ? t(".no_problems") : t("counts.problem", count: check.problems.size)}" : t(".not_run_yet") ],
+        [ t(".checked"), check ? t(".checked_counts", versions: number_with_delimiter(check.versions_checked), signatures: number_with_delimiter(check.signatures_checked)) : nil ],
+        [ t(".last_backup"), backup ? "#{fmt_time(backup.created_at)} · #{backup.ok ? number_to_human_size(backup.bytes) : 'FAILED'}" : t(".not_run_yet") ],
+        [ t(".backup_check"), backup&.message ],
+        [ t(".backups_kept"), t(".in_storage_backups", backups_kept: (Setting.integer('backups_kept'))) ],
+        [ t(".off_site_backup"), OffsiteConnection.connected? ? ((o = OffsiteRun.latest_backup) ? tag.span("#{o.ok ? 'OK' : 'FAILED'} #{fmt_date(o.created_at.to_date)}", class: (o.ok && o.recent? ? nil : "badge-orange")) + t(".google_drive", account_email: OffsiteConnection.current.account_email) : t(".google_drive_connected_none_yet")) : link_to(t(".not_set_up"), admin_offsite_backup_path, class: "badge-orange") ],
+        [ t(".procedures"), (r = ProceduresRevision.current) ? t(".revision_adopted", number: r.number, to_date: (fmt_date(r.adopted_at.to_date))) : tag.span(t(".not_adopted"), class: "badge-orange") ],
+        [ t(".last_audit"), AuditRun.latest ? "#{fmt_date(AuditRun.latest.performed_at.to_date)} · #{AuditRun.latest.passed ? 'passed' : 'items not passed'}" : t(".none_yet") ],
+        [ t(".next_audit_due"), AuditRun.due_soon? ? tag.span(fmt_date(AuditRun.next_due), class: "badge-orange") : fmt_date(AuditRun.next_due) ]
       ] %>
   <% if check && !check.ok %>
     <ul class="list-disc space-y-1 px-8 pb-3 text-sm text-red-700"><% check.problems.each do |p| %><li><%= p %></li><% end %></ul>
@@ -105,17 +104,17 @@
 </section>
 
 <section class="card mt-5">
-  <div class="card-header"><h2 class="card-title">Software versions</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".software_versions") %></h2></div>
   <% revisions = AppRevision.latest_first.limit(20) %>
   <% if revisions.any? %>
     <%= render "pairs", pairs: revisions.map { |r| [ [ r.version, "build #{r.revision}" ].compact.join(" · "), "#{fmt_time(r.first_seen_at)} – #{fmt_time(r.last_seen_at)}" ] } %>
   <% else %>
-    <%= empty_state "No versions recorded yet." %>
+    <%= empty_state t(".no_versions_recorded_yet") %>
   <% end %>
 </section>
 
 <details class="card mt-5">
-  <summary class="card-header cursor-pointer"><span class="card-title">All gems (<%= info.all_gems.size %>)</span></summary>
+  <summary class="card-header cursor-pointer"><span class="card-title"><%= t(".all_gems_html", all_gems: info.all_gems.size) %></span></summary>
   <div class="grid gap-x-6 px-4 py-3 font-mono text-xs sm:grid-cols-2 lg:grid-cols-3">
     <% info.all_gems.each do |name, version| %>
       <div class="flex justify-between gap-2 py-0.5"><span class="truncate"><%= name %></span><span class="text-slate-500"><%= version %></span></div>

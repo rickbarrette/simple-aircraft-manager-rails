@@ -1,23 +1,23 @@
-<% content_for :title, "#{@aircraft.tail_number} Flights" %>
+<% content_for :title, t(".flights", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <% if @stats.any? %><%= render "flight_logs/stats", stats: @stats %><% end %>
 <section class="card">
   <div class="card-header">
-    <h2 class="card-title">Flight Log</h2>
+    <h2 class="card-title"><%= t(".flight_log") %></h2>
     <%= more_menu do %>
-      <% if owner? %><%= link_to "Import from spreadsheet", new_aircraft_flight_import_path(@aircraft), class: "menu-item" %><% end %>
-      <%= link_to "Export for AirTrail", new_aircraft_air_trail_export_path(@aircraft), class: "menu-item" %>
-      <% if owner? %><%= link_to "Standardize airport codes", aircraft_airport_codes_path(@aircraft), class: "menu-item" %><% end %>
+      <% if owner? %><%= link_to t(".import_from_spreadsheet"), new_aircraft_flight_import_path(@aircraft), class: "menu-item" %><% end %>
+      <%= link_to t(".export_for_airtrail"), new_aircraft_air_trail_export_path(@aircraft), class: "menu-item" %>
+      <% if owner? %><%= link_to t(".standardize_airport_codes"), aircraft_airport_codes_path(@aircraft), class: "menu-item" %><% end %>
     <% end %>
   </div>
   <% if @days.any? %>
     <div class="hidden grid-cols-[9.5rem_1fr_repeat(4,5rem)_1.25rem] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:grid">
-      <span>Date</span><span>Route</span><span class="text-right">Tach</span><span class="text-right">Hobbs</span><span class="text-right">Fuel (gal)</span><span class="text-right">Oil (qt)</span><span></span>
+      <span><%= t(".date") %></span><span><%= t(".route") %></span><span class="text-right"><%= t(".tach") %></span><span class="text-right"><%= t(".hobbs") %></span><span class="text-right"><%= t(".fuel_gal") %></span><span class="text-right"><%= t(".oil_qt") %></span><span></span>
     </div>
     <div>
       <%= render "flight_logs/days", days: @days, page: @page, more: @more %>
     </div>
   <% else %>
-    <%= empty_state "No flights logged yet." %>
+    <%= empty_state t(".no_flights_logged_yet") %>
   <% end %>
 </section>

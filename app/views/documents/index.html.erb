@@ -1,16 +1,16 @@
-<% content_for :title, "#{@aircraft.tail_number} Documents" %>
+<% content_for :title, t(".documents", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <div class="mb-4 flex flex-wrap justify-end gap-2">
   <% if owner? %>
     <%= more_menu do %>
-      <%= link_to "Upload several files", new_bulk_aircraft_documents_path(@aircraft), class: "menu-item" %>
-      <%= link_to "New collection", new_aircraft_document_collection_path(@aircraft), class: "menu-item" %>
+      <%= link_to t(".upload_several_files"), new_bulk_aircraft_documents_path(@aircraft), class: "menu-item" %>
+      <%= link_to t(".new_collection"), new_aircraft_document_collection_path(@aircraft), class: "menu-item" %>
     <% end %>
-    <%= link_to "+ Upload Document", new_aircraft_document_path(@aircraft), class: "btn-primary" %>
+    <%= link_to t(".upload_document"), new_aircraft_document_path(@aircraft), class: "btn-primary" %>
   <% end %>
 </div>
 <% if @collections.empty? && @uncollected.empty? %>
-  <div class="card"><%= empty_state "No documents yet. Upload logbook scans, 337s, weight & balance, receipts…" %></div>
+  <div class="card"><%= empty_state t(".no_documents_yet_upload_logbook") %></div>
 <% end %>
 <div class="space-y-5">
   <% @collections.each do |col| %>
@@ -26,14 +26,14 @@
         <div class="flex items-center gap-2">
           <%= visibility_badge(col.visibility) %>
           <% if owner? %>
-            <%= link_to "+ Document", new_aircraft_document_path(@aircraft, collection_id: col.id), class: "btn-secondary btn-sm" %>
-            <%= link_to "Edit", edit_aircraft_document_collection_path(@aircraft, col), class: "btn-secondary btn-sm" %>
+            <%= link_to t(".document"), new_aircraft_document_path(@aircraft, collection_id: col.id), class: "btn-secondary btn-sm" %>
+            <%= link_to t(".edit"), edit_aircraft_document_collection_path(@aircraft, col), class: "btn-secondary btn-sm" %>
           <% end %>
         </div>
       </summary>
       <% if col.documents.any? %>
         <ul class="divide-y divide-slate-100"><% col.documents.sort_by(&:name).each do |doc| %><%= render "documents/doc_row", doc: doc, aircraft: @aircraft %><% end %></ul>
-      <% else %><%= empty_state "Empty collection." %><% end %>
+      <% else %><%= empty_state t(".empty_collection") %><% end %>
     </details>
   <% end %>
   <% if @uncollected.any? %>
@@ -41,7 +41,7 @@
       <summary class="card-header cursor-pointer list-none border-b-0 group-open:border-b [&::-webkit-details-marker]:hidden">
         <div class="flex items-start gap-2">
           <span aria-hidden="true" class="mt-0.5 text-slate-400 transition group-open:rotate-90">›</span>
-          <h2 class="card-title">Uncollected <span class="text-sm font-normal text-slate-500">(<%= @uncollected.size %>)</span></h2>
+          <h2 class="card-title"><%= t(".uncollected") %> <span class="text-sm font-normal text-slate-500">(<%= @uncollected.size %>)</span></h2>
         </div>
       </summary>
       <ul class="divide-y divide-slate-100"><% @uncollected.each do |doc| %><%= render "documents/doc_row", doc: doc, aircraft: @aircraft %><% end %></ul>

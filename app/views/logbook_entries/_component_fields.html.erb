@@ -2,19 +2,19 @@
 <% comps = aircraft.components.where.not(status: "DISPOSED").includes(:component_type).order(:install_location) %>
 <div class="grid gap-4 sm:grid-cols-3">
   <div>
-    <%= f.label :component_id, "Component", class: "label" %>
-    <%= f.select :component_id, options_for_select([ [ "— None —", "" ] ] + comps.map { |c|
-          [ "#{c} · #{c.manufacturer} #{c.model}#{" · S/N #{c.serial_number}" if c.serial_number.present?}", c.id,
+    <%= f.label :component_id, t(".component"), class: "label" %>
+    <%= f.select :component_id, options_for_select([ [ t(".none"), "" ] ] + comps.map { |c|
+          [ "#{c} · #{c.manufacturer} #{c.model}#{" · #{t('.serial_short', serial: c.serial_number)}" if c.serial_number.present?}", c.id,
             { "data-total" => c.hours_in_service.to_f, "data-since" => c.hours_since_overhaul.to_f,
               "data-kind" => (c.engine? ? "ENG" : c.propeller? ? "PROP" : ""), "data-abbr" => c.since_overhaul_abbreviation } ] }, f.object.component_id),
           {}, class: "input", data: { component_times_target: "component", action: "component-times#componentChanged" } %>
-    <p class="hint">For engine and propeller logs: printed with its serial number and times.</p>
+    <p class="hint"><%= t(".for_engine_and_propeller_logs") %></p>
   </div>
-  <%= f.field :component_hours_at_entry, as: :number, step: 0.1, label: "Component total time",
+  <%= f.field :component_hours_at_entry, as: :number, step: 0.1, label: t(".component_total_time"),
         data: { component_times_target: "total", action: "input->component-times#markManual" } %>
-  <%= f.field :component_since_overhaul_at_entry, as: :number, step: 0.1, label: "Since overhaul",
+  <%= f.field :component_since_overhaul_at_entry, as: :number, step: 0.1, label: t(".since_overhaul"),
         data: { component_times_target: "since", action: "input->component-times#markManual" },
-        hint: "Worked out from the component's current times and the airframe total time above; edit them if they differ." %>
+        hint: t(".worked_out_from_the_component") %>
 </div>
 <%# Sub-components of the chosen component (oil filter, magnetos…): tick to include them with their times. %>
 <% children = comps.select(&:parent_component_id) %>
@@ -22,7 +22,7 @@
   <% parts = f.object.parts.index_by(&:component_id) %>
   <% selected = f.object.component %>
   <fieldset class="space-y-2" data-component-times-target="partsBox" <%= "hidden" unless selected && (children.map(&:id) & selected.descendant_ids).any? %>>
-    <legend class="label">Sub-components</legend>
+    <legend class="label"><%= t(".sub_components") %></legend>
     <% children.each do |c| %>
       <% part = parts[c.id] %>
       <% ancestors = c.ancestor_ids %>
@@ -35,19 +35,19 @@
                             data: { action: "component-times#partToggled" } %>
           <span><%= c %> · <%= c.manufacturer %> <%= c.model %><%= " · S/N #{c.serial_number}" if c.serial_number.present? %></span>
         </label>
-        <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_hours">Total time</label>
+        <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_hours"><%= t(".total_time") %></label>
           <%= number_field_tag "#{field}[hours]", part&.hours_at_entry, id: "part_#{c.id}_hours", step: 0.1, class: "input",
                                data: { role: "hours", action: "input->component-times#partEdited" } %></div>
         <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_since"><%= c.since_overhaul_abbreviation.capitalize %></label>
           <%= number_field_tag "#{field}[since]", part&.since_overhaul_at_entry, id: "part_#{c.id}_since", step: 0.1, class: "input",
                                data: { role: "since", action: "input->component-times#partEdited" } %></div>
         <% if f.object.new_record? %>
-          <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_service">On the Components tab</label>
-            <%= select_tag "#{field}[service]", options_for_select([ [ "Not changed", "" ], [ "Serviced", "serviced" ], [ "Replaced", "replaced" ] ], params.dig(:logbook_entry, :parts, c.id.to_s, :service)),
+          <div><label class="text-xs text-slate-500" for="part_<%= c.id %>_service"><%= t(".on_the_components_tab") %></label>
+            <%= select_tag "#{field}[service]", options_for_select([ [ t(".not_changed"), "" ], [ t(".serviced"), "serviced" ], [ t(".replaced"), "replaced" ] ], params.dig(:logbook_entry, :parts, c.id.to_s, :service)),
                            id: "part_#{c.id}_service", class: "input" %></div>
         <% end %>
       </div>
     <% end %>
-    <p class="hint">Their times are worked out the same way as the component's. Sub-components are set up on the Components tab (a part's "Parent component").<%= " “Serviced” or “Replaced” also records it on the Components tab (e.g. an oil and filter change), dated to this entry." if f.object.new_record? %></p>
+    <p class="hint"><%= t(f.object.new_record? ? ".their_times_new_html" : ".their_times_are_worked_out_html") %></p>
   </fieldset>
 <% end %>

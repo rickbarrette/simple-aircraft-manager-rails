@@ -1,10 +1,8 @@
-You electronically signed a logbook entry.
+<%= raw t(".you_electronically_signed_a_logbook_2_text", tail_number: @entry.aircraft.tail_number) %>
+<%= raw t(".entry_log_2_text", date: (fmt_date(@entry.date)), log_type: (LogbookEntry::LOG_TYPES[@entry.log_type])) %>
+<%= raw t(".certified_by_2_text", signer_name: @signature.signer_name, certificate_label: @signature.certificate_label, certificate_number: @signature.certificate_number) %>
+<%= raw t(".signed_text", d: (@signature.signed_at.utc.strftime("%Y-%m-%d %H:%M:%S UTC"))) %>
+<%= raw t(".statement_2_text", statement: @signature.statement) %>
+<%= raw t(".fingerprint_text", content_digest: @signature.content_digest) %>
 
-Aircraft: <%= @entry.aircraft.tail_number %>
-Entry: <%= fmt_date(@entry.date) %>, <%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log
-Certified by: <%= @signature.signer_name %>, <%= @signature.certificate_label %> <%= @signature.certificate_number %>
-Signed: <%= @signature.signed_at.utc.strftime("%Y-%m-%d %H:%M:%S UTC") %>
-Statement: <%= @signature.statement %>
-Fingerprint: <%= @signature.content_digest %>
-
-If you didn't sign this, tell the aircraft's owner right away.
+<%= raw t(".if_you_didn_t_sign") %>

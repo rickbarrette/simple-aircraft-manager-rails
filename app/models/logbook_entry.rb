@@ -1,22 +1,12 @@
 class LogbookEntry < ApplicationRecord
   include Versioned
-  LOG_TYPES = { "AC" => "Aircraft", "ENG" => "Engine", "PROP" => "Propeller", "OTHER" => "Other" }.freeze
-  ENTRY_TYPES = {
-    "MAINTENANCE" => "Maintenance", "INSPECTION" => "Inspection", "FLIGHT" => "Flight",
-    "HOURS_UPDATE" => "Hours Update", "OTHER" => "Other"
-  }.freeze
+  LOG_TYPES = LabelSet.new("logbook_entry.log_types", %w[AC ENG PROP OTHER])
+  ENTRY_TYPES = LabelSet.new("logbook_entry.entry_types", %w[MAINTENANCE INSPECTION FLIGHT HOURS_UPDATE OTHER])
 
   # Kind of certificate of the person approving return to service (43.9(a)(4)).
-  CERTIFICATE_TYPES = {
-    "AP" => "A&P mechanic", "IA" => "A&P with Inspection Authorization", "A" => "Mechanic, airframe only",
-    "P" => "Mechanic, powerplant only", "REPAIR_STATION" => "Repair station", "REPAIRMAN" => "Repairman",
-    "PILOT" => "Pilot (preventive maintenance)", "OTHER" => "Other"
-  }.freeze
+  CERTIFICATE_TYPES = LabelSet.new("logbook_entry.certificate_types", %w[AP IA A P REPAIR_STATION REPAIRMAN PILOT OTHER])
   # An inspection entry ends with one of these (43.11(a)(5)).
-  INSPECTION_RESULTS = {
-    "approved" => "Airworthy, approved for return to service",
-    "discrepancies" => "Not approved: discrepancy list given to the owner"
-  }.freeze
+  INSPECTION_RESULTS = LabelSet.new("logbook_entry.inspection_results", %w[approved discrepancies])
   # Entries that 43.9 / 43.11 set requirements for.
   RECORD_TYPES = %w[MAINTENANCE INSPECTION].freeze
 
@@ -60,7 +50,7 @@ class LogbookEntry < ApplicationRecord
     where("text LIKE :t OR signoff_person LIKE :t OR signoff_location LIKE :t", t: term)
   end
 
-  def to_s = "#{date} — #{LOG_TYPES[log_type]}"
+  def to_s = "#{date && I18n.l(date, format: :app)} — #{LOG_TYPES[log_type]}"
 
   def signed? = signature.present?
   def superseded? = superseded_at.present?
@@ -103,45 +93,44 @@ class LogbookEntry < ApplicationRecord
     name = inspection_records.first&.inspection_type&.name.to_s.sub(/\s*\(.*\)\z/, "").sub(/\s*inspection\z/i, "").strip.downcase
     name = "annual" if name.empty? && text.to_s.match?(/annual/i)
     name = "100-hour" if name.empty? && text.to_s.match?(/100[- ]?h(ou)?r/i)
-    return "a ______________" if name.empty?
-    "#{name.match?(/\A[aeiou]/) ? 'an' : 'a'} #{name}"
+    return I18n.t("models.logbook_entry.inspection_blank") if name.empty?
+    I18n.t(name.match?(/\A[aeiou]/) ? "models.logbook_entry.inspection_an" : "models.logbook_entry.inspection_a", name: name)
   end
 
   # What the signer certifies, by the kind of entry and certificate.
   def certification_statement(certificate_kind)
     if entry_type == "INSPECTION"
       if inspection_result == "discrepancies"
-        "I certify that this aircraft has been inspected in accordance with #{inspection_kind_phrase} inspection and a list of discrepancies " \
-          "and unairworthy items dated #{date&.strftime('%b %-d, %Y')} has been provided for the aircraft owner or operator."
+        I18n.t("models.logbook_entry.statements.discrepancies", inspection: inspection_kind_phrase, date: date && I18n.l(date, format: :app))
       else
-        "I certify that this aircraft has been inspected in accordance with #{inspection_kind_phrase} inspection and was determined to be in airworthy condition."
+        I18n.t("models.logbook_entry.statements.airworthy", inspection: inspection_kind_phrase)
       end
     elsif certificate_kind == "PILOT"
-      "I certify that the preventive maintenance described in this entry was performed in accordance with 14 CFR Part 43, and I approve it for return to service."
+      I18n.t("models.logbook_entry.statements.preventive")
     elsif entry_type == "MAINTENANCE"
-      "I certify that the work described in this entry was performed in accordance with 14 CFR Part 43, and I approve it for return to service with respect to that work."
+      I18n.t("models.logbook_entry.statements.maintenance")
     else
-      "I certify that this entry is correct."
+      I18n.t("models.logbook_entry.statements.other")
     end
   end
 
   # Why this certificate can't sign this entry ([] if it can).
   def signing_problems(certificate)
     problems = []
-    problems << "it's already signed" if signed?
-    problems << "it has been superseded by a correction" if superseded?
-    problems << "it has no description" if text.blank?
-    problems << "it has no date" if date.blank?
+    problems << I18n.t("models.logbook_entry.signing_problems.already_signed") if signed?
+    problems << I18n.t("models.logbook_entry.signing_problems.superseded") if superseded?
+    problems << I18n.t("models.logbook_entry.signing_problems.no_description") if text.blank?
+    problems << I18n.t("models.logbook_entry.signing_problems.no_date") if date.blank?
     if entry_type == "INSPECTION"
-      problems << "an inspection entry needs its result (airworthy, or discrepancy list)" if inspection_result.blank?
-      problems << "an inspection entry needs the aircraft's total time" if aircraft_hours_at_entry.blank?
+      problems << I18n.t("models.logbook_entry.signing_problems.no_result") if inspection_result.blank?
+      problems << I18n.t("models.logbook_entry.signing_problems.no_total_time") if aircraft_hours_at_entry.blank?
     end
     if certificate
-      problems << "that certificate has expired" if certificate.expired?
-      problems << "a pilot certificate can sign preventive maintenance only" if certificate.kind == "PILOT" && entry_type != "MAINTENANCE"
-      problems << "\"Other\" certificates can't sign maintenance or inspections" if certificate.kind == "OTHER" && RECORD_TYPES.include?(entry_type)
+      problems << I18n.t("models.logbook_entry.signing_problems.certificate_expired") if certificate.expired?
+      problems << I18n.t("models.logbook_entry.signing_problems.pilot_preventive_only") if certificate.kind == "PILOT" && entry_type != "MAINTENANCE"
+      problems << I18n.t("models.logbook_entry.signing_problems.other_certificate") if certificate.kind == "OTHER" && RECORD_TYPES.include?(entry_type)
     else
-      problems << "choose a certificate to sign with"
+      problems << I18n.t("models.logbook_entry.signing_problems.choose_certificate")
     end
     problems
   end
@@ -166,13 +155,13 @@ class LogbookEntry < ApplicationRecord
   def missing_record_items
     return [] unless RECORD_TYPES.include?(entry_type)
     missing = []
-    missing << "description of the work" if text.blank?
-    missing << "signer's name" if signoff_person.blank?
-    missing << "kind of certificate" if signoff_certificate_type.blank?
-    missing << "certificate number" if signoff_certificate_number.blank?
+    missing << I18n.t("models.logbook_entry.missing.description") if text.blank?
+    missing << I18n.t("models.logbook_entry.missing.signer") if signoff_person.blank?
+    missing << I18n.t("models.logbook_entry.missing.certificate_kind") if signoff_certificate_type.blank?
+    missing << I18n.t("models.logbook_entry.missing.certificate_number") if signoff_certificate_number.blank?
     if entry_type == "INSPECTION"
-      missing << "aircraft time in service" if aircraft_hours_at_entry.blank?
-      missing << "airworthiness result" if inspection_result.blank?
+      missing << I18n.t("models.logbook_entry.missing.time_in_service") if aircraft_hours_at_entry.blank?
+      missing << I18n.t("models.logbook_entry.missing.result") if inspection_result.blank?
     end
     missing
   end
@@ -183,7 +172,7 @@ class LogbookEntry < ApplicationRecord
     return unless signed? && signature.persisted?
     locked = changed - UNSIGNED_FIELDS
     return if locked.empty?
-    errors.add(:base, "This entry is signed, so it can't be changed. Make a correction entry instead")
+    errors.add(:base, :signed_locked)
     throw :abort
   end
 end

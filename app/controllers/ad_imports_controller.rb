@@ -14,7 +14,7 @@ class AdImportsController < ApplicationController
 
   def show
     @token = params[:token].to_s
-    return redirect_to_upload("Upload expired. Please upload the file again.") unless stored_file?(@token)
+    return redirect_to_upload(t("flash.uploads.expired")) unless stored_file?(@token)
     @filename = params[:filename].to_s
     @import = AdImport.new(@aircraft, path: stored_path(@token), filename: @filename)
     @import.rows
@@ -24,7 +24,7 @@ class AdImportsController < ApplicationController
 
   def confirm
     token = params[:token].to_s
-    return redirect_to_upload("Upload expired. Please upload the file again.") unless stored_file?(token)
+    return redirect_to_upload(t("flash.uploads.expired")) unless stored_file?(token)
     import = AdImport.new(@aircraft, path: stored_path(token), filename: params[:filename])
     # Only AD numbers present in the uploaded file; values are checked against AdImport::ACTIONS.
     decisions = params.fetch(:decisions, {}).permit(*import.rows.map(&:number)).to_h
@@ -34,8 +34,8 @@ class AdImportsController < ApplicationController
                                   models_covered: DrsImport.covered(@aircraft, import.rows.flat_map(&:models)))
     discard_upload(token)
     redirect_to aircraft_airworthiness_directives_path(@aircraft),
-                notice: "Imported #{result[:tracked]} ADs to track and #{result[:not_applicable]} marked N/A; " \
-                        "#{result[:updated]} existing ADs updated, #{result[:skipped]} skipped."
+                notice: t("flash.ad_imports.imported_ads_to_track", tracked: result[:tracked], not_applicable: result[:not_applicable],
+                                                                           updated: result[:updated], skipped: result[:skipped])
   rescue AdImport::Error => e
     redirect_to_upload(e.message)
   end

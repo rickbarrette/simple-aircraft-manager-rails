@@ -4,12 +4,7 @@
 class RecordsAudit
   Item = Data.define(:key, :title, :auto, :passed, :detail)
 
-  MANUAL = {
-    "restore_test" => "Restored the latest off-site backup somewhere separate and opened it (records readable, counts plausible)",
-    "sample" => "Compared the sampled entries below with their work orders, receipts or other source documents; they match",
-    "users" => "Reviewed the users and roles below; accounts of people who no longer need access are disabled",
-    "legacy" => "The paper (legacy) logbooks are kept, complete and accounted for"
-  }.freeze
+  MANUAL = LabelSet.new("records_audit.manual", %w[restore_test sample users legacy])
 
   def initialize(since: AuditRun.latest&.performed_at)
     @since = since
@@ -22,23 +17,23 @@ class RecordsAudit
     revision = ProceduresRevision.current
     expired = UserCertificate.joins(:user).merge(User.active).where(expires_on: ...Date.current)
     [
-      Item.new("integrity", "Records integrity check passed in the last 2 days", true,
+      Item.new("integrity", t(:integrity), true,
                check.present? && check.ok && check.created_at > 2.days.ago,
-               check ? "#{check.created_at.to_date}: #{check.ok ? 'no problems' : check.problems.first(3).join('; ')}" : "Never run"),
-      Item.new("backup", "A verified database backup was made in the last 2 days", true,
+               check ? "#{check.created_at.to_date}: #{check.ok ? t(:no_problems) : check.problems.first(3).join('; ')}" : t(:never_run)),
+      Item.new("backup", t(:backup), true,
                backup.present? && backup.ok && backup.created_at > 2.days.ago,
-               backup ? "#{backup.created_at.to_date}: #{backup.message}" : "Never run"),
+               backup ? "#{backup.created_at.to_date}: #{backup.message}" : t(:never_run)),
       *offsite_items,
       drs_item,
-      Item.new("procedures", "The procedures document is adopted and its details filled in", true,
+      Item.new("procedures", t(:procedures), true,
                revision.present? && @policy.complete?,
-               revision ? "Revision #{revision.number}, adopted #{revision.adopted_at.to_date}" : "Not adopted yet"),
-      Item.new("signatures", "Electronic signatures since the last audit are intact", true,
-               check.present? && check.ok, "#{signatures_since.count} signed since #{since_label}"),
-      Item.new("certificates", "No active user is relying on an expired certificate", true, true,
-               expired.any? ? "Expired (can't sign until renewed): #{expired.map { "#{_1.user.display_name} #{_1.short_label}" }.join(', ')}" : "None expired"),
-      Item.new("versions", "Software versions since the last audit", true, true,
-               versions_since.map { [ _1.version, "build #{_1.revision}" ].compact.join(" ") }.join(", ").presence || "No changes")
+               revision ? t(:revision, number: revision.number, date: revision.adopted_at.to_date) : t(:not_adopted)),
+      Item.new("signatures", t(:signatures), true,
+               check.present? && check.ok, t(:signed_since, count: signatures_since.count, since: since_label)),
+      Item.new("certificates", t(:certificates), true, true,
+               expired.any? ? t(:expired_certificates, names: expired.map { "#{_1.user.display_name} #{_1.short_label}" }.join(", ")) : t(:none_expired)),
+      Item.new("versions", t(:versions), true, true,
+               versions_since.map { [ _1.version, t(:build, revision: _1.revision) ].compact.join(" ") }.join(", ").presence || t(:no_changes))
     ]
   end
 
@@ -59,7 +54,7 @@ class RecordsAudit
       { "key" => key, "title" => title, "auto" => false, "passed" => a["passed"] == "1", "detail" => a["note"].to_s.strip.first(1000) }
     end
     results = autos.map { { "key" => _1.key, "title" => _1.title, "auto" => true, "passed" => _1.passed, "detail" => _1.detail } } + manual
-    results << { "key" => "sample_entries", "title" => "Entries sampled", "auto" => true, "passed" => true,
+    results << { "key" => "sample_entries", "title" => t(:entries_sampled), "auto" => true, "passed" => true,
                  "detail" => LogbookEntry.where(id: sample_ids).includes(:aircraft).map { "#{_1.aircraft.tail_number} #{_1.date}" }.join(", ") }
     AuditRun.create!(performed_by: user, performed_at: Time.current, passed: results.all? { _1["passed"] }, results: results, notes: notes.to_s.strip.first(5000))
   end
@@ -71,18 +66,19 @@ class RecordsAudit
 
   def drs_item
     due = Aircraft.ordered.select { DrsImport.renewal_due?(_1) || DrsImport.missing_models(_1).any? }
-    Item.new("drs", "Each aircraft's AD list was refreshed from FAA DRS in the last 12 months, for all its models", true, due.empty?,
-             due.any? ? "Needs a DRS import: #{due.map(&:tail_number).join(', ')}" : "Up to date")
+    Item.new("drs", t(:drs), true, due.empty?,
+             due.any? ? t(:needs_drs, aircraft: due.map(&:tail_number).join(", ")) : t(:up_to_date))
   end
 
   def offsite_items
     return [] unless OffsiteConnection.connected?
     run = OffsiteRun.latest_backup
-    [ Item.new("offsite", "The backup was copied off-site (Google Drive) in the last 2 days", true, run.present? && run.ok && run.recent?,
-               run ? "#{run.created_at.to_date}: #{run.message}" : "Never run") ]
+    [ Item.new("offsite", t(:offsite), true, run.present? && run.ok && run.recent?,
+               run ? "#{run.created_at.to_date}: #{run.message}" : t(:never_run)) ]
   end
 
-  def since_label = @since ? @since.to_date.to_s : "the start"
+  def since_label = @since ? @since.to_date.to_s : t(:the_start)
+  def t(key, **opts) = I18n.t(key, scope: "services.records_audit", **opts)
   def signatures_since = EntrySignature.where(signed_at: (@since || Time.at(0))..)
   def versions_since = AppRevision.where(first_seen_at: (@since || Time.at(0))..).order(:first_seen_at)
 end

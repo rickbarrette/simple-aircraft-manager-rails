@@ -1,10 +1,5 @@
 class Aircraft < ApplicationRecord
-  STATUSES = {
-    "AVAILABLE" => "Available",
-    "MX" => "In Maintenance",
-    "GROUND" => "Grounded",
-    "UNAVAILABLE" => "Unavailable"
-  }.freeze
+  STATUSES = LabelSet.new("aircraft.statuses", %w[AVAILABLE MX GROUND UNAVAILABLE])
 
   has_one_attached :picture
 
@@ -33,12 +28,12 @@ class Aircraft < ApplicationRecord
 
   # Which clock counts as time in service for maintenance (14 CFR 1.1 defines
   # it as takeoff to landing; many owners use tach, some Hobbs).
-  TIME_BASES = { "tach" => "Tach", "hobbs" => "Hobbs" }.freeze
+  TIME_BASES = LabelSet.new("aircraft.time_bases", %w[tach hobbs])
 
   validates :tail_number, presence: true
   validates :time_basis, inclusion: { in: TIME_BASES.keys }
   validates :status, inclusion: { in: STATUSES.keys }
-  validates :icao_type, format: { with: /\A[A-Z0-9]{1,4}\z/, message: "must be an ICAO type designator like C150" }, allow_blank: true
+  validates :icao_type, format: { with: /\A[A-Z0-9]{1,4}\z/, message: :icao_type }, allow_blank: true
   normalizes :icao_type, with: ->(t) { t.strip.upcase.presence }
   validate :picture_is_image
 
@@ -86,7 +81,7 @@ class Aircraft < ApplicationRecord
 
   def picture_is_image
     if picture.attached? && !picture.content_type.to_s.start_with?("image/")
-      errors.add(:picture, "must be an image")
+      errors.add(:picture, :not_image)
     end
   end
 end

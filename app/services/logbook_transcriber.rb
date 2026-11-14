@@ -48,8 +48,8 @@ class LogbookTranscriber
     )
     message = stream.accumulated_message
     case message.stop_reason
-    when :refusal then raise Error, "Claude declined to read these pages"
-    when :max_tokens then raise Error, "the transcription was too long to finish; try fewer pages per file"
+    when :refusal then raise Error, I18n.t("services.logbook_transcriber.claude_declined_to_read_these")
+    when :max_tokens then raise Error, I18n.t("services.logbook_transcriber.the_transcription_was_too_long")
     end
 
     text = message.content.select { _1.type == :text }.map(&:text).join
@@ -57,15 +57,15 @@ class LogbookTranscriber
     Result.new(entries: Array(data["entries"]), non_logbook_pages: Array(data["non_logbook_pages"]),
                unparseable_pages: Array(data["unparseable_pages"]), model: message.model.to_s)
   rescue JSON::ParserError
-    raise Error, "Claude's answer wasn't valid JSON"
+    raise Error, I18n.t("services.logbook_transcriber.claude_s_answer_wasn_t")
   rescue Anthropic::Errors::RateLimitError
-    raise Error, "the Anthropic API is rate limiting requests; try again in a few minutes"
+    raise Error, I18n.t("services.logbook_transcriber.the_anthropic_api_is_rate")
   rescue Anthropic::Errors::AuthenticationError, Anthropic::Errors::PermissionDeniedError
-    raise Error, "the Anthropic API key was rejected"
+    raise Error, I18n.t("services.logbook_transcriber.the_anthropic_api_key_was")
   rescue Anthropic::Errors::APIStatusError => e
-    raise Error, "the Anthropic API returned an error (#{e.status})"
+    raise Error, I18n.t("services.logbook_transcriber.the_anthropic_api_returned_an", status: e.status)
   rescue Anthropic::Errors::APIConnectionError
-    raise Error, "couldn't reach the Anthropic API"
+    raise Error, I18n.t("services.logbook_transcriber.couldn_t_reach_the_anthropic")
   end
 
   private

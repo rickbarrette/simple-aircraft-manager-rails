@@ -1,2 +1,2 @@
-<h1 class="mb-4 text-2xl font-bold">Edit <%= @airport.ident %></h1>
+<h1 class="mb-4 text-2xl font-bold"><%= t(".edit_html", ident: @airport.ident) %></h1>
 <%= render "form", airport: @airport %>

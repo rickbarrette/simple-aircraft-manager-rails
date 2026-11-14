@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 // Airport code field with suggestions from the airport database.
 //   <div data-controller="airport-autocomplete" data-airport-autocomplete-url-value="/airports/search?aircraft_id=1">
@@ -108,7 +109,7 @@ export default class extends Controller {
     const code = this.inputTarget.value.trim().toUpperCase()
     const match = this.results.find((a) => a.code === code || (a.aka || []).includes(code))
     if (match) this.setHint(this.describeAirport(match))
-    else if (code.length >= 2 && code.length <= 4 && !code.includes(" ")) this.setHint("Not in the airport database", true)
+    else if (code.length >= 2 && code.length <= 4 && !code.includes(" ")) this.setHint(t("airports.not_found"), true)
     else this.setHint("")
   }
 

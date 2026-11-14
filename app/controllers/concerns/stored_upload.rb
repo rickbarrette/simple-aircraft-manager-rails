@@ -14,10 +14,10 @@ module StoredUpload
 
   # Returns [token, nil] on success or [nil, error message].
   def store_upload(file)
-    return [ nil, "Choose a file to upload." ] unless file.respond_to?(:path)
-    return [ nil, "File is too large." ] if file.size > UPLOAD_MAX_SIZE
+    return [ nil, I18n.t("flash.uploads.choose_file") ] unless file.respond_to?(:path)
+    return [ nil, I18n.t("flash.uploads.too_large") ] if file.size > UPLOAD_MAX_SIZE
     ext = File.extname(file.original_filename.to_s).delete(".").downcase
-    return [ nil, "Upload an .xlsx or .csv file." ] unless ext.in?(UPLOAD_EXTENSIONS)
+    return [ nil, I18n.t("flash.uploads.spreadsheet_only") ] unless ext.in?(UPLOAD_EXTENSIONS)
 
     FileUtils.mkdir_p(UPLOAD_DIR)
     Dir.glob(UPLOAD_DIR.join("*")).each { |f| File.delete(f) if File.mtime(f) < 1.day.ago }

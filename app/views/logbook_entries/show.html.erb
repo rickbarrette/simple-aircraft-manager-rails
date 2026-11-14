@@ -1,19 +1,19 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card max-w-4xl">
   <div class="card-header">
-    <h2 class="card-title"><%= LogbookEntry::LOG_TYPES[@entry.log_type] %> log — <%= fmt_date(@entry.date) %></h2>
+    <h2 class="card-title"><%= t(".log_html", log_type: (LogbookEntry::LOG_TYPES[@entry.log_type]), date: (fmt_date(@entry.date))) %></h2>
     <div class="flex gap-2">
       <% if @entry.signed? %>
-        <%= link_to "Print for logbook", new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "btn-secondary btn-sm" %>
+        <%= link_to t(".print_for_logbook"), new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "btn-secondary btn-sm" %>
         <% if owner? && !@entry.superseded? && !@entry.superseded_by %>
-          <%= more_menu(small: true) do %><%= link_to "Correct this entry", new_aircraft_logbook_entry_path(@aircraft, supersedes: @entry.id), class: "menu-item" %><% end %>
+          <%= more_menu(small: true) do %><%= link_to t(".correct_this_entry"), new_aircraft_logbook_entry_path(@aircraft, supersedes: @entry.id), class: "menu-item" %><% end %>
         <% end %>
       <% else %>
-        <%= link_to "Sign", new_aircraft_logbook_entry_signature_path(@aircraft, @entry), class: "btn-primary btn-sm" %>
-        <% if owner? %><%= link_to "Edit", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
+        <%= link_to t(".sign"), new_aircraft_logbook_entry_signature_path(@aircraft, @entry), class: "btn-primary btn-sm" %>
+        <% if owner? %><%= link_to t(".edit"), edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
         <%= more_menu(small: true) do %>
-          <% if owner? %><%= link_to "Ask someone to sign", new_aircraft_logbook_entry_signing_invitation_path(@aircraft, @entry), class: "menu-item" %><% end %>
-          <%= link_to "Print for logbook", new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "menu-item" %>
+          <% if owner? %><%= link_to t(".ask_someone_to_sign"), new_aircraft_logbook_entry_signing_invitation_path(@aircraft, @entry), class: "menu-item" %><% end %>
+          <%= link_to t(".print_for_logbook"), new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "menu-item" %>
         <% end %>
       <% end %>
     </div>
@@ -21,43 +21,43 @@
   <div class="card-body space-y-3">
     <% if @entry.signed? %><%= render "logbook_entries/signature", entry: @entry %>
     <% elsif LogbookEntry::RECORD_TYPES.include?(@entry.entry_type) %>
-      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200">Not signed electronically.<%= " Pending correction of the #{fmt_date(@entry.supersedes.date)} entry." if @entry.supersedes %> Sign it here, or print it and sign the paper copy.</p>
+      <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200"><%= t(".not_signed_electronically_sign_it_html", supersedes: (t(".pending_correction_of_the_entry", date: (fmt_date(@entry.supersedes.date))) if @entry.supersedes)) %></p>
     <% end %>
     <% unless @entry.verified? %>
       <div class="flex flex-wrap items-center justify-between gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
-        <span>Transcribed by Claude<%= " (#{@entry.transcription_confidence} confidence)" if @entry.transcription_confidence %> and not yet checked. Compare it with the scan<%= @entry.document ? "" : " or the paper logbook" %> before relying on it.</span>
-        <% if owner? %><%= button_to "Matches the scan: mark verified", verify_aircraft_logbook_entry_path(@aircraft, @entry), method: :patch, class: "btn-secondary btn-sm" %><% end %>
+        <span><%= t(".transcribed_by_claude_and_not_html", transcription_confidence: (t(".confidence", transcription_confidence: @entry.transcription_confidence) if @entry.transcription_confidence), logbook: (@entry.document ? "" : t(".or_the_paper_logbook"))) %></span>
+        <% if owner? %><%= button_to t(".matches_the_scan_mark_verified"), verify_aircraft_logbook_entry_path(@aircraft, @entry), method: :patch, class: "btn-secondary btn-sm" %><% end %>
       </div>
     <% end %>
     <div class="flex flex-wrap gap-4 text-sm text-slate-600">
-      <span>Type: <%= LogbookEntry::ENTRY_TYPES[@entry.entry_type] %></span>
-      <span>Airframe total time: <%= hours(@entry.aircraft_hours_at_entry) %></span>
+      <span><%= t(".type_html", entry_type: (LogbookEntry::ENTRY_TYPES[@entry.entry_type])) %></span>
+      <span><%= t(".airframe_total_time_html", aircraft_hours_at_entry: (hours(@entry.aircraft_hours_at_entry))) %></span>
       <% if (c = @entry.component) %>
         <span><%= c %> <%= c.model %><%= " S/N #{c.serial_number}" if c.serial_number.present? %>:
-          <%= hours(@entry.component_hours_at_entry) %> total, <%= hours(@entry.component_since_overhaul_at_entry) %> <%= c.since_overhaul_abbreviation %></span>
+          <%= t(".total_html", component_hours_at_entry: (hours(@entry.component_hours_at_entry)), component_since_overhaul_at_entry: (hours(@entry.component_since_overhaul_at_entry)), since_overhaul_abbreviation: c.since_overhaul_abbreviation) %></span>
       <% end %>
       <% @entry.parts.each do |part| %>
         <% pc = part.component %>
         <span><%= pc %> <%= pc.model %><%= " S/N #{pc.serial_number}" if pc.serial_number.present? %>:
-          <%= hours(part.hours_at_entry) %> total, <%= hours(part.since_overhaul_at_entry) %> <%= pc.since_overhaul_abbreviation.downcase %></span>
+          <%= t(".total_2_html", hours_at_entry: (hours(part.hours_at_entry)), since_overhaul_at_entry: (hours(part.since_overhaul_at_entry)), since_overhaul_abbreviation: pc.since_overhaul_abbreviation.downcase) %></span>
       <% end %>
     </div>
     <div class="whitespace-pre-wrap rounded bg-slate-50 p-3 font-mono text-sm"><%= @entry.text %></div>
     <div class="text-sm text-slate-600">
-      Signed off: <%= @entry.signoff_person.presence || "—" %>
+      <%= t(".signed_off_html", signoff_person: (@entry.signoff_person.presence || "—")) %>
       <%= ", #{@entry.certificate_label}" if @entry.certificate_label %><%= " ##{@entry.signoff_certificate_number}" if @entry.signoff_certificate_number %>
       <%= "(#{@entry.signoff_location})" if @entry.signoff_location.present? %>
     </div>
-    <% if @entry.inspection_result %><div class="text-sm text-slate-600">Result: <%= @entry.inspection_result_label %></div><% end %>
+    <% if @entry.inspection_result %><div class="text-sm text-slate-600"><%= t(".result_html", inspection_result_label: @entry.inspection_result_label) %></div><% end %>
     <% if (missing = @entry.missing_record_items).any? %>
       <p class="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
-        Missing for <%= @entry.entry_type == "INSPECTION" ? "43.11" : "43.9" %>: <%= missing.to_sentence %>.
-        <%= link_to("Fill in", edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "link") if owner? %>
-        (Check against the signed logbook.)
+        <%= t(".missing_for_html", entry_type: (@entry.entry_type == "INSPECTION" ? "43.11" : "43.9"), items: missing.to_sentence) %>
+        <%= link_to(t(".fill_in"), edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "link") if owner? %>
+        <%= t(".check_against_the_signed_logbook") %>
       </p>
     <% end %>
     <% if @entry.document %>
-      <p class="text-sm">Scan: <%= link_to @entry.document.name, aircraft_document_path(@aircraft, @entry.document, page: @entry.page_number), class: "link" %><%= " (page #{@entry.page_number})" if @entry.page_number %></p>
+      <p class="text-sm"><%= t(".scan_html", link: (link_to @entry.document.name, aircraft_document_path(@aircraft, @entry.document, page: @entry.page_number), class: "link"), page_number: (t(".page", page_number: @entry.page_number) if @entry.page_number)) %></p>
     <% end %>
   </div>
 </section>
@@ -65,7 +65,7 @@
 <% history = (@entry.versions.to_a + @entry.parts.flat_map { _1.versions.to_a } + (@entry.signature ? @entry.signature.versions.to_a : [])).sort_by(&:id).reverse %>
 <% if history.any? %>
   <details class="card mt-5 max-w-4xl">
-    <summary class="card-header cursor-pointer"><span class="card-title">Change history (<%= history.size %>)</span></summary>
+    <summary class="card-header cursor-pointer"><span class="card-title"><%= t(".change_history_html", history: history.size) %></span></summary>
     <%= render "record_versions/list", versions: history %>
   </details>
 <% end %>

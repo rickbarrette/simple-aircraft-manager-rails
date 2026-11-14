@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 // Interactive viewer for engine monitor charts. Clicking a chart opens it large
 // with higher-resolution data (fetched once, on first open): a crosshair shows
@@ -35,7 +36,7 @@ export default class extends Controller {
       this.render()
     } catch (error) {
       this.statusTarget.hidden = false
-      this.statusTarget.textContent = `Couldn't load the engine data (${error.message}).`
+      this.statusTarget.textContent = t("engine.load_failed", { message: error.message })
     }
   }
 

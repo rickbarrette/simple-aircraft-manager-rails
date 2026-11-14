@@ -16,10 +16,10 @@ class EntrySigner
   end
 
   def sign!
-    raise Error, "Your account is disabled" if @user.disabled?
-    raise Error, "That certificate isn't yours" unless @certificate && @certificate.user_id == @user.id
+    raise Error, I18n.t("services.entry_signer.your_account_is_disabled") if @user.disabled?
+    raise Error, I18n.t("services.entry_signer.that_certificate_isn_t_yours") unless @certificate && @certificate.user_id == @user.id
     problems = @entry.signing_problems(@certificate)
-    raise Error, "This entry can't be signed: #{problems.to_sentence}" if problems.any?
+    raise Error, I18n.t("services.entry_signer.this_entry_can_t_be", to_sentence: problems.to_sentence) if problems.any?
 
     LogbookEntry.transaction do
       @entry.update!(signoff_person: @user.display_name, signoff_certificate_type: @certificate.kind,
@@ -34,7 +34,7 @@ class EntrySigner
       )
       @entry.supersedes&.update_column(:superseded_at, signature.signed_at)
       @entry.aircraft.log_event!("logbook", "Logbook entry signed electronically (#{@entry.date})",
-                                 notes: "#{signature.signer_name}, #{signature.certificate_label} #{signature.certificate_number}", user: @user)
+                                 notes: I18n.t("services.entry_signer.text", signer_name: signature.signer_name, certificate_label: signature.certificate_label, certificate_number: signature.certificate_number), user: @user)
       signature
     end
   end

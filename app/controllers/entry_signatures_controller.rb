@@ -12,7 +12,7 @@ class EntrySignaturesController < ApplicationController
 
   def create
     sign_entry(@entry) do |signature|
-      redirect_to aircraft_logbook_entry_path(@aircraft, @entry), notice: "Signed. #{EntrySignature::LABEL} #{signature.signer_name}, #{signature.certificate_label} #{signature.certificate_number}."
+      redirect_to aircraft_logbook_entry_path(@aircraft, @entry), notice: t("flash.entry_signatures.signed", label: EntrySignature.label, signer_name: signature.signer_name, certificate_label: signature.certificate_label, certificate_number: signature.certificate_number)
     end
   end
 

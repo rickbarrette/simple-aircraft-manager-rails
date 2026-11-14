@@ -22,10 +22,10 @@ class OilReportParser
     elsif text.match?(/OIL ANALYSIS RESULTS IN PARTS PER MILLION|AVIATION LABORATORIES|avlab\.com/i)
       Avlab.from_receivers(receivers)
     else
-      raise Error, "Not a recognized lab report (AvLab and Blackstone PDFs are supported)"
+      raise Error, I18n.t("services.oil_report.not_a_recognized_lab_report")
     end
   rescue PDF::Reader::MalformedPDFError, PDF::Reader::UnsupportedFeatureError => e
-    raise Error, "Couldn't read the PDF (#{e.message})"
+    raise Error, I18n.t("services.oil_report.couldn_t_read_the_pdf", message: e.message)
   end
 
   # "1,903" → 1903, "<0.5" → 0.5, "5 qts" → 5, ".3" → 0.3; nil for "-", "N/A"…

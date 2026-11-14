@@ -1,9 +1,7 @@
-Last night's records check found a problem.
-
-Backup: <%= @backup.ok ? "OK" : "FAILED: #{@backup.message}" %>
-Integrity check: <%= @check.ok ? "OK" : "#{@check.problems.size} problem(s)" %>
+<%= raw t(".last_night_s_records_check_2_text", message: (@backup.ok ? "OK" : t(".failed", message: @backup.message))) %>
+<%= raw t(".integrity_check_2_text", s: (@check.ok ? "OK" : t(".problem_s", problems: @check.problems.size))) %>
 <% Array(@check.problems).first(20).each do |p| %>
 - <%= p %>
 <% end %>
 
-See Admin → About for details.
+<%= raw t(".see_admin_about_for_details") %>

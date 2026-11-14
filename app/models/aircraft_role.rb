@@ -1,5 +1,5 @@
 class AircraftRole < ApplicationRecord
-  ROLES = { "owner" => "Owner", "pilot" => "Pilot" }.freeze
+  ROLES = LabelSet.new("aircraft_role.roles", %w[owner pilot])
 
   belongs_to :aircraft
   belongs_to :user

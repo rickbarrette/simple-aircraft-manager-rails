@@ -1,11 +1,5 @@
 class AircraftEvent < ApplicationRecord
-  CATEGORIES = {
-    "hours" => "Hours Update", "flight" => "Flight", "component" => "Component",
-    "squawk" => "Squawk", "note" => "Note", "oil" => "Oil", "fuel" => "Fuel",
-    "logbook" => "Logbook", "ad" => "Airworthiness Directive", "inspection" => "Inspection",
-    "document" => "Document", "aircraft" => "Aircraft", "role" => "Role",
-    "major_record" => "Major Repair/Alteration", "oil_analysis" => "Oil Analysis"
-  }.freeze
+  CATEGORIES = LabelSet.new("aircraft_event.categories", %w[hours flight component squawk note oil fuel logbook ad inspection document aircraft role major_record oil_analysis])
 
   belongs_to :aircraft
   belongs_to :user, optional: true

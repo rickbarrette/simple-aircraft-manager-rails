@@ -13,7 +13,7 @@ class Admin::ComponentTypesController < ApplicationController
   def create
     @component_type = ComponentType.new(type_params)
     if @component_type.save
-      redirect_to admin_component_types_path, notice: "Component type created."
+      redirect_to admin_component_types_path, notice: t("flash.admin_component_types.component_type_created")
     else
       render :new, status: :unprocessable_entity
     end
@@ -23,7 +23,7 @@ class Admin::ComponentTypesController < ApplicationController
 
   def update
     if @component_type.update(type_params)
-      redirect_to admin_component_types_path, notice: "Component type updated."
+      redirect_to admin_component_types_path, notice: t("flash.admin_component_types.component_type_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -31,7 +31,7 @@ class Admin::ComponentTypesController < ApplicationController
 
   def destroy
     if @component_type.destroy
-      redirect_to admin_component_types_path, notice: "Component type deleted."
+      redirect_to admin_component_types_path, notice: t("flash.admin_component_types.component_type_deleted")
     else
       redirect_to admin_component_types_path, alert: @component_type.errors.full_messages.to_sentence
     end

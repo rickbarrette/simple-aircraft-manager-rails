@@ -9,7 +9,7 @@
 class SsoController < ApplicationController
   allow_unauthenticated_access only: %i[callback failure]
   before_action :require_sso
-  rate_limit to: 20, within: 3.minutes, only: :callback, with: -> { redirect_to new_session_path, alert: "Try again later." }
+  rate_limit to: 20, within: 3.minutes, only: :callback, with: -> { redirect_to new_session_path, alert: t("flash.sso.try_again_later") }
 
   def callback
     auth = request.env["omniauth.auth"]
@@ -20,11 +20,10 @@ class SsoController < ApplicationController
     user = User.find_by(sso_uid: auth.uid) || link_by_email(auth) || create_user(auth)
     unless user
       email = auth.info&.email.presence
-      return redirect_to new_session_path, alert: "There's no account for #{email || 'that sign-in'} here yet. " \
-                                                  "Ask an administrator to add you, or sign in with your password and link #{Sso.label} from your profile."
+      return redirect_to new_session_path, alert: t("flash.sso.there_s_no_account", email: email || t("flash.sso.that_sign_in"), provider: Sso.label)
     end
 
-    return redirect_to new_session_path, alert: "This account is disabled." if user.disabled?
+    return redirect_to new_session_path, alert: t("flash.sso.this_account_is_disabled") if user.disabled?
 
     sync_admin(user, auth)
     return_to = session[:return_to_after_authenticating]
@@ -34,22 +33,21 @@ class SsoController < ApplicationController
   end
 
   # OmniAuth's error codes; anything else (network errors…) is logged, not shown.
-  FAILURES = { "invalid_credentials" => "invalid credentials", "csrf_detected" => "the sign-in expired, try again",
-               "access_denied" => "access denied", "timeout" => "timed out" }.freeze
+  FAILURES = %w[invalid_credentials csrf_detected access_denied timeout].freeze
 
   def failure
-    reason = FAILURES[params[:message].to_s]
+    reason = t(params[:message], scope: "flash.sso.failures") if FAILURES.include?(params[:message].to_s)
     Rails.logger.warn("[sso] sign-in failed: #{params[:message].to_s.truncate(300)}") unless reason
     redirect_to(authenticated? ? edit_profile_path : new_session_path,
-                alert: "#{Sso.label} sign-in failed (#{reason || "couldn't reach or verify #{Sso.label}; see the server log"}).")
+                alert: t("flash.sso.failed", provider: Sso.label, reason: reason || t("flash.sso.unreachable", provider: Sso.label)))
   end
 
   def destroy
     unless Sso.password_login?
-      return redirect_to edit_profile_path, alert: "Password sign-in is off, so unlinking #{Sso.label} would lock you out."
+      return redirect_to edit_profile_path, alert: t("flash.sso.password_sign_in_is", label: Sso.label)
     end
     current_user.update!(sso_uid: nil)
-    redirect_to edit_profile_path, notice: "#{Sso.label} unlinked. Sign in with your email and password from now on."
+    redirect_to edit_profile_path, notice: t("flash.sso.unlinked_sign_in_with", label: Sso.label)
   end
 
   private
@@ -61,16 +59,16 @@ class SsoController < ApplicationController
   # Signed in again (e.g. to sign a logbook entry): note when, and go back.
   def reauthenticated(auth)
     session[:reauthenticated_at] = Time.current.to_i
-    redirect_to session.delete(:after_reauth).presence || edit_profile_path, notice: "Signed in again with #{Sso.label}."
+    redirect_to session.delete(:after_reauth).presence || edit_profile_path, notice: t("flash.sso.signed_in_again_with", label: Sso.label)
   end
 
   def link(auth)
     owner = User.find_by(sso_uid: auth.uid)
     if owner && owner != current_user
-      redirect_to edit_profile_path, alert: "That #{Sso.label} account is already linked to another user."
+      redirect_to edit_profile_path, alert: t("flash.sso.that_account_is_already", label: Sso.label)
     else
       current_user.update!(sso_uid: auth.uid)
-      redirect_to edit_profile_path, notice: "#{Sso.label} linked. You can now sign in with it."
+      redirect_to edit_profile_path, notice: t("flash.sso.linked_you_can_now", label: Sso.label)
     end
   end
 

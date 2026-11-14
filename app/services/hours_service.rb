@@ -2,6 +2,7 @@
 # the time-in-service delta (tach or Hobbs, per the aircraft's maintenance
 # clock) to every IN-USE component.
 class HoursService
+  H = "services.hours_service"
   def initialize(aircraft, user: Current.user)
     @aircraft = aircraft
     @user = user
@@ -30,8 +31,8 @@ class HoursService
       @aircraft.save!
       cascade_to_components(delta, clamp: true)
       @aircraft.log_event!("hours",
-        "Hours #{tach_delta >= 0 ? 'updated' : 'corrected'} to #{tach}",
-        user: @user, notes: "Previous: #{old}, delta: #{tach_delta >= 0 ? '+' : ''}#{tach_delta}")
+        I18n.t(tach_delta >= 0 ? "#{H}.hours_updated" : "#{H}.hours_corrected", tach: tach),
+        user: @user, notes: I18n.t("#{H}.hours_notes", old: old, delta: "#{'+' if tach_delta >= 0}#{tach_delta}"))
     end
     tach_delta
   end
@@ -55,13 +56,13 @@ class HoursService
         @aircraft.consumable_records.create!(
           record_type: type, flight_log: flight, date: flight.date, quantity_added: qty,
           level_after: level, consumable_type: kind, flight_hours: @aircraft.tach_time,
-          notes: "Auto-created from flight log")
-        @aircraft.log_event!(type, "#{type.capitalize} added: #{qty} #{ConsumableRecord::UNITS[type]}",
-                             user: @user, notes: "From flight log")
+          notes: I18n.t("services.hours_service.auto_created_from_flight_log"))
+        @aircraft.log_event!(type, I18n.t("#{H}.consumable_added", type: ConsumableRecord::TYPES[type], quantity: qty, unit: ConsumableRecord::UNITS[type]),
+                             user: @user, notes: I18n.t("services.hours_service.from_flight_log"))
       end
 
       route = flight.route_summary.presence
-      @aircraft.log_event!("flight", "Flight logged: #{flight.tach_time} hrs#{" (#{route})" if route}", user: @user)
+      @aircraft.log_event!("flight", I18n.t(route ? "#{H}.flight_logged_route" : "#{H}.flight_logged", hours: flight.tach_time, route: route), user: @user)
     end
     flight
   end

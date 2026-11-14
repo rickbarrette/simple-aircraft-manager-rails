@@ -1,5 +1,5 @@
 class DocumentCollection < ApplicationRecord
-  VISIBILITIES = { "private" => "Private", "status" => "All share links", "maintenance" => "Maintenance only" }.freeze
+  VISIBILITIES = LabelSet.new("document_collection.visibilities", %w[private status maintenance])
 
   belongs_to :aircraft
   has_many :documents, dependent: :destroy

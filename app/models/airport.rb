@@ -4,7 +4,7 @@ class Airport < ApplicationRecord
   KINDS = %w[small_airport medium_airport large_airport seaplane_base heliport balloonport closed].freeze
   KIND_RANK = { "large_airport" => 0, "medium_airport" => 1, "small_airport" => 2, "seaplane_base" => 3,
                 "heliport" => 4, "balloonport" => 5, "closed" => 9 }.freeze
-  KIND_LABELS = { "seaplane_base" => "seaplane base", "heliport" => "heliport", "balloonport" => "balloonport", "closed" => "closed" }.freeze
+  KIND_LABELS = LabelSet.new("airport.kinds", %w[seaplane_base heliport balloonport closed])
 
   # Custom airports (admin-added) use their identifier as the AirTrail code.
   before_validation(if: :custom?) { self.airtrail_code = ident }

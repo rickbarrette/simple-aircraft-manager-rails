@@ -49,44 +49,17 @@ class RecordsPackage
   def readme(entries)
     signed = entries.count(&:signed?)
     check = IntegrityCheck.latest
-    <<~TXT
-      Maintenance records for #{@aircraft.tail_number} (#{[ @aircraft.make, @aircraft.model ].compact_blank.join(' ')}, S/N #{@aircraft.serial_number.presence || 'not recorded'})
-      Prepared #{@generated_at.utc.strftime('%Y-%m-%d %H:%M UTC')} by Simple Aircraft Manager (#{@source}), software version #{SystemInfo.new.version_label}.
-
-      Electronic records since: #{@aircraft.electronic_records_since&.iso8601 || 'not stated'}. Earlier records are the paper logbooks#{' (scans marked "legacy record" are in the archive)' if @aircraft.documents.where(legacy_record: true).exists?}.
-
-      Contents
-      - logbook-entries.pdf   All #{entries.size} logbook entries, oldest first. #{signed} are signed electronically: each shows
-                              "Certified by" the signer and certificate, the time (UTC) and the first 16 characters of its fingerprint.
-      - signatures.csv        Every electronic signature: signer, certificate, statement, time, status and full fingerprint.
-      - record-history.csv    Every change to the maintenance records (created, changed, deleted), with who and when.
-      - status-report.html    Maintenance status per 14 CFR 91.417(a)(2): times, life-limited parts, inspections, ADs, alterations.
-      - #{@aircraft.tail_number.downcase}.sam.zip        All records and files as data, to load into another system.
-      - recordkeeping-procedures.html  How these electronic records and signatures are kept (AC 120-78B), current adopted revision.
-      - viewer/docker-compose.yml       Runs Simple Aircraft Manager on your own computer to browse the archive (below).
-
-      Signatures
-      Each electronic signature records who signed, with which certificate, what they certified, when, and a SHA-256
-      fingerprint of the entry's content at signing. A signed entry can't be edited; corrections are new signed entries
-      that supersede the original (both are included). Status "Valid" means the entry and signature are unchanged since
-      signing; "Superseded" means a later signed correction replaces it.
-
-      Last records integrity check: #{check ? "#{check.created_at.utc.strftime('%Y-%m-%d %H:%M UTC')}, #{check.ok ? 'no problems found' : "#{check.problems.size} problem(s) found"}" : 'not run yet'}.
-
-      Viewing the data in Simple Aircraft Manager
-      The PDF, CSV and HTML files above open on their own. To browse everything (components, logbook, ADs,
-      inspections, documents, flights, oil and fuel) the way the owner sees it, run the app on your own computer:
-
-        1. Install Docker Desktop (https://www.docker.com/products/docker-desktop/).
-        2. In a terminal, go to the "viewer" folder of this package and run:   docker compose up -d
-        3. Open http://localhost:3000 and create the first (admin) account.
-        4. Choose Fleet -> Import and select #{@aircraft.tail_number.downcase}.sam.zip from this package (or this whole zip file).
-
-      The copy runs only on your computer and stays separate from the owner's system. Electronic signatures are
-      shown as imported: compare their fingerprints with signatures.csv and logbook-entries.pdf. To stop it:
-      docker compose down (add -v to delete the local copy).
-      #{"\nSimple Aircraft Manager is open source: #{repository}" if repository}
-    TXT
+    t = ->(key, **opts) { I18n.t(key, scope: "services.records_package", **opts) }
+    check_text =
+      if check.nil? then t.(:check_none)
+      else t.(check.ok ? :check_ok : :check_problems, time: check.created_at.utc.strftime("%Y-%m-%d %H:%M UTC"), count: check.problems.size)
+      end
+    t.(:readme, tail_number: @aircraft.tail_number, aircraft: [ @aircraft.make, @aircraft.model ].compact_blank.join(" "),
+                serial: @aircraft.serial_number.presence || t.(:not_recorded), prepared: @generated_at.utc.strftime("%Y-%m-%d %H:%M UTC"),
+                source: @source, version: SystemInfo.new.version_label, since: @aircraft.electronic_records_since&.iso8601 || t.(:not_stated),
+                legacy: (@aircraft.documents.where(legacy_record: true).exists? ? t.(:legacy_note) : ""), count: entries.size, signed: signed,
+                archive: "#{@aircraft.tail_number.downcase}.sam.zip", check: check_text,
+                repository: (repository ? "\n#{t.(:repository, url: repository)}" : "")) + "\n"
   end
 
   def repository = SystemInfo.new.repository_url
@@ -131,7 +104,7 @@ class RecordsPackage
       entries.select(&:signed?).each do |e|
         s = e.signature
         csv << [ e.date, LogbookEntry::LOG_TYPES[e.log_type], LogbookEntry::ENTRY_TYPES[e.entry_type], s.signer_name, s.certificate_label,
-                 s.certificate_number, s.signed_at.utc.iso8601, s.imported? ? "imported from #{s.origin}" : s.status_label,
+                 s.certificate_number, s.signed_at.utc.iso8601, s.imported? ? I18n.t("services.records_package.imported_from", origin: s.origin) : s.status_label,
                  s.content_digest, s.statement, e.supersedes&.date ]
       end
     end

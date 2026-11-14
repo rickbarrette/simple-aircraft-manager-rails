@@ -1,4 +1,4 @@
-<% content_for :title, "#{@aircraft.tail_number} Oil Analysis" %>
+<% content_for :title, t(".oil_analysis", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= render "shared/oil_subnav", aircraft: @aircraft %>
 <% recent = @analyses.first(OilAnalysesController::COMPARE_SAMPLES) %>
@@ -6,8 +6,8 @@
   <section class="card">
     <div class="card-header">
       <div>
-        <h2 class="card-title">Import a lab report</h2>
-        <p class="hint">AvLab or Blackstone PDF reports: each sample on the report (including earlier ones) is added unless it's already here.</p>
+        <h2 class="card-title"><%= t(".import_a_lab_report") %></h2>
+        <p class="hint"><%= t(".avlab_or_blackstone_pdf_reports") %></p>
       </div>
       <%= render "import", aircraft: @aircraft %>
     </div>
@@ -15,41 +15,41 @@
 
   <section class="card">
     <div class="card-header">
-      <h2 class="card-title">Wear metal trends</h2>
-      <%= link_to "+ Add Oil Analysis", new_aircraft_oil_analysis_path(@aircraft), class: "btn-secondary btn-sm" %>
+      <h2 class="card-title"><%= t(".wear_metal_trends") %></h2>
+      <%= link_to t(".add_oil_analysis"), new_aircraft_oil_analysis_path(@aircraft), class: "btn-secondary btn-sm" %>
     </div>
     <div class="card-body">
       <% series = oil_trend_series(@analyses) %>
       <% if series.any? %>
         <%= line_chart series, ytitle: "ppm", height: "260px", curve: false, colors: OilAnalysesHelper::TREND_COLORS, legend: "bottom" %>
-        <p class="hint">Lead is left out of the chart: it comes from 100LL fuel and reads in the thousands. Look for a steady trend rather than a single reading.<%= " Samples marked “leave out of trends” aren't charted." if @analyses.any?(&:excluded_from_averages?) %></p>
+        <p class="hint"><%= t(".lead_is_left_out_of_html", excluded_from_averages: (t(".samples_marked_leave_out_of") if @analyses.any?(&:excluded_from_averages?))) %></p>
       <% else %>
-        <%= empty_state @analyses.any? ? "Add another sample to see trends." : "No oil analyses yet. Add one from your lab report." %>
+        <%= empty_state @analyses.any? ? t(".add_another_sample_to_see") : t(".no_oil_analyses_yet_add") %>
       <% end %>
     </div>
   </section>
 
   <% if recent.any?(&:any_results?) %>
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Results (ppm)</h2>
-        <span class="text-xs text-slate-500">Lab average for similar engines in (parentheses); <span class="font-semibold text-red-700">red</span> is <%= OilAnalysis::FLAG_RATIO %>× or more above it.</span></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".results_ppm") %></h2>
+        <span class="text-xs text-slate-500"><%= t(".lab_average_for_similar_engines") %> <span class="font-semibold text-red-700"><%= t(".red") %></span> <%= t(".is_or_more_above_it_html", ratio: (OilAnalysis::FLAG_RATIO)) %></span></div>
       <div class="overflow-x-auto">
         <table class="table table-keep">
           <thead>
-            <tr><th>Element</th>
+            <tr><th><%= t(".element") %></th>
               <% recent.each do |a| %><th class="text-right whitespace-nowrap"><%= link_to fmt_date(a.sample_date), aircraft_oil_analysis_path(@aircraft, a), class: "link" %></th><% end %></tr>
           </thead>
           <tbody>
-            <tr class="text-xs text-slate-500"><td>Engine / oil hrs</td>
+            <tr class="text-xs text-slate-500"><td><%= t(".engine_oil_hrs") %></td>
               <% recent.each do |a| %><td class="text-right tabular-nums"><%= a.engine_hours ? hours(a.engine_hours) : "—" %> / <%= a.oil_hours ? hours(a.oil_hours) : "—" %></td><% end %></tr>
             <% OilAnalysis.elements_in(recent).each do |el| %>
-              <% label, source = OilAnalysis::ELEMENTS.fetch(el) %>
+              <% label, source = OilAnalysis::ELEMENTS.fetch(el), OilAnalysis::ELEMENT_SOURCES[el] %>
               <tr><td><span title="<%= source %>"><%= label %></span></td>
                 <% recent.each do |a| %><td class="text-right align-top"><%= ppm_cell(a, el) %></td><% end %></tr>
             <% end %>
             <% OilAnalysis::PROPERTIES.each_key do |key| %>
               <% next if recent.none? { _1.property(key) } %>
-              <tr class="text-sm"><td class="text-slate-600"><%= OilAnalysis::PROPERTIES[key][0] %></td>
+              <tr class="text-sm"><td class="text-slate-600"><%= OilAnalysis::PROPERTIES[key] %></td>
                 <% recent.each do |a| %><td class="text-right tabular-nums whitespace-nowrap text-slate-600"><%= oil_property(a, key) %></td><% end %></tr>
             <% end %>
           </tbody>
@@ -59,30 +59,30 @@
   <% end %>
 
   <section class="card">
-    <div class="card-header"><h2 class="card-title">Samples</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".samples") %></h2></div>
     <% if @analyses.any? %>
       <div class="overflow-x-auto">
         <table class="table">
-          <thead><tr><th>Sampled</th><th>Result</th><th>Engine</th><th class="text-right">Engine hrs</th><th class="text-right">Oil hrs</th><th>Lab</th><th>Report</th></tr></thead>
+          <thead><tr><th><%= t(".sampled") %></th><th><%= t(".result") %></th><th><%= t(".engine") %></th><th class="text-right"><%= t(".engine_hrs") %></th><th class="text-right"><%= t(".oil_hrs") %></th><th><%= t(".lab") %></th><th><%= t(".report") %></th></tr></thead>
           <tbody>
             <% @analyses.each do |a| %>
               <tr>
                 <td class="whitespace-nowrap"><%= link_to fmt_date(a.sample_date), aircraft_oil_analysis_path(@aircraft, a), class: "link" %>
-                  <% if a.excluded_from_averages? %><div class="text-xs text-slate-500">left out of trends</div><% end %></td>
+                  <% if a.excluded_from_averages? %><div class="text-xs text-slate-500"><%= t(".left_out_of_trends") %></div><% end %></td>
                 <td class="whitespace-nowrap"><%= oil_status_badge(a) %>
-                  <% if (flags = a.flagged_elements).any? %><span class="ml-1 text-xs text-red-700"><%= flags.map { OilAnalysis.element_label(_1) }.to_sentence %> above average</span><% end %></td>
+                  <% if (flags = a.flagged_elements).any? %><span class="ml-1 text-xs text-red-700"><%= t(".above_average_html", to_sentence: (flags.map { OilAnalysis.element_label(_1) }.to_sentence)) %></span><% end %></td>
                 <td><%= a.component&.to_s || "—" %></td>
                 <td class="text-right tabular-nums"><%= a.engine_hours ? hours(a.engine_hours) : "—" %></td>
                 <td class="text-right tabular-nums"><%= a.oil_hours ? hours(a.oil_hours) : "—" %></td>
                 <td><%= [ a.lab, a.sample_number ].compact.join(" · ").presence || "—" %></td>
-                <td><%= a.report.attached? ? link_to("PDF", rails_blob_path(a.report, disposition: :inline), class: "link", target: "_blank", rel: "noopener") : "—" %></td>
+                <td><%= a.report.attached? ? link_to(t(".pdf"), rails_blob_path(a.report, disposition: :inline), class: "link", target: "_blank", rel: "noopener") : "—" %></td>
               </tr>
             <% end %>
           </tbody>
         </table>
       </div>
     <% else %>
-      <%= empty_state "No samples recorded." %>
+      <%= empty_state t(".no_samples_recorded") %>
     <% end %>
   </section>
 </div>

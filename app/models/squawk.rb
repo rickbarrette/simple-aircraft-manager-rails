@@ -2,7 +2,7 @@ class Squawk < ApplicationRecord
   include Versioned
   include UploadValidation
 
-  PRIORITIES = { 0 => "Ground Aircraft", 1 => "Fix Soon", 2 => "Fix at Next Inspection", 3 => "Fix Eventually" }.freeze
+  PRIORITIES = LabelSet.new("squawk.priorities", [ 0, 1, 2, 3 ])
   PRIORITY_COLORS = { 0 => "red", 1 => "orange", 2 => "blue", 3 => "gray" }.freeze
 
   belongs_to :aircraft
@@ -21,17 +21,10 @@ class Squawk < ApplicationRecord
 
   # Deferring inoperative equipment without an MEL, 14 CFR 91.213(d): what
   # was done with the item and who decided it isn't a hazard.
-  DEFERRAL_ACTIONS = { "deactivated" => "Deactivated and placarded \"Inoperative\"",
-                       "removed" => "Removed, cockpit control placarded \"Inoperative\"" }.freeze
-  DEFERRAL_ROLES = { "pilot" => "Pilot", "mechanic" => "Certificated mechanic" }.freeze
+  DEFERRAL_ACTIONS = LabelSet.new("squawk.deferral_actions", %w[deactivated removed])
+  DEFERRAL_ROLES = LabelSet.new("squawk.deferral_roles", %w[pilot mechanic])
   # Each must be confirmed to defer (91.213(d)(2)(i)–(iv) and (d)(3)–(4)).
-  DEFERRAL_CHECKS = {
-    "not_required_by_type" => "Not part of the VFR-day type certification instruments and equipment, nor on the aircraft's equipment list or kinds of operations equipment list",
-    "not_required_by_rules" => "Not required by 91.205 or any other rule for the kind of flight planned",
-    "not_required_by_ad" => "Not required by an airworthiness directive",
-    "placarded" => "Removed or deactivated, and placarded \"Inoperative\"",
-    "no_hazard" => "A pilot or certificated mechanic has determined it isn't a hazard to the aircraft"
-  }.freeze
+  DEFERRAL_CHECKS = LabelSet.new("squawk.deferral_checks", %w[not_required_by_type not_required_by_rules not_required_by_ad placarded no_hazard])
 
   scope :deferred, -> { active.where.not(deferred_at: nil) }
 
@@ -39,7 +32,7 @@ class Squawk < ApplicationRecord
   validates :deferred_by_role, inclusion: { in: DEFERRAL_ROLES.keys }, if: :deferred?
   validates :deferred_by_name, presence: true, if: :deferred?
 
-  def priority_label = deferred? ? "Deferred (91.213(d))" : PRIORITIES[priority]
+  def priority_label = deferred? ? I18n.t("models.squawk.deferred") : PRIORITIES[priority]
   def priority_color = deferred? ? "blue" : PRIORITY_COLORS[priority]
   def deferred? = deferred_at.present? && !resolved?
   def grounding? = priority.zero? && !resolved? && !deferred?
@@ -50,7 +43,7 @@ class Squawk < ApplicationRecord
     missing = DEFERRAL_CHECKS.keys - Array(checks).map(&:to_s)
     assign_attributes(deferred_at: Time.current, deferred_by_name: name.to_s.strip.presence, deferred_by_role: role,
                       deferral_action: action, deferral_notes: notes.to_s.strip.presence)
-    missing.each { errors.add(:base, "Confirm: #{DEFERRAL_CHECKS[_1]}") }
+    missing.each { errors.add(:base, :confirm, check: DEFERRAL_CHECKS[_1]) }
     return false if missing.any? || !valid?
     save
   end

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-page">
+<html lang="<%= I18n.locale %>" class="h-full bg-page">
   <head>
     <meta charset="utf-8">
     <%= render "shared/theme_script" %>
-    <title><%= [content_for(:title), "Simple Aircraft Manager"].compact.join(" · ") %></title>
+    <title><%= [content_for(:title), t(".simple_aircraft_manager")].compact.join(" · ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <%= csrf_meta_tags %>
@@ -16,11 +16,12 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <script type="application/json" id="i18n" nonce="<%= content_security_policy_nonce %>"><%= json_escape(t("js").to_json).html_safe %></script>
   </head>
   <body class="min-h-full text-slate-800">
-    <a href="#main" class="skip-link">Skip to content</a>
+    <%= t(".skip_to_content_html") %>
     <header class="bg-header text-white">
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3"><span class="font-semibold"><span class="text-xl">✈</span> Simple Aircraft Manager</span><%= render "shared/theme_toggle" %></div>
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3"><span class="font-semibold"><span class="text-xl">✈</span> <%= t(".simple_aircraft_manager") %></span><%= render "shared/theme_toggle" %></div>
     </header>
     <main id="main" tabindex="-1" class="mx-auto max-w-7xl px-4 py-6 focus:outline-none">
       <%= render "shared/flash" %>

@@ -35,11 +35,11 @@ module EntrySigning
     certificate = current_user.certificates.find_by(id: params[:certificate_id])
     method = reauthenticated_method
     unless params[:confirm] == "1"
-      return signing_failed(entry, "Tick the box to confirm you're signing this entry.")
+      return signing_failed(entry, t("flash.signing.confirm_box"))
     end
     unless method
-      return signing_failed(entry, "This account is locked for a few minutes after too many failed tries.") if current_user.reload.locked?
-      return signing_failed(entry, "Re-enter your password#{' and a current authenticator code' if current_user.otp_enabled?} (or sign in again with #{Sso.label}) to sign.")
+      return signing_failed(entry, t("flash.signing.locked")) if current_user.reload.locked?
+      return signing_failed(entry, t(current_user.otp_enabled? ? "flash.signing.reauth_otp" : "flash.signing.reauth", provider: Sso.label))
     end
     current_user.clear_failed_sign_ins!
 

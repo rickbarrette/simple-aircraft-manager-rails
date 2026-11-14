@@ -1,7 +1,7 @@
-<% content_for :title, "Component Types" %>
-<div class="mb-4 flex items-center justify-between"><h1 class="text-2xl font-bold">Component Types</h1><%= link_to "+ New Type", new_admin_component_type_path, class: "btn-primary" %></div>
+<% content_for :title, t(".component_types") %>
+<div class="mb-4 flex items-center justify-between"><h1 class="text-2xl font-bold"><%= t(".component_types") %></h1><%= link_to t(".new_type"), new_admin_component_type_path, class: "btn-primary" %></div>
 <section class="card"><table class="table">
-  <thead><tr><th>Name</th><th>Consumable</th><th></th></tr></thead>
-  <tbody><% @component_types.each do |t| %><tr><td><%= t.name %></td><td><%= "Yes" if t.consumable? %></td>
-    <td class="text-right"><%= link_to "Edit", edit_admin_component_type_path(t), class: "btn-secondary btn-sm" %></td></tr><% end %></tbody>
+  <thead><tr><th><%= t(".name") %></th><th><%= t(".consumable") %></th><th></th></tr></thead>
+  <tbody><% @component_types.each do |t| %><tr><td><%= t.name %></td><td><%= t(".yes") if t.consumable? %></td>
+    <td class="text-right"><%= link_to t(".edit"), edit_admin_component_type_path(t), class: "btn-secondary btn-sm" %></td></tr><% end %></tbody>
 </table></section>

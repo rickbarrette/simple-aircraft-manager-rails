@@ -1,49 +1,49 @@
-<% content_for :title, "#{@aircraft.tail_number} Loading setup" %>
+<% content_for :title, t(".loading_setup", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <% stations = @setup.stations + Array.new([ 8 - @setup.stations.size, 2 ].max) { nil } %>
 <% points = @setup.entered_envelope + Array.new([ 10 - @setup.envelope.size, 2 ].max) { nil } %>
 <%= form_with url: aircraft_loading_setup_path(@aircraft), method: :patch, class: "card card-body max-w-3xl space-y-5" do %>
   <div>
-    <h2 class="card-title">Loading setup</h2>
-    <p class="mt-1 text-sm text-slate-600">From the POH's weight and balance section. Arms are inches aft of the datum.</p>
+    <h2 class="card-title"><%= t(".loading_setup_2") %></h2>
+    <p class="mt-1 text-sm text-slate-600"><%= t(".from_the_poh_s_weight") %></p>
   </div>
   <% if @setup.errors.any? %>
     <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert"><ul class="list-disc pl-5"><% @setup.errors.full_messages.each do |m| %><li><%= m %></li><% end %></ul></div>
   <% end %>
   <fieldset>
-    <legend class="label">Stations</legend>
-    <div class="grid grid-cols-[1fr_5rem_5rem_3.5rem] gap-2 text-xs text-slate-500 sm:grid-cols-[1fr_6rem_6rem_4rem]"><span>Name</span><span>Arm (in)</span><span>Max (lb/gal)</span><span class="text-center">Fuel</span></div>
+    <legend class="label"><%= t(".stations") %></legend>
+    <div class="grid grid-cols-[1fr_5rem_5rem_3.5rem] gap-2 text-xs text-slate-500 sm:grid-cols-[1fr_6rem_6rem_4rem]"><span><%= t(".name") %></span><span><%= t(".arm_in") %></span><span><%= t(".max_lb_gal") %></span><span class="text-center"><%= t(".fuel") %></span></div>
     <% stations.each_with_index do |st, i| %>
       <div class="mt-1 grid grid-cols-[1fr_5rem_5rem_3.5rem] items-center gap-2 sm:grid-cols-[1fr_6rem_6rem_4rem]">
-        <%= text_field_tag "setup[stations][#{i}][name]", st&.name, class: "input", placeholder: ("Front seats" if i.zero?), "aria-label": "Station #{i + 1} name" %>
-        <%= text_field_tag "setup[stations][#{i}][arm]", st&.arm&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Station #{i + 1} arm" %>
-        <%= text_field_tag "setup[stations][#{i}][max]", st&.max&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Station #{i + 1} maximum" %>
-        <%= check_box_tag "setup[stations][#{i}][fuel]", "1", st&.fuel, class: "mx-auto block h-4 w-4", "aria-label": "Station #{i + 1} is fuel" %>
+        <%= text_field_tag "setup[stations][#{i}][name]", st&.name, class: "input", placeholder: (t(".front_seats") if i.zero?), "aria-label": t(".station_name", i: (i + 1)) %>
+        <%= text_field_tag "setup[stations][#{i}][arm]", st&.arm&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": t(".station_arm", i: (i + 1)) %>
+        <%= text_field_tag "setup[stations][#{i}][max]", st&.max&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": t(".station_maximum", i: (i + 1)) %>
+        <%= check_box_tag "setup[stations][#{i}][fuel]", "1", st&.fuel, class: "mx-auto block h-4 w-4", "aria-label": t(".station_is_fuel", i: (i + 1)) %>
       </div>
     <% end %>
-    <p class="hint">Tick "Fuel" for fuel tanks: their quantity is entered in gallons and the max is the usable capacity in gallons. Other maximums are in pounds.</p>
+    <p class="hint"><%= t(".tick_fuel_for_fuel_tanks") %></p>
   </fieldset>
   <div class="max-w-xs">
-    <%= label_tag "setup[fuel_lb_per_gal]", "Fuel weight (lb per gallon)", class: "label" %>
+    <%= label_tag "setup[fuel_lb_per_gal]", t(".fuel_weight_lb_per_gallon"), class: "label" %>
     <%= text_field_tag "setup[fuel_lb_per_gal]", @setup.fuel_lb_per_gal.to_s.sub(/\.0\z/, ""), class: "input", inputmode: "decimal" %>
-    <p class="hint">6 for avgas, 6.7 for Jet-A.</p>
+    <p class="hint"><%= t(".n6_for_avgas_6_7") %></p>
   </div>
   <fieldset>
-    <legend class="label">CG envelope</legend>
-    <p class="hint !mt-0 mb-2">The corners of the normal-category envelope, in order around it (e.g. forward limit at low weight, forward limit at gross, aft limit at gross, aft limit at low weight).</p>
+    <legend class="label"><%= t(".cg_envelope") %></legend>
+    <p class="hint !mt-0 mb-2"><%= t(".the_corners_of_the_normal") %></p>
     <div class="mb-3 max-w-xs">
-      <%= label_tag "setup[envelope_unit]", "Envelope values are", class: "label" %>
+      <%= label_tag "setup[envelope_unit]", t(".envelope_values_are"), class: "label" %>
       <%= select_tag "setup[envelope_unit]", options_for_select(LoadingSetup::ENVELOPE_UNITS.invert, @setup.envelope_unit), class: "input" %>
-      <p class="hint">Use the same units as your source: a POH “moment envelope” chart or Garmin Pilot give moment in lb-in/1000 (e.g. 2300 lb at 104.5). Moments are converted to CG (moment × 1000 ÷ weight) when saved. Changing this and saving reads the numbers below in the new units, so it also fixes moments typed in as CG.</p>
+      <p class="hint"><%= t(".use_the_same_units_as") %></p>
     </div>
-    <div class="grid max-w-md grid-cols-3 gap-2 text-xs text-slate-500"><span>Weight (lb)</span><span><%= @setup.moment? ? "Moment (lb-in/1000)" : "CG (in)" %></span><span><%= "= CG (in)" if @setup.moment? %></span></div>
+    <div class="grid max-w-md grid-cols-3 gap-2 text-xs text-slate-500"><span><%= t(".weight_lb") %></span><span><%= @setup.moment? ? t(".moment_lb_in_1000") : t(".cg_in_2") %></span><span><%= t(".cg_in") if @setup.moment? %></span></div>
     <% points.each_with_index do |pt, i| %>
       <div class="mt-1 grid max-w-md grid-cols-3 items-center gap-2">
-        <%= text_field_tag "setup[envelope][#{i}][weight]", pt&.first&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Envelope point #{i + 1} weight" %>
-        <%= text_field_tag "setup[envelope][#{i}][cg]", pt&.last&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": "Envelope point #{i + 1} #{@setup.moment? ? 'moment' : 'CG'}" %>
+        <%= text_field_tag "setup[envelope][#{i}][weight]", pt&.first&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": t(".envelope_point_weight", i: (i + 1)) %>
+        <%= text_field_tag "setup[envelope][#{i}][cg]", pt&.last&.to_s&.sub(/\.0\z/, ""), class: "input", inputmode: "decimal", "aria-label": t(".envelope_point", i: (i + 1), moment: (@setup.moment? ? 'moment' : 'CG')) %>
         <span class="text-sm text-slate-600"><%= "#{@setup.envelope[i].last.round(2)} in" if @setup.moment? && @setup.envelope[i] %></span>
       </div>
     <% end %>
   </fieldset>
-  <div class="flex gap-2"><%= submit_tag "Save", class: "btn-primary" %><%= link_to "Cancel", aircraft_weight_balance_records_path(@aircraft), class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= submit_tag t(".save"), class: "btn-primary" %><%= link_to t(".cancel"), aircraft_weight_balance_records_path(@aircraft), class: "btn-secondary" %></div>
 <% end %>

@@ -1,4 +1,4 @@
-<% content_for :title, "Log Flight" %>
+<% content_for :title, t(".log_flight") %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= form_with model: [@aircraft, @flight_log], class: "card card-body space-y-5 max-w-3xl",
       data: { controller: "offline-flight", offline_flight_tail_value: @aircraft.tail_number,
@@ -8,36 +8,36 @@
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-3">
     <%= f.field :date, as: :date, required: true %>
-    <%= render "shared/airport_field", f: f, attribute: :departure_location, label: "From", aircraft: @aircraft, placeholder: "KOQU" %>
-    <%= render "shared/airport_field", f: f, attribute: :destination_location, label: "To", aircraft: @aircraft, placeholder: "Code or name" %>
+    <%= render "shared/airport_field", f: f, attribute: :departure_location, label: t(".from"), aircraft: @aircraft, placeholder: t(".koqu") %>
+    <%= render "shared/airport_field", f: f, attribute: :destination_location, label: t(".to"), aircraft: @aircraft, placeholder: t(".code_or_name") %>
   </div>
   <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold">Tach (required)</legend>
-    <%= f.field :tach_out, as: :number, step: 0.1, label: "Tach out" %>
-    <%= f.field :tach_in, as: :number, step: 0.1, label: "Tach in" %>
-    <%= f.field :tach_time, as: :number, step: 0.1, label: "…or duration", hint: "Calculated from out/in if blank." %>
+    <legend class="mb-2 text-sm font-semibold"><%= t(".tach_required") %></legend>
+    <%= f.field :tach_out, as: :number, step: 0.1, label: t(".tach_out") %>
+    <%= f.field :tach_in, as: :number, step: 0.1, label: t(".tach_in") %>
+    <%= f.field :tach_time, as: :number, step: 0.1, label: t(".or_duration"), hint: t(".calculated_from_out_in_if") %>
   </fieldset>
   <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold">Hobbs (optional)</legend>
-    <%= f.field :hobbs_out, as: :number, step: 0.1, label: "Hobbs out" %>
-    <%= f.field :hobbs_in, as: :number, step: 0.1, label: "Hobbs in" %>
-    <%= f.field :hobbs_time, as: :number, step: 0.1, label: "…or duration" %>
+    <legend class="mb-2 text-sm font-semibold"><%= t(".hobbs_optional") %></legend>
+    <%= f.field :hobbs_out, as: :number, step: 0.1, label: t(".hobbs_out") %>
+    <%= f.field :hobbs_in, as: :number, step: 0.1, label: t(".hobbs_in") %>
+    <%= f.field :hobbs_time, as: :number, step: 0.1, label: t(".or_duration") %>
   </fieldset>
   <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold">Oil & fuel added</legend>
-    <%= f.field :oil_added, as: :number, step: 0.25, label: "Oil added (qt)" %>
-    <%= f.field :oil_level_after, as: :number, step: 0.25, label: "Oil level after (qt)" %>
-    <%= f.field :oil_added_type, label: "Oil type", placeholder: "Aeroshell W100" %>
-    <%= f.field :fuel_added, as: :number, step: 0.1, label: "Fuel added (gal)" %>
-    <%= f.field :fuel_level_after, as: :number, step: 0.1, label: "Fuel level after (gal)" %>
-    <%= f.field :fuel_added_type, label: "Fuel type", placeholder: "100LL" %>
+    <legend class="mb-2 text-sm font-semibold"><%= t(".oil_fuel_added") %></legend>
+    <%= f.field :oil_added, as: :number, step: 0.25, label: t(".oil_added_qt") %>
+    <%= f.field :oil_level_after, as: :number, step: 0.25, label: t(".oil_level_after_qt") %>
+    <%= f.field :oil_added_type, label: t(".oil_type"), placeholder: t(".aeroshell_w100") %>
+    <%= f.field :fuel_added, as: :number, step: 0.1, label: t(".fuel_added_gal") %>
+    <%= f.field :fuel_level_after, as: :number, step: 0.1, label: t(".fuel_level_after_gal") %>
+    <%= f.field :fuel_added_type, label: t(".fuel_type"), placeholder: t(".n100ll") %>
   </fieldset>
   <%= f.field :route, as: :textarea, rows: 2 %>
   <%= f.field :notes, as: :textarea, rows: 2 %>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :track_log, as: :file, label: "Track log (GPX/KML/CSV)" %>
-    <%= f.field :engine_data, as: :file, label: "Engine monitor data", hint: "CGR-30P / CGR-30C flight recording (.csv).", accept: ".csv,text/csv" %>
+    <%= f.field :track_log, as: :file, label: t(".track_log_gpx_kml_csv") %>
+    <%= f.field :engine_data, as: :file, label: t(".engine_monitor_data"), hint: t(".cgr_30p_cgr_30c_flight"), accept: ".csv,text/csv" %>
   </div>
-  <p class="hint">Saving adds the tach time to the aircraft and all in-service components, and records any oil/fuel added.</p>
-  <div class="flex gap-2"><%= f.submit "Log Flight" %><%= link_to "Cancel", aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %></div>
+  <p class="hint"><%= t(".saving_adds_the_tach_time") %></p>
+  <div class="flex gap-2"><%= f.submit t(".log_flight") %><%= link_to t(".cancel"), aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %></div>
 <% end %>

@@ -1,8 +1,8 @@
-<% content_for :title, "Add Oil Analysis" %>
+<% content_for :title, t(".add_oil_analysis") %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card card-body mb-5 max-w-4xl">
-  <h2 class="mb-1 text-sm font-semibold">Have an AvLab or Blackstone PDF? Import it instead</h2>
-  <p class="hint mb-3">Every sample on the report is filled in for you, and the PDF is attached to the newest one.</p>
+  <h2 class="mb-1 text-sm font-semibold"><%= t(".have_an_avlab_or_blackstone") %></h2>
+  <p class="hint mb-3"><%= t(".every_sample_on_the_report") %></p>
   <%= render "import", aircraft: @aircraft %>
 </section>
 <%= render "form", aircraft: @aircraft, analysis: @analysis %>

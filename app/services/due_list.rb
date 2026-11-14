@@ -44,7 +44,7 @@ class DueList
 
   def inspections
     Compliance.inspection_rows(@aircraft).map do |r|
-      item("inspection-#{r.type.id}", "#{r.type.name} due", "inspection", @urls.aircraft_inspections_path(@aircraft),
+      item("inspection-#{r.type.id}", I18n.t("services.due_list.due", type: r.type.name), "inspection", @urls.aircraft_inspections_path(@aircraft),
            date: r.next_due_date, hours_left: hours_left(r.next_due_hours))
     end
   end
@@ -52,7 +52,7 @@ class DueList
   def ads
     Compliance.ad_rows(@aircraft).map do |r|
       next if r.status.to_s.in?(%w[not_applicable na conditional])
-      item("ad-#{r.ad.id}", "AD #{r.ad.name} due", "ad", @urls.aircraft_airworthiness_directives_path(@aircraft),
+      item("ad-#{r.ad.id}", I18n.t("services.due_list.ad_due", ad: r.ad.name), "ad", @urls.aircraft_airworthiness_directives_path(@aircraft),
            date: r.next_due_date, hours_left: hours_left(r.next_due_hours))
     end
   end
@@ -63,19 +63,19 @@ class DueList
       path = @urls.aircraft_component_path(@aircraft, c)
       since_service = c.hours_since_overhaul.to_d
       [
-        (item("replace-#{c.id}", "Replace #{label}", "component", path, date: c.next_replacement_date,
+        (item("replace-#{c.id}", I18n.t("services.due_list.replace", label: label), "component", path, date: c.next_replacement_date,
               hours_left: c.hours_to_replacement) if c.replacement_hours || c.replacement_calendar?),
-        (item("tbo-#{c.id}", "#{label} reaches TBO", "component", path,
+        (item("tbo-#{c.id}", I18n.t("services.due_list.reaches_tbo", label: label), "component", path,
               date: c.tbo_after(c.overhaul_date),
               hours_left: c.tbo_hours && c.tbo_hours - since_service) if (c.tbo_hours || c.tbo_calendar?) && !c.on_condition?),
-        (item("expires-#{c.id}", "#{label} expires", "component", path, date: c.expires_on) if c.expires_on)
+        (item("expires-#{c.id}", I18n.t("services.due_list.expires", label: label), "component", path, date: c.expires_on) if c.expires_on)
       ]
     end
   end
 
   def documents
     @aircraft.documents.expiring.map do |d|
-      item("document-#{d.id}", "#{d.name} expires", "document", @urls.aircraft_document_path(@aircraft, d), date: d.expires_on)
+      item("document-#{d.id}", I18n.t("services.due_list.expires_2", d: d.name), "document", @urls.aircraft_document_path(@aircraft, d), date: d.expires_on)
     end
   end
 end

@@ -41,11 +41,11 @@ class FlightStats
 
   def periods
     [
-      period("Past 30 days", today - 29..today),
-      period("Past 12 months", (today << 12) + 1..today),
-      period("This year (#{today.year})", Date.new(today.year)..today),
-      period("Last year (#{today.year - 1})", Date.new(today.year - 1)..Date.new(today.year - 1, 12, 31)),
-      period("Since purchase", (first_date || today)..today)
+      period(I18n.t("services.flight_stats.past_30_days"), today - 29..today),
+      period(I18n.t("services.flight_stats.past_12_months"), (today << 12) + 1..today),
+      period(I18n.t("services.flight_stats.this_year", year: today.year), Date.new(today.year)..today),
+      period(I18n.t("services.flight_stats.last_year", year: (today.year - 1)), Date.new(today.year - 1)..Date.new(today.year - 1, 12, 31)),
+      period(I18n.t("services.flight_stats.since_purchase"), (first_date || today)..today)
     ]
   end
 
@@ -60,7 +60,7 @@ class FlightStats
                      .transform_values { |fs| sum(fs) { flight_hours(_1) } }
     (0...months).to_h do |i|
       month = start >> i
-      [ month.strftime("%b %Y"), totals.fetch(month, 0.0) ]
+      [ I18n.l(month, format: :month_year), totals.fetch(month, 0.0) ]
     end
   end
 

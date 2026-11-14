@@ -7,44 +7,26 @@
 class OilAnalysis < ApplicationRecord
   include UploadValidation
 
-  # Element → [label, what it usually indicates]. The first twelve are the
-  # wear-metal set every lab reports; the rest are mostly oil additives.
-  ELEMENTS = {
-    "iron" => [ "Iron", "Cylinders, cam, lifters, gears" ],
-    "copper" => [ "Copper", "Bearings, bushings, oil cooler" ],
-    "nickel" => [ "Nickel", "Valve guides, cylinder plating" ],
-    "chromium" => [ "Chromium", "Rings, chromed cylinders" ],
-    "silver" => [ "Silver", "Bearing plating" ],
-    "magnesium" => [ "Magnesium", "Accessory case, additive" ],
-    "aluminum" => [ "Aluminum", "Pistons, case" ],
-    "lead" => [ "Lead", "Fuel (100LL) blow-by" ],
-    "silicon" => [ "Silicon", "Dirt (air filter), sealant" ],
-    "titanium" => [ "Titanium", "Hardened parts" ],
-    "tin" => [ "Tin", "Bearings, piston pin bushings" ],
-    "molybdenum" => [ "Moly", "Rings, additive" ],
-    "manganese" => [ "Manganese", "Steel alloys (valves, gears)" ],
-    "potassium" => [ "Potassium", "Coolant, additive" ],
-    "boron" => [ "Boron", "Additive" ],
-    "sodium" => [ "Sodium", "Additive, dirt" ],
-    "calcium" => [ "Calcium", "Detergent additive" ],
-    "phosphorus" => [ "Phosphorus", "Anti-wear additive" ],
-    "zinc" => [ "Zinc", "Anti-wear additive, brass" ],
-    "barium" => [ "Barium", "Additive" ]
-  }.freeze
+  # Elements (labels.oil_analysis.elements) and what each usually indicates
+  # (element_sources). The first twelve are the wear-metal set every lab
+  # reports; the rest are mostly oil additives.
+  ELEMENTS = LabelSet.new("oil_analysis.elements", %w[iron copper nickel chromium silver magnesium aluminum lead silicon titanium tin molybdenum manganese potassium boron sodium calcium phosphorus zinc barium])
+  ELEMENT_SOURCES = LabelSet.new("oil_analysis.element_sources", ELEMENTS.keys)
   COMMON_ELEMENTS = ELEMENTS.keys.first(12).freeze
-  # Property → [label, unit].
-  PROPERTIES = {
-    "viscosity_sus_210f" => [ "Viscosity @ 210°F", "SUS" ],
-    "viscosity_cst_100c" => [ "Viscosity @ 100°C", "cSt" ],
-    "flashpoint_f" => [ "Flash point", "°F" ],
-    "fuel_percent" => [ "Fuel", "%" ],
-    "antifreeze_percent" => [ "Antifreeze", "%" ],
-    "water_percent" => [ "Water", "%" ],
-    "insolubles_percent" => [ "Insolubles", "%" ],
-    "total_base_number" => [ "TBN", "" ],
-    "total_acid_number" => [ "TAN", "" ]
+  # Oil properties (labels.oil_analysis.properties) and their units.
+  PROPERTIES = LabelSet.new("oil_analysis.properties", %w[viscosity_sus_210f viscosity_cst_100c flashpoint_f fuel_percent antifreeze_percent water_percent insolubles_percent total_base_number total_acid_number])
+  PROPERTY_UNITS = {
+    "viscosity_sus_210f" => "SUS",
+    "viscosity_cst_100c" => "cSt",
+    "flashpoint_f" => "°F",
+    "fuel_percent" => "%",
+    "antifreeze_percent" => "%",
+    "water_percent" => "%",
+    "insolubles_percent" => "%",
+    "total_base_number" => "",
+    "total_acid_number" => ""
   }.freeze
-  STATUSES = { "normal" => "Normal", "monitor" => "Monitor", "action_required" => "Action required" }.freeze
+  STATUSES = LabelSet.new("oil_analysis.statuses", %w[normal monitor action_required])
   # A reading this far above the lab's average for similar engines gets flagged.
   FLAG_RATIO = 1.5
   # Wear metals worth charting together (lead is on its own scale: it comes from fuel).
@@ -66,7 +48,7 @@ class OilAnalysis < ApplicationRecord
 
   scope :recent_first, -> { order(sample_date: :desc, created_at: :desc) }
 
-  def self.element_label(el) = ELEMENTS.fetch(el)[0]
+  def self.element_label(el) = ELEMENTS.fetch(el)
 
   # Elements any of these samples has a reading for, in display order.
   def self.elements_in(analyses) = ELEMENTS.keys.select { |el| analyses.any? { _1.value(el) } }
@@ -121,12 +103,12 @@ class OilAnalysis < ApplicationRecord
 
   def results_are_numbers
     (@invalid_results || {}).each do |attribute, keys|
-      labels = keys.map { (ELEMENTS[_1] || PROPERTIES[_1]).first }
-      errors.add(attribute, "must be numbers of 0 or more (#{labels.to_sentence})") if keys.any?
+      labels = keys.map { ELEMENTS[_1] || PROPERTIES[_1] }
+      errors.add(attribute, :not_numbers, fields: labels.to_sentence) if keys.any?
     end
   end
 
   def component_belongs_to_aircraft
-    errors.add(:component, "must be on this aircraft") if component && component.aircraft_id != aircraft_id
+    errors.add(:component, :other_aircraft) if component && component.aircraft_id != aircraft_id
   end
 end

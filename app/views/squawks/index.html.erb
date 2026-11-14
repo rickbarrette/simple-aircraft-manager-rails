@@ -1,31 +1,31 @@
-<% content_for :title, "#{@aircraft.tail_number} Squawks" %>
+<% content_for :title, t(".squawks", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
   <div class="card-header">
-    <h2 class="card-title">Open Squawks</h2>
-    <%= link_to "+ Report Squawk", new_aircraft_squawk_path(@aircraft), class: "btn-primary" %>
+    <h2 class="card-title"><%= t(".open_squawks") %></h2>
+    <%= link_to t(".report_squawk"), new_aircraft_squawk_path(@aircraft), class: "btn-primary" %>
   </div>
-  <% if @active.any? %><%= render "squawks/table", squawks: @active, aircraft: @aircraft %><% else %><%= empty_state "No open squawks." %><% end %>
+  <% if @active.any? %><%= render "squawks/table", squawks: @active, aircraft: @aircraft %><% else %><%= empty_state t(".no_open_squawks") %><% end %>
 </section>
 
 <section class="card mt-5">
-  <div class="card-header"><h2 class="card-title">Resolved</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".resolved") %></h2></div>
   <% if @resolved.any? %>
     <table class="table">
-      <thead><tr><th>Priority</th><th>Issue</th><th>Resolution</th><th>Resolved</th><th></th></tr></thead>
+      <thead><tr><th><%= t(".priority") %></th><th><%= t(".issue") %></th><th><%= t(".resolution") %></th><th><%= t(".resolved") %></th><th></th></tr></thead>
       <tbody>
         <% @resolved.each do |s| %>
           <tr>
             <td><%= squawk_priority_badge(s) %></td>
             <td><%= s.issue_reported %><%= render "squawks/attachments", squawk: s %></td>
-            <td class="text-xs text-slate-600"><%= s.notes %><% if s.logbook_entry %><div><%= link_to "Logbook #{fmt_date(s.logbook_entry.date)}", aircraft_logbook_entry_path(@aircraft, s.logbook_entry), class: "link" %></div><% end %></td>
+            <td class="text-xs text-slate-600"><%= s.notes %><% if s.logbook_entry %><div><%= link_to t(".logbook", date: fmt_date(s.logbook_entry.date)), aircraft_logbook_entry_path(@aircraft, s.logbook_entry), class: "link" %></div><% end %></td>
             <td class="text-xs text-slate-500"><%= fmt_date(s.resolved_at&.to_date) %></td>
-            <td class="text-right"><% if owner? %><%= button_to "Reopen", reopen_aircraft_squawk_path(@aircraft, s), method: :patch, class: "btn-secondary btn-sm" %><% end %></td>
+            <td class="text-right"><% if owner? %><%= button_to t(".reopen"), reopen_aircraft_squawk_path(@aircraft, s), method: :patch, class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   <% else %>
-    <%= empty_state "No resolved squawks." %>
+    <%= empty_state t(".no_resolved_squawks") %>
   <% end %>
 </section>

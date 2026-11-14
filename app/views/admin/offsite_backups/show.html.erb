@@ -1,59 +1,59 @@
-<% content_for :title, "Off-site backup" %>
-<h1 class="mb-1 text-2xl font-bold">Off-site backup</h1>
-<p class="mb-5 max-w-3xl text-sm text-slate-600">Every night, after the verified database backup, the app copies it to Google Drive with every uploaded file not already there, so the records survive losing this server (AC 120-78B 3.2.7). The newest <%= Setting.integer("offsite_backups_kept") %> database copies are kept (<%= link_to "Settings", edit_admin_settings_path, class: "link" %>); uploaded files are copied once and never deleted there. The app can only see the files it created in your Drive.</p>
+<% content_for :title, t(".off_site_backup") %>
+<h1 class="mb-1 text-2xl font-bold"><%= t(".off_site_backup") %></h1>
+<p class="mb-5 max-w-3xl text-sm text-slate-600"><%= t(".every_night_after_the_verified_html", offsite_backups_kept: (Setting.integer("offsite_backups_kept")), link: (link_to t(".settings"), edit_admin_settings_path, class: "link")) %></p>
 
 <div class="grid gap-5 lg:grid-cols-2">
   <section class="card card-body space-y-3">
-    <h2 class="card-title">Google Drive</h2>
+    <h2 class="card-title"><%= t(".google_drive") %></h2>
     <% if @connection.connected? %>
-      <p class="text-sm"><span class="badge-green">Connected</span> <strong><%= @connection.account_email %></strong>, by <%= @connection.connected_by&.display_name %> on <%= fmt_date(@connection.connected_at&.to_date) %>.
-        Folder: <em><%= OffsiteConnection::ROOT_FOLDER %></em>.</p>
-      <p class="text-sm">Uploaded files copied: <%= @files_copied %> of <%= @files_total %>.</p>
+      <p class="text-sm"><span class="badge-green"><%= t(".connected") %></span> <%= t(".by_on_html", account_email: @connection.account_email, display_name: @connection.connected_by&.display_name, to_date: (fmt_date(@connection.connected_at&.to_date))) %>
+        <%= t(".folder_html", folder: (OffsiteConnection::ROOT_FOLDER)) %></p>
+      <p class="text-sm"><%= t(".uploaded_files_copied_of_html", files_copied: @files_copied, files_total: @files_total) %></p>
       <div class="flex flex-wrap gap-2">
-        <%= button_to "Back up now", backup_now_admin_offsite_backup_path, class: "btn-primary" %>
-        <%= button_to "Test restore", restore_test_admin_offsite_backup_path, class: "btn-secondary",
-              title: "Download the newest database copy and a few files from Drive and check them" %>
-        <%= button_to "Disconnect", admin_offsite_backup_path, method: :delete, class: "btn-secondary",
-              form: { data: { turbo_confirm: "Stop copying backups to #{@connection.account_email}? The copies already there stay in that Drive." } } %>
+        <%= button_to t(".back_up_now"), backup_now_admin_offsite_backup_path, class: "btn-primary" %>
+        <%= button_to t(".test_restore"), restore_test_admin_offsite_backup_path, class: "btn-secondary",
+              title: t(".download_the_newest_database_copy") %>
+        <%= button_to t(".disconnect"), admin_offsite_backup_path, method: :delete, class: "btn-secondary",
+              form: { data: { turbo_confirm: t(".stop_copying_backups_to_the", account_email: @connection.account_email) } } %>
       </div>
     <% elsif @connection.configured? %>
-      <p class="text-sm">The OAuth client is saved. Connect the Google account whose Drive will hold the backups.</p>
-      <%= link_to "Connect Google Drive", connect_admin_offsite_backup_path, class: "btn-primary self-start", data: { turbo: false } %>
+      <p class="text-sm"><%= t(".the_oauth_client_is_saved") %></p>
+      <%= link_to t(".connect_google_drive"), connect_admin_offsite_backup_path, class: "btn-primary self-start", data: { turbo: false } %>
     <% else %>
-      <p class="text-sm text-amber-800">Not set up. Follow the steps to create a Google OAuth client, then connect.</p>
+      <p class="text-sm text-amber-800"><%= t(".not_set_up_follow_the") %></p>
     <% end %>
 
     <%= form_with model: @connection, url: admin_offsite_backup_path, method: :patch, class: "space-y-3 border-t border-slate-100 pt-3" do |f| %>
-      <%= f.field :client_id, label: "OAuth client ID", placeholder: "1234567890-abc.apps.googleusercontent.com" %>
-      <%= f.field :client_secret, as: :password, label: "OAuth client secret", value: nil,
-            placeholder: (@connection.client_secret.present? ? "saved (leave blank to keep)" : nil), autocomplete: "off" %>
-      <%= f.submit "Save client", class: "btn-secondary" %>
+      <%= f.field :client_id, label: t(".oauth_client_id"), placeholder: "1234567890-abc.apps.googleusercontent.com" %>
+      <%= f.field :client_secret, as: :password, label: t(".oauth_client_secret"), value: nil,
+            placeholder: (@connection.client_secret.present? ? t(".saved_leave_blank_to_keep") : nil), autocomplete: "off" %>
+      <%= f.submit t(".save_client"), class: "btn-secondary" %>
     <% end %>
   </section>
 
   <section class="card card-body space-y-2 text-sm">
-    <h2 class="card-title">Setting up Google (once)</h2>
+    <h2 class="card-title"><%= t(".setting_up_google_once") %></h2>
     <ol class="list-decimal space-y-1.5 pl-5">
-      <li>Open the <a class="link" href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">Google Cloud console</a> signed in as the account that will hold the backups, and create a project (e.g. “Aircraft records backup”).</li>
-      <li><a class="link" href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Enable the Google Drive API</a> for it.</li>
-      <li>Under <strong>Google Auth Platform → Branding</strong>, give the app a name and your email; under <strong>Audience</strong> choose <strong>External</strong> and then <strong>Publish app</strong> (in “Testing”, Google expires the access after 7 days). Google doesn't need to verify it: the app only asks for access to files it creates.</li>
-      <li>Under <strong>Clients</strong>, create an <strong>OAuth client ID</strong> of type <strong>Web application</strong> with this authorized redirect URI:
+      <li><%= t(".open_the_google_cloud_console_html") %></li>
+      <li><%= t(".enable_the_google_drive_api_html") %></li>
+      <li><%= t(".under_google_auth_platform_branding_html") %></li>
+      <li><%= t(".under_clients_create_an_oauth_html") %>
         <code class="mt-1 block break-all rounded bg-slate-100 px-2 py-1"><%= @connection.redirect_uri %></code>
-        (It must be the address you open the app at; set <code>APP_URL</code> if it isn't.)</li>
-      <li>Paste the client ID and secret here, save, and choose <strong>Connect Google Drive</strong>. Google will warn that the app isn't verified: choose <strong>Advanced → Go to …</strong> and allow access.</li>
+        <%= t(".it_must_be_the_address_html") %></li>
+      <li><%= t(".paste_the_client_id_and_html") %></li>
     </ol>
-    <p class="text-slate-600">Restoring: see <%= link_to "Help → Administration", help_page_path("administration", anchor: "restoring-from-google-drive"), class: "link" %>.</p>
+    <p class="text-slate-600"><%= t(".restoring_see_html", link: (link_to t(".help_administration"), help_page_path("administration", anchor: "restoring-from-google-drive"), class: "link")) %></p>
   </section>
 </div>
 
 <section class="card mt-5">
-  <div class="card-header"><h2 class="card-title">Recent runs</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".recent_runs") %></h2></div>
   <% if @runs.any? %>
     <ul class="divide-y divide-slate-100 text-sm">
       <% @runs.each do |r| %>
-        <li class="flex items-start gap-3 px-4 py-2"><span class="<%= r.ok ? 'badge-green' : 'badge-red' %>"><%= r.ok ? "OK" : "Failed" %></span>
-          <span><span class="font-medium"><%= r.kind == "restore_test" ? "Restore test" : "Backup" %></span> · <%= fmt_time(r.created_at.in_time_zone) %><span class="block text-xs text-slate-600"><%= r.message %></span></span></li>
+        <li class="flex items-start gap-3 px-4 py-2"><span class="<%= r.ok ? 'badge-green' : 'badge-red' %>"><%= r.ok ? "OK" : t(".failed") %></span>
+          <span><span class="font-medium"><%= r.kind == "restore_test" ? t(".restore_test") : t(".backup") %></span> · <%= fmt_time(r.created_at.in_time_zone) %><span class="block text-xs text-slate-600"><%= r.message %></span></span></li>
       <% end %>
     </ul>
-  <% else %><%= empty_state "None yet." %><% end %>
+  <% else %><%= empty_state t(".none_yet") %><% end %>
 </section>

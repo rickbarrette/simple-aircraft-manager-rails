@@ -5,7 +5,7 @@ class InvitedSigningsController < ApplicationController
   include EntrySigning
   allow_unauthenticated_access only: %i[show account]
   before_action :set_invitation
-  rate_limit to: 10, within: 15.minutes, only: :account, with: -> { redirect_to new_session_path, alert: "Try again later." }
+  rate_limit to: 10, within: 15.minutes, only: :account, with: -> { redirect_to new_session_path, alert: t("flash.invited_signings.try_again_later") }
 
   def show
     @entry = @invitation.logbook_entry
@@ -24,13 +24,13 @@ class InvitedSigningsController < ApplicationController
   def account
     return redirect_to(invited_signing_path(params[:token])) if authenticated?
     if User.exists?(email_address: @invitation.email) || !Sso.password_login?
-      return redirect_to invited_signing_path(params[:token]), alert: "Sign in to continue."
+      return redirect_to invited_signing_path(params[:token]), alert: t("flash.invited_signings.sign_in_to_continue")
     end
     user = User.new(params.permit(:name, :password, :password_confirmation).merge(email_address: @invitation.email))
     if user.save
       reset_session
       start_new_session_for user
-      redirect_to invited_signing_path(params[:token]), notice: "Account created. Add your certificate, then sign."
+      redirect_to invited_signing_path(params[:token]), notice: t("flash.invited_signings.account_created_add_your")
     else
       @entry = @invitation.logbook_entry
       @account_errors = user.errors.full_messages
@@ -44,7 +44,7 @@ class InvitedSigningsController < ApplicationController
     return render(:wrong_account) unless current_user.email_address == @invitation.email
     sign_entry(@entry) do |signature|
       @invitation.update!(used_at: Time.current, user: current_user)
-      redirect_to invited_signing_path(params[:token]), notice: "Signed. #{EntrySignature::LABEL} #{signature.signer_name}, #{signature.certificate_label} #{signature.certificate_number}."
+      redirect_to invited_signing_path(params[:token]), notice: t("flash.invited_signings.signed", label: EntrySignature.label, signer_name: signature.signer_name, certificate_label: signature.certificate_label, certificate_number: signature.certificate_number)
     end
   end
 

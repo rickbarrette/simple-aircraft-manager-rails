@@ -29,7 +29,7 @@ class AircraftController < ApplicationController
       @aircraft.roles.create!(user: current_user, role: "owner")
       @aircraft.log_event!("aircraft", "Aircraft created")
     end
-    redirect_to @aircraft, notice: "#{@aircraft.tail_number} added."
+    redirect_to @aircraft, notice: t("flash.aircraft.added", tail_number: @aircraft.tail_number)
   rescue ActiveRecord::RecordInvalid
     render :new, status: :unprocessable_entity
   end
@@ -38,8 +38,8 @@ class AircraftController < ApplicationController
 
   def update
     if @aircraft.update(aircraft_params)
-      log_event("aircraft", "Aircraft details updated")
-      redirect_to @aircraft, notice: "Aircraft updated."
+      log_event("aircraft", t("flash.aircraft.aircraft_details_updated"))
+      redirect_to @aircraft, notice: t("flash.aircraft.aircraft_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -47,7 +47,7 @@ class AircraftController < ApplicationController
 
   def destroy
     @aircraft.destroy!
-    redirect_to root_path, notice: "#{@aircraft.tail_number} deleted."
+    redirect_to root_path, notice: t("flash.aircraft.deleted", tail_number: @aircraft.tail_number)
   end
 
   # Pilots and above: set absolute tach/hobbs readings.
@@ -55,11 +55,11 @@ class AircraftController < ApplicationController
     delta = HoursService.new(@aircraft).update_hours!(
       tach_time: params.require(:tach_time), hobbs_time: params[:hobbs_time]
     )
-    redirect_to @aircraft, notice: "Hours updated (#{delta >= 0 ? '+' : ''}#{delta})."
+    redirect_to @aircraft, notice: t("flash.aircraft.hours_updated", delta: "#{'+' if delta >= 0}#{delta}")
   rescue AircraftGroundedError => e
     redirect_to @aircraft, alert: e.message
   rescue ArgumentError
-    redirect_to @aircraft, alert: "Enter a valid tach reading."
+    redirect_to @aircraft, alert: t("flash.aircraft.enter_a_valid_tach")
   end
 
   private

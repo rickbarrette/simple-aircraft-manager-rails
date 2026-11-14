@@ -12,6 +12,6 @@ class AirportUpdate < ApplicationRecord
   def in_progress? = status.in?(%w[queued running])
 
   def summary
-    "#{created_count} added, #{updated_count} updated, #{removed_count} removed"
+    I18n.t("models.airport_update.summary", added: created_count, updated: updated_count, removed: removed_count)
   end
 end

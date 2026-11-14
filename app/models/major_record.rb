@@ -1,6 +1,6 @@
 class MajorRecord < ApplicationRecord
   include Versioned
-  RECORD_TYPES = { "repair" => "Major Repair", "alteration" => "Major Alteration" }.freeze
+  RECORD_TYPES = LabelSet.new("major_record.record_types", %w[repair alteration])
 
   belongs_to :aircraft
   belongs_to :component, optional: true

@@ -9,14 +9,13 @@ class RecordkeepingPolicy < ApplicationRecord
 
   def complete? = [ operator_name, responsible_name, hosting_description ].all?(&:present?) && offsite_backup? && unfilled_fields.empty?
 
-  FILLABLE = { hosting_description: "Hosting and network", offsite_backup_description: "Off-site backup",
-               additional_procedures: "Additional procedures", operator_name: "Owner / operator",
-               responsible_name: "Responsible person", responsible_title: "Their role" }.freeze
+  FILLABLE = LabelSet.new("recordkeeping_policy.fillable", %w[hosting_description offsite_backup_description additional_procedures
+                                                              operator_name responsible_name responsible_title])
   # A [bracketed] blank left from the suggested text (not a Markdown link).
   BLANK = /\[[^\]\n]+\](?!\()/
 
   # Labels of the fields that still have a blank to fill in.
-  def unfilled_fields = FILLABLE.select { |attr, _| self[attr].to_s.match?(BLANK) }.values
+  def unfilled_fields = FILLABLE.keys.select { self[_1].to_s.match?(BLANK) }.map { FILLABLE[_1] }
 
   # Off-site backup is described, or done by the app to Google Drive.
   def offsite_backup? = offsite_backup_description.present? || OffsiteConnection.connected?

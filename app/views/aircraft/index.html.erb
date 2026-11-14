@@ -1,16 +1,16 @@
-<% content_for :title, "Fleet" %>
+<% content_for :title, t(".fleet") %>
 <div class="mb-5 flex items-center justify-between">
-  <h1 class="text-2xl font-bold tracking-tight">Fleet</h1>
+  <h1 class="text-2xl font-bold tracking-tight"><%= t(".fleet") %></h1>
   <div class="flex gap-2">
-    <%= more_menu do %><%= link_to "Import from a .sam.zip archive", new_aircraft_import_path, class: "menu-item" %><% end %>
-    <%= link_to "+ Add Aircraft", new_aircraft_path, class: "btn-primary" %>
+    <%= more_menu do %><%= link_to t(".import_from_a_sam_zip"), new_aircraft_import_path, class: "menu-item" %><% end %>
+    <%= link_to t(".add_aircraft"), new_aircraft_path, class: "btn-primary" %>
   </div>
 </div>
 
 <% if @aircraft_list.empty? %>
   <div class="card card-body text-center">
-    <p class="text-slate-600">No aircraft yet.</p>
-    <p class="mt-3"><%= link_to "Add your first aircraft", new_aircraft_path, class: "btn-primary" %></p>
+    <p class="text-slate-600"><%= t(".no_aircraft_yet") %></p>
+    <p class="mt-3"><%= link_to t(".add_your_first_aircraft"), new_aircraft_path, class: "btn-primary" %></p>
   </div>
 <% else %>
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -19,7 +19,7 @@
       <%= link_to aircraft_path(aircraft), class: "card block overflow-hidden transition hover:shadow-md" do %>
         <div class="flex h-36 items-center justify-center bg-slate-200">
           <% if aircraft.picture.attached? %>
-            <%= image_tag aircraft.picture, class: "h-full w-full object-cover", alt: "Photo of #{aircraft.tail_number}" %>
+            <%= image_tag aircraft.picture, class: "h-full w-full object-cover", alt: t(".photo_of", tail_number: aircraft.tail_number) %>
           <% else %>
             <span class="text-5xl text-slate-400" aria-hidden="true">✈</span>
           <% end %>
@@ -33,7 +33,7 @@
             <%= airworthiness_badge(aw) %>
           </div>
           <div class="mt-3 flex items-center justify-between text-sm text-slate-600">
-            <span>Tach <strong><%= hours(aircraft.tach_time) %></strong></span>
+            <span><%= t(".tach_html", tach_time: (hours(aircraft.tach_time))) %></span>
             <%= aircraft_status_badge(aircraft) %>
           </div>
           <% if aw.issues.any? %>
@@ -41,7 +41,7 @@
               <% aw.issues.first(3).each do |issue| %>
                 <li class="<%= issue_text_class(issue) %>">• <%= issue.title %></li>
               <% end %>
-              <% if aw.issues.size > 3 %><li class="text-slate-500">+ <%= aw.issues.size - 3 %> more</li><% end %>
+              <% if aw.issues.size > 3 %><li class="text-slate-500"><%= t(".more_html", issues: (aw.issues.size - 3)) %></li><% end %>
             </ul>
           <% end %>
         </div>

@@ -16,9 +16,9 @@ class DirectUploadsController < ActiveStorage::DirectUploadsController
   def check_upload
     error =
       if !UploadValidation::ALLOWED_CONTENT_TYPES.include?(blob_args[:content_type])
-        "#{blob_args[:filename]} isn't an allowed file type"
+        t("errors.messages.file_type", file: blob_args[:filename])
       elsif blob_args[:byte_size].to_i > UploadValidation.max_size
-        "#{blob_args[:filename]} is over the #{UploadValidation.max_size / 1.megabyte} MB upload limit"
+        t("errors.messages.file_size", file: blob_args[:filename], limit: UploadValidation.max_size / 1.megabyte)
       end
     render json: { error: error }, status: :unprocessable_entity if error
   end

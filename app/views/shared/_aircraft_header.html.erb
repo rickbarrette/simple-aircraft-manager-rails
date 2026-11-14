@@ -13,21 +13,21 @@
       <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
         <%= airworthiness_badge(aw) %>
         <%= aircraft_status_badge(aircraft) unless aircraft.status == "AVAILABLE" %>
-        <span class="text-slate-500">Tach <%= hours(aircraft.tach_time) %> · Hobbs <%= hours(aircraft.hobbs_time) %></span>
-        <span class="badge-gray" title="Your access to this aircraft"><%= (current_user.aircraft_roles.find_by(aircraft: aircraft)&.role || current_role).capitalize %></span>
+        <span class="text-slate-500"><%= t(".tach_hobbs_html", tach_time: (hours(aircraft.tach_time)), hobbs_time: (hours(aircraft.hobbs_time))) %></span>
+        <span class="badge-gray" title="<%= t(".your_access_to_this_aircraft") %>"><%= (current_user.aircraft_roles.find_by(aircraft: aircraft)&.role || current_role).capitalize %></span>
       </div>
     </div>
   </div>
   <div class="flex w-full gap-2 sm:w-auto [&>a]:flex-1 [&>a]:justify-center [&>a]:whitespace-nowrap max-sm:[&>a]:px-2 sm:[&>a]:flex-none">
-    <%= link_to "Log Flight", new_aircraft_flight_log_path(aircraft), class: "btn-primary" %>
-    <%= link_to "Report Squawk", new_aircraft_squawk_path(aircraft), class: "btn-secondary" %>
+    <%= link_to t(".log_flight"), new_aircraft_flight_log_path(aircraft), class: "btn-primary" %>
+    <%= link_to t(".report_squawk"), new_aircraft_squawk_path(aircraft), class: "btn-secondary" %>
     <%= more_menu do %>
-      <%= link_to "Status report", aircraft_report_path(aircraft), class: "menu-item" %>
+      <%= link_to t(".status_report"), aircraft_report_path(aircraft), class: "menu-item" %>
       <% if owner? %>
-        <%= link_to "Access & sharing", aircraft_aircraft_roles_path(aircraft), class: "menu-item" %>
-        <%= link_to "Edit aircraft", edit_aircraft_path(aircraft), class: "menu-item" %>
-        <%= link_to "Download .sam.zip", aircraft_export_path(aircraft), class: "menu-item", data: { turbo: false } %>
-        <%= link_to "Download records package", aircraft_records_package_path(aircraft), class: "menu-item", data: { turbo: false } %>
+        <%= link_to t(".access_sharing"), aircraft_aircraft_roles_path(aircraft), class: "menu-item" %>
+        <%= link_to t(".edit_aircraft"), edit_aircraft_path(aircraft), class: "menu-item" %>
+        <%= link_to t(".download_sam_zip"), aircraft_export_path(aircraft), class: "menu-item", data: { turbo: false } %>
+        <%= link_to t(".download_records_package"), aircraft_records_package_path(aircraft), class: "menu-item", data: { turbo: false } %>
       <% end %>
     <% end %>
   </div>
@@ -37,17 +37,17 @@
 <%# Phones: the current section, with every section a tap away. %>
 <details class="relative mb-5 md:hidden" data-controller="dropdown" data-action="click@window->dropdown#closeOutside keydown.esc@window->dropdown#close">
   <summary class="flex cursor-pointer list-none items-center justify-between rounded-md bg-surface px-4 py-3 font-medium shadow-sm ring-1 ring-slate-200 [&::-webkit-details-marker]:hidden">
-    <span><span class="text-xs font-normal text-slate-500">Section</span><br><%= current_tab&.first || "Choose a section" %></span>
+    <span><span class="text-xs font-normal text-slate-500"><%= t(".section") %></span><br><%= current_tab&.first || t(".choose_a_section") %></span>
     <span aria-hidden="true" class="text-slate-500">▾</span>
   </summary>
-  <nav class="absolute inset-x-0 z-30 mt-2 grid grid-cols-2 gap-1 rounded-md bg-surface p-2 shadow-lg ring-1 ring-slate-200" aria-label="Aircraft sections">
+  <nav class="absolute inset-x-0 z-30 mt-2 grid grid-cols-2 gap-1 rounded-md bg-surface p-2 shadow-lg ring-1 ring-slate-200" aria-label="<%= t(".aircraft_sections") %>">
     <% tabs.each do |label, path, names| %>
       <%= link_to label, path, class: [ "rounded px-3 py-2.5 text-sm hover:bg-slate-100", (names.include?(controller_name) ? "bg-slate-100 font-semibold text-sky-700" : "text-slate-700") ],
             aria: { current: (names.include?(controller_name) ? "page" : nil) } %>
     <% end %>
   </nav>
 </details>
-<nav class="mb-5 hidden flex-wrap border-b border-slate-200 md:flex" aria-label="Aircraft sections">
+<nav class="mb-5 hidden flex-wrap border-b border-slate-200 md:flex" aria-label="<%= t(".aircraft_sections") %>">
   <% tabs.each do |label, path, names| %>
     <%= nav_tab label, path, names.include?(controller_name) %>
   <% end %>

@@ -2,8 +2,8 @@
   <%= f.errors_summary %>
   <%= f.field :name, required: true %>
   <%= f.field :description, as: :textarea, rows: 2 %>
-  <%= f.field :visibility, as: :select, label: "Share-link visibility", collection: DocumentCollection::VISIBILITIES.invert %>
-  <%= f.field :starred, as: :checkbox, label: "Starred (shown first)" %>
-  <div class="flex gap-2"><%= f.submit "Save Collection" %><%= link_to "Cancel", aircraft_documents_path(aircraft), class: "btn-secondary" %></div>
+  <%= f.field :visibility, as: :select, label: t(".share_link_visibility"), collection: DocumentCollection::VISIBILITIES.invert %>
+  <%= f.field :starred, as: :checkbox, label: t(".starred_shown_first") %>
+  <div class="flex gap-2"><%= f.submit t(".save_collection") %><%= link_to t(".cancel"), aircraft_documents_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
-<% if collection.persisted? %><div class="mt-4"><%= delete_button "Delete collection and its documents", aircraft_document_collection_path(aircraft, collection) %></div><% end %>
+<% if collection.persisted? %><div class="mt-4"><%= delete_button t(".delete_collection_and_its_documents"), aircraft_document_collection_path(aircraft, collection) %></div><% end %>

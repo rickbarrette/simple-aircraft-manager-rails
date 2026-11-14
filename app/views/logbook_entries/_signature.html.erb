@@ -3,12 +3,12 @@
 <% box, title = { valid: [ "bg-emerald-50 ring-emerald-200", "text-emerald-900" ], superseded: [ "bg-amber-50 ring-amber-200", "text-amber-900" ],
                   altered: [ "bg-red-50 ring-red-200", "text-red-900" ] }.fetch(sig.imported? ? :valid : sig.status) %>
 <div class="rounded-md p-3 text-sm ring-1 <%= box %>">
-  <div class="font-medium <%= title %>"><%= EntrySignature::LABEL %> <%= sig.signer_name %>, <%= sig.certificate_label %> <%= sig.certificate_number %></div>
-  <div class="text-slate-700">Signed electronically <%= sig.signed_at.utc.strftime("%Y-%m-%d %H:%M UTC") %><%= " (#{EntrySignature::AUTH_METHODS[sig.auth_method]})" if EntrySignature::AUTH_METHODS[sig.auth_method] %></div>
+  <div class="font-medium <%= title %>"><%= EntrySignature.label %> <%= sig.signer_name %>, <%= sig.certificate_label %> <%= sig.certificate_number %></div>
+  <div class="text-slate-700"><%= t(".signed_electronically_html", d: (sig.signed_at.utc.strftime("%Y-%m-%d %H:%M UTC")), auth_method: (" (#{EntrySignature::AUTH_METHODS[sig.auth_method]})" if EntrySignature::AUTH_METHODS[sig.auth_method])) %></div>
   <div class="mt-1 italic text-slate-700">“<%= sig.statement %>”</div>
   <div class="mt-1 text-xs text-slate-500">
-    Status: <strong><%= sig.imported? ? "Signed on #{sig.origin} (imported)" : sig.status_label %></strong>
-    · Fingerprint <span class="font-mono"><%= sig.content_digest.first(16) %>…</span>
-    <% if entry.superseded_by %> · Corrected by <%= link_to "the #{fmt_date(entry.superseded_by.date)} entry", aircraft_logbook_entry_path(entry.aircraft, entry.superseded_by), class: "link" %><% end %>
+    <%= t(".status_html", status_label: (sig.imported? ? t(".signed_on_imported", origin: sig.origin) : sig.status_label)) %>
+    <%= t(".fingerprint") %> <span class="font-mono"><%= sig.content_digest.first(16) %>…</span>
+    <% if entry.superseded_by %> <%= t(".corrected_by_html", link: (link_to t(".the_entry", date: fmt_date(entry.superseded_by.date)), aircraft_logbook_entry_path(entry.aircraft, entry.superseded_by), class: "link")) %><% end %>
   </div>
 </div>

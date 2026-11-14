@@ -63,7 +63,7 @@ class FlightImport
   # Creates flight logs + oil/fuel records. Returns the number of flights imported.
   def import!(user:, update_aircraft_hours: false)
     flights = importable
-    raise Error, "Nothing to import." if flights.empty?
+    raise Error, I18n.t("services.flight_import.nothing_to_import") if flights.empty?
 
     Aircraft.transaction do
       flights.each do |r|
@@ -71,17 +71,17 @@ class FlightImport
           user: user, date: r.date, departure_location: r.from, destination_location: r.to,
           tach_out: r.tach_out, tach_in: r.tach_in, tach_time: r.tach_time,
           hobbs_out: r.hobbs_out, hobbs_in: r.hobbs_in, hobbs_time: r.hobbs_time,
-          oil_added: r.oil, fuel_added: r.fuel, notes: "Imported from #{@filename}"
+          oil_added: r.oil, fuel_added: r.fuel, notes: I18n.t("services.flight_import.imported_from", filename: @filename)
         )
         { "oil" => r.oil, "fuel" => r.fuel }.each do |type, qty|
           next unless qty
           @aircraft.consumable_records.create!(record_type: type, flight_log: log, date: r.date,
                                                quantity_added: qty, flight_hours: r.tach_in,
-                                               notes: "Imported from #{@filename}")
+                                               notes: I18n.t("services.flight_import.imported_from", filename: @filename))
         end
       end
       @aircraft.log_event!("flight", "Imported #{flights.size} flights from spreadsheet", user: user,
-                           notes: "#{@filename}: #{flights.first.date} – #{flights.last.date}, #{total_tach_hours} tach hrs")
+                           notes: I18n.t("services.flight_import.tach_hrs", filename: @filename, from: flights.first.date, to: flights.last.date, total_tach_hours: total_tach_hours))
     end
 
     advance_aircraft_hours!(user) if update_aircraft_hours
@@ -116,33 +116,33 @@ class FlightImport
       row.to = code(cell(raw, :to))
       row.tach_in = decimal(cell(raw, :tach), 1)
       row.hobbs_in = decimal(cell(raw, :hobbs), 1)
-      row.oil = quantity(row, cell(raw, :oil), "Oil")
-      row.fuel = quantity(row, cell(raw, :fuel), "Fuel")
+      row.oil = quantity(row, cell(raw, :oil), ConsumableRecord::TYPES["oil"])
+      row.fuel = quantity(row, cell(raw, :fuel), ConsumableRecord::TYPES["fuel"])
       flight_time = decimal(cell(raw, :flight_time), 1)
 
-      row.error("Date missing or not recognized (#{cell(raw, :date).inspect})") unless row.date
-      row.error("Tach reading missing") unless row.tach_in
+      row.error(I18n.t("services.flight_import.date_missing_or_not_recognized", date: (cell(raw, :date).inspect))) unless row.date
+      row.error(I18n.t("services.flight_import.tach_reading_missing")) unless row.tach_in
 
       if row.tach_in
         if prev_tach.nil?
           if flight_time&.positive?
             row.tach_time = flight_time
             row.tach_out = row.tach_in - flight_time
-            row.warn("First row: duration taken from Flight Time column (enter the starting tach to be exact)")
+            row.warn(I18n.t("services.flight_import.first_row_duration_taken_from"))
           else
-            row.error("Starting reading only: no previous tach to measure from. Enter the tach before the first flight to import this row")
+            row.error(I18n.t("services.flight_import.starting_reading_only_no_previous"))
             row.baseline = true
           end
         elsif row.tach_in < prev_tach
-          row.error("Tach went backwards (#{prev_tach} → #{row.tach_in}). Likely a typo")
+          row.error(I18n.t("services.flight_import.tach_went_backwards_likely_a", prev_tach: prev_tach, tach_in: row.tach_in))
         elsif row.tach_in == prev_tach
           row.tach_out = prev_tach
           row.tach_time = BigDecimal("0")
-          row.warn("Tach didn't change (#{row.tach_in}). Imported as 0.0 hrs; check for a typo")
+          row.warn(I18n.t("services.flight_import.tach_didn_t_change_imported", tach_in: row.tach_in))
         else
           row.tach_out = prev_tach
           row.tach_time = row.tach_in - prev_tach
-          row.warn("Long flight: #{row.tach_time} tach hrs. Missing rows?") if row.tach_time > LONG_FLIGHT_HOURS
+          row.warn(I18n.t("services.flight_import.long_flight_tach_hrs_missing", tach_time: row.tach_time)) if row.tach_time > LONG_FLIGHT_HOURS
         end
       end
 
@@ -153,12 +153,12 @@ class FlightImport
         row.hobbs_time = flight_time
       end
       if row.hobbs_in && prev_hobbs && row.hobbs_in < prev_hobbs
-        row.warn("Hobbs went backwards (#{prev_hobbs} → #{row.hobbs_in}). Meter replaced?")
+        row.warn(I18n.t("services.flight_import.hobbs_went_backwards_meter_replaced", prev_hobbs: prev_hobbs, hobbs_in: row.hobbs_in))
       end
 
       if row.status != :error && existing.include?([ row.date, row.tach_in ])
         row.status = :duplicate
-        row.messages = [ "Already imported" ]
+        row.messages = [ I18n.t("services.flight_import.already_imported") ]
       end
 
       # Bad rows don't move the baseline, so the next good row absorbs the time.
@@ -185,15 +185,15 @@ class FlightImport
         end
       end
     end
-    raise Error, "Couldn't find a header row with Date and Tach columns."
+    raise Error, I18n.t("services.flight_import.couldn_t_find_a_header")
   end
 
   def open_spreadsheet
     ext = File.extname(@filename).delete(".").downcase
-    raise Error, "Upload an .xlsx or .csv file." unless ext.in?(EXTENSIONS)
+    raise Error, I18n.t("flash.uploads.spreadsheet_only") unless ext.in?(EXTENSIONS)
     Roo::Spreadsheet.open(@path, extension: ext.to_sym)
   rescue Zip::Error, ArgumentError, CSV::MalformedCSVError => e
-    raise Error, "Couldn't read the file (#{e.message})."
+    raise Error, I18n.t("services.flight_import.couldn_t_read_the_file", message: e.message)
   end
 
   def detect_columns(header_row)
@@ -235,12 +235,12 @@ class FlightImport
   def quantity(row, value, label)
     return nil if value.nil? || BLANK_VALUES.include?(value.to_s.strip.downcase)
     if value.to_s.strip.casecmp?("full")
-      row.warn("#{label} “Full” has no quantity, so it isn't recorded")
+      row.warn(I18n.t("services.flight_import.full_has_no_quantity_so", label: label))
       return nil
     end
     qty = decimal(value)
     if qty.nil? || qty.negative?
-      row.warn("#{label} value #{value.inspect} ignored")
+      row.warn(I18n.t("services.flight_import.value_ignored", label: label, value: value.inspect))
       return nil
     end
     qty

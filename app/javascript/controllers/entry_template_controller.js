@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 // Fills a new logbook entry from a template: the wording, and when the
 // template sets them, the entry type, the logbook (which also picks the
@@ -9,7 +10,7 @@ export default class extends Controller {
   apply() {
     const option = this.templateTarget.selectedOptions[0]
     if (!option?.dataset.text) return
-    if (this.textTarget.value.trim() && !confirm("Replace the entry text with this template?")) return
+    if (this.textTarget.value.trim() && !confirm(t("entry_template.confirm"))) return
     const { text, entryType, logType, certificate } = option.dataset
     this.textTarget.value = text
     if (entryType && this.hasEntryTypeTarget) this.entryTypeTarget.value = entryType

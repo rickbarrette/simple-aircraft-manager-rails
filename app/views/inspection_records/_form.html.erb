@@ -3,17 +3,17 @@
 <%= form_with model: record, url: record.new_record? ? aircraft_inspection_records_path(aircraft) : aircraft_inspection_record_path(aircraft, record),
               class: "card card-body space-y-4 max-w-2xl", data: { controller: "next-due", next_due_rules_value: rules.to_json } do |f| %>
   <%= f.errors_summary %>
-  <%= f.field :inspection_type_id, as: :select, label: "Inspection", collection: types.map { [_1.name, _1.id] },
+  <%= f.field :inspection_type_id, as: :select, label: t(".inspection"), collection: types.map { [_1.name, _1.id] },
         data: { next_due_target: "rule", action: "change->next-due#changed" } %>
   <div class="grid gap-4 sm:grid-cols-2">
     <%= f.field :date, as: :date, data: { next_due_target: "date", action: "change->next-due#changed" } %>
-    <%= f.field :aircraft_hours, as: :number, step: 0.1, label: "Aircraft hours (tach)",
+    <%= f.field :aircraft_hours, as: :number, step: 0.1, label: t(".aircraft_hours_tach"),
           data: { next_due_target: "hours", action: "input->next-due#changed" } %>
-    <%= f.field :component_id, as: :select, label: "Component (if component-level)", collection: component_options(aircraft) %>
-    <%= f.field :logbook_entry_id, as: :select, label: "Logbook entry", collection: logbook_options(aircraft) %>
+    <%= f.field :component_id, as: :select, label: t(".component_if_component_level"), collection: component_options(aircraft) %>
+    <%= f.field :logbook_entry_id, as: :select, label: t(".logbook_entry"), collection: logbook_options(aircraft) %>
   </div>
   <p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-next-due-target="preview" hidden></p>
   <%= f.field :notes, as: :textarea, rows: 2 %>
-  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_inspections_path(aircraft), class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= f.submit t(".save") %><%= link_to t(".cancel"), aircraft_inspections_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
-<% if record.persisted? %><div class="mt-4"><%= delete_button "Delete record", aircraft_inspection_record_path(aircraft, record) %></div><% end %>
+<% if record.persisted? %><div class="mt-4"><%= delete_button t(".delete_record"), aircraft_inspection_record_path(aircraft, record) %></div><% end %>

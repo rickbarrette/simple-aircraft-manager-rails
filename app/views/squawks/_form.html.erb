@@ -1,13 +1,13 @@
 <%= form_with model: [aircraft, squawk], multipart: true, class: "card card-body space-y-4 max-w-2xl" do |f| %>
   <%= f.errors_summary %>
-  <%= f.field :priority, as: :select, collection: Squawk::PRIORITIES.invert, hint: "“Ground Aircraft” makes the aircraft not airworthy until resolved." %>
-  <%= f.field :issue_reported, as: :textarea, label: "Issue", required: true, autofocus: true %>
-  <%= f.field :component_id, as: :select, label: "Component (optional)", collection: component_options(aircraft) %>
-  <%= f.field :attachments, as: :file, multiple: true, label: squawk.attachments.attached? ? "Add photos / files" : "Photos / files",
-        hint: "Select several at once. Images, PDFs or text, up to #{Setting.max_upload_mb} MB each." %>
+  <%= f.field :priority, as: :select, collection: Squawk::PRIORITIES.invert, hint: t(".ground_aircraft_makes_the_aircraft") %>
+  <%= f.field :issue_reported, as: :textarea, label: t(".issue"), required: true, autofocus: true %>
+  <%= f.field :component_id, as: :select, label: t(".component_optional"), collection: component_options(aircraft) %>
+  <%= f.field :attachments, as: :file, multiple: true, label: squawk.attachments.attached? ? t(".add_photos_files") : t(".photos_files"),
+        hint: t(".select_several_at_once_images", max_upload_mb: Setting.max_upload_mb) %>
   <% if squawk.persisted? && squawk.attachments.attached? %>
     <div>
-      <p class="label">Remove attached files</p>
+      <p class="label"><%= t(".remove_attached_files") %></p>
       <% squawk.attachments.each do |file| %>
         <label class="flex items-center gap-2 text-sm"><%= check_box_tag "remove_attachment_ids[]", file.id, false, id: "remove_attachment_#{file.id}" %> <%= file.filename %></label>
       <% end %>
@@ -15,10 +15,10 @@
   <% end %>
   <% if squawk.persisted? %><%= f.field :notes, as: :textarea, rows: 3 %><% end %>
   <div class="flex gap-2">
-    <%= f.submit squawk.new_record? ? "Report Squawk" : "Save" %>
-    <%= link_to "Cancel", aircraft_squawks_path(aircraft), class: "btn-secondary" %>
+    <%= f.submit squawk.new_record? ? t(".report_squawk") : t(".save") %>
+    <%= link_to t(".cancel"), aircraft_squawks_path(aircraft), class: "btn-secondary" %>
   </div>
 <% end %>
 <% if squawk.persisted? && owner? %>
-  <div class="mt-4"><%= delete_button "Delete squawk", aircraft_squawk_path(aircraft, squawk) %></div>
+  <div class="mt-4"><%= delete_button t(".delete_squawk"), aircraft_squawk_path(aircraft, squawk) %></div>
 <% end %>

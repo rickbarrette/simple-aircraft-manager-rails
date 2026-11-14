@@ -1,3 +1,5 @@
+import { t, locale } from "i18n"
+
 // Next-due math, mirroring Compliance.next_due in app/services/compliance.rb:
 // months land on the END of the month, then days are added; hours are added
 // to the hours at completion. Dates are "YYYY-MM-DD" strings (no timezones).
@@ -24,11 +26,11 @@ export function nextDue(rule, dateStr, hours) {
 
 export function describeDue(due) {
   const parts = []
-  if (due.hours != null) parts.push(`${due.hours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} tach`)
+  if (due.hours != null) parts.push(t("next_due.tach", { hours: due.hours.toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }))
   if (due.date) {
     const [y, mo, d] = due.date.split("-").map(Number)
-    parts.push(new Date(y, mo - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }))
+    parts.push(new Date(y, mo - 1, d).toLocaleDateString(locale(), { month: "short", day: "numeric", year: "numeric" }))
   }
   if (parts.length === 0) return ""
-  return parts.length > 1 ? `${parts.join(" or ")}, whichever comes first` : parts[0]
+  return parts.length > 1 ? t("next_due.either", { first: parts[0], second: parts[1] }) : parts[0]
 }

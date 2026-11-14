@@ -21,11 +21,11 @@ module FlightLogsHelper
       [ "CHT", recording.cht_keys, "°F", CYLINDER_COLORS ],
       [ "EGT", recording.egt_keys, "°F", CYLINDER_COLORS ],
       [ "RPM", [ :rpm ], "rpm" ],
-      [ "Manifold pressure", [ :map ], "inHg" ],
-      [ "Fuel flow", [ :fuel_flow ], "gph" ],
-      [ "Oil temp", [ :oil_t ], "°F" ],
-      [ "Oil pressure", [ :oil_p ], "psi" ],
-      [ "Volts", [ :volts ], "V" ]
+      [ I18n.t("helpers.flight_logs.manifold_pressure"), [ :map ], "inHg" ],
+      [ I18n.t("helpers.flight_logs.fuel_flow"), [ :fuel_flow ], "gph" ],
+      [ I18n.t("helpers.flight_logs.oil_temp"), [ :oil_t ], "°F" ],
+      [ I18n.t("helpers.flight_logs.oil_pressure"), [ :oil_p ], "psi" ],
+      [ I18n.t("helpers.flight_logs.volts"), [ :volts ], "V" ]
     ].filter_map do |title, keys, unit, colors|
       keys = keys.select { recording.channels.key?(_1) }
       { title: title, keys: keys, unit: unit, colors: colors || [ CHART_COLOR ] } if keys.any?

@@ -1,17 +1,17 @@
-<% content_for :title, "Set up two-factor" %>
+<% content_for :title, t(".set_up_two_factor") %>
 <section class="card card-body mx-auto max-w-md space-y-4">
-  <h1 class="text-2xl font-bold">Set up an authenticator app</h1>
-  <p class="text-sm text-slate-600">After your password (or an emailed sign-in link) you'll also enter a 6-digit code from an app on your phone, so a stolen password alone can't get in. Any authenticator app works: Google Authenticator, Microsoft Authenticator, 1Password, Authy…</p>
+  <h1 class="text-2xl font-bold"><%= t(".set_up_an_authenticator_app") %></h1>
+  <p class="text-sm text-slate-600"><%= t(".after_your_password_or_an") %></p>
   <ol class="list-decimal space-y-3 pl-5 text-sm">
-    <li>In the app, add an account and scan this code:
-      <div class="mt-2 inline-block rounded bg-white p-2"><%= image_tag @qr_data_uri, alt: "QR code for your authenticator app", class: "h-48 w-48" %></div>
-      <p class="mt-1 text-xs text-slate-500">Can't scan it? Enter this key instead: <code class="break-all"><%= @secret.scan(/.{4}/).join(" ") %></code></p></li>
-    <li>Enter the code the app shows:
+    <li><%= t(".in_the_app_add_an") %>
+      <div class="mt-2 inline-block rounded bg-white p-2"><%= image_tag @qr_data_uri, alt: t(".qr_code_for_your_authenticator"), class: "h-48 w-48" %></div>
+      <p class="mt-1 text-xs text-slate-500"><%= t(".can_t_scan_it_enter_html", scan: (@secret.scan(/.{4}/).join(" "))) %></p></li>
+    <li><%= t(".enter_the_code_the_app") %>
       <%= form_with url: two_factor_path, class: "mt-2 flex flex-wrap items-end gap-2" do |f| %>
         <%= hidden_field_tag :return_to, params[:return_to] %>
-        <%= f.text_field :code, required: true, autocomplete: "one-time-code", inputmode: "numeric", maxlength: 7, class: "input w-32 text-lg tracking-widest", "aria-label": "Code" %>
-        <%= f.submit "Turn on", class: "btn-primary" %>
+        <%= f.text_field :code, required: true, autocomplete: "one-time-code", inputmode: "numeric", maxlength: 7, class: "input w-32 text-lg tracking-widest", "aria-label": t(".code") %>
+        <%= f.submit t(".turn_on"), class: "btn-primary" %>
       <% end %></li>
   </ol>
-  <p class="text-sm"><%= link_to "Not now", back_path, class: "link" %></p>
+  <p class="text-sm"><%= link_to t(".not_now"), back_path, class: "link" %></p>
 </section>

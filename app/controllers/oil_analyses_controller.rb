@@ -24,8 +24,8 @@ class OilAnalysesController < ApplicationController
   def create
     @analysis = @aircraft.oil_analyses.new(analysis_params)
     if @analysis.save
-      log_event("oil_analysis", "Oil analysis added (sampled #{@analysis.sample_date})")
-      redirect_to aircraft_oil_analysis_path(@aircraft, @analysis), notice: "Oil analysis saved."
+      log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_added_sampled", sample_date: @analysis.sample_date))
+      redirect_to aircraft_oil_analysis_path(@aircraft, @analysis), notice: t("flash.oil_analyses.oil_analysis_saved")
     else
       render :new, status: :unprocessable_entity
     end
@@ -35,13 +35,13 @@ class OilAnalysesController < ApplicationController
   # earlier samples, so samples already on file are skipped rather than duplicated.
   def import
     file = params[:report]
-    return redirect_to(new_aircraft_oil_analysis_path(@aircraft), alert: "Choose a lab report PDF.") if file.blank?
+    return redirect_to(new_aircraft_oil_analysis_path(@aircraft), alert: t("flash.oil_analyses.choose_a_lab_report")) if file.blank?
 
     report = OilReportParser.from_pdf(file.tempfile)
     file.rewind
     if report.tail_number.present? && normalize_tail(report.tail_number) != normalize_tail(@aircraft.tail_number)
       return redirect_to(new_aircraft_oil_analysis_path(@aircraft),
-                         alert: "That report is for #{report.tail_number}, not #{@aircraft.tail_number}.")
+                         alert: t("flash.oil_analyses.that_report_is_for", report_tail: report.tail_number, tail_number: @aircraft.tail_number))
     end
 
     engine = engine_for(report)
@@ -57,20 +57,20 @@ class OilAnalysesController < ApplicationController
     current_record.report.attach(file) if current_record && !current_record.report.attached?
 
     skipped = report.samples.size - created.size
-    created.each { log_event("oil_analysis", "Oil analysis imported (sampled #{_1.sample_date})") }
-    notice = "Imported #{helpers.pluralize(created.size, 'sample')} from the #{report.lab} report."
-    notice += " #{helpers.pluralize(skipped, 'sample was', plural: 'samples were')} already recorded." if skipped.positive?
+    created.each { log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_imported_sampled", sample_date: _1.sample_date)) }
+    notice = t("flash.oil_analyses.imported", count: created.size, lab: report.lab)
+    notice += " #{t('flash.oil_analyses.already_recorded', count: skipped)}" if skipped.positive?
     redirect_to aircraft_oil_analyses_path(@aircraft), notice: notice
   rescue OilReportParser::Error => e
-    redirect_to new_aircraft_oil_analysis_path(@aircraft), alert: "Couldn't import that report: #{e.message}"
+    redirect_to new_aircraft_oil_analysis_path(@aircraft), alert: t("flash.oil_analyses.couldn_t_import_that", message: e.message)
   end
 
   def edit; end
 
   def update
     if @analysis.update(analysis_params)
-      log_event("oil_analysis", "Oil analysis updated (sampled #{@analysis.sample_date})")
-      redirect_to aircraft_oil_analysis_path(@aircraft, @analysis), notice: "Oil analysis updated."
+      log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_updated_sampled", sample_date: @analysis.sample_date))
+      redirect_to aircraft_oil_analysis_path(@aircraft, @analysis), notice: t("flash.oil_analyses.oil_analysis_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -78,8 +78,8 @@ class OilAnalysesController < ApplicationController
 
   def destroy
     @analysis.destroy!
-    log_event("oil_analysis", "Oil analysis deleted (sampled #{@analysis.sample_date})")
-    redirect_to aircraft_oil_analyses_path(@aircraft), notice: "Oil analysis deleted."
+    log_event("oil_analysis", t("flash.oil_analyses.oil_analysis_deleted_sampled", sample_date: @analysis.sample_date))
+    redirect_to aircraft_oil_analyses_path(@aircraft), notice: t("flash.oil_analyses.oil_analysis_deleted")
   end
 
   private

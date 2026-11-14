@@ -14,6 +14,6 @@ class AircraftImport < ApplicationRecord
 
   # "12 components, 140 logbook entries, …" for whatever was imported.
   def summary
-    counts.select { |_, n| n.to_i.positive? }.map { |key, n| "#{n} #{key.to_s.humanize(capitalize: false).then { n == 1 ? _1.singularize : _1 }}" }.to_sentence
+    counts.select { |_, n| n.to_i.positive? }.map { |key, n| I18n.t(key, scope: "models.aircraft_import.counts", count: n.to_i) }.to_sentence
   end
 end

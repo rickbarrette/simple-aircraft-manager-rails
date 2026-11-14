@@ -13,7 +13,7 @@ class AircraftExportsController < ApplicationController
     Dir[EXPORT_DIR.join("*.zip")].each { |old| File.delete(old) if File.mtime(old) < 1.hour.ago }
     path = EXPORT_DIR.join("#{SecureRandom.hex(12)}.zip").to_s
     exporter.write_to(path)
-    log_event("aircraft", "Aircraft exported (.sam.zip)")
+    log_event("aircraft", t("flash.aircraft_exports.aircraft_exported_sam_zip"))
     # Generic binary, not application/zip: Safari unzips zip downloads into a
     # folder ("Open safe files"), and the archive must stay one file to import.
     send_file path, filename: exporter.filename, type: "application/octet-stream", disposition: "attachment"

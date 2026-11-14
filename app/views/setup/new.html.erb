@@ -1,13 +1,13 @@
 <div class="mx-auto max-w-md">
-  <h1 class="mb-1 text-2xl font-bold">Welcome</h1>
-  <p class="mb-4 text-sm text-slate-600">Create the administrator account to get started.</p>
+  <h1 class="mb-1 text-2xl font-bold"><%= t(".welcome") %></h1>
+  <p class="mb-4 text-sm text-slate-600"><%= t(".create_the_administrator_account_to") %></p>
   <%= form_with model: @user, url: setup_path, class: "card card-body space-y-4" do |f| %>
     <%= f.errors_summary %>
     <%= f.field :name %>
-    <%= f.field :email_address, as: :email, label: "Email", required: true %>
-    <%= f.field :password, as: :password, required: true, hint: "At least #{User::PASSWORD_MIN} characters; not one known from a data breach." %>
+    <%= f.field :email_address, as: :email, label: t(".email"), required: true %>
+    <%= f.field :password, as: :password, required: true, hint: t(".at_least_characters_not_one", min: User::PASSWORD_MIN) %>
     <%= f.field :password_confirmation, as: :password, required: true %>
-    <p class="hint">Simple Aircraft Manager is provided as is, without warranty, and is not approved by the FAA or any other aviation authority. It is up to you to verify that using it for your aircraft and operation is legal and suitable. The full disclaimer is under Help once you're signed in.</p>
-    <%= f.submit "Create Admin Account", class: "btn-primary w-full justify-center" %>
+    <p class="hint"><%= t(".simple_aircraft_manager_is_provided") %></p>
+    <%= f.submit t(".create_admin_account"), class: "btn-primary w-full justify-center" %>
   <% end %>
 </div>

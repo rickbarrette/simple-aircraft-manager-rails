@@ -1,10 +1,10 @@
-<% content_for :title, "Records audits" %>
+<% content_for :title, t(".records_audits") %>
 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
   <div>
-    <h1 class="text-2xl font-bold">Records audits</h1>
-    <p class="text-sm text-slate-600">Quality-control audits of the electronic records (AC 120-78B 3.2.8.5), every <%= RecordkeepingPolicy.current.audit_interval_months %> months. Next due <strong class="<%= AuditRun.due_soon? ? 'text-amber-700' : '' %>"><%= AuditRun.next_due %></strong>.</p>
+    <h1 class="text-2xl font-bold"><%= t(".records_audits") %></h1>
+    <p class="text-sm text-slate-600"><%= t(".quality_control_audits_of_the_html", audit_interval_months: RecordkeepingPolicy.current.audit_interval_months) %> <strong class="<%= AuditRun.due_soon? ? 'text-amber-700' : '' %>"><%= AuditRun.next_due %></strong>.</p>
   </div>
-  <%= link_to "Start an audit", new_admin_audit_path, class: "btn-primary" %>
+  <%= link_to t(".start_an_audit"), new_admin_audit_path, class: "btn-primary" %>
 </div>
 <section class="card">
   <% if @audits.any? %>
@@ -12,9 +12,9 @@
       <% @audits.each do |a| %>
         <li class="flex items-center justify-between px-4 py-2">
           <span><%= link_to fmt_date(a.performed_at.to_date), admin_audit_path(a), class: "link" %> · <%= a.performed_by&.display_name %></span>
-          <span class="<%= a.passed ? 'badge-green' : 'badge-orange' %>"><%= a.passed ? "Passed" : "Items not passed" %></span>
+          <span class="<%= a.passed ? 'badge-green' : 'badge-orange' %>"><%= a.passed ? t(".passed") : t(".items_not_passed") %></span>
         </li>
       <% end %>
     </ul>
-  <% else %><%= empty_state "No audits yet." %><% end %>
+  <% else %><%= empty_state t(".no_audits_yet") %><% end %>
 </section>

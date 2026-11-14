@@ -1,5 +1,5 @@
-<p>Last night's records check found a problem.</p>
-<p>Backup: <strong><%= @backup.ok ? "OK" : "FAILED: #{@backup.message}" %></strong><br>
-Integrity check: <strong><%= @check.ok ? "OK" : "#{@check.problems.size} problem(s)" %></strong></p>
+<p><%= t(".last_night_s_records_check") %></p>
+<p><%= t(".backup_html", message: (@backup.ok ? "OK" : t(".failed", message: @backup.message))) %>
+<%= t(".integrity_check_html", s: (@check.ok ? "OK" : t(".problem_s", problems: @check.problems.size))) %></p>
 <ul><% Array(@check.problems).first(20).each do |p| %><li><%= p %></li><% end %></ul>
-<p>See Admin → About for details.</p>
+<p><%= t(".see_admin_about_for_details") %></p>

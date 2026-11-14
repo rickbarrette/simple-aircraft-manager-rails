@@ -1,12 +1,12 @@
-<% content_for :title, "Records audit" %>
-<h1 class="mb-1 text-2xl font-bold">Records audit</h1>
-<p class="mb-5 text-sm text-slate-600">Work through each item; the app has checked the first ones itself.</p>
+<% content_for :title, t(".records_audit") %>
+<h1 class="mb-1 text-2xl font-bold"><%= t(".records_audit") %></h1>
+<p class="mb-5 text-sm text-slate-600"><%= t(".work_through_each_item_the") %></p>
 <%= form_with url: admin_audits_path, class: "space-y-5" do %>
   <section class="card">
-    <div class="card-header"><h2 class="card-title">Checked by the app</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".checked_by_the_app") %></h2></div>
     <ul class="divide-y divide-slate-100 text-sm">
       <% @audit.auto_items.each do |item| %>
-        <li class="flex items-start gap-3 px-4 py-2"><span class="<%= item.passed ? 'badge-green' : 'badge-red' %>"><%= item.passed ? "Pass" : "Fail" %></span>
+        <li class="flex items-start gap-3 px-4 py-2"><span class="<%= item.passed ? 'badge-green' : 'badge-red' %>"><%= item.passed ? t(".pass") : t(".fail") %></span>
           <span><span class="font-medium"><%= item.title %></span><span class="block text-xs text-slate-500"><%= item.detail %></span></span></li>
       <% end %>
     </ul>
@@ -14,32 +14,32 @@
 
   <% sample = @audit.sample %>
   <section class="card">
-    <div class="card-header"><h2 class="card-title">Confirmed by you</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".confirmed_by_you") %></h2></div>
     <div class="space-y-4 p-4">
       <% RecordsAudit::MANUAL.each do |key, title| %>
         <div class="space-y-2 rounded-md p-3 ring-1 ring-slate-200">
           <label class="flex items-start gap-2 text-sm font-medium"><%= check_box_tag "answers[#{key}][passed]", "1", false, class: "mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300" %><span><%= title %></span></label>
           <% if key == "restore_test" && OffsiteConnection.connected? %>
             <p class="ml-6 text-xs text-slate-600">
-              <% if (rt = @audit.restore_test) %>Last automatic restore test (<%= fmt_date(rt.created_at.to_date) %>): <span class="<%= rt.ok ? 'badge-green' : 'badge-red' %>"><%= rt.ok ? "OK" : "Failed" %></span> <%= rt.message %><% else %>No automatic restore test yet.<% end %>
-              <%= link_to "Run one", admin_offsite_backup_path, class: "link", target: "_blank" %> (Admin → Off-site Backup → Test restore), then also open a copy downloaded from Google Drive yourself.
+              <% if (rt = @audit.restore_test) %><%= t(".last_automatic_restore_test_html", to_date: (fmt_date(rt.created_at.to_date))) %> <span class="<%= rt.ok ? 'badge-green' : 'badge-red' %>"><%= rt.ok ? "OK" : t(".failed") %></span> <%= rt.message %><% else %><%= t(".no_automatic_restore_test_yet") %><% end %>
+              <%= t(".admin_off_site_backup_test_html", link: (link_to t(".run_one"), admin_offsite_backup_path, class: "link", target: "_blank")) %>
             </p>
           <% end %>
           <% if key == "sample" %>
             <ul class="ml-6 list-disc text-xs text-slate-600">
-              <% sample.each do |e| %><li><%= hidden_field_tag "sample_ids[]", e.id, id: nil %><%= link_to "#{e.aircraft.tail_number} · #{fmt_date(e.date)} · #{e.text.truncate(80)}", aircraft_logbook_entry_path(e.aircraft, e), class: "link", target: "_blank" %><%= " (signed)" if e.signature %></li><% end %>
-              <% if sample.empty? %><li>No entries since the last audit.</li><% end %>
+              <% sample.each do |e| %><li><%= hidden_field_tag "sample_ids[]", e.id, id: nil %><%= link_to "#{e.aircraft.tail_number} · #{fmt_date(e.date)} · #{e.text.truncate(80)}", aircraft_logbook_entry_path(e.aircraft, e), class: "link", target: "_blank" %><%= t(".signed") if e.signature %></li><% end %>
+              <% if sample.empty? %><li><%= t(".no_entries_since_the_last") %></li><% end %>
             </ul>
           <% elsif key == "users" %>
             <ul class="ml-6 list-disc text-xs text-slate-600">
-              <% @audit.users.each do |u| %><li><%= u.display_name %> (<%= u.email_address %>)<%= " · admin" if u.admin? %><%= " · #{u.aircraft_roles.map { "#{_1.role} #{_1.aircraft.tail_number}" }.join(', ')}" if u.aircraft_roles.any? %> · last sign-in <%= u.last_signed_in_at ? time_ago_in_words(u.last_signed_in_at) + " ago" : "never" %><%= " · DISABLED" if u.disabled? %></li><% end %>
+              <% @audit.users.each do |u| %><li><%= t(".last_sign_in_html", display_name: u.display_name, email_address: u.email_address, admin: (t(".admin") if u.admin?), any: (" · #{u.aircraft_roles.map { "#{AircraftRole::ROLES[_1.role]} #{_1.aircraft.tail_number}" }.join(', ')}" if u.aircraft_roles.any?), never: (u.last_signed_in_at ? t(".ago", time: time_ago_in_words(u.last_signed_in_at)) : t(".never")), disabled: (t(".disabled") if u.disabled?)) %></li><% end %>
             </ul>
           <% end %>
-          <%= text_field_tag "answers[#{key}][note]", nil, class: "input", placeholder: "Note (what was checked, or what's being done)" %>
+          <%= text_field_tag "answers[#{key}][note]", nil, class: "input", placeholder: t(".note_what_was_checked_or") %>
         </div>
       <% end %>
-      <div><%= label_tag :notes, "Overall notes", class: "label" %><%= text_area_tag :notes, nil, rows: 3, class: "input" %></div>
-      <%= submit_tag "Record audit", class: "btn-primary" %>
+      <div><%= label_tag :notes, t(".overall_notes"), class: "label" %><%= text_area_tag :notes, nil, rows: 3, class: "input" %></div>
+      <%= submit_tag t(".record_audit"), class: "btn-primary" %>
     </div>
   </section>
 <% end %>

@@ -35,8 +35,8 @@ class ComponentsController < ApplicationController
   def create
     @component = @aircraft.components.new(component_params)
     if @component.save
-      log_event("component", "Component added: #{@component}")
-      redirect_to aircraft_components_path(@aircraft), notice: "Component added."
+      log_event("component", t("flash.components.component_added_2", component: @component))
+      redirect_to aircraft_components_path(@aircraft), notice: t("flash.components.component_added")
     else
       render :new, status: :unprocessable_entity
     end
@@ -46,8 +46,8 @@ class ComponentsController < ApplicationController
 
   def update
     if @component.update(component_params)
-      log_event("component", "Component updated: #{@component}")
-      redirect_to aircraft_components_path(@aircraft), notice: "Component updated."
+      log_event("component", t("flash.components.component_updated_2", component: @component))
+      redirect_to aircraft_components_path(@aircraft), notice: t("flash.components.component_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -55,8 +55,8 @@ class ComponentsController < ApplicationController
 
   def destroy
     @component.destroy!
-    log_event("component", "Component deleted: #{@component}")
-    redirect_to aircraft_components_path(@aircraft), notice: "Component deleted."
+    log_event("component", t("flash.components.component_deleted_2", component: @component))
+    redirect_to aircraft_components_path(@aircraft), notice: t("flash.components.component_deleted")
   end
 
   # Always zeroes hours since overhaul; reset_in_service=1 also zeroes the
@@ -64,8 +64,8 @@ class ComponentsController < ApplicationController
   def reset_service
     replaced = params[:reset_in_service] == "1"
     @component.reset_service!(reset_in_service: replaced)
-    log_event("component", "#{replaced ? 'Replaced' : 'Serviced'}: #{@component}")
-    redirect_to aircraft_components_path(@aircraft), notice: "#{@component} #{replaced ? 'replaced' : 'serviced'}."
+    log_event("component", t(replaced ? "flash.components.replaced_event" : "flash.components.serviced_event", component: @component))
+    redirect_to aircraft_components_path(@aircraft), notice: t(replaced ? "flash.components.replaced" : "flash.components.serviced", component: @component)
   end
 
   private

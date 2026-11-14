@@ -137,7 +137,7 @@ class EngineDataParser
     lines = @content.lines.map(&:chomp)
     header_at = lines.index { _1.start_with?("TIME,") }
     unless header_at && @content[0, 500].match?(/CGR-30|Electronics International/i)
-      raise Error, "Not a recognized engine monitor file (expected a CGR-30P/CGR-30C .csv recording)"
+      raise Error, I18n.t("services.engine_data.not_a_recognized_engine_monitor")
     end
 
     metadata = parse_metadata(lines[0...header_at])
@@ -159,7 +159,7 @@ class EngineDataParser
       times << local - utc_offset
       columns.each { |key, i| values[key] << number(fields[i]) }
     end
-    raise Error, "No data rows found" if times.size < 2
+    raise Error, I18n.t("services.engine_data.no_data_rows_found") if times.size < 2
 
     channels = columns.keys.to_h do |key|
       label, unit = describe(key)
@@ -185,7 +185,7 @@ class EngineDataParser
   def clock(meta)
     local = parse_time(meta[:local_time])
     zulu = parse_time(meta[:zulu_time])
-    raise Error, "Recording has no start date (Local Time line missing)" unless local
+    raise Error, I18n.t("services.engine_data.recording_has_no_start_date") unless local
     offset = zulu ? ((local - zulu) / 900).round * 900 : 0 # whole quarter hours
     [ local.to_date, offset ]
   end

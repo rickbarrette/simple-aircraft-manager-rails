@@ -1,23 +1,23 @@
-<% content_for :title, @search.query.present? ? "Search: #{@search.query}" : "Search" %>
-<h1 class="mb-4 text-2xl font-bold">Search</h1>
+<% content_for :title, @search.query.present? ? t(".search_2", query: @search.query) : t(".search") %>
+<h1 class="mb-4 text-2xl font-bold"><%= t(".search") %></h1>
 <%= form_with url: search_path, method: :get, class: "card card-body mb-5 flex flex-wrap items-end gap-2", data: { turbo_action: "advance" } do %>
   <div class="min-w-0 flex-1">
-    <%= label_tag :q, "Search for", class: "label" %>
-    <%= search_field_tag :q, @search.query, class: "input", autofocus: @search.query.blank?, placeholder: "e.g. magneto, KOQU, 2011-10-09, oil filter" %>
+    <%= label_tag :q, t(".search_for"), class: "label" %>
+    <%= search_field_tag :q, @search.query, class: "input", autofocus: @search.query.blank?, placeholder: t(".e_g_magneto_koqu_2011") %>
   </div>
   <% if @fleet.size > 1 %>
     <div>
-      <%= label_tag :aircraft_id, "Aircraft", class: "label" %>
-      <%= select_tag :aircraft_id, options_for_select([ [ "All aircraft", "" ] ] + @fleet.map { [ _1.tail_number, _1.id ] }, @aircraft&.id), class: "input" %>
+      <%= label_tag :aircraft_id, t(".aircraft"), class: "label" %>
+      <%= select_tag :aircraft_id, options_for_select([ [ t(".all_aircraft"), "" ] ] + @fleet.map { [ _1.tail_number, _1.id ] }, @aircraft&.id), class: "input" %>
     </div>
   <% end %>
-  <%= submit_tag "Search", class: "btn-primary", name: nil %>
+  <%= submit_tag t(".search"), class: "btn-primary", name: nil %>
 <% end %>
 
 <% if @search.query.present? && !@search.searchable? %>
-  <p class="text-sm text-slate-600">Type at least two characters.</p>
+  <p class="text-sm text-slate-600"><%= t(".type_at_least_two_characters") %></p>
 <% elsif @search.searchable? %>
-  <p class="mb-3 text-sm text-slate-600" role="status"><%= pluralize(@search.count, "result") %> for “<%= @search.query %>”<%= " on #{@aircraft.tail_number}" if @aircraft %>.</p>
+  <p class="mb-3 text-sm text-slate-600" role="status"><%= t(".for_html", count: @search.count, query: @search.query, aircraft: (t(".on_aircraft", tail_number: @aircraft.tail_number) if @aircraft)) %></p>
   <div class="space-y-5">
     <% @search.results.each do |kind, results| %>
       <section class="card">
@@ -33,6 +33,6 @@
         </ul>
       </section>
     <% end %>
-    <% if @search.results.empty? %><div class="card"><%= empty_state "Nothing found. Try a shorter word, a part number or an airport code." %></div><% end %>
+    <% if @search.results.empty? %><div class="card"><%= empty_state t(".nothing_found_try_a_shorter") %></div><% end %>
   </div>
 <% end %>

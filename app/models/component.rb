@@ -1,9 +1,9 @@
 class Component < ApplicationRecord
   include Versioned
   include CalendarInterval
-  STATUSES = { "SPARE" => "Spare Part", "IN-USE" => "In Service", "DISPOSED" => "Disposed" }.freeze
+  STATUSES = LabelSet.new("component.statuses", %w[SPARE IN-USE DISPOSED])
   # What "since overhaul" counts from, and how logbooks abbreviate it.
-  OVERHAUL_KINDS = { "major" => "Major overhaul", "factory_overhaul" => "Factory overhaul", "factory_new" => "Factory new or rebuilt (zero time)" }.freeze
+  OVERHAUL_KINDS = LabelSet.new("component.overhaul_kinds", %w[major factory_overhaul factory_new])
   OVERHAUL_ABBREVIATIONS = { "major" => "SMOH", "factory_overhaul" => "SFOH", "factory_new" => "SNEW" }.freeze
 
   calendar_interval :replacement, days: :replacement_days, months: :replacement_months
@@ -41,7 +41,7 @@ class Component < ApplicationRecord
   # SMOH / SFOH / SNEW when the overhaul type is known; engines and
   # propellers otherwise "TSO", and other parts (filters…) "since service".
   def since_overhaul_abbreviation
-    OVERHAUL_ABBREVIATIONS.fetch(overhaul_kind) { engine? || propeller? ? "TSO" : "Since service" }
+    OVERHAUL_ABBREVIATIONS.fetch(overhaul_kind) { engine? || propeller? ? "TSO" : I18n.t("models.component.since_service") }
   end
 
   # Its sub-components, and theirs.
@@ -132,7 +132,7 @@ class Component < ApplicationRecord
 
   def parent_on_same_aircraft
     return unless parent_component
-    errors.add(:parent_component, "can't be itself") if parent_component_id == id && id
-    errors.add(:parent_component, "must be on the same aircraft") if parent_component.aircraft_id != aircraft_id
+    errors.add(:parent_component, :itself) if parent_component_id == id && id
+    errors.add(:parent_component, :other_aircraft) if parent_component.aircraft_id != aircraft_id
   end
 end

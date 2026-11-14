@@ -12,8 +12,8 @@ class InspectionRecordsController < ApplicationController
   def create
     @record = InspectionRecord.new(record_params.merge(aircraft: @aircraft))
     if @record.save
-      log_event("inspection", "Inspection completed: #{@record.inspection_type.name}")
-      redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection recorded."
+      log_event("inspection", t("flash.inspection_records.inspection_completed", name: @record.inspection_type.name))
+      redirect_to aircraft_inspections_path(@aircraft), notice: t("flash.inspection_records.inspection_recorded")
     else
       render :new, status: :unprocessable_entity
     end
@@ -23,8 +23,8 @@ class InspectionRecordsController < ApplicationController
 
   def update
     if @record.update(record_params)
-      log_event("inspection", "Inspection record updated: #{@record.inspection_type.name}")
-      redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection record updated."
+      log_event("inspection", t("flash.inspection_records.inspection_record_updated_2", name: @record.inspection_type.name))
+      redirect_to aircraft_inspections_path(@aircraft), notice: t("flash.inspection_records.inspection_record_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -32,8 +32,8 @@ class InspectionRecordsController < ApplicationController
 
   def destroy
     @record.destroy!
-    log_event("inspection", "Inspection record deleted: #{@record.inspection_type.name}")
-    redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection record deleted."
+    log_event("inspection", t("flash.inspection_records.inspection_record_deleted_2", name: @record.inspection_type.name))
+    redirect_to aircraft_inspections_path(@aircraft), notice: t("flash.inspection_records.inspection_record_deleted")
   end
 
   private

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 import { queue } from "controllers/offline_queue"
 
 // On every page: sends flights logged offline once there's a connection, and
@@ -29,7 +30,7 @@ export default class extends Controller {
       for (const item of items.filter((i) => !i.error)) {
         const result = await this.send(item)
         if (result === "sent") { await queue.remove(item.id); sent++ }
-        else if (result === "signin") { this.show("Sign in to send the flights logged offline."); return }
+        else if (result === "signin") { this.show(t("offline.sign_in")); return }
         else if (result === "offline") break
         else { item.error = result; await queue.put(item) }
       }
@@ -52,15 +53,15 @@ export default class extends Controller {
     const html = await response.text()
     const doc = new DOMParser().parseFromString(html, "text/html")
     const message = [ ...doc.querySelectorAll("[role=alert], .field-error") ].map((e) => e.textContent.trim()).filter(Boolean).join(" ")
-    return message || `Not accepted (${response.status}).`
+    return message || t("offline.not_accepted", { status: response.status })
   }
 
   status(items, sent = 0) {
     const failed = items.filter((i) => i.error)
     const waiting = items.length - failed.length
     const parts = []
-    if (sent) parts.push(`Sent ${sent} flight${sent > 1 ? "s" : ""} logged offline.`)
-    if (waiting) parts.push(`${waiting} flight${waiting > 1 ? "s" : ""} logged offline waiting for a connection.`)
+    if (sent) parts.push(t("offline.sent", { count: sent }))
+    if (waiting) parts.push(t("offline.waiting", { count: waiting }))
     this.show(parts.join(" "), failed)
   }
 
@@ -72,7 +73,7 @@ export default class extends Controller {
       const date = (item.fields.find(([ n ]) => n === "flight_log[date]") || [])[1] || ""
       const row = document.createElement("p")
       row.textContent = `${item.tail} flight ${date} logged offline wasn't accepted: ${item.error} `
-      const discard = Object.assign(document.createElement("button"), { type: "button", textContent: "Discard", className: "btn-secondary btn-sm ml-1" })
+      const discard = Object.assign(document.createElement("button"), { type: "button", textContent: t("offline.discard"), className: "btn-secondary btn-sm ml-1" })
       discard.addEventListener("click", async () => { await queue.remove(item.id); this.sync() })
       row.append(discard)
       banner.append(row)

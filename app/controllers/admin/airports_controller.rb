@@ -16,11 +16,11 @@ class Admin::AirportsController < ApplicationController
   # Queue a download + sync from OurAirports.
   def refresh
     if AirportUpdate.in_progress.exists?
-      redirect_to admin_airports_path, alert: "An update is already running."
+      redirect_to admin_airports_path, alert: t("flash.admin_airports.an_update_is_already")
     else
       update = AirportUpdate.create!(source_url: AirportData::SOURCE_URL, requested_by: current_user)
       AirportUpdateJob.perform_later(update.id)
-      redirect_to admin_airports_path, notice: "Airport update started. Refresh this page in a minute or two."
+      redirect_to admin_airports_path, notice: t("flash.admin_airports.airport_update_started_refresh")
     end
   end
 
@@ -31,7 +31,7 @@ class Admin::AirportsController < ApplicationController
   def create
     @airport = Airport.new(airport_params.merge(custom: true))
     if @airport.save
-      redirect_to admin_airports_path, notice: "Custom airport #{@airport.ident} added."
+      redirect_to admin_airports_path, notice: t("flash.admin_airports.custom_airport_added", ident: @airport.ident)
     else
       render :new, status: :unprocessable_entity
     end
@@ -41,7 +41,7 @@ class Admin::AirportsController < ApplicationController
 
   def update
     if @airport.update(airport_params)
-      redirect_to admin_airports_path, notice: "#{@airport.ident} updated."
+      redirect_to admin_airports_path, notice: t("flash.admin_airports.updated", ident: @airport.ident)
     else
       render :edit, status: :unprocessable_entity
     end
@@ -49,7 +49,7 @@ class Admin::AirportsController < ApplicationController
 
   def destroy
     @airport.destroy!
-    redirect_to admin_airports_path, notice: "#{@airport.ident} removed."
+    redirect_to admin_airports_path, notice: t("flash.admin_airports.removed", ident: @airport.ident)
   end
 
   private

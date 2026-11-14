@@ -10,8 +10,8 @@ class DocumentCollectionsController < ApplicationController
   def create
     @collection = @aircraft.document_collections.new(collection_params)
     if @collection.save
-      log_event("document", "Collection created: #{@collection.name}")
-      redirect_to aircraft_documents_path(@aircraft), notice: "Collection created."
+      log_event("document", t("flash.document_collections.collection_created_2", name: @collection.name))
+      redirect_to aircraft_documents_path(@aircraft), notice: t("flash.document_collections.collection_created")
     else
       render :new, status: :unprocessable_entity
     end
@@ -21,8 +21,8 @@ class DocumentCollectionsController < ApplicationController
 
   def update
     if @collection.update(collection_params)
-      log_event("document", "Collection updated: #{@collection.name}")
-      redirect_to aircraft_documents_path(@aircraft), notice: "Collection updated."
+      log_event("document", t("flash.document_collections.collection_updated_2", name: @collection.name))
+      redirect_to aircraft_documents_path(@aircraft), notice: t("flash.document_collections.collection_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -30,8 +30,8 @@ class DocumentCollectionsController < ApplicationController
 
   def destroy
     @collection.destroy!
-    log_event("document", "Collection deleted: #{@collection.name}")
-    redirect_to aircraft_documents_path(@aircraft), notice: "Collection and its documents deleted."
+    log_event("document", t("flash.document_collections.collection_deleted", name: @collection.name))
+    redirect_to aircraft_documents_path(@aircraft), notice: t("flash.document_collections.collection_and_its_documents")
   end
 
   private

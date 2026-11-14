@@ -48,10 +48,10 @@ class OilReportParser
 
     def parse
       unless @lines.any? { _1.text.include?("OIL ANALYSIS RESULTS IN PARTS PER MILLION") }
-        raise Error, "Not an AvLab oil analysis report"
+        raise Error, I18n.t("services.oil_report.not_an_avlab_oil_analysis")
       end
       samples = sample_blocks.map { parse_sample(_1) }.select { _1[:sample_date] }
-      raise Error, "No samples found in the report" if samples.empty?
+      raise Error, I18n.t("services.oil_report.no_samples_found_in_the") if samples.empty?
 
       Report.new(lab: LAB, tail_number: after("Tail No.:"), engine_serial: after("Engine S/N:"),
                  engine_model: after("Engine Model:", words: 3), samples: samples)

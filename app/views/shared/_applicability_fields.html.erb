@@ -1,7 +1,7 @@
 <%# ADs and inspection types: which parts of THIS aircraft they apply to. %>
 <fieldset>
-  <legend class="label">Applies to on <%= aircraft.tail_number %></legend>
-  <label class="flex items-center gap-2 text-sm"><%= check_box_tag :applies_to_airframe, "1", applies_to_airframe %> Airframe</label>
+  <legend class="label"><%= t(".applies_to_on_html", tail_number: aircraft.tail_number) %></legend>
+  <label class="flex items-center gap-2 text-sm"><%= t(".airframe_html", applies_to_airframe: (check_box_tag :applies_to_airframe, "1", applies_to_airframe)) %></label>
   <% comps = aircraft.components.where.not(status: "DISPOSED").includes(:component_type) %>
   <% if comps.any? %>
     <div class="mt-1 grid gap-1 sm:grid-cols-2">
@@ -10,5 +10,5 @@
       <% end %>
     </div>
   <% end %>
-  <p class="hint">Component-level items follow the component if it moves to another aircraft.</p>
+  <p class="hint"><%= t(".component_level_items_follow_the") %></p>
 </fieldset>

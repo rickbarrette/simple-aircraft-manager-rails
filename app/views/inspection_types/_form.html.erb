@@ -2,29 +2,29 @@
   <%= f.errors_summary %>
   <% if @major_record %>
     <%= hidden_field_tag :major_record_id, @major_record.id %>
-    <p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200">For the Instructions for Continued Airworthiness of <strong><%= @major_record.title %></strong><%= " (STC #{@major_record.stc_number})" if @major_record.stc_number.present? %>. Set the interval the ICA gives.<%= " ICA notes: #{@major_record.ica_notes}" if @major_record.ica_notes.present? %></p>
+    <p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200"><%= t(".for_the_instructions_for_continued_html", title: @major_record.title, stc: (t(".stc", stc_number: @major_record.stc_number) if @major_record.stc_number.present?), notes: (t(".ica_notes", ica_notes: @major_record.ica_notes) if @major_record.ica_notes.present?)) %></p>
   <% end %>
-  <%= f.field :name, required: true, placeholder: "Annual Inspection" %>
-  <%= f.field :effect, as: :select, label: "When overdue", collection: InspectionType::EFFECTS.invert,
-        hint: "An overdue pitot-static check (91.411) only rules out IFR, and an overdue transponder check (91.413) only rules out using the transponder. Neither grounds the aircraft." %>
-  <%= f.field :recurring, as: :checkbox, label: "Recurring" %>
+  <%= f.field :name, required: true, placeholder: t(".annual_inspection") %>
+  <%= f.field :effect, as: :select, label: t(".when_overdue"), collection: InspectionType::EFFECTS.invert,
+        hint: t(".an_overdue_pitot_static_check") %>
+  <%= f.field :recurring, as: :checkbox, label: t(".recurring") %>
   <div class="grid gap-4 sm:grid-cols-3">
-    <%= f.field :recurring_hours, as: :number, step: 0.1, label: "Every (hours)" %>
-    <%= f.interval :recurring, label: "Every", wrapper: { class: "sm:col-span-2" },
-          hint: "Months and years are calendar months: due at the end of the month (an annual done March 10 is due by the end of next March)." %>
+    <%= f.field :recurring_hours, as: :number, step: 0.1, label: t(".every_hours") %>
+    <%= f.interval :recurring, label: t(".every"), wrapper: { class: "sm:col-span-2" },
+          hint: t(".months_and_years_are_calendar") %>
   </div>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :hours_tolerance, as: :number, step: 0.1, min: 0, label: "Overrun allowance (hours)",
-          hint: "For the 100-hour: 10. Done late within this, the next one counts from when it was due (91.409(b))." %>
+    <%= f.field :hours_tolerance, as: :number, step: 0.1, min: 0, label: t(".overrun_allowance_hours"),
+          hint: t(".for_the_100_hour_10") %>
     <% others = aircraft.applicable_inspection_types.ordered.where.not(id: inspection_type.id) %>
-    <%= f.field :satisfies_id, as: :select, label: "Also counts as", include_blank: "— Nothing else —",
+    <%= f.field :satisfies_id, as: :select, label: t(".also_counts_as"), include_blank: t(".nothing_else"),
           collection: others.map { [ _1.name, _1.id ] },
-          hint: "An annual also counts as the 100-hour (91.409(b))." %>
+          hint: t(".an_annual_also_counts_as") %>
   </div>
   <%= render "shared/applicability_fields", aircraft: aircraft, record: inspection_type, applies_to_airframe: @applies_to_airframe %>
   <% if inspection_type.persisted? && inspection_type.aircraft.count > 1 %>
-    <p class="rounded bg-amber-50 p-2 text-xs text-amber-800">This inspection type is shared with other aircraft; interval changes affect them too.</p>
+    <p class="rounded bg-amber-50 p-2 text-xs text-amber-800"><%= t(".this_inspection_type_is_shared") %></p>
   <% end %>
-  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_inspections_path(aircraft), class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= f.submit t(".save") %><%= link_to t(".cancel"), aircraft_inspections_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
-<% if inspection_type.persisted? %><div class="mt-4"><%= delete_button "Remove from #{aircraft.tail_number}", aircraft_inspection_type_path(aircraft, inspection_type) %></div><% end %>
+<% if inspection_type.persisted? %><div class="mt-4"><%= delete_button t(".remove_from", tail_number: aircraft.tail_number), aircraft_inspection_type_path(aircraft, inspection_type) %></div><% end %>

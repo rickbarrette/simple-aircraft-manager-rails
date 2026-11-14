@@ -1,24 +1,24 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <div class="space-y-6">
 <section class="card max-w-3xl">
-  <div class="card-header"><h2 class="card-title">Flight on <%= fmt_date(@flight_log.date) %></h2>
-    <% if owner? %><%= delete_button "Delete", aircraft_flight_log_path(@aircraft, @flight_log), confirm: "Delete this flight log? Aircraft and component hours will NOT be rolled back." %><% end %></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".flight_on_html", date: (fmt_date(@flight_log.date))) %></h2>
+    <% if owner? %><%= delete_button t(".delete"), aircraft_flight_log_path(@aircraft, @flight_log), confirm: t(".delete_this_flight_log_aircraft") %><% end %></div>
   <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
-    <dt class="text-slate-500">Tach</dt><dd><%= hours(@flight_log.tach_time) %> <span class="text-xs text-slate-500"><%= "(#{@flight_log.tach_out} → #{@flight_log.tach_in})" if @flight_log.tach_out && @flight_log.tach_in %></span></dd>
-    <dt class="text-slate-500">Hobbs</dt><dd><%= hours(@flight_log.hobbs_time) %> <span class="text-xs text-slate-500"><%= "(#{@flight_log.hobbs_out} → #{@flight_log.hobbs_in})" if @flight_log.hobbs_out && @flight_log.hobbs_in %></span></dd>
-    <dt class="text-slate-500">Route</dt><dd class="col-span-3"><%= @flight_log.route_summary.presence || "—" %> <%= @flight_log.route %></dd>
-    <dt class="text-slate-500">Oil added</dt><dd><%= @flight_log.oil_added ? "#{@flight_log.oil_added} qt #{@flight_log.oil_added_type}" : "—" %></dd>
-    <dt class="text-slate-500">Fuel added</dt><dd><%= @flight_log.fuel_added ? "#{@flight_log.fuel_added} gal #{@flight_log.fuel_added_type}" : "—" %></dd>
-    <dt class="text-slate-500">Pilot</dt><dd><%= @flight_log.user&.display_name || "—" %></dd>
-    <dt class="text-slate-500">Track log</dt><dd class="col-span-3"><%= @flight_log.track_log.attached? ? link_to(@flight_log.track_log.filename, rails_blob_path(@flight_log.track_log, disposition: :attachment), class: "link") : "—" %>
-      <% if @track %><span class="text-xs text-slate-500"> · <%= number_with_delimiter(@track.points) %> GPS points<%= " · max #{number_with_delimiter(@track.max_altitude_ft)} ft" if @track.max_altitude_ft %></span>
+    <dt class="text-slate-500"><%= t(".tach") %></dt><dd><%= hours(@flight_log.tach_time) %> <span class="text-xs text-slate-500"><%= "(#{@flight_log.tach_out} → #{@flight_log.tach_in})" if @flight_log.tach_out && @flight_log.tach_in %></span></dd>
+    <dt class="text-slate-500"><%= t(".hobbs") %></dt><dd><%= hours(@flight_log.hobbs_time) %> <span class="text-xs text-slate-500"><%= "(#{@flight_log.hobbs_out} → #{@flight_log.hobbs_in})" if @flight_log.hobbs_out && @flight_log.hobbs_in %></span></dd>
+    <dt class="text-slate-500"><%= t(".route") %></dt><dd class="col-span-3"><%= @flight_log.route_summary.presence || "—" %> <%= @flight_log.route %></dd>
+    <dt class="text-slate-500"><%= t(".oil_added") %></dt><dd><%= @flight_log.oil_added ? "#{@flight_log.oil_added} qt #{@flight_log.oil_added_type}" : "—" %></dd>
+    <dt class="text-slate-500"><%= t(".fuel_added") %></dt><dd><%= @flight_log.fuel_added ? "#{@flight_log.fuel_added} gal #{@flight_log.fuel_added_type}" : "—" %></dd>
+    <dt class="text-slate-500"><%= t(".pilot") %></dt><dd><%= @flight_log.user&.display_name || "—" %></dd>
+    <dt class="text-slate-500"><%= t(".track_log") %></dt><dd class="col-span-3"><%= @flight_log.track_log.attached? ? link_to(@flight_log.track_log.filename, rails_blob_path(@flight_log.track_log, disposition: :attachment), class: "link") : "—" %>
+      <% if @track %><span class="text-xs text-slate-500"> <%= t(".gps_points_html", points: (number_with_delimiter(@track.points)), max_altitude_ft: (t(".max_ft", max_altitude_ft: (number_with_delimiter(@track.max_altitude_ft))) if @track.max_altitude_ft)) %></span>
       <% elsif @track_error %><span class="text-xs text-amber-700"> · <%= @track_error %></span><% end %></dd>
     <% if @air_trail_sync || @air_trail_connection %>
-      <dt class="text-slate-500">AirTrail</dt>
+      <dt class="text-slate-500"><%= t(".airtrail") %></dt>
       <dd class="col-span-3 text-xs">
-        <% if @air_trail_sync&.status == "synced" %><span class="badge-green">Synced</span> <%= time_ago_in_words(@air_trail_sync.synced_at) %> ago
-        <% elsif @air_trail_sync&.status == "error" %><span class="badge-red">Not synced</span> <%= @air_trail_sync.last_error %>
-        <% else %><span class="badge-gray">Pending</span><% end %>
+        <% if @air_trail_sync&.status == "synced" %><span class="badge-green"><%= t(".synced") %></span> <%= t(".ago_html", synced_at: (time_ago_in_words(@air_trail_sync.synced_at))) %>
+        <% elsif @air_trail_sync&.status == "error" %><span class="badge-red"><%= t(".not_synced") %></span> <%= @air_trail_sync.last_error %>
+        <% else %><span class="badge-gray"><%= t(".pending") %></span><% end %>
       </dd>
     <% end %>
   </dl>

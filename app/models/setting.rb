@@ -6,12 +6,13 @@
 #   Setting.max_upload_bytes   # => 52428800
 class Setting < ApplicationRecord
   INTEGERS = {
-    "max_upload_mb" => { default: 50, in: 1..1024, label: "Maximum upload size (MB)" },
-    "backups_kept" => { default: 14, in: 1..365, label: "Database backups kept" },
-    "offsite_backups_kept" => { default: 30, in: 1..365, label: "Database copies kept in Google Drive" },
-    "documents_claude_text" => { default: 0, in: 0..1, label: "Read scanned documents with Claude" },
-    "logbook_templates_seeded" => { default: 0, in: 0..1, label: "Built-in logbook templates added" } # internal flag
+    "max_upload_mb" => { default: 50, in: 1..1024 },
+    "backups_kept" => { default: 14, in: 1..365 },
+    "offsite_backups_kept" => { default: 30, in: 1..365 },
+    "documents_claude_text" => { default: 0, in: 0..1 },
+    "logbook_templates_seeded" => { default: 0, in: 0..1 } # internal flag
   }.freeze
+  LABELS = LabelSet.new("setting.keys", INTEGERS.keys)
 
   validates :key, presence: true, uniqueness: true, inclusion: { in: INTEGERS.keys }
   validate :value_in_range
@@ -41,7 +42,7 @@ class Setting < ApplicationRecord
   def value_in_range
     definition = INTEGERS[key] or return
     unless value.to_s.match?(/\A\d+\z/) && definition[:in].cover?(value.to_i)
-      errors.add(:base, "#{definition[:label]} must be a whole number from #{definition[:in].min} to #{definition[:in].max}")
+      errors.add(:base, :out_of_range, setting: LABELS[key], min: definition[:in].min, max: definition[:in].max)
     end
   end
 end

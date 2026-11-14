@@ -1,9 +1,9 @@
-<% content_for :title, "Edit #{@aircraft.tail_number}" %>
+<% content_for :title, t(".edit", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= render "form", aircraft: @aircraft %>
 <div class="mt-6 max-w-3xl card card-body border-red-200">
-  <h2 class="font-semibold text-red-700">Danger zone</h2>
-  <p class="text-sm text-slate-600 mb-3">Deleting an aircraft removes all of its records, documents and history.</p>
-  <%= delete_button "Delete #{@aircraft.tail_number}", aircraft_path(@aircraft),
-        confirm: "Delete #{@aircraft.tail_number} and ALL its records? This cannot be undone.", class: "btn-danger" %>
+  <h2 class="font-semibold text-red-700"><%= t(".danger_zone") %></h2>
+  <p class="text-sm text-slate-600 mb-3"><%= t(".deleting_an_aircraft_removes_all") %></p>
+  <%= delete_button t(".delete", tail_number: @aircraft.tail_number), aircraft_path(@aircraft),
+        confirm: t(".delete_and_all_its_records", tail_number: @aircraft.tail_number), class: "btn-danger" %>
 </div>

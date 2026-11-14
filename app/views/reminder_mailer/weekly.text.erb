@@ -1,31 +1,31 @@
-Here's what needs attention<%= " on your aircraft" if @items.any? %>.
+<%= raw t(".here_s_what_needs_attention_text", any: (t(".on_your_aircraft") if @items.any?)) %>
 <% @items.each do |aircraft, issues, alerts| %>
 
 <%= aircraft.tail_number %> (<%= aircraft.airworthiness.label %>): <%= aircraft_url(aircraft) %>
 <% issues.each do |issue| %>
-- <%= { "RED" => "Overdue", "LIMITED" => "Overdue", "ORANGE" => "Due soon", "INFO" => "Deferred" }[issue.severity] %>: <%= issue.title %>. <%= issue.description %>
+- <%= { "RED" => t(".overdue"), "LIMITED" => t(".overdue"), "ORANGE" => t(".due_soon"), "INFO" => t(".deferred") }[issue.severity] %>: <%= issue.title %>. <%= issue.description %>
 <% end %>
 <% if alerts.any? %>
-- New ADs that may apply: <%= alerts.map { _1.ad_number || _1.fr_document_number }.to_sentence %>. Review: <%= aircraft_airworthiness_directives_url(aircraft, anchor: "new-ads") %>
+<%= raw t(".new_ads_that_may_apply_text", to_sentence: (alerts.map { _1.ad_number || _1.fr_document_number }.to_sentence), ads: (aircraft_airworthiness_directives_url(aircraft, anchor: "new-ads"))) %>
 <% end %>
 <% end %>
 <% if @certificates.any? %>
 
-Your certificates:
+<%= raw t(".your_certificates_2") %>
 <% @certificates.each do |c| %>
-- <%= c.expired? ? "Expired" : "Expires" %> <%= fmt_date(c.expires_on) %>: <%= c.kind_label %> <%= c.number %>
+- <%= c.expired? ? t(".expired") : t(".expires") %> <%= fmt_date(c.expires_on) %>: <%= c.kind_label %> <%= c.number %>
 <% end %>
 <% end %>
 <% if @drs_due.any? %>
 
-AD list from FAA DRS needs a refresh:
+<%= raw t(".ad_list_from_faa_drs") %>
 <% @drs_due.each do |a| %>
-- <%= a.tail_number %>: <%= (m = DrsImport.missing_models(a)).any? ? "never imported for #{m.to_sentence}" : "last import #{a.drs_imports.latest_first.first&.created_at&.to_date || 'never'}" %> (<%= aircraft_airworthiness_directives_url(a) %>)
+- <%= a.tail_number %>: <%= (m = DrsImport.missing_models(a)).any? ? t(".never_imported_for", to_sentence: m.to_sentence) : t(".last_import", never: (a.drs_imports.latest_first.first&.created_at&.to_date || 'never')) %> (<%= aircraft_airworthiness_directives_url(a) %>)
 <% end %>
 <% end %>
 <% if @audit_due %>
 
-Records audit due <%= @audit_due %>: <%= new_admin_audit_url %>
+<%= raw t(".records_audit_due_text", audit_due: @audit_due, new_admin_audit_url: new_admin_audit_url) %>
 <% end %>
 
-Based on the records in Simple Aircraft Manager. Turn these emails off on your profile: <%= edit_profile_url %>
+<%= raw t(".based_on_the_records_in_2_text", edit_profile_url: edit_profile_url) %>

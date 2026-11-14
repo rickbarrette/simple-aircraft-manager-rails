@@ -23,12 +23,12 @@ class GoogleDriveClient
   # The refresh token from the code Google sent back.
   def self.exchange_code(client_id:, client_secret:, code:, redirect_uri:)
     token = token_request(client_id: client_id, client_secret: client_secret, code: code, redirect_uri: redirect_uri, grant_type: "authorization_code")
-    token["refresh_token"].presence or raise AuthError, "Google didn't return a refresh token; remove the app's access in your Google account and connect again"
+    token["refresh_token"].presence or raise AuthError, I18n.t("services.google_drive.google_didn_t_return_a")
   end
 
   def self.revoke(token)
     res = Net::HTTP.post_form(URI(REVOKE_URL), token: token)
-    raise Error, "revoke failed (#{res.code})" unless res.is_a?(Net::HTTPSuccess)
+    raise Error, I18n.t("services.google_drive.revoke_failed", code: res.code) unless res.is_a?(Net::HTTPSuccess)
   rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout => e
     raise Error, e.message
   end
@@ -37,10 +37,10 @@ class GoogleDriveClient
     res = Net::HTTP.post_form(URI(TOKEN_URL), form)
     body = JSON.parse(res.body) rescue {}
     return body if res.is_a?(Net::HTTPSuccess)
-    raise AuthError, "Google refused the credentials (#{body['error_description'] || body['error'] || res.code})" if res.code.to_i.in?([ 400, 401 ])
-    raise Error, "Google token request failed (#{res.code})"
+    raise AuthError, I18n.t("services.google_drive.refused_credentials", reason: body["error_description"] || body["error"] || res.code) if res.code.to_i.in?([ 400, 401 ])
+    raise Error, I18n.t("services.google_drive.google_token_request_failed", code: res.code)
   rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout => e
-    raise Error, "couldn't reach Google: #{e.message}"
+    raise Error, I18n.t("services.google_drive.couldn_t_reach_google", message: e.message)
   end
 
   def initialize(client_id:, client_secret:, refresh_token:)
@@ -68,7 +68,7 @@ class GoogleDriveClient
     session = request(:post, UPLOAD, query: { uploadType: "resumable", fields: "id" },
                                      json: { name: name, parents: [ parent ], appProperties: properties },
                                      headers: { "X-Upload-Content-Type" => content_type, "X-Upload-Content-Length" => size.to_s }, raw: true)
-    location = session["Location"] or raise Error, "Google didn't start the upload"
+    location = session["Location"] or raise Error, I18n.t("services.google_drive.google_didn_t_start_the")
     put = Net::HTTP::Put.new(URI(location))
     put["Content-Length"] = size.to_s
     put["Content-Type"] = content_type
@@ -105,7 +105,7 @@ class GoogleDriveClient
     to.rewind if to.respond_to?(:rewind)
     to
   rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout => e
-    raise Error, "couldn't reach Google Drive: #{e.message}"
+    raise Error, I18n.t("services.google_drive.couldn_t_reach_google_drive", message: e.message)
   end
 
   def delete(id) = request(:delete, "#{API}/files/#{CGI.escape(id)}")
@@ -139,12 +139,12 @@ class GoogleDriveClient
     raise_for(res) unless res.is_a?(Net::HTTPSuccess)
     res
   rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, Net::WriteTimeout => e
-    raise Error, "couldn't reach Google Drive: #{e.message}"
+    raise Error, I18n.t("services.google_drive.couldn_t_reach_google_drive", message: e.message)
   end
 
   def raise_for(res)
     message = (JSON.parse(res.body.to_s).dig("error", "message") rescue nil) || res.message
-    raise AuthError, "Google Drive refused access (#{message}); connect again" if res.code.to_i == 401
-    raise Error, "Google Drive: #{message} (#{res.code})"
+    raise AuthError, I18n.t("services.google_drive.google_drive_refused_access_connect", message: message) if res.code.to_i == 401
+    raise Error, I18n.t("services.google_drive.google_drive", message: message, code: res.code)
   end
 end

@@ -11,6 +11,12 @@ module SimpleAircraftManager
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
 
+    # Language: every config/locales/<locale>.yml is available; APP_LOCALE
+    # picks one (default English). Strings it lacks fall back to English.
+    config.i18n.available_locales = Dir[File.join(__dir__, "locales", "*.yml")].map { File.basename(_1, ".yml").to_sym }
+    config.i18n.default_locale = ENV.fetch("APP_LOCALE", "en").to_sym
+    config.i18n.fallbacks = [ :en ]
+
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.

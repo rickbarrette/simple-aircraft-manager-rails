@@ -1,11 +1,11 @@
-<% content_for :title, "Sign in" %>
+<% content_for :title, t(".sign_in") %>
 <div class="mx-auto max-w-sm">
-  <h1 class="mb-4 text-2xl font-bold">Authenticator code</h1>
+  <h1 class="mb-4 text-2xl font-bold"><%= t(".authenticator_code") %></h1>
   <%= form_with url: two_factor_session_path, class: "card card-body space-y-4" do |form| %>
-    <p class="text-sm text-slate-600">Enter the 6-digit code from your authenticator app. Lost your phone? Enter one of your recovery codes instead.</p>
-    <div><%= form.label :code, "Code", class: "label" %>
+    <p class="text-sm text-slate-600"><%= t(".enter_the_6_digit_code") %></p>
+    <div><%= form.label :code, t(".code"), class: "label" %>
       <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", inputmode: "text", maxlength: 20, class: "input text-lg tracking-widest" %></div>
-    <%= form.submit "Continue", class: "btn-primary w-full justify-center" %>
-    <p class="text-center text-sm"><%= link_to "Start again", new_session_path, class: "link" %></p>
+    <%= form.submit t(".continue"), class: "btn-primary w-full justify-center" %>
+    <p class="text-center text-sm"><%= link_to t(".start_again"), new_session_path, class: "link" %></p>
   <% end %>
 </div>

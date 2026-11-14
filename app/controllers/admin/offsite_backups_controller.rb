@@ -16,12 +16,12 @@ class Admin::OffsiteBackupsController < ApplicationController
     changed_client = attrs[:client_id].present? && attrs[:client_id].strip != @connection.client_id
     @connection.disconnect! if changed_client && @connection.connected?
     @connection.update!(attrs.transform_values(&:strip))
-    redirect_to admin_offsite_backup_path, notice: "Saved. Now connect your Google account."
+    redirect_to admin_offsite_backup_path, notice: t("flash.admin_offsite_backups.saved_now_connect_your")
   end
 
   # Off to Google to grant access (a link, so no form-action CSP entry is needed).
   def connect
-    return redirect_to(admin_offsite_backup_path, alert: "Enter the Google OAuth client ID and secret first.") unless @connection.configured?
+    return redirect_to(admin_offsite_backup_path, alert: t("flash.admin_offsite_backups.enter_the_google_oauth")) unless @connection.configured?
     session[:offsite_oauth_state] = state = SecureRandom.urlsafe_base64(24)
     redirect_to GoogleDriveClient.authorize_url(client_id: @connection.client_id, redirect_uri: @connection.redirect_uri, state: state),
                 allow_other_host: true
@@ -30,9 +30,9 @@ class Admin::OffsiteBackupsController < ApplicationController
   def callback
     expected = session.delete(:offsite_oauth_state)
     unless expected.present? && params[:state].present? && ActiveSupport::SecurityUtils.secure_compare(expected, params[:state].to_s)
-      return redirect_to(admin_offsite_backup_path, alert: "That Google sign-in didn't match a request from here. Try connecting again.")
+      return redirect_to(admin_offsite_backup_path, alert: t("flash.admin_offsite_backups.that_google_sign_in"))
     end
-    return redirect_to(admin_offsite_backup_path, alert: "Google Drive wasn't connected (#{params[:error]}).") if params[:error].present? || params[:code].blank?
+    return redirect_to(admin_offsite_backup_path, alert: t("flash.admin_offsite_backups.google_drive_wasn_t", error: params[:error])) if params[:error].present? || params[:code].blank?
 
     token = GoogleDriveClient.exchange_code(client_id: @connection.client_id, client_secret: @connection.client_secret,
                                             code: params[:code].to_s, redirect_uri: @connection.redirect_uri)
@@ -42,25 +42,25 @@ class Admin::OffsiteBackupsController < ApplicationController
     @connection.ensure_folders!(drive)
     Rails.logger.info("[offsite] #{current_user.email_address} connected Google Drive #{@connection.account_email}")
     OffsiteBackupJob.perform_later
-    redirect_to admin_offsite_backup_path, notice: "Google Drive connected (#{@connection.account_email}). The first off-site backup has started; it copies every uploaded file, so it can take a while."
+    redirect_to admin_offsite_backup_path, notice: t("flash.admin_offsite_backups.google_drive_connected_the", account_email: @connection.account_email)
   rescue GoogleDriveClient::Error => e
-    redirect_to admin_offsite_backup_path, alert: "Couldn't connect Google Drive: #{e.message}"
+    redirect_to admin_offsite_backup_path, alert: t("flash.admin_offsite_backups.couldn_t_connect_google", message: e.message)
   end
 
   def destroy
     @connection.disconnect!
     Rails.logger.info("[offsite] #{current_user.email_address} disconnected Google Drive")
-    redirect_to admin_offsite_backup_path, notice: "Google Drive disconnected. The copies already there stay in your Drive."
+    redirect_to admin_offsite_backup_path, notice: t("flash.admin_offsite_backups.google_drive_disconnected_the")
   end
 
   def backup_now
     OffsiteBackupJob.perform_later
-    redirect_to admin_offsite_backup_path, notice: "Off-site backup started. Refresh in a minute to see the result."
+    redirect_to admin_offsite_backup_path, notice: t("flash.admin_offsite_backups.off_site_backup_started")
   end
 
   def restore_test
     OffsiteBackupJob.perform_later("restore_test")
-    redirect_to admin_offsite_backup_path, notice: "Restore test started. Refresh in a minute to see the result."
+    redirect_to admin_offsite_backup_path, notice: t("flash.admin_offsite_backups.restore_test_started_refresh")
   end
 
   private

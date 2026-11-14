@@ -114,7 +114,7 @@ class DocumentBulkUploadTest < ActionDispatch::IntegrationTest
     sign_in @owner
     post "/rails/active_storage/direct_uploads", params: blob.("a.exe", "application/x-msdownload"), as: :json
     assert_response :unprocessable_entity
-    assert_match "isn't an allowed file type", response.parsed_body["error"]
+    assert_match "is not an allowed file type", response.parsed_body["error"]
     post "/rails/active_storage/direct_uploads", params: blob.("big.pdf", "application/pdf", 51.megabytes), as: :json
     assert_response :unprocessable_entity
 

@@ -1,17 +1,17 @@
 <%= form_with model: [ :admin, template ], class: "card card-body max-w-3xl space-y-4" do |f| %>
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :name, required: true, placeholder: "Oil and filter change" %>
-    <%= f.field :reference, placeholder: "Part 43 App. A (c)(6)", hint: "Shown next to the name, e.g. the regulation or manual paragraph." %>
+    <%= f.field :name, required: true, placeholder: t(".oil_and_filter_change") %>
+    <%= f.field :reference, placeholder: t(".part_43_app_a_c"), hint: t(".shown_next_to_the_name") %>
   </div>
-  <%= f.field :text, as: :textarea, rows: 5, required: true, hint: "The entry text. Use __ for blanks to fill in (quantities, part numbers…)." %>
+  <%= f.field :text, as: :textarea, rows: 5, required: true, hint: t(".the_entry_text_use_for") %>
   <div class="grid gap-4 sm:grid-cols-4">
-    <%= f.field :entry_type, as: :select, label: "Entry type", collection: LogbookEntry::ENTRY_TYPES.invert %>
-    <%= f.field :log_type, as: :select, label: "Logbook", include_blank: "— Leave as is —", collection: LogbookEntry::LOG_TYPES.invert %>
-    <%= f.field :certificate_type, as: :select, label: "Kind of certificate", include_blank: "— Leave as is —", collection: LogbookEntry::CERTIFICATE_TYPES.invert,
-          hint: "Only filled in when none is chosen yet." %>
-    <%= f.field :position, as: :number, label: "Order" %>
+    <%= f.field :entry_type, as: :select, label: t(".entry_type"), collection: LogbookEntry::ENTRY_TYPES.invert %>
+    <%= f.field :log_type, as: :select, label: t(".logbook"), include_blank: t(".leave_as_is"), collection: LogbookEntry::LOG_TYPES.invert %>
+    <%= f.field :certificate_type, as: :select, label: t(".kind_of_certificate"), include_blank: t(".leave_as_is"), collection: LogbookEntry::CERTIFICATE_TYPES.invert,
+          hint: t(".only_filled_in_when_none") %>
+    <%= f.field :position, as: :number, label: t(".order") %>
   </div>
-  <div class="flex gap-2"><%= f.submit "Save Template" %><%= link_to "Cancel", admin_logbook_templates_path, class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= f.submit t(".save_template") %><%= link_to t(".cancel"), admin_logbook_templates_path, class: "btn-secondary" %></div>
 <% end %>
-<% if template.persisted? %><div class="mt-4"><%= delete_button "Delete template", admin_logbook_template_path(template) %></div><% end %>
+<% if template.persisted? %><div class="mt-4"><%= delete_button t(".delete_template"), admin_logbook_template_path(template) %></div><% end %>

@@ -1,14 +1,14 @@
-<% content_for :title, "Records audit" %>
-<h1 class="mb-1 text-2xl font-bold">Records audit, <%= fmt_date(@audit.performed_at.to_date) %></h1>
-<p class="mb-4 text-sm text-slate-600">By <%= @audit.performed_by&.display_name %> · <span class="<%= @audit.passed ? 'badge-green' : 'badge-orange' %>"><%= @audit.passed ? "Passed" : "Items not passed" %></span></p>
+<% content_for :title, t(".records_audit") %>
+<h1 class="mb-1 text-2xl font-bold"><%= t(".records_audit_2_html", to_date: (fmt_date(@audit.performed_at.to_date))) %></h1>
+<p class="mb-4 text-sm text-slate-600"><%= t(".by_html", display_name: @audit.performed_by&.display_name) %> <span class="<%= @audit.passed ? 'badge-green' : 'badge-orange' %>"><%= @audit.passed ? t(".passed") : t(".items_not_passed") %></span></p>
 <section class="card">
   <ul class="divide-y divide-slate-100 text-sm">
     <% @audit.results.each do |r| %>
-      <li class="flex items-start gap-3 px-4 py-2"><span class="<%= r['passed'] ? 'badge-green' : 'badge-red' %>"><%= r["passed"] ? "Pass" : "Fail" %></span>
-        <span><span class="font-medium"><%= r["title"] %></span><%= tag.span(" (checked by the app)", class: "text-xs text-slate-500") if r["auto"] %>
+      <li class="flex items-start gap-3 px-4 py-2"><span class="<%= r['passed'] ? 'badge-green' : 'badge-red' %>"><%= r["passed"] ? t(".pass") : t(".fail") %></span>
+        <span><span class="font-medium"><%= r["title"] %></span><%= tag.span(t(".checked_by_the_app"), class: "text-xs text-slate-500") if r["auto"] %>
           <% if r["detail"].present? %><span class="block text-xs text-slate-600"><%= r["detail"] %></span><% end %></span></li>
     <% end %>
   </ul>
   <% if @audit.notes.present? %><div class="whitespace-pre-wrap border-t border-slate-100 px-4 py-3 text-sm"><%= @audit.notes %></div><% end %>
 </section>
-<p class="mt-4"><%= link_to "All audits", admin_audits_path, class: "link" %></p>
+<p class="mt-4"><%= link_to t(".all_audits"), admin_audits_path, class: "link" %></p>

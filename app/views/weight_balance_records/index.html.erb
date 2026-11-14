@@ -1,62 +1,62 @@
-<% content_for :title, "#{@aircraft.tail_number} Weight & Balance" %>
+<% content_for :title, t(".weight_balance", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <% setup = @aircraft.loading_setup %>
 <div class="grid gap-5 lg:grid-cols-2">
   <section class="card">
     <div class="card-header">
-      <h2 class="card-title">Current weight & balance</h2>
-      <% if owner? %><%= link_to "+ New W&B", new_aircraft_weight_balance_record_path(@aircraft), class: "btn-primary btn-sm" %><% end %>
+      <h2 class="card-title"><%= t(".current_weight_balance") %></h2>
+      <% if owner? %><%= link_to t(".new_w_b"), new_aircraft_weight_balance_record_path(@aircraft), class: "btn-primary btn-sm" %><% end %>
     </div>
     <% if @current %>
       <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <dt class="text-slate-500">As of</dt><dd><%= fmt_date(@current.date) %><%= " · #{@current.reason}" if @current.reason.present? %></dd>
-        <dt class="text-slate-500">Empty weight</dt><dd class="font-medium"><%= number_with_precision(@current.empty_weight, precision: 1, delimiter: ",") %> lb</dd>
-        <dt class="text-slate-500">Empty CG (arm)</dt><dd class="font-medium"><%= number_with_precision(@current.empty_arm, precision: 2) %> in</dd>
-        <dt class="text-slate-500">Moment</dt><dd><%= number_with_precision(@current.empty_moment, precision: 0, delimiter: ",") %> lb-in</dd>
-        <dt class="text-slate-500">Max gross weight</dt><dd><%= @current.max_gross_weight ? "#{number_with_precision(@current.max_gross_weight, precision: 0, delimiter: ',')} lb" : "—" %></dd>
-        <dt class="text-slate-500">Useful load</dt><dd class="font-medium"><%= @current.useful_load ? "#{number_with_precision(@current.useful_load, precision: 1, delimiter: ',')} lb" : "—" %></dd>
+        <dt class="text-slate-500"><%= t(".as_of") %></dt><dd><%= fmt_date(@current.date) %><%= " · #{@current.reason}" if @current.reason.present? %></dd>
+        <dt class="text-slate-500"><%= t(".empty_weight") %></dt><dd class="font-medium"><%= t(".lb_html", delimiter: (number_with_precision(@current.empty_weight, precision: 1, delimiter: ","))) %></dd>
+        <dt class="text-slate-500"><%= t(".empty_cg_arm") %></dt><dd class="font-medium"><%= t(".in_html", precision: (number_with_precision(@current.empty_arm, precision: 2))) %></dd>
+        <dt class="text-slate-500"><%= t(".moment") %></dt><dd><%= t(".lb_in_html", delimiter: (number_with_precision(@current.empty_moment, precision: 0, delimiter: ","))) %></dd>
+        <dt class="text-slate-500"><%= t(".max_gross_weight") %></dt><dd><%= @current.max_gross_weight ? "#{number_with_precision(@current.max_gross_weight, precision: 0, delimiter: ',')} lb" : "—" %></dd>
+        <dt class="text-slate-500"><%= t(".useful_load") %></dt><dd class="font-medium"><%= @current.useful_load ? "#{number_with_precision(@current.useful_load, precision: 1, delimiter: ',')} lb" : "—" %></dd>
       </dl>
     <% else %>
-      <%= empty_state "No weight & balance recorded yet. Add the figures from the current W&B report." %>
+      <%= empty_state t(".no_weight_balance_recorded_yet") %>
     <% end %>
   </section>
 
   <section class="card">
     <div class="card-header">
-      <h2 class="card-title">Loading calculator</h2>
-      <% if owner? %><%= link_to "Loading setup", edit_aircraft_loading_setup_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+      <h2 class="card-title"><%= t(".loading_calculator") %></h2>
+      <% if owner? %><%= link_to t(".loading_setup"), edit_aircraft_loading_setup_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
     </div>
     <% if @current && setup.configured? %>
       <%= render "weight_balance_records/calculator", record: @current, setup: setup %>
     <% elsif !@current %>
-      <%= empty_state "Record the current weight & balance first." %>
+      <%= empty_state t(".record_the_current_weight_balance") %>
     <% else %>
-      <%= empty_state(owner? ? "Set up the loading stations and CG envelope from the POH to use the calculator." : "An owner needs to set up the loading stations first.") %>
+      <%= empty_state(owner? ? t(".set_up_the_loading_stations") : t(".an_owner_needs_to_set")) %>
     <% end %>
   </section>
 </div>
 
 <section class="card mt-5">
-  <div class="card-header"><h2 class="card-title">History</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".history") %></h2></div>
   <% if @records.any? %>
     <div class="overflow-x-auto">
       <table class="table">
-        <thead><tr><th>Date</th><th class="text-right">Empty weight</th><th class="text-right">CG</th><th class="text-right">Useful load</th><th>Reason</th><th></th></tr></thead>
+        <thead><tr><th><%= t(".date") %></th><th class="text-right"><%= t(".empty_weight") %></th><th class="text-right"><%= t(".cg") %></th><th class="text-right"><%= t(".useful_load") %></th><th><%= t(".reason") %></th><th></th></tr></thead>
         <tbody>
           <% @records.each do |r| %>
             <tr>
               <td class="whitespace-nowrap"><%= fmt_date(r.date) %></td>
-              <td class="text-right tabular-nums"><%= number_with_precision(r.empty_weight, precision: 1, delimiter: ",") %> lb</td>
-              <td class="text-right tabular-nums"><%= number_with_precision(r.empty_arm, precision: 2) %> in</td>
+              <td class="text-right tabular-nums"><%= t(".lb_html", delimiter: (number_with_precision(r.empty_weight, precision: 1, delimiter: ","))) %></td>
+              <td class="text-right tabular-nums"><%= t(".in_html", precision: (number_with_precision(r.empty_arm, precision: 2))) %></td>
               <td class="text-right tabular-nums"><%= r.useful_load ? "#{number_with_precision(r.useful_load, precision: 1, delimiter: ',')} lb" : "—" %></td>
               <td class="text-xs"><%= r.reason %>
                 <% if r.major_record %><div><%= link_to r.major_record.title, aircraft_major_record_path(@aircraft, r.major_record), class: "link" %></div><% end %>
                 <% if r.document %><div><%= link_to "📄 #{r.document.name}", aircraft_document_path(@aircraft, r.document), class: "link" %></div><% end %></td>
-              <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_weight_balance_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+              <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_weight_balance_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
             </tr>
           <% end %>
         </tbody>
       </table>
     </div>
-  <% else %><%= empty_state "No records yet." %><% end %>
+  <% else %><%= empty_state t(".no_records_yet") %><% end %>
 </section>

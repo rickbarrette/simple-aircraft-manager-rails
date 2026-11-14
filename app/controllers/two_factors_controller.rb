@@ -1,10 +1,10 @@
 # Profile → Two-factor: set up an authenticator app (TOTP) for password and
 # emailed-link sign-in, turn it off, or make new recovery codes.
 class TwoFactorsController < ApplicationController
-  rate_limit to: 10, within: 5.minutes, only: %i[create destroy recovery_codes], with: -> { redirect_to edit_profile_path(anchor: "two-factor"), alert: "Try again later." }
+  rate_limit to: 10, within: 5.minutes, only: %i[create destroy recovery_codes], with: -> { redirect_to edit_profile_path(anchor: "two-factor"), alert: t("flash.two_factors.try_again_later") }
 
   def new
-    return redirect_to(back_path, notice: "Two-factor is already on.") if current_user.otp_enabled?
+    return redirect_to(back_path, notice: t("flash.two_factors.two_factor_is_already")) if current_user.otp_enabled?
     session[:pending_otp_secret] ||= User.new_otp_secret
     @secret = session[:pending_otp_secret]
     svg = RQRCode::QRCode.new(User.otp_uri(@secret, current_user.email_address)).as_svg(module_size: 4, use_path: true, viewbox: true)
@@ -20,22 +20,22 @@ class TwoFactorsController < ApplicationController
       log_security("turned on two-factor")
       render :codes
     else
-      redirect_to new_two_factor_path(return_to: params[:return_to]), alert: "That code didn't match. Check the time on your phone and try the current code."
+      redirect_to new_two_factor_path(return_to: params[:return_to]), alert: t("flash.two_factors.that_code_didn_t")
     end
   end
 
   def recovery_codes
-    return redirect_to(edit_profile_path(anchor: "two-factor"), alert: "That code didn't match.") unless current_user.verify_second_factor(params[:code])
+    return redirect_to(edit_profile_path(anchor: "two-factor"), alert: t("flash.two_factors.that_code_didn_t_2")) unless current_user.verify_second_factor(params[:code])
     @codes = current_user.enable_otp!(current_user.otp_secret)
     log_security("made new recovery codes")
     render :codes
   end
 
   def destroy
-    return redirect_to(edit_profile_path(anchor: "two-factor"), alert: "That code didn't match.") unless current_user.verify_second_factor(params[:code])
+    return redirect_to(edit_profile_path(anchor: "two-factor"), alert: t("flash.two_factors.that_code_didn_t_3")) unless current_user.verify_second_factor(params[:code])
     current_user.disable_otp!
     log_security("turned off two-factor")
-    redirect_to edit_profile_path(anchor: "two-factor"), notice: "Two-factor is off."
+    redirect_to edit_profile_path(anchor: "two-factor"), notice: t("flash.two_factors.two_factor_is_off")
   end
 
   private

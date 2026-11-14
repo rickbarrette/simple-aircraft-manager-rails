@@ -1,6 +1,6 @@
 <%# Upload a lab report PDF to create the sample records. Locals: aircraft %>
 <%= form_with url: import_aircraft_oil_analyses_path(aircraft), multipart: true, class: "flex flex-wrap items-center gap-2" do |f| %>
-  <%= f.file_field :report, accept: ".pdf,application/pdf", required: true, "aria-label": "Lab report PDF",
+  <%= f.file_field :report, accept: ".pdf,application/pdf", required: true, "aria-label": t(".lab_report_pdf"),
         class: "block text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
-  <%= f.submit "Import report", class: "btn-secondary btn-sm" %>
+  <%= f.submit t(".import_report"), class: "btn-secondary btn-sm" %>
 <% end %>

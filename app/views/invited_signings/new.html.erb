@@ -1,15 +1,15 @@
-<% content_for :title, "Sign logbook entry" %>
+<% content_for :title, t(".sign_logbook_entry") %>
 <% if @certificates.empty? %>
   <section class="card card-body mb-5 max-w-3xl space-y-3">
-    <h2 class="card-title">Add your certificate</h2>
+    <h2 class="card-title"><%= t(".add_your_certificate") %></h2>
     <%= form_with model: UserCertificate.new, url: certificates_path(return_to: request.path), class: "grid gap-2 sm:grid-cols-[1fr_10rem_auto]" do |f| %>
-      <%= f.select :kind, UserCertificate::KINDS.invert, {}, class: "input", "aria-label": "Kind of certificate" %>
-      <%= f.text_field :number, class: "input", placeholder: "Number", required: true, "aria-label": "Certificate number" %>
-      <%= f.submit "Add", class: "btn-secondary" %>
+      <%= f.select :kind, UserCertificate::KINDS.invert, {}, class: "input", "aria-label": t(".kind_of_certificate") %>
+      <%= f.text_field :number, class: "input", placeholder: t(".number"), required: true, "aria-label": t(".certificate_number") %>
+      <%= f.submit t(".add"), class: "btn-secondary" %>
     <% end %>
   </section>
 <% end %>
 <%= render "entry_signatures/form", entry: @entry, url: invited_signing_path(params[:token]), cancel_path: root_path %>
 <% unless current_user.otp_enabled? %>
-  <p class="mx-auto mt-4 max-w-3xl text-sm text-slate-600">Recommended: <%= link_to "add an authenticator app", new_two_factor_path(return_to: request.path), class: "link" %> to your account, so your signature can't be made with a stolen password alone.</p>
+  <p class="mx-auto mt-4 max-w-3xl text-sm text-slate-600"><%= t(".recommended_to_your_account_so_html", link: (link_to t(".add_an_authenticator_app"), new_two_factor_path(return_to: request.path), class: "link")) %></p>
 <% end %>

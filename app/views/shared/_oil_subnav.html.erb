@@ -1,6 +1,6 @@
 <%# Oil & Fuel tab: consumption and oil analysis are two pages under one tab. %>
-<nav class="mb-4 inline-flex rounded-md bg-surface p-1 text-sm shadow-sm ring-1 ring-slate-200" aria-label="Oil and fuel">
-  <% [ [ "Consumption", aircraft_consumable_records_path(aircraft), "consumable_records" ], [ "Oil analysis", aircraft_oil_analyses_path(aircraft), "oil_analyses" ] ].each do |label, path, name| %>
+<nav class="mb-4 inline-flex rounded-md bg-surface p-1 text-sm shadow-sm ring-1 ring-slate-200" aria-label="<%= t(".oil_and_fuel") %>">
+  <% [ [ t(".consumption"), aircraft_consumable_records_path(aircraft), "consumable_records" ], [ t(".oil_analysis"), aircraft_oil_analyses_path(aircraft), "oil_analyses" ] ].each do |label, path, name| %>
     <%= link_to label, path, class: [ "rounded px-3 py-1.5", (controller_name == name ? "bg-slate-100 font-semibold text-sky-700" : "text-slate-600 hover:text-slate-900") ],
           aria: { current: (controller_name == name ? "page" : nil) } %>
   <% end %>

@@ -19,8 +19,8 @@ class WeightBalanceRecordsController < ApplicationController
   def create
     @record = @aircraft.weight_balance_records.new(record_params)
     if @record.save
-      log_event("aircraft", "Weight & balance recorded: #{@record.empty_weight} lb @ #{@record.empty_arm} in")
-      redirect_to aircraft_weight_balance_records_path(@aircraft), notice: "Weight & balance saved."
+      log_event("aircraft", t("flash.weight_balance_records.weight_balance_recorded_lb", empty_weight: @record.empty_weight, empty_arm: @record.empty_arm))
+      redirect_to aircraft_weight_balance_records_path(@aircraft), notice: t("flash.weight_balance_records.weight_balance_saved")
     else
       render :new, status: :unprocessable_entity
     end
@@ -30,8 +30,8 @@ class WeightBalanceRecordsController < ApplicationController
 
   def update
     if @record.update(record_params)
-      log_event("aircraft", "Weight & balance updated (#{@record.date})")
-      redirect_to aircraft_weight_balance_records_path(@aircraft), notice: "Weight & balance updated."
+      log_event("aircraft", t("flash.weight_balance_records.weight_balance_updated_2", date: @record.date))
+      redirect_to aircraft_weight_balance_records_path(@aircraft), notice: t("flash.weight_balance_records.weight_balance_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -39,8 +39,8 @@ class WeightBalanceRecordsController < ApplicationController
 
   def destroy
     @record.destroy!
-    log_event("aircraft", "Weight & balance record deleted (#{@record.date})")
-    redirect_to aircraft_weight_balance_records_path(@aircraft), notice: "Record deleted."
+    log_event("aircraft", t("flash.weight_balance_records.weight_balance_record_deleted", date: @record.date))
+    redirect_to aircraft_weight_balance_records_path(@aircraft), notice: t("flash.weight_balance_records.record_deleted")
   end
 
   private

@@ -6,6 +6,6 @@ class AircraftGroundedError < StandardError
   def initialize(airworthiness)
     @airworthiness = airworthiness
     reasons = airworthiness.red_issues.map(&:title).join("; ")
-    super([ "Aircraft is grounded and airworthiness enforcement is enabled", reasons.presence ].compact.join(": "))
+    super([ I18n.t("services.aircraft_grounded_error.message"), reasons.presence ].compact.join(": "))
   end
 end

@@ -1,43 +1,43 @@
-<% content_for :title, "#{@aircraft.tail_number} ADs" %>
+<% content_for :title, t(".ads", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
   <div class="card-header">
-    <h2 class="card-title">Airworthiness Directives & Bulletins</h2>
+    <h2 class="card-title"><%= t(".airworthiness_directives_bulletins") %></h2>
     <% if owner? %>
       <div class="flex flex-wrap items-center gap-2">
         <% if @attachable.any? %>
           <%= form_with url: attach_aircraft_airworthiness_directives_path(@aircraft), class: "flex gap-2" do |f| %>
             <%= f.select :airworthiness_directive_id, @attachable.map { ["#{_1.name} – #{_1.short_description.truncate(40)}", _1.id] }, {}, class: "input w-64" %>
-            <%= f.submit "Link existing", class: "btn-secondary" %>
+            <%= f.submit t(".link_existing"), class: "btn-secondary" %>
           <% end %>
         <% end %>
-        <%= link_to "+ New AD", new_aircraft_airworthiness_directive_path(@aircraft), class: "btn-primary" %>
+        <%= link_to t(".new_ad"), new_aircraft_airworthiness_directive_path(@aircraft), class: "btn-primary" %>
       </div>
     <% end %>
   </div>
   <% if @rows.any? %>
     <div class="overflow-x-auto">
       <table class="table">
-        <thead><tr><th>AD / Bulletin</th><th>Description</th><th>Recurrence</th><th>Last complied</th><th>Next due</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th><%= t(".ad_bulletin") %></th><th><%= t(".description") %></th><th><%= t(".recurrence") %></th><th><%= t(".last_complied") %></th><th><%= t(".next_due") %></th><th><%= t(".status") %></th><th></th></tr></thead>
         <tbody>
           <% @rows.each do |row| ad = row.ad %>
             <tr>
               <td class="whitespace-nowrap font-medium"><span class="badge-gray mr-1"><%= ad.bulletin_label %></span><%= ad_link(ad) %>
-                <% if ad.document %><%= link_to "📄", aircraft_document_path(@aircraft, ad.document), title: ad.document.name, "aria-label": "Document: #{ad.document.name}" %><% end %>
-                <% unless ad.mandatory? %><div class="text-xs text-slate-500">not mandatory</div><% end %></td>
+                <% if ad.document %><%= link_to "📄", aircraft_document_path(@aircraft, ad.document), title: ad.document.name, "aria-label": t(".document", document: ad.document.name) %><% end %>
+                <% unless ad.mandatory? %><div class="text-xs text-slate-500"><%= t(".not_mandatory") %></div><% end %></td>
               <td class="max-w-sm text-xs"><%= ad.short_description %>
-                <% if ad.effective_date || ad.product_type.present? %><div class="text-slate-500"><%= [(ad.effective_date && "Effective #{fmt_date(ad.effective_date)}"), ad.product_type.presence].compact.join(" · ") %></div><% end %>
-                <% if ad.superseded_by.present? %><div class="text-amber-700">Superseded by <%= ad.superseded_by %></div><% end %>
-                <% if ad.conditional? && ad.trigger_condition.present? %><div class="text-slate-500">Trigger: <%= ad.trigger_condition %></div><% end %></td>
-              <td class="text-xs"><%= ad.recurring? ? [ad.recurring_hours.to_f > 0 && "#{hours(ad.recurring_hours)} h", ad.recurring_interval_label].select(&:itself).join(" / ") : "One-time" %></td>
+                <% if ad.effective_date || ad.product_type.present? %><div class="text-slate-500"><%= [(ad.effective_date && t(".effective_2", effective_date: (fmt_date(ad.effective_date)))), ad.product_type.presence].compact.join(" · ") %></div><% end %>
+                <% if ad.superseded_by.present? %><div class="text-amber-700"><%= t(".superseded_by_html", superseded_by: ad.superseded_by) %></div><% end %>
+                <% if ad.conditional? && ad.trigger_condition.present? %><div class="text-slate-500"><%= t(".trigger_html", trigger_condition: ad.trigger_condition) %></div><% end %></td>
+              <td class="text-xs"><%= ad.recurring? ? [ad.recurring_hours.to_f > 0 && "#{hours(ad.recurring_hours)} h", ad.recurring_interval_label].select(&:itself).join(" / ") : t(".one_time") %></td>
               <td class="text-xs"><%= row.latest ? "#{row.latest.date_complied}#{' (permanent)' if row.latest.permanent?}" : "—" %></td>
-              <td class="text-xs"><%= [row.next_due_date&.strftime("%b %Y"), row.next_due_hours && "#{hours(row.next_due_hours)} #{@aircraft.time_basis} (#{hours(row.next_due_hours - @aircraft.current_hours)} h left)"].compact.join(" / ").presence || "—" %></td>
+              <td class="text-xs"><%= [row.next_due_date && l(row.next_due_date, format: :month_year), row.next_due_hours && t(".due_hours", hours: hours(row.next_due_hours), meter: Aircraft::TIME_BASES[@aircraft.time_basis].downcase, left: hours(row.next_due_hours - @aircraft.current_hours))].compact.join(" / ").presence || "—" %></td>
               <td><%= compliance_badge(row.status) %></td>
               <td class="whitespace-nowrap text-right">
                 <% if owner? %>
-                  <%= link_to "Comply", new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id), class: "btn-secondary btn-sm" %>
-                  <% if row.status.in?(%w[no_compliance overdue due_soon conditional]) %><%= link_to "N/A", new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id, not_applicable: 1), class: "btn-secondary btn-sm", title: "Record that this AD doesn't apply to this aircraft" %><% end %>
-                  <%= link_to "Edit", edit_aircraft_airworthiness_directive_path(@aircraft, ad), class: "btn-secondary btn-sm" %>
+                  <%= link_to t(".comply"), new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id), class: "btn-secondary btn-sm" %>
+                  <% if row.status.in?(%w[no_compliance overdue due_soon conditional]) %><%= link_to "N/A", new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id, not_applicable: 1), class: "btn-secondary btn-sm", title: t(".record_that_this_ad_doesn") %><% end %>
+                  <%= link_to t(".edit"), edit_aircraft_airworthiness_directive_path(@aircraft, ad), class: "btn-secondary btn-sm" %>
                 <% end %>
               </td>
             </tr>
@@ -46,7 +46,7 @@
       </table>
     </div>
   <% else %>
-    <%= empty_state "No ADs tracked for this aircraft." %>
+    <%= empty_state t(".no_ads_tracked_for_this") %>
   <% end %>
 </section>
 
@@ -55,69 +55,69 @@
 <section class="card mt-5" id="ad-baseline">
   <div class="card-header">
     <div>
-      <h2 class="card-title">AD baseline from FAA DRS</h2>
-      <p class="text-xs text-slate-500">The full list comes from DRS imports; the weekly search below adds what's published after.</p>
+      <h2 class="card-title"><%= t(".ad_baseline_from_faa_drs") %></h2>
+      <p class="text-xs text-slate-500"><%= t(".the_full_list_comes_from") %></p>
     </div>
-    <% if owner? %><%= link_to "Import from FAA DRS", new_aircraft_ad_import_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+    <% if owner? %><%= link_to t(".import_from_faa_drs"), new_aircraft_ad_import_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
   </div>
   <div class="card-body space-y-2 text-sm">
     <% if last_drs %>
-      <p>Last import <strong><%= fmt_date(last_drs.created_at.to_date) %></strong> by <%= last_drs.user&.display_name || "—" %>: <%= last_drs.ad_count %> ADs<%= ", covering #{Array(last_drs.models_covered).to_sentence}" if Array(last_drs.models_covered).any? %>.</p>
-      <% if last_drs.created_at < DrsImport::RENEW_AFTER.ago %><p class="text-amber-800">Over a year old: import again to pick up revised ADs and anything the weekly search missed.</p><% end %>
+      <p><%= t(".last_import_by_ads_html", to_date: (fmt_date(last_drs.created_at.to_date)), display_name: (last_drs.user&.display_name || "—"), ad_count: last_drs.ad_count, any: (t(".covering", to_sentence: (Array(last_drs.models_covered).to_sentence)) if Array(last_drs.models_covered).any?)) %></p>
+      <% if last_drs.created_at < DrsImport::RENEW_AFTER.ago %><p class="text-amber-800"><%= t(".over_a_year_old_import") %></p><% end %>
     <% else %>
-      <p class="text-amber-800">No DRS import yet. Export the ADs for each model from drs.faa.gov and import them here.</p>
+      <p class="text-amber-800"><%= t(".no_drs_import_yet_export") %></p>
     <% end %>
-    <% if missing.any? %><p class="text-amber-800">Never imported for: <strong><%= missing.join(", ") %></strong>. Search DRS for each and import the file.</p><% end %>
+    <% if missing.any? %><p class="text-amber-800"><%= t(".never_imported_for_search_drs_html", missing: (missing.join(", "))) %></p><% end %>
   </div>
 </section>
 
 <section class="card mt-5" id="new-ads">
   <div class="card-header">
     <div>
-      <h2 class="card-title">Newly published ADs that may apply</h2>
-      <p class="text-xs text-slate-500">Searched weekly in the Federal Register for <%= AdWatch.new(@aircraft).terms.map(&:label).uniq.to_sentence.presence || "the aircraft and its installed components" %><%= " · last checked #{time_ago_in_words(@aircraft.ad_watch_checked_at)} ago" if @aircraft.ad_watch_checked_at %>.</p>
+      <h2 class="card-title"><%= t(".newly_published_ads_that_may") %></h2>
+      <p class="text-xs text-slate-500"><%= t(".searched_weekly_in_the_federal_html", components: (AdWatch.new(@aircraft).terms.map(&:label).uniq.to_sentence.presence || t(".the_aircraft_and_its_installed")), ad_watch_checked_at: (t(".last_checked_ago", ad_watch_checked_at: (time_ago_in_words(@aircraft.ad_watch_checked_at))) if @aircraft.ad_watch_checked_at)) %></p>
     </div>
-    <% if owner? %><%= button_to "Check now", check_aircraft_ad_alerts_path(@aircraft), class: "btn-secondary btn-sm", data: { turbo_submits_with: "Checking…" } %><% end %>
+    <% if owner? %><%= button_to t(".check_now"), check_aircraft_ad_alerts_path(@aircraft), class: "btn-secondary btn-sm", data: { turbo_submits_with: t(".checking") } %><% end %>
   </div>
   <% if @alerts.any? %>
     <ul class="divide-y divide-slate-100">
       <% @alerts.each do |alert| %>
         <li class="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
           <div class="min-w-0 flex-1 text-sm">
-            <div class="font-medium"><%= alert.ad_number ? "AD #{alert.ad_number}" : alert.fr_document_number %> · <%= alert.title.to_s.delete_prefix("Airworthiness Directives; ") %></div>
-            <div class="text-xs text-slate-500"><%= [ (alert.effective_on && "Effective #{fmt_date(alert.effective_on)}"), "published #{fmt_date(alert.publication_date)}", "matched “#{alert.matched_term}”" ].compact.join(" · ") %></div>
+            <div class="font-medium"><%= alert.ad_number ? t(".ad_2", ad_number: alert.ad_number) : alert.fr_document_number %> · <%= alert.title.to_s.delete_prefix("Airworthiness Directives; ") %></div>
+            <div class="text-xs text-slate-500"><%= [ (alert.effective_on && t(".effective", effective_on: (fmt_date(alert.effective_on)))), "published #{fmt_date(alert.publication_date)}", t(".matched", matched_term: alert.matched_term) ].compact.join(" · ") %></div>
             <p class="mt-1 text-xs text-slate-600"><%= alert.abstract.to_s.truncate(400) %></p>
-            <%= link_to "Read it in the Federal Register", alert.html_url, class: "link text-xs", target: "_blank", rel: "noopener" %>
+            <%= link_to t(".read_it_in_the_federal"), alert.html_url, class: "link text-xs", target: "_blank", rel: "noopener" %>
           </div>
           <% if owner? %>
             <div class="flex gap-2">
-              <%= button_to "Track", track_aircraft_ad_alert_path(@aircraft, alert), class: "btn-primary btn-sm", title: "Add it to this aircraft's ADs" %>
-              <%= button_to "Dismiss", dismiss_aircraft_ad_alert_path(@aircraft, alert), class: "btn-secondary btn-sm", title: "Doesn't apply" %>
+              <%= button_to t(".track"), track_aircraft_ad_alert_path(@aircraft, alert), class: "btn-primary btn-sm", title: t(".add_it_to_this_aircraft") %>
+              <%= button_to t(".dismiss"), dismiss_aircraft_ad_alert_path(@aircraft, alert), class: "btn-secondary btn-sm", title: t(".doesn_t_apply") %>
             </div>
           <% end %>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <%= empty_state "Nothing new to review." %>
+    <%= empty_state t(".nothing_new_to_review") %>
   <% end %>
   <% if owner? %>
     <%= form_with url: terms_aircraft_ad_alerts_path(@aircraft), method: :patch, class: "flex flex-wrap items-end gap-2 border-t border-slate-100 px-4 py-3" do %>
       <div class="min-w-0 flex-1">
-        <%= label_tag :ad_watch_terms, "Additional search terms", class: "label" %>
-        <%= text_field_tag :ad_watch_terms, @aircraft.ad_watch_terms, class: "input", placeholder: "e.g. an STC or part that isn't a component" %>
+        <%= label_tag :ad_watch_terms, t(".additional_search_terms"), class: "label" %>
+        <%= text_field_tag :ad_watch_terms, @aircraft.ad_watch_terms, class: "input", placeholder: t(".e_g_an_stc_or") %>
       </div>
-      <%= submit_tag "Save", class: "btn-secondary" %>
-      <p class="hint w-full">Comma-separated, searched in addition to the automatic ones: the aircraft make and model, engine and propeller models (and families), and every installed component’s maker, type and model. A match on a component makes the tracked AD apply to that component. Matches are only possibly applicable: check each AD's applicability (and serial number ranges) before tracking it.</p>
+      <%= submit_tag t(".save"), class: "btn-secondary" %>
+      <p class="hint w-full"><%= t(".comma_separated_searched_in_addition") %></p>
     <% end %>
   <% end %>
 </section>
 
 <section class="card mt-5">
-  <div class="card-header"><h2 class="card-title">Compliance History</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".compliance_history") %></h2></div>
   <% if @history.any? %>
     <table class="table">
-      <thead><tr><th>Date</th><th>AD</th><th class="text-right">Hours</th><th>Next due (tach)</th><th>Notes</th><th></th></tr></thead>
+      <thead><tr><th><%= t(".date") %></th><th><%= t(".ad") %></th><th class="text-right"><%= t(".hours") %></th><th><%= t(".next_due_tach") %></th><th><%= t(".notes") %></th><th></th></tr></thead>
       <tbody>
         <% @history.each do |c| %>
           <tr>
@@ -125,27 +125,27 @@
             <% ad = c.airworthiness_directive %>
             <td class="max-w-xs">
               <span class="whitespace-nowrap font-medium"><%= ad_link(ad) %></span>
-              <% if ad.document %><%= link_to "📄", aircraft_document_path(@aircraft, ad.document), title: ad.document.name, "aria-label": "Document: #{ad.document.name}" %><% end %>
+              <% if ad.document %><%= link_to "📄", aircraft_document_path(@aircraft, ad.document), title: ad.document.name, "aria-label": t(".document", document: ad.document.name) %><% end %>
               <div class="text-xs text-slate-500"><%= ad.short_description %><%= " · #{c.component}" if c.component %></div>
             </td>
             <td class="text-right"><%= hours(c.aircraft_hours_at_compliance) %></td>
-            <td><%= c.not_applicable? ? "N/A" : c.permanent? ? "Permanent" : (c.next_due_at_time.to_f > 0 ? hours(c.next_due_at_time) : "—") %></td>
+            <td><%= c.not_applicable? ? "N/A" : c.permanent? ? t(".permanent") : (c.next_due_at_time.to_f > 0 ? hours(c.next_due_at_time) : "—") %></td>
             <td class="max-w-md text-xs">
               <div class="font-medium text-slate-700"><%= c.method_label %><%= " · #{c.ad_revision}" if c.ad_revision.present? %></div>
               <%= c.compliance_notes %>
               <% if c.logbook_entry || c.inspection_record %>
                 <div class="mt-1 flex flex-wrap gap-x-3">
-                  <% if c.logbook_entry %><%= link_to "Logbook #{fmt_date(c.logbook_entry.date)}", aircraft_logbook_entry_path(@aircraft, c.logbook_entry), class: "link" %><% end %>
+                  <% if c.logbook_entry %><%= link_to t(".logbook", date: fmt_date(c.logbook_entry.date)), aircraft_logbook_entry_path(@aircraft, c.logbook_entry), class: "link" %><% end %>
                   <% if c.inspection_record %><%= link_to "#{c.inspection_record.inspection_type.name} #{fmt_date(c.inspection_record.date)}", aircraft_inspections_path(@aircraft), class: "link" %><% end %>
                 </div>
               <% end %>
             </td>
-            <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_ad_compliance_path(@aircraft, c), class: "btn-secondary btn-sm" %><% end %></td>
+            <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_ad_compliance_path(@aircraft, c), class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   <% else %>
-    <%= empty_state "No compliance records." %>
+    <%= empty_state t(".no_compliance_records") %>
   <% end %>
 </section>

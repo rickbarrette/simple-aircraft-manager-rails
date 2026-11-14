@@ -27,8 +27,8 @@ class ConsumableRecordsController < ApplicationController
   def create
     @record = @aircraft.consumable_records.new(record_params)
     if @record.save
-      log_event(@record.record_type, "#{@record.record_type.capitalize} added: #{@record.quantity_added} #{@record.unit}")
-      redirect_to aircraft_consumable_records_path(@aircraft), notice: "Record added."
+      log_event(@record.record_type, t("flash.consumable_records.added_event", type: ConsumableRecord::TYPES[@record.record_type], quantity: @record.quantity_added, unit: @record.unit))
+      redirect_to aircraft_consumable_records_path(@aircraft), notice: t("flash.consumable_records.record_added")
     else
       render :new, status: :unprocessable_entity
     end
@@ -38,8 +38,8 @@ class ConsumableRecordsController < ApplicationController
 
   def update
     if @record.update(record_params)
-      log_event(@record.record_type, "#{@record.record_type.capitalize} record updated")
-      redirect_to aircraft_consumable_records_path(@aircraft), notice: "Record updated."
+      log_event(@record.record_type, t("flash.consumable_records.updated_event", type: ConsumableRecord::TYPES[@record.record_type]))
+      redirect_to aircraft_consumable_records_path(@aircraft), notice: t("flash.consumable_records.record_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -47,8 +47,8 @@ class ConsumableRecordsController < ApplicationController
 
   def destroy
     @record.destroy!
-    log_event(@record.record_type, "#{@record.record_type.capitalize} record deleted")
-    redirect_to aircraft_consumable_records_path(@aircraft), notice: "Record deleted."
+    log_event(@record.record_type, t("flash.consumable_records.deleted_event", type: ConsumableRecord::TYPES[@record.record_type]))
+    redirect_to aircraft_consumable_records_path(@aircraft), notice: t("flash.consumable_records.record_deleted")
   end
 
   private

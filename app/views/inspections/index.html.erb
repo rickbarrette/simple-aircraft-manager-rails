@@ -1,25 +1,25 @@
-<% content_for :title, "#{@aircraft.tail_number} Inspections" %>
+<% content_for :title, t(".inspections", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
-  <div class="card-header"><h2 class="card-title">Inspection Status</h2>
-    <% if owner? %><div class="flex flex-wrap gap-2"><%= more_menu do %><%= link_to "Add standard inspections", new_aircraft_standard_inspections_path(@aircraft), class: "menu-item" %><% end %><%= link_to "+ Inspection Type", new_aircraft_inspection_type_path(@aircraft), class: "btn-primary" %></div><% end %></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".inspection_status") %></h2>
+    <% if owner? %><div class="flex flex-wrap gap-2"><%= more_menu do %><%= link_to t(".add_standard_inspections"), new_aircraft_standard_inspections_path(@aircraft), class: "menu-item" %><% end %><%= link_to t(".inspection_type"), new_aircraft_inspection_type_path(@aircraft), class: "btn-primary" %></div><% end %></div>
   <% if @rows.any? %>
     <div class="overflow-x-auto">
       <table class="table">
-        <thead><tr><th>Inspection</th><th>Interval</th><th>Last done</th><th>Next due</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th><%= t(".inspection") %></th><th><%= t(".interval") %></th><th><%= t(".last_done") %></th><th><%= t(".next_due") %></th><th><%= t(".status") %></th><th></th></tr></thead>
         <tbody>
           <% @rows.each do |row| %>
             <tr>
               <td class="font-medium"><%= row.type.name %><%= tag.span(" #{row.type.advisory? ? 'advisory' : row.type.limitation.to_s.downcase + ' if overdue'}", class: "text-xs text-slate-500") if row.type.advisory? || row.type.limitation %>
-                <% if row.type.satisfies %><div class="text-xs text-slate-500">Also counts as <%= row.type.satisfies.name %></div><% end %></td>
+                <% if row.type.satisfies %><div class="text-xs text-slate-500"><%= t(".also_counts_as_html", satisfies: row.type.satisfies.name) %></div><% end %></td>
               <td class="text-xs"><%= row.type.interval_description %></td>
               <td class="text-xs"><%= row.latest ? "#{fmt_date(row.latest.date)} @ #{hours(row.latest.hours_at_inspection)} h" : "—" %></td>
               <td class="text-xs"><%= [row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} h"].compact.join(" / ").presence || "—" %></td>
               <td><%= compliance_badge(row.status) %></td>
               <td class="whitespace-nowrap text-right">
                 <% if owner? %>
-                  <%= link_to "Record", new_aircraft_inspection_record_path(@aircraft, inspection_type_id: row.type.id), class: "btn-secondary btn-sm" %>
-                  <%= link_to "Edit", edit_aircraft_inspection_type_path(@aircraft, row.type), class: "btn-secondary btn-sm" %>
+                  <%= link_to t(".record"), new_aircraft_inspection_record_path(@aircraft, inspection_type_id: row.type.id), class: "btn-secondary btn-sm" %>
+                  <%= link_to t(".edit"), edit_aircraft_inspection_type_path(@aircraft, row.type), class: "btn-secondary btn-sm" %>
                 <% end %>
               </td>
             </tr>
@@ -28,15 +28,15 @@
       </table>
     </div>
   <% else %>
-    <%= empty_state "No inspections tracked. Add Annual, 100-hour, transponder (91.413), pitot-static (91.411), ELT (91.207)…" %>
+    <%= empty_state t(".no_inspections_tracked_add_annual") %>
   <% end %>
 </section>
 
 <section class="card mt-5">
-  <div class="card-header"><h2 class="card-title">History</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".history") %></h2></div>
   <% if @history.any? %>
     <table class="table">
-      <thead><tr><th>Date</th><th>Inspection</th><th class="text-right">Hours</th><th>Notes</th><th></th></tr></thead>
+      <thead><tr><th><%= t(".date") %></th><th><%= t(".inspection") %></th><th class="text-right"><%= t(".hours") %></th><th><%= t(".notes") %></th><th></th></tr></thead>
       <tbody>
         <% @history.each do |r| %>
           <tr>
@@ -44,12 +44,12 @@
             <td><%= r.inspection_type.name %><%= " (#{r.component})" if r.component %></td>
             <td class="text-right"><%= hours(r.hours_at_inspection) %></td>
             <td class="text-xs"><%= r.notes %><% if r.logbook_entry %> <%= link_to "logbook", aircraft_logbook_entry_path(@aircraft, r.logbook_entry), class: "link" %><% end %></td>
-            <td class="text-right"><% if owner? %><%= link_to "Edit", edit_aircraft_inspection_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+            <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_inspection_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   <% else %>
-    <%= empty_state "No inspections recorded." %>
+    <%= empty_state t(".no_inspections_recorded") %>
   <% end %>
 </section>

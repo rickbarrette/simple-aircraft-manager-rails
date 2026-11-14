@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 const CHOICES = ["system", "light", "dark"]
-const LABELS = { system: "System", light: "Light", dark: "Dark" }
 
 // Light / dark / follow-the-OS theme toggle. The choice is kept in
 // localStorage; the layout's inline script applies it before first paint.
@@ -40,7 +40,7 @@ export default class extends Controller {
     this.element.querySelectorAll("[data-theme-icon]").forEach((icon) => {
       icon.classList.toggle("hidden", icon.dataset.themeIcon !== choice)
     })
-    const label = `Theme: ${LABELS[choice]}${choice === "system" ? ` (${theme})` : ""}`
+    const label = choice === "system" ? t("theme.system", { theme: t(`theme.${theme}`) }) : t("theme.label", { choice: t(`theme.${choice}`) })
     this.element.title = label
     this.element.setAttribute("aria-label", label)
     if (changed) window.dispatchEvent(new CustomEvent("theme:change", { detail: { theme } }))

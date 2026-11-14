@@ -1,3 +1,3 @@
-<% content_for :title, "#{@aircraft.tail_number} Weight & Balance" %>
+<% content_for :title, t(".weight_balance", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= render "form", aircraft: @aircraft, record: @record %>

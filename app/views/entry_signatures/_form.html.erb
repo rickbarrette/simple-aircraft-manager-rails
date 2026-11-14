@@ -1,56 +1,56 @@
 <%# Signing form: review, certificate, re-authentication, confirm. Locals: entry, url, cancel_path. %>
 <section class="card max-w-3xl">
-  <div class="card-header"><h2 class="card-title">Sign this entry</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".sign_this_entry") %></h2></div>
   <div class="card-body space-y-4">
-    <p class="text-sm text-slate-600">Review the entry: your signature will cover exactly what's shown here, and it can't be changed afterwards. A mistake is fixed with a correction entry. <%= link_to "How signing works", records_help_path, class: "link", target: "_blank" %></p>
+    <p class="text-sm text-slate-600"><%= t(".review_the_entry_your_signature_html", link: (link_to t(".how_signing_works"), records_help_path, class: "link", target: "_blank")) %></p>
     <%= render "logbook_entries/content", entry: entry %>
     <% if @signing_error %>
       <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert"><%= @signing_error %></div>
     <% end %>
     <% if @certificates.empty? %>
       <p class="rounded-md bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-200">
-        To sign, add your certificate on <%= link_to "your profile", edit_profile_path(anchor: "certificates"), class: "link" %>.
+        <%= t(".to_sign_add_your_certificate_html", link: (link_to t(".your_profile"), edit_profile_path(anchor: "certificates"), class: "link")) %>
       </p>
     <% else %>
       <%= form_with url: url, method: :post, class: "space-y-4" do %>
         <fieldset class="space-y-2">
-          <legend class="label">Sign with</legend>
+          <legend class="label"><%= t(".sign_with") %></legend>
           <% @certificates.each_with_index do |c, i| %>
             <% problems = entry.signing_problems(c) %>
             <label class="flex items-start gap-2 rounded-md p-2 text-sm ring-1 ring-slate-200 <%= 'opacity-60' if problems.any? %>">
               <%= radio_button_tag :certificate_id, c.id, params[:certificate_id].to_s == c.id.to_s || (params[:certificate_id].blank? && i.zero? && problems.empty?),
                                    disabled: problems.any?, class: "mt-1" %>
               <span><strong><%= current_user.display_name %>, <%= c.kind_label %> <%= c.number %></strong>
-                <% if problems.any? %><span class="block text-xs text-red-700">Can't sign: <%= problems.to_sentence %>.</span>
-                <% else %><span class="block text-slate-600"><%= EntrySignature::LABEL %>: “<%= entry.certification_statement(c.kind) %>”</span><% end %></span>
+                <% if problems.any? %><span class="block text-xs text-red-700"><%= t(".can_t_sign_html", to_sentence: problems.to_sentence) %></span>
+                <% else %><span class="block text-slate-600"><%= EntrySignature.label %>: “<%= entry.certification_statement(c.kind) %>”</span><% end %></span>
             </label>
           <% end %>
         </fieldset>
         <% if Sso.password_login? || !current_user.sso_uid? %>
           <div class="max-w-xs">
-            <%= label_tag :password, "Your password", class: "label" %>
+            <%= label_tag :password, t(".your_password"), class: "label" %>
             <%= password_field_tag :password, nil, class: "input", autocomplete: "current-password" %>
-            <p class="hint">Proves it's you signing, not someone at your keyboard.<%= " Or sign in again with #{Sso.label} below." if Sso.enabled? && current_user.sso_uid? %></p>
+            <p class="hint"><%= t(".proves_it_s_you_signing_html", sso_uid: (t(".or_sign_in_again_with_2", so: Sso.label) if Sso.enabled? && current_user.sso_uid?)) %></p>
           </div>
           <% if current_user.otp_enabled? %>
             <div class="max-w-xs">
-              <%= label_tag :otp_code, "Authenticator code", class: "label" %>
+              <%= label_tag :otp_code, t(".authenticator_code"), class: "label" %>
               <%= text_field_tag :otp_code, nil, class: "input w-32 tracking-widest", autocomplete: "one-time-code", inputmode: "numeric", maxlength: 20 %>
             </div>
           <% end %>
         <% end %>
         <% if Sso.enabled? && current_user.sso_uid? %>
           <% fresh = session[:reauthenticated_at] && Time.zone.at(session[:reauthenticated_at]) > EntrySigner::REAUTH_WINDOW.ago %>
-          <p class="text-sm <%= fresh ? 'text-emerald-700' : 'text-slate-600' %>"><%= fresh ? "Signed in again with #{Sso.label}: you can sign now." : "Or sign in again with #{Sso.label} first (button below the form)." %></p>
+          <p class="text-sm <%= fresh ? 'text-emerald-700' : 'text-slate-600' %>"><%= fresh ? t(".signed_in_again_with_you", so: Sso.label) : t(".or_sign_in_again_with", so: Sso.label) %></p>
         <% end %>
         <label class="flex items-start gap-2 text-sm">
           <%= check_box_tag :confirm, "1", false, class: "mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300" %>
-          <span>I am signing this entry myself, with the intent to sign it, and certify the statement above.</span>
+          <span><%= t(".i_am_signing_this_entry") %></span>
         </label>
-        <div class="flex gap-2"><%= submit_tag "Sign entry", class: "btn-primary" %><%= link_to "Cancel", cancel_path, class: "btn-secondary" %></div>
+        <div class="flex gap-2"><%= submit_tag t(".sign_entry"), class: "btn-primary" %><%= link_to t(".cancel"), cancel_path, class: "btn-secondary" %></div>
       <% end %>
       <% if Sso.enabled? && current_user.sso_uid? %>
-        <%= button_to "Sign in again with #{Sso.label}", "/auth/#{Sso::PROVIDER}", params: { prompt: "login" }, class: "btn-secondary btn-sm", data: { turbo: false } %>
+        <%= button_to t(".sign_in_again_with", so: Sso.label), "/auth/#{Sso::PROVIDER}", params: { prompt: "login" }, class: "btn-secondary btn-sm", data: { turbo: false } %>
       <% end %>
     <% end %>
   </div>

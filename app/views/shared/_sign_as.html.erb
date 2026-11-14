@@ -1,10 +1,10 @@
-<%# "Sign as" picker for the current user's certificates (signer controller). %>
+<%# t(".sign_as") picker for the current user's certificates (signer controller). %>
 <% certificates = current_user.certificates.reject(&:expired?) %>
 <% if certificates.any? %>
   <div class="flex flex-wrap items-center gap-2 text-sm">
-    <%= label_tag :sign_as, "Sign as", class: "text-slate-600" %>
+    <%= label_tag :sign_as, t(".sign_as"), class: "text-slate-600" %>
     <select id="sign_as" class="input w-auto" data-signer-target="choice" data-action="signer#fill">
-      <option value="">— Someone else —</option>
+      <option value=""><%= t(".someone_else") %></option>
       <% certificates.each do |c| %>
         <option value="<%= c.id %>" data-name="<%= current_user.display_name %>" data-kind="<%= c.kind %>" data-number="<%= c.number %>">
           <%= current_user.display_name %>, <%= c.kind_label %> <%= c.number %></option>

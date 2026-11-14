@@ -1,40 +1,40 @@
-<% content_for :title, "Import Flights" %>
+<% content_for :title, t(".import_flights") %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <div class="grid gap-5 lg:grid-cols-3">
   <%= form_with url: aircraft_flight_import_path(@aircraft), multipart: true, class: "card card-body space-y-4 lg:col-span-2" do |f| %>
-    <h2 class="card-title">Import flights from a spreadsheet</h2>
+    <h2 class="card-title"><%= t(".import_flights_from_a_spreadsheet") %></h2>
     <div>
-      <%= f.label :file, "Spreadsheet (.xlsx or .csv)", class: "label" %>
+      <%= f.label :file, t(".spreadsheet_xlsx_or_csv"), class: "label" %>
       <%= f.file_field :file, accept: ".xlsx,.csv", required: true,
             class: "block text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
-        <%= f.label :starting_tach, "Tach before the first flight (optional)", class: "label" %>
+        <%= f.label :starting_tach, t(".tach_before_the_first_flight"), class: "label" %>
         <%= f.number_field :starting_tach, step: 0.1, class: "input" %>
-        <p class="hint">E.g. the tach at purchase. Without it, the first row's time comes from a Flight Time column, if you have one.</p>
+        <p class="hint"><%= t(".e_g_the_tach_at") %></p>
       </div>
       <div>
-        <%= f.label :starting_hobbs, "Hobbs before the first flight (optional)", class: "label" %>
+        <%= f.label :starting_hobbs, t(".hobbs_before_the_first_flight"), class: "label" %>
         <%= f.number_field :starting_hobbs, step: 0.1, class: "input" %>
       </div>
     </div>
-    <%= f.submit "Upload & Preview", class: "btn-primary" %>
-    <p class="hint">Nothing is saved until you confirm on the next page.</p>
+    <%= f.submit t(".upload_preview"), class: "btn-primary" %>
+    <p class="hint"><%= t(".nothing_is_saved_until_you") %></p>
   <% end %>
 
   <section class="card card-body text-sm text-slate-700 space-y-2">
-    <h3 class="font-semibold">Expected layout</h3>
-    <p>One row per flight, with the meter readings <em>at the end</em> of the flight. Columns are matched by header name, in any order:</p>
+    <h3 class="font-semibold"><%= t(".expected_layout") %></h3>
+    <p><%= t(".one_row_per_flight_with_html") %></p>
     <ul class="list-disc pl-5 text-xs">
-      <li><strong>Date</strong> (required)</li>
-      <li><strong>Tach</strong> / Tach Time (required)</li>
-      <li>From, To</li>
-      <li>Hobbs / Hobbs Time</li>
-      <li>Oil Added (qt), Fuel Added (gal); “N” or blank = none</li>
-      <li>Flight Time (used only for the first row)</li>
+      <li><%= t(".date_required_html") %></li>
+      <li><%= t(".tach_tach_time_required_html") %></li>
+      <li><%= t(".from_to") %></li>
+      <li><%= t(".hobbs_hobbs_time") %></li>
+      <li><%= t(".oil_added_qt_fuel_added") %></li>
+      <li><%= t(".flight_time_used_only_for") %></li>
     </ul>
-    <p class="text-xs">Each flight's time is the difference from the row above. Rows are kept in file order.</p>
-    <p class="text-xs">Importing records history only. It doesn't add time to components.</p>
+    <p class="text-xs"><%= t(".each_flight_s_time_is") %></p>
+    <p class="text-xs"><%= t(".importing_records_history_only_it") %></p>
   </section>
 </div>

@@ -74,6 +74,7 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 | `APP_HOST` | Host name the app is reached at, used in email links (password resets, sign-in links, signing invitations, reminders). |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | Optional. They enable email: password resets and **Email me a sign-in link**. Without them an admin resets passwords from **Users**. Check the setup with **Admin → About → Send test email**. |
 | `SMTP_TLS` | `true` for servers that use TLS from the start. That's the default on port 465; other ports upgrade with STARTTLS. |
+| `APP_LOCALE` | Optional. The app's language, e.g. `es` for `config/locales/es.yml` (see [Translating](#translating)). Default `en`. |
 | `ANTHROPIC_API_KEY` | Optional. Lets Claude transcribe scanned logbook pages into entries (**Logbook → Import scans**). Without it, scans are only uploaded. |
 | `LOGBOOK_AI_MODEL`, `LOGBOOK_AI_EFFORT` | Optional. The Claude model and effort used for transcription (default `claude-opus-5-5`, `high`). |
 | `APP_URL` | Optional public base URL, e.g. `https://aircraft.example.com` (default `https://APP_HOST`). Used for the SSO and Google Drive redirect URIs. |
@@ -197,6 +198,18 @@ The MCP server for AI agents, invitation codes, per-aircraft feature switches, t
 ### Added in this port
 
 AirTrail sync and export, an airport database, FAA DRS AD import, spreadsheet flight import, engine monitor data (CGR-30P/C) with interactive charts, AvLab and Blackstone oil analysis import with trends, multiple squawk attachments with a photo viewer, AI logbook transcription with Claude (images and PDFs), printable logbook entries, electronic signatures and recordkeeping along the lines of AC 120-78B (record history, nightly integrity checks, records package, procedures and audits), off-site backup to Google Drive, a user guide, and an installable PWA.
+
+## Translating
+
+Every piece of text the app shows (pages, emails, messages, labels, printed logbook entries, the procedures and records-package text, and the scripts' messages) is in [`config/locales/en.yml`](config/locales/en.yml). To translate the app:
+
+1. Copy `en.yml` to `<locale>.yml` (for example `es.yml`), change the top key from `en:` to `es:`, and translate the values. Keep the `%{name}` placeholders and any HTML tags in keys ending in `_html`. Keys with `one:` / `other:` are counted forms.
+2. For month and day names in dates, also add that language's standard Rails translations (for example from the [rails-i18n](https://github.com/svenfuchs/rails-i18n) project).
+3. Set `APP_LOCALE=es` and restart. Anything not yet translated shows in English.
+
+Where the text lives in `en.yml`: `labels:` are the names of stored values (statuses, types, priorities); `activerecord:` holds field names and validation messages; `flash:` holds the messages shown after an action; `services:`, `models:` and `helpers:` hold text built in Ruby; `js:` holds the scripts' text; the rest are keyed by page (`<controller>.<view>.<key>`). The user guide under Help is Markdown in `docs/guide` and is translated separately.
+
+In development and tests a missing translation raises an error, so a page that uses a key not in `en.yml` fails its test.
 
 ## Disclaimer
 

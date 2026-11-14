@@ -18,7 +18,7 @@ class FlightImportsController < ApplicationController
   # Preview.
   def show
     @token = params[:token].to_s
-    return redirect_to_upload("Upload expired. Please upload the file again.") unless stored_file?(@token)
+    return redirect_to_upload(t("flash.uploads.expired")) unless stored_file?(@token)
 
     @filename = params[:filename].to_s
     @starting_tach = params[:starting_tach].presence
@@ -31,17 +31,17 @@ class FlightImportsController < ApplicationController
 
   def confirm
     token = params[:token].to_s
-    return redirect_to_upload("Upload expired. Please upload the file again.") unless stored_file?(token)
+    return redirect_to_upload(t("flash.uploads.expired")) unless stored_file?(token)
 
     import = build_import(token, params[:filename], starting_tach: params[:starting_tach], starting_hobbs: params[:starting_hobbs])
     count = import.import!(user: current_user, update_aircraft_hours: params[:update_aircraft_hours] == "1")
     discard_upload(token)
-    redirect_to aircraft_flight_logs_path(@aircraft), notice: "Imported #{count} flights."
+    redirect_to aircraft_flight_logs_path(@aircraft), notice: t("flash.flight_imports.imported_flights", count: count)
   rescue FlightImport::Error => e
     redirect_to new_aircraft_flight_import_path(@aircraft), alert: e.message
   rescue AircraftGroundedError
     redirect_to aircraft_flight_logs_path(@aircraft),
-                alert: "Flights imported, but aircraft hours weren't updated: the aircraft is grounded and enforcement is on."
+                alert: t("flash.flight_imports.flights_imported_but_aircraft")
   end
 
   private

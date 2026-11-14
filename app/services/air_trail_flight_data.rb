@@ -27,7 +27,7 @@ module AirTrailFlightData
   end
 
   def note(flight)
-    times = [ "Tach #{flight.tach_time} h", (flight.hobbs_time && "Hobbs #{flight.hobbs_time} h") ].compact.join(" · ")
+    times = [ I18n.t("services.air_trail.tach", hours: flight.tach_time), (flight.hobbs_time && I18n.t("services.air_trail.hobbs", hours: flight.hobbs_time)) ].compact.join(" · ")
     [ times, flight.route.presence, flight.notes.presence ].compact.join("\n").truncate(1000)
   end
 

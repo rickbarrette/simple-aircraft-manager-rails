@@ -13,8 +13,8 @@ class LoadingSetupsController < ApplicationController
     @setup = LoadingSetup.from_params(permitted.to_h)
     if @setup.valid?
       @aircraft.update!(loading_stations: @setup.stations_json, cg_envelope: @setup.envelope.map { |w, cg| [ w.to_f, cg.to_f ] })
-      log_event("aircraft", "Loading stations and CG envelope updated")
-      redirect_to aircraft_weight_balance_records_path(@aircraft), notice: "Loading setup saved."
+      log_event("aircraft", t("flash.loading_setups.loading_stations_and_cg"))
+      redirect_to aircraft_weight_balance_records_path(@aircraft), notice: t("flash.loading_setups.loading_setup_saved")
     else
       render :edit, status: :unprocessable_entity
     end

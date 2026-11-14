@@ -1,38 +1,38 @@
-<% content_for :title, "Airports" %>
+<% content_for :title, t(".airports") %>
 <div class="mb-4 flex items-center justify-between">
-  <h1 class="text-2xl font-bold">Airports</h1>
-  <%= link_to "+ Custom Airport", new_admin_airport_path, class: "btn-primary" %>
+  <h1 class="text-2xl font-bold"><%= t(".airports") %></h1>
+  <%= link_to t(".custom_airport"), new_admin_airport_path, class: "btn-primary" %>
 </div>
 
 <div class="grid gap-5 lg:grid-cols-3">
   <section class="card lg:col-span-2">
     <div class="card-header">
-      <h2 class="card-title">Airport database</h2>
+      <h2 class="card-title"><%= t(".airport_database") %></h2>
       <% if @running %>
-        <span class="badge-blue">Updating…</span>
+        <span class="badge-blue"><%= t(".updating") %></span>
       <% else %>
-        <%= button_to "Update from OurAirports", refresh_admin_airports_path, class: "btn-secondary",
-              form: { data: { turbo_confirm: "Download the latest airport data from OurAirports? Custom airports are kept." } } %>
+        <%= button_to t(".update_from_ourairports"), refresh_admin_airports_path, class: "btn-secondary",
+              form: { data: { turbo_confirm: t(".download_the_latest_airport_data") } } %>
       <% end %>
     </div>
     <div class="card-body space-y-3 text-sm">
       <div class="grid grid-cols-3 gap-3 text-center">
-        <div><div class="text-2xl font-semibold"><%= number_with_delimiter(@total) %></div><div class="text-xs text-slate-500">airports</div></div>
-        <div><div class="text-2xl font-semibold"><%= @custom.size %></div><div class="text-xs text-slate-500">custom</div></div>
-        <div><div class="text-sm font-semibold"><%= @last_success ? "#{time_ago_in_words(@last_success.finished_at)} ago" : "never" %></div><div class="text-xs text-slate-500">last updated</div></div>
+        <div><div class="text-2xl font-semibold"><%= number_with_delimiter(@total) %></div><div class="text-xs text-slate-500"><%= t(".airports_2") %></div></div>
+        <div><div class="text-2xl font-semibold"><%= @custom.size %></div><div class="text-xs text-slate-500"><%= t(".custom") %></div></div>
+        <div><div class="text-sm font-semibold"><%= @last_success ? "#{time_ago_in_words(@last_success.finished_at)} ago" : "never" %></div><div class="text-xs text-slate-500"><%= t(".last_updated") %></div></div>
       </div>
       <% if @total.zero? %>
-        <p class="rounded-md bg-amber-50 px-3 py-2 text-amber-900 ring-1 ring-amber-200">No airport data yet. It downloads automatically when the app starts. Use “Update from OurAirports” if that didn't happen.</p>
+        <p class="rounded-md bg-amber-50 px-3 py-2 text-amber-900 ring-1 ring-amber-200"><%= t(".no_airport_data_yet_it") %></p>
       <% end %>
-      <p class="hint">Airport data comes from <a href="https://ourairports.com/data/" class="link" target="_blank" rel="noopener noreferrer">OurAirports</a> (public domain), the same source AirTrail uses. It's used for From/To autocomplete and to match airport codes when syncing to AirTrail. Updates add new airports, apply changes and remove closed-out entries; custom airports are never changed.</p>
+      <p class="hint"><%= t(".airport_data_comes_from_ourairports_html") %></p>
       <% if @updates.any? %>
         <table class="table">
-          <thead><tr><th>Started</th><th>By</th><th>Status</th><th>Result</th></tr></thead>
+          <thead><tr><th><%= t(".started") %></th><th><%= t(".by") %></th><th><%= t(".status") %></th><th><%= t(".result") %></th></tr></thead>
           <tbody>
             <% @updates.each do |u| %>
               <tr>
                 <td class="whitespace-nowrap text-xs"><%= fmt_time(u.created_at) %></td>
-                <td class="text-xs"><%= u.requested_by&.display_name || "Startup" %></td>
+                <td class="text-xs"><%= u.requested_by&.display_name || t(".startup") %></td>
                 <td><%= tag.span u.status.capitalize, class: { "done" => "badge-green", "failed" => "badge-red" }.fetch(u.status, "badge-blue") %></td>
                 <td class="text-xs"><%= u.done? ? u.summary : u.error %></td>
               </tr>
@@ -44,22 +44,22 @@
   </section>
 
   <section class="card">
-    <div class="card-header"><h2 class="card-title">Look up</h2></div>
+    <div class="card-header"><h2 class="card-title"><%= t(".look_up") %></h2></div>
     <div class="card-body space-y-2">
       <%= form_with url: admin_airports_path, method: :get, class: "flex gap-2" do |f| %>
-        <%= f.search_field :q, value: @query, class: "input", placeholder: "Code or name" %>
-        <%= f.submit "Search", class: "btn-secondary" %>
+        <%= f.search_field :q, value: @query, class: "input", placeholder: t(".code_or_name") %>
+        <%= f.submit t(".search"), class: "btn-secondary" %>
       <% end %>
       <% if @query.present? %>
         <% if @results.any? %>
           <ul class="divide-y divide-slate-100 text-sm">
             <% @results.each do |a| %>
               <li class="py-1.5"><span class="font-mono font-semibold"><%= a.code %></span> <%= a.name %>
-                <div class="text-xs text-slate-500"><%= [a.place, "AirTrail #{a.airtrail_code}", (a.custom? ? "custom" : nil), Airport::KIND_LABELS[a.kind]].compact_blank.join(" · ") %></div></li>
+                <div class="text-xs text-slate-500"><%= [a.place, t(".airtrail", airtrail_code: a.airtrail_code), (a.custom? ? "custom" : nil), Airport::KIND_LABELS[a.kind]].compact_blank.join(" · ") %></div></li>
             <% end %>
           </ul>
         <% else %>
-          <p class="text-sm text-slate-600">No match for “<%= @query %>”. <%= link_to "Add it as a custom airport", new_admin_airport_path(ident: @query.upcase), class: "link" %>.</p>
+          <p class="text-sm text-slate-600"><%= t(".no_match_for_html", query: @query, link: (link_to t(".add_it_as_a_custom"), new_admin_airport_path(ident: @query.upcase), class: "link")) %></p>
         <% end %>
       <% end %>
     </div>
@@ -67,21 +67,21 @@
 </div>
 
 <section class="card mt-5">
-  <div class="card-header"><h2 class="card-title">Custom airports</h2></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".custom_airports") %></h2></div>
   <% if @custom.any? %>
     <table class="table">
-      <thead><tr><th>Code</th><th>Name</th><th>Location</th><th>Type</th><th></th></tr></thead>
+      <thead><tr><th><%= t(".code") %></th><th><%= t(".name") %></th><th><%= t(".location") %></th><th><%= t(".type") %></th><th></th></tr></thead>
       <tbody>
         <% @custom.each do |a| %>
           <tr>
             <td class="font-mono font-semibold"><%= a.ident %></td><td><%= a.name %></td><td class="text-xs"><%= a.place %></td>
             <td class="text-xs"><%= a.kind.to_s.humanize %></td>
-            <td class="text-right"><%= link_to "Edit", edit_admin_airport_path(a), class: "btn-secondary btn-sm" %></td>
+            <td class="text-right"><%= link_to t(".edit"), edit_admin_airport_path(a), class: "btn-secondary btn-sm" %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   <% else %>
-    <%= empty_state "None. Add private strips or fields that aren't in OurAirports." %>
+    <%= empty_state t(".none_add_private_strips_or") %>
   <% end %>
 </section>

@@ -24,6 +24,6 @@ class ApplicationController < ActionController::Base
   end
 
   def require_admin!
-    redirect_to root_path, alert: "Admins only." unless current_user&.admin?
+    redirect_to root_path, alert: t("flash.application.admins_only") unless current_user&.admin?
   end
 end

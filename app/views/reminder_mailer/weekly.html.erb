@@ -1,26 +1,26 @@
-<p>Here's what needs attention<%= " on your aircraft" if @items.any? %>.</p>
+<p><%= t(".here_s_what_needs_attention_html", any: (t(".on_your_aircraft") if @items.any?)) %></p>
 <% @items.each do |aircraft, issues, alerts| %>
   <h3 style="margin: 16px 0 4px;"><%= link_to aircraft.tail_number, aircraft_url(aircraft) %> <span style="font-weight: normal; color: #64748b;"><%= aircraft.airworthiness.label %></span></h3>
   <ul style="margin: 0; padding-left: 20px;">
     <% issues.each do |issue| %>
-      <li><strong><%= { "RED" => "Overdue", "LIMITED" => "Overdue", "ORANGE" => "Due soon", "INFO" => "Deferred" }[issue.severity] %>:</strong>
+      <li><strong><%= { "RED" => t(".overdue"), "LIMITED" => t(".overdue"), "ORANGE" => t(".due_soon"), "INFO" => t(".deferred") }[issue.severity] %>:</strong>
         <%= issue.title %> <span style="color: #64748b;"><%= issue.description %></span></li>
     <% end %>
   </ul>
   <% if alerts.any? %>
-    <p style="margin: 8px 0 0;"><strong><%= alerts.size %> newly published <%= "AD".pluralize(alerts.size) %> may apply:</strong>
-      <%= alerts.map { _1.ad_number || _1.fr_document_number }.to_sentence %>. <%= link_to "Review them", aircraft_airworthiness_directives_url(aircraft, anchor: "new-ads") %>.</p>
+    <p style="margin: 8px 0 0;"><%= t(".newly_published_may_apply_html", count: alerts.size) %>
+      <%= alerts.map { _1.ad_number || _1.fr_document_number }.to_sentence %>. <%= link_to t(".review_them"), aircraft_airworthiness_directives_url(aircraft, anchor: "new-ads") %>.</p>
   <% end %>
 <% end %>
 <% if @certificates.any? %>
-  <h3 style="margin: 16px 0 4px;">Your certificates</h3>
+  <h3 style="margin: 16px 0 4px;"><%= t(".your_certificates") %></h3>
   <ul style="margin: 0; padding-left: 20px;">
-    <% @certificates.each do |c| %><li><strong><%= c.expired? ? "Expired" : "Expires" %> <%= fmt_date(c.expires_on) %>:</strong> <%= c.kind_label %> <%= c.number %></li><% end %>
+    <% @certificates.each do |c| %><li><strong><%= c.expired? ? t(".expired") : t(".expires") %> <%= fmt_date(c.expires_on) %>:</strong> <%= c.kind_label %> <%= c.number %></li><% end %>
   </ul>
 <% end %>
-<% if @drs_due.any? %><p><strong>Refresh the AD list from FAA DRS</strong> (new ADs are found weekly, but revisions and anything missed come from a fresh import):</p>
-<ul><% @drs_due.each do |a| %><li><%= link_to a.tail_number, aircraft_airworthiness_directives_url(a) %>: <%= (m = DrsImport.missing_models(a)).any? ? "never imported for #{m.to_sentence}" : "last import #{a.drs_imports.latest_first.first&.created_at&.to_date || 'never'}" %></li><% end %></ul><% end %>
-<% if @audit_due %><p><strong>Records audit due <%= @audit_due %></strong> (AC 120-78B quality control): <%= link_to "start it", new_admin_audit_url %>.</p><% end %>
+<% if @drs_due.any? %><p><%= t(".refresh_the_ad_list_from_html") %></p>
+<ul><% @drs_due.each do |a| %><li><%= link_to a.tail_number, aircraft_airworthiness_directives_url(a) %>: <%= (m = DrsImport.missing_models(a)).any? ? t(".never_imported_for", to_sentence: m.to_sentence) : t(".last_import", never: (a.drs_imports.latest_first.first&.created_at&.to_date || 'never')) %></li><% end %></ul><% end %>
+<% if @audit_due %><p><%= t(".records_audit_due_ac_120_html", audit_due: @audit_due, link: (link_to t(".start_it"), new_admin_audit_url)) %></p><% end %>
 <p style="color: #64748b; font-size: 12px; margin-top: 20px;">
-  Based on the records in Simple Aircraft Manager. Turn these emails off on your <%= link_to "profile", edit_profile_url %>.
+  <%= t(".based_on_the_records_in_html", link: (link_to "profile", edit_profile_url)) %>
 </p>

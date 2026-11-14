@@ -1,26 +1,26 @@
-<% content_for :title, "Aircraft Import" %>
+<% content_for :title, t(".aircraft_import") %>
 <% if @import.in_progress? %><% content_for :head, tag.meta("http-equiv": "refresh", content: "2") %><% end %>
 <div class="mx-auto max-w-2xl space-y-5">
-  <h1 class="text-2xl font-bold tracking-tight">Importing <%= @import.tail_number %></h1>
+  <h1 class="text-2xl font-bold tracking-tight"><%= t(".importing_html", tail_number: @import.tail_number) %></h1>
   <section class="card card-body space-y-3 text-sm" id="import-status">
-    <p class="text-slate-500"><%= @import.filename %><%= " · from #{@import.source}" if @import.source.present? %></p>
+    <p class="text-slate-500"><%= @import.filename %><%= t(".from", source: @import.source) if @import.source.present? %></p>
     <% if @import.in_progress? %>
       <p class="flex items-center gap-2 font-medium"><span class="inline-block h-3 w-3 animate-pulse rounded-full bg-sky-500"></span>
-        <%= @import.status == "queued" ? "Waiting to start…" : "Importing…" %></p>
-      <% if @import.counts.any? %><p class="text-slate-600">So far: <%= @import.summary %>.</p><% end %>
-      <p class="hint">This page updates by itself. Large archives with many documents can take a few minutes.</p>
+        <%= @import.status == "queued" ? t(".waiting_to_start") : t(".importing_2") %></p>
+      <% if @import.counts.any? %><p class="text-slate-600"><%= t(".so_far_html", summary: @import.summary) %></p><% end %>
+      <p class="hint"><%= t(".this_page_updates_by_itself") %></p>
     <% elsif @import.done? %>
-      <p class="font-medium text-emerald-700">Imported.</p>
-      <p class="text-slate-600"><%= @import.summary.presence&.upcase_first || "No records" %>.</p>
-      <% if @import.aircraft %><p><%= link_to "Open #{@import.aircraft.tail_number} →", aircraft_path(@import.aircraft), class: "btn-primary" %></p><% end %>
+      <p class="font-medium text-emerald-700"><%= t(".imported") %></p>
+      <p class="text-slate-600"><%= @import.summary.presence&.upcase_first || t(".no_records") %>.</p>
+      <% if @import.aircraft %><p><%= link_to t(".open", tail_number: @import.aircraft.tail_number), aircraft_path(@import.aircraft), class: "btn-primary" %></p><% end %>
     <% else %>
-      <p class="font-medium text-red-700">The import failed. Nothing was added.</p>
+      <p class="font-medium text-red-700"><%= t(".the_import_failed_nothing_was") %></p>
       <p class="text-slate-600"><%= @import.error %></p>
-      <p><%= link_to "Try another file", new_aircraft_import_path, class: "btn-secondary" %></p>
+      <p><%= link_to t(".try_another_file"), new_aircraft_import_path, class: "btn-secondary" %></p>
     <% end %>
     <% if @import.warnings.any? %>
       <div class="border-t border-slate-100 pt-3">
-        <p class="mb-1 text-xs font-semibold text-slate-500"><%= pluralize(@import.warnings.size, "note") %></p>
+        <p class="mb-1 text-xs font-semibold text-slate-500"><%= t("counts.note", count: @import.warnings.size) %></p>
         <ul class="list-disc space-y-0.5 pl-5 text-slate-600"><% @import.warnings.each do |w| %><li><%= w %></li><% end %></ul>
       </div>
     <% end %>

@@ -125,6 +125,6 @@ class User < ApplicationRecord
 
   def password_not_breached
     return if password.blank? || errors.include?(:password)
-    errors.add(:password, "has appeared in a data breach (Have I Been Pwned); choose a different one") if PwnedPasswords.breached?(password)
+    errors.add(:password, :breached) if PwnedPasswords.breached?(password)
   end
 end

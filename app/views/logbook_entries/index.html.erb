@@ -1,21 +1,21 @@
-<% content_for :title, "#{@aircraft.tail_number} Logbook" %>
+<% content_for :title, t(".logbook", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
   <div class="card-header">
-    <h2 class="card-title">Maintenance Logbook <%= link_to "How records and signing work", records_help_path, class: "link ml-2 text-xs font-normal" %></h2>
+    <h2 class="card-title"><%= t(".maintenance_logbook_html", link: (link_to t(".how_records_and_signing_work"), records_help_path, class: "link ml-2 text-xs font-normal")) %></h2>
     <div class="flex flex-wrap items-center gap-2">
       <%= form_with url: aircraft_logbook_entries_path(@aircraft), method: :get, class: "flex w-full flex-wrap gap-2 sm:w-auto" do |f| %>
-        <%= f.search_field :q, value: @query, placeholder: "Search entries…", class: "input min-w-0 flex-1 sm:w-48 sm:flex-none" %>
-        <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: "All logs", selected: @log_type }, class: "input w-32", data: { submit_on_change: true } %>
+        <%= f.search_field :q, value: @query, placeholder: t(".search_entries"), class: "input min-w-0 flex-1 sm:w-48 sm:flex-none" %>
+        <%= f.select :log_type, LogbookEntry::LOG_TYPES.invert, { include_blank: t(".all_logs"), selected: @log_type }, class: "input w-32", data: { submit_on_change: true } %>
         <% if @unverified_count.positive? || @unverified_only %>
-          <label class="flex items-center gap-1 text-sm text-slate-700"><%= f.check_box :unverified, { checked: @unverified_only, data: { submit_on_change: true } }, "1", nil %> Unverified (<%= @unverified_count %>)</label>
+          <label class="flex items-center gap-1 text-sm text-slate-700"><%= t(".unverified_html", checkbox: (f.check_box :unverified, { checked: @unverified_only, data: { submit_on_change: true } }, "1", nil), unverified_count: @unverified_count) %></label>
         <% end %>
-        <%= f.submit "Filter", class: "sr-only" %>
+        <%= f.submit t(".filter"), class: "sr-only" %>
       <% end %>
-      <% if @entries.any? %><button type="submit" form="print-entries" class="btn-secondary" hidden data-needs-selection="print-entries" title="Print the ticked entries on labels or pages for the paper logbook">Print selected</button><% end %>
+      <% if @entries.any? %><button type="submit" form="print-entries" class="btn-secondary" hidden data-needs-selection="print-entries" title="<%= t(".print_the_ticked_entries_on") %>"><%= t(".print_selected") %></button><% end %>
       <% if owner? %>
-        <%= more_menu do %><%= link_to "Import scans", new_aircraft_logbook_import_path(@aircraft), class: "menu-item" %><% end %>
-        <%= link_to "+ New Entry", new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %>
+        <%= more_menu do %><%= link_to t(".import_scans"), new_aircraft_logbook_import_path(@aircraft), class: "menu-item" %><% end %>
+        <%= link_to t(".new_entry"), new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %>
       <% end %>
     </div>
   </div>
@@ -23,7 +23,7 @@
     <%= form_with url: new_aircraft_logbook_print_path(@aircraft), method: :get, id: "print-entries" do %><% end %>
     <div class="overflow-x-auto">
       <table class="table">
-        <thead><tr><th><input type="checkbox" class="mr-1 align-middle" aria-label="Select all entries" data-check-all> Date</th><th>Log</th><th>Type</th><th class="text-right">Hours</th><th>Entry</th><th>Signed off</th></tr></thead>
+        <thead><tr><th><input type="checkbox" class="mr-1 align-middle" aria-label="<%= t(".select_all_entries") %>" data-check-all> <%= t(".date") %></th><th><%= t(".log") %></th><th><%= t(".type") %></th><th class="text-right"><%= t(".hours") %></th><th><%= t(".entry") %></th><th><%= t(".signed_off") %></th></tr></thead>
         <tbody>
           <% @entries.each do |e| %>
             <tr>
@@ -31,17 +31,17 @@
               <td><span class="badge-gray"><%= LogbookEntry::LOG_TYPES[e.log_type] %></span></td>
               <td class="text-xs"><%= LogbookEntry::ENTRY_TYPES[e.entry_type] %></td>
               <td class="text-right tabular-nums"><%= hours(e.aircraft_hours_at_entry) %></td>
-              <td class="max-w-xl"><%= e.text.truncate(220) %> <% if e.document %><span role="img" title="Has a scanned page" aria-label="Has a scanned page">📄</span><% end %>
-                <% unless e.verified? %><span class="badge-orange" title="Transcribed by Claude<%= " (#{e.transcription_confidence} confidence)" if e.transcription_confidence %>; check it against the scan">Unverified</span><% end %></td>
+              <td class="max-w-xl"><%= e.text.truncate(220) %> <% if e.document %><span role="img" title="<%= t(".has_a_scanned_page") %>" aria-label="<%= t(".has_a_scanned_page") %>">📄</span><% end %>
+                <% unless e.verified? %><span class="badge-orange" title="Transcribed by Claude<%= t(".confidence", transcription_confidence: e.transcription_confidence) if e.transcription_confidence %>; check it against the scan"><%= t(".unverified_2") %></span><% end %></td>
               <td class="text-xs text-slate-500"><%= e.signoff_person %><%= " ##{e.signoff_certificate_number}" if e.signoff_certificate_number %><% if e.signoff_location.present? %><br><%= e.signoff_location %><% end %>
-                <% if e.signature %><br><span class="<%= e.superseded? ? 'badge-orange' : 'badge-green' %>" title="Signed electronically by <%= e.signature.signer_name %>"><%= e.superseded? ? "Superseded" : "Signed" %></span>
-                <% elsif (missing = e.missing_record_items).any? %><br><span class="badge-orange" title="Missing: <%= missing.to_sentence %>">Incomplete</span><% end %></td>
+                <% if e.signature %><br><span class="<%= e.superseded? ? 'badge-orange' : 'badge-green' %>" title="Signed electronically by <%= e.signature.signer_name %>"><%= e.superseded? ? t(".superseded") : t(".signed") %></span>
+                <% elsif (missing = e.missing_record_items).any? %><br><span class="badge-orange" title="Missing: <%= missing.to_sentence %>"><%= t(".incomplete") %></span><% end %></td>
             </tr>
           <% end %>
         </tbody>
       </table>
     </div>
   <% else %>
-    <%= empty_state(@query.present? ? "No entries match “#{@query}”." : "No logbook entries yet.") %>
+    <%= empty_state(@query.present? ? t(".no_entries_match", query: @query) : t(".no_logbook_entries_yet")) %>
   <% end %>
 </section>

@@ -7,19 +7,19 @@ module ApplicationHelper
   # How dates and times read across the app: "Nov 8, 2026", "Nov 8, 2026 14:05".
   # (Signatures and the record history keep exact UTC timestamps, 2026-11-08 14:05 UTC.)
   def fmt_date(value)
-    value ? value.to_date.strftime("%b %-d, %Y") : "—"
+    value ? l(value.to_date, format: :app) : "—"
   end
 
   def fmt_time(value)
-    value ? value.in_time_zone.strftime("%b %-d, %Y %H:%M") : "—"
+    value ? l(value.in_time_zone, format: :app) : "—"
   end
 
-  # Secondary actions (imports, exports, printing, tools) behind one "More"
+  # Secondary actions (imports, exports, printing, tools) behind one I18n.t("helpers.application.more")
   # button, so each section shows only its main action. The block gives the
   # items: links or button_to forms with class "menu-item".
-  def more_menu(label = "More", small: false, &block)
+  def more_menu(label = I18n.t("helpers.application.more"), small: false, &block)
     tag.details(class: "relative", data: { controller: "dropdown", action: "click@window->dropdown#closeOutside keydown.esc@window->dropdown#close" }) do
-      tag.summary(class: [ "btn-secondary list-none [&::-webkit-details-marker]:hidden", ("btn-sm" if small) ], title: "More actions") do
+      tag.summary(class: [ "btn-secondary list-none [&::-webkit-details-marker]:hidden", ("btn-sm" if small) ], title: I18n.t("helpers.application.more_actions")) do
         safe_join([ label, tag.span("▾", class: "text-xs", "aria-hidden": true) ], " ")
       end + tag.div(capture(&block), class: "menu")
     end
@@ -29,7 +29,7 @@ module ApplicationHelper
 
   def airworthiness_badge(status, large: false)
     tag.span(status.label, class: [ "badge-#{AIRWORTHINESS_COLORS[status.status]}", ("text-sm px-3 py-1" if large) ],
-                           title: Airworthiness::DISCLAIMER)
+                           title: Airworthiness.disclaimer)
   end
 
   # Badge class (or text class) for one airworthiness issue.
@@ -39,22 +39,18 @@ module ApplicationHelper
     { "RED" => "text-red-700", "LIMITED" => "text-sky-700", "INFO" => "text-slate-600" }.fetch(issue.severity, "text-amber-700")
   end
 
-  COMPLIANCE_BADGES = {
-    "compliant" => [ "green", "Compliant" ], "due_soon" => [ "orange", "Due Soon" ],
-    "overdue" => [ "red", "Overdue" ], "no_compliance" => [ "red", "No Record" ],
-    "never_completed" => [ "red", "Never Completed" ], "conditional" => [ "gray", "Conditional" ],
-    "not_applicable" => [ "gray", "N/A" ]
-  }.freeze
+  COMPLIANCE_COLORS = { "compliant" => "green", "due_soon" => "orange", "overdue" => "red", "no_compliance" => "red",
+                        "never_completed" => "red", "conditional" => "gray", "not_applicable" => "gray" }.freeze
 
   def compliance_badge(status)
-    color, text = COMPLIANCE_BADGES.fetch(status, [ "gray", status.to_s.humanize ])
-    tag.span(text, class: "badge-#{color}")
+    color = COMPLIANCE_COLORS.fetch(status, "gray")
+    tag.span(t(status, scope: "helpers.application.compliance", default: status.to_s.humanize), class: "badge-#{color}")
   end
 
   def life_badge(status)
     return "" unless status
-    color, text = { overdue: [ "red", "Overdue" ], due_soon: [ "orange", "Due Soon" ], ok: [ "green", "OK" ] }[status]
-    tag.span(text, class: "badge-#{color}")
+    color = { overdue: "red", due_soon: "orange", ok: "green" }[status]
+    tag.span(t(status, scope: "helpers.application.life"), class: "badge-#{color}")
   end
 
   def squawk_priority_badge(squawk)
@@ -78,7 +74,7 @@ module ApplicationHelper
     link_to ad.name, link[0], class: "link", target: "_blank", rel: "noopener noreferrer", title: link[1]
   end
 
-  def delete_button(label, path, confirm: "Are you sure?", **opts)
+  def delete_button(label, path, confirm: I18n.t("helpers.application.are_you_sure"), **opts)
     button_to label, path, method: :delete, form: { data: { turbo_confirm: confirm }, class: "inline" },
               class: opts[:class] || "btn-danger btn-sm"
   end

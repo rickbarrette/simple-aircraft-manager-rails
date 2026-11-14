@@ -1,12 +1,7 @@
 class AdCompliance < ApplicationRecord
   include Versioned
   # Method of compliance, recorded per 91.417(a)(2)(v).
-  METHODS = {
-    "inspection" => "Inspection",
-    "terminating" => "Terminating action (no further action)",
-    "amoc" => "Alternative method of compliance (AMOC)",
-    "not_applicable" => "Not applicable to this aircraft"
-  }.freeze
+  METHODS = LabelSet.new("ad_compliance.methods", %w[inspection terminating amoc not_applicable])
 
   belongs_to :airworthiness_directive
   belongs_to :aircraft, optional: true
@@ -18,7 +13,7 @@ class AdCompliance < ApplicationRecord
   validates :compliance_method, inclusion: { in: METHODS.keys }
   before_validation :apply_method
   before_validation :fill_revision
-  validate { errors.add(:base, "Must belong to an aircraft or component") unless aircraft_id || component_id }
+  validate { errors.add(:base, :needs_owner) unless aircraft_id || component_id }
   validate :next_due_is_a_future_reading
   before_validation :fill_next_due, if: -> { next_due_at_time.to_d.zero? }
 
@@ -66,7 +61,6 @@ class AdCompliance < ApplicationRecord
     return if closed? || due <= 0
     base = aircraft_hours_at_compliance || aircraft&.current_hours
     return unless base && due <= base
-    errors.add(:next_due_at_time, "must be a #{aircraft&.time_basis || 'tach'} reading after the compliance hours (#{base}). " \
-                                  "For “every 100 hours” enter #{base + 100}, not 100")
+    errors.add(:next_due_at_time, :not_future_reading, meter: Aircraft::TIME_BASES[aircraft&.time_basis || "tach"].downcase, base: base, example: base + 100)
   end
 end

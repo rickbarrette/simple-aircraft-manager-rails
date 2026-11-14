@@ -1,5 +1,5 @@
-<% content_for :title, "Settings" %>
-<h1 class="mb-4 text-2xl font-bold">Settings</h1>
+<% content_for :title, t(".settings") %>
+<h1 class="mb-4 text-2xl font-bold"><%= t(".settings") %></h1>
 <%= form_with url: admin_settings_path, method: :patch, class: "card card-body max-w-xl space-y-4" do |f| %>
   <% if @errors.present? %>
     <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert">
@@ -7,44 +7,44 @@
     </div>
   <% end %>
 
-  <h2 class="card-title">Uploads</h2>
+  <h2 class="card-title"><%= t(".uploads") %></h2>
   <% upload = Setting::INTEGERS["max_upload_mb"] %>
   <div>
-    <%= label_tag "settings[max_upload_mb]", upload[:label], class: "label" %>
+    <%= label_tag "settings[max_upload_mb]", Setting::LABELS["max_upload_mb"], class: "label" %>
     <%= number_field_tag "settings[max_upload_mb]", @values["max_upload_mb"], id: "settings_max_upload_mb",
           min: upload[:in].min, max: upload[:in].max, step: 1, required: true, class: "input w-32" %>
     <p class="hint">
-      The largest single file anyone can upload: documents, squawk photos and bulk uploads. Default <%= upload[:default] %> MB, up to <%= upload[:in].max %> MB.
+      <%= t(".the_largest_single_file_anyone_html", default_mb: (upload[:default]), max: (upload[:in].max)) %>
     </p>
     <p class="hint">
-      A proxy in front of the app can have its own, smaller limit. Cloudflare's proxy stops at 100 MB on its free plan; nginx needs <code>client_max_body_size</code>.
-      Logbook transcription with Claude reads PDFs up to <%= LogbookTranscriber::MAX_PDF_BYTES / 1.megabyte %> MB and images up to <%= LogbookTranscriber::MAX_IMAGE_BYTES / 1.megabyte %> MB, whatever this is set to.
+      <%= t(".a_proxy_in_front_of_html") %>
+      <%= t(".logbook_transcription_with_claude_reads_html", pdf_mb: (LogbookTranscriber::MAX_PDF_BYTES / 1.megabyte), image_mb: (LogbookTranscriber::MAX_IMAGE_BYTES / 1.megabyte)) %>
     </p>
   </div>
 
-  <h2 class="card-title pt-2">Backups</h2>
+  <h2 class="card-title pt-2"><%= t(".backups") %></h2>
   <% kept = Setting::INTEGERS["backups_kept"] %>
   <div>
-    <%= label_tag "settings[backups_kept]", kept[:label], class: "label" %>
+    <%= label_tag "settings[backups_kept]", Setting::LABELS["backups_kept"], class: "label" %>
     <%= number_field_tag "settings[backups_kept]", @values["backups_kept"], id: "settings_backups_kept", min: kept[:in].min, max: kept[:in].max,
           step: 1, required: true, class: "input w-32" %>
-    <p class="hint">A verified copy of the database is made nightly in storage/backups; this many of the newest are kept. Back up off the server too: <%= link_to "Off-site Backup", admin_offsite_backup_path, class: "link" %>.</p>
+    <p class="hint"><%= t(".a_verified_copy_of_the_html", link: (link_to t(".off_site_backup"), admin_offsite_backup_path, class: "link")) %></p>
   </div>
   <% okept = Setting::INTEGERS["offsite_backups_kept"] %>
   <div>
-    <%= label_tag "settings[offsite_backups_kept]", okept[:label], class: "label" %>
+    <%= label_tag "settings[offsite_backups_kept]", Setting::LABELS["offsite_backups_kept"], class: "label" %>
     <%= number_field_tag "settings[offsite_backups_kept]", @values["offsite_backups_kept"], id: "settings_offsite_backups_kept", min: okept[:in].min, max: okept[:in].max,
           step: 1, required: true, class: "input w-32" %>
-    <p class="hint">With off-site backup to Google Drive, this many of the newest nightly database copies are kept there. Uploaded files are copied once and kept.</p>
+    <p class="hint"><%= t(".with_off_site_backup_to") %></p>
   </div>
 
-  <h2 class="card-title pt-2">Document search</h2>
+  <h2 class="card-title pt-2"><%= t(".document_search") %></h2>
   <div>
-    <%= label_tag "settings[documents_claude_text]", "Read scanned documents with", class: "label" %>
-    <%= select_tag "settings[documents_claude_text]", options_for_select([ [ "Tesseract (free, on this server)", 0 ], [ "Claude (better on handwriting; uses the Anthropic API)", 1 ] ], @values["documents_claude_text"].to_i),
+    <%= label_tag "settings[documents_claude_text]", t(".read_scanned_documents_with"), class: "label" %>
+    <%= select_tag "settings[documents_claude_text]", options_for_select([ [ t(".tesseract_free_on_this_server"), 0 ], [ t(".claude_better_on_handwriting_uses"), 1 ] ], @values["documents_claude_text"].to_i),
           id: "settings_documents_claude_text", class: "input" %>
-    <p class="hint">Text in documents is read so search can find it. PDFs that contain text are read directly either way. Claude is used only when an ANTHROPIC_API_KEY is set<%= " (it isn't)" if ENV["ANTHROPIC_API_KEY"].blank? %>, and costs API credit per page.</p>
+    <p class="hint"><%= t(".text_in_documents_is_read_html", blank: (t(".it_isn_t") if ENV["ANTHROPIC_API_KEY"].blank?)) %></p>
   </div>
 
-  <div class="flex gap-2"><%= f.submit "Save Settings", class: "btn-primary" %><%= link_to "Cancel", admin_about_path, class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= f.submit t(".save_settings"), class: "btn-primary" %><%= link_to t(".cancel"), admin_about_path, class: "btn-secondary" %></div>
 <% end %>

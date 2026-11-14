@@ -1,9 +1,9 @@
-<% content_for :title, "Recovery codes" %>
+<% content_for :title, t(".recovery_codes") %>
 <section class="card card-body mx-auto max-w-md space-y-4">
-  <h1 class="text-2xl font-bold">Save your recovery codes</h1>
-  <p class="text-sm text-slate-600">Two-factor is on. If you lose your phone, each of these codes signs you in once in place of an authenticator code. Print them or keep them in a password manager: they won't be shown again.</p>
+  <h1 class="text-2xl font-bold"><%= t(".save_your_recovery_codes") %></h1>
+  <p class="text-sm text-slate-600"><%= t(".two_factor_is_on_if") %></p>
   <ul class="grid grid-cols-2 gap-2 rounded-md bg-slate-50 p-4 font-mono text-sm ring-1 ring-slate-200">
     <% @codes.each do |c| %><li><%= c %></li><% end %>
   </ul>
-  <%= link_to "Done", back_path, class: "btn-primary self-start" %>
+  <%= link_to t(".done"), back_path, class: "btn-primary self-start" %>
 </section>

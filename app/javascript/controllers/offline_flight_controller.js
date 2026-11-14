@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 import { queue, formFields, newKey } from "controllers/offline_queue"
 
 // The Log Flight form: with no connection, the flight is kept on this device
@@ -48,7 +49,7 @@ export default class extends Controller {
     try {
       await queue.add(item)
     } catch (_) {
-      this.say("No connection, and this browser can't store the flight. Write it down and log it when you're back online.")
+      this.say(t("offline.no_storage"))
       return
     }
     this.prefillFrom(item)
@@ -56,7 +57,7 @@ export default class extends Controller {
     this.keyTarget.value = newKey()
     this.pending = null
     window.scrollTo({ top: 0 })
-    this.say("No connection: flight saved on this device. It's sent automatically when you're back online. Log the next leg below, or close the app.")
+    this.say(t("offline.saved_on_device"))
     document.dispatchEvent(new CustomEvent("offline-queue:changed"))
   }
 

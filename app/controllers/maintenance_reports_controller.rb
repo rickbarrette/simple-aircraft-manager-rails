@@ -4,7 +4,7 @@ class MaintenanceReportsController < ApplicationController
 
   def show
     @report = MaintenanceReport.new(@aircraft)
-    log_event("aircraft", "Maintenance status report viewed") if params[:print]
+    log_event("aircraft", t("flash.maintenance_reports.maintenance_status_report_viewed")) if params[:print]
     render layout: "report"
   end
 end

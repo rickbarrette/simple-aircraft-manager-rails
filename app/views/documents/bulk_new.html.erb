@@ -1,12 +1,12 @@
-<% content_for :title, "#{@aircraft.tail_number} Bulk Upload" %>
+<% content_for :title, t(".bulk_upload", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <% file_classes = "block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200" %>
 <%= form_with url: bulk_aircraft_documents_path(@aircraft), multipart: true, class: "card card-body max-w-3xl space-y-4",
       data: { controller: "bulk-upload", bulk_upload_url_value: rails_direct_uploads_path,
               bulk_upload_max_bytes_value: UploadValidation.max_size, action: "submit->bulk-upload#submit" } do %>
   <div>
-    <h2 class="card-title">Bulk upload</h2>
-    <p class="text-sm text-slate-500">Each file becomes its own document, named after the file. Give files the same name to combine them, in order, as the pages of one document.</p>
+    <h2 class="card-title"><%= t(".bulk_upload_2") %></h2>
+    <p class="text-sm text-slate-500"><%= t(".each_file_becomes_its_own") %></p>
   </div>
   <% if @bulk_error %>
     <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert"><%= @bulk_error %></div>
@@ -14,37 +14,37 @@
 
   <div class="grid gap-4 sm:grid-cols-2">
     <div>
-      <%= label_tag :doc_type, "Type", class: "label" %>
+      <%= label_tag :doc_type, t(".type"), class: "label" %>
       <%= select_tag :doc_type, options_for_select(Document::TYPES.invert, @bulk[:doc_type]), class: "input" %>
     </div>
     <div>
-      <%= label_tag :visibility, "Share-link visibility", class: "label" %>
-      <%= select_tag :visibility, options_for_select([ [ "Inherit from collection", "" ] ] + DocumentCollection::VISIBILITIES.invert.to_a, @bulk[:visibility]), class: "input" %>
+      <%= label_tag :visibility, t(".share_link_visibility"), class: "label" %>
+      <%= select_tag :visibility, options_for_select([ [ t(".inherit_from_collection"), "" ] ] + DocumentCollection::VISIBILITIES.invert.to_a, @bulk[:visibility]), class: "input" %>
     </div>
     <div>
-      <%= label_tag :document_collection_id, "Collection", class: "label" %>
+      <%= label_tag :document_collection_id, t(".collection"), class: "label" %>
       <%= select_tag :document_collection_id,
-            options_for_select([ [ "— None —", "" ] ] + @aircraft.document_collections.ordered.map { [ _1.name, _1.id ] }, @bulk[:document_collection_id]), class: "input" %>
+            options_for_select([ [ t(".none"), "" ] ] + @aircraft.document_collections.ordered.map { [ _1.name, _1.id ] }, @bulk[:document_collection_id]), class: "input" %>
     </div>
     <div>
-      <%= label_tag :new_collection, "…or a new collection", class: "label" %>
-      <%= text_field_tag :new_collection, @bulk[:new_collection], class: "input", placeholder: "e.g. 2025 Annual" %>
+      <%= label_tag :new_collection, t(".or_a_new_collection"), class: "label" %>
+      <%= text_field_tag :new_collection, @bulk[:new_collection], class: "input", placeholder: t(".e_g_2025_annual") %>
     </div>
   </div>
 
   <div class="grid gap-4 sm:grid-cols-2">
     <div>
-      <%= label_tag :files, "Files", class: "label" %>
+      <%= label_tag :files, t(".files"), class: "label" %>
       <%= file_field_tag "files[]", id: "files", multiple: true, class: file_classes,
             data: { bulk_upload_target: "input", action: "change->bulk-upload#add" } %>
     </div>
     <div data-bulk-upload-target="folderField" hidden>
-      <%= label_tag :folder, "…or a whole folder", class: "label" %>
+      <%= label_tag :folder, t(".or_a_whole_folder"), class: "label" %>
       <input type="file" id="folder" webkitdirectory multiple class="<%= file_classes %>"
              data-bulk-upload-target="folder" data-action="change->bulk-upload#add">
     </div>
   </div>
-  <p class="hint !mt-1">Images, PDFs or text, up to <%= Setting.max_upload_mb %> MB each and <%= DocumentsController::MAX_BULK_FILES %> at a time.</p>
+  <p class="hint !mt-1"><%= t(".images_pdfs_or_text_up_html", max_upload_mb: Setting.max_upload_mb, max_files: (DocumentsController::MAX_BULK_FILES)) %></p>
 
   <div data-bulk-upload-target="panel" hidden class="space-y-2">
     <div class="flex flex-wrap items-center justify-between gap-2">
@@ -52,17 +52,17 @@
       <div class="flex flex-wrap items-center gap-3">
         <label class="flex items-center gap-2 text-sm text-slate-700" data-bulk-upload-target="groupField" hidden>
           <input type="checkbox" class="h-4 w-4 rounded border-slate-300" data-bulk-upload-target="group" data-action="bulk-upload#regroup">
-          One document per folder
+          <%= t(".one_document_per_folder") %>
         </label>
-        <button type="button" class="btn-secondary btn-sm" data-action="bulk-upload#clear">Clear</button>
+        <button type="button" class="btn-secondary btn-sm" data-action="bulk-upload#clear"><%= t(".clear") %></button>
       </div>
     </div>
     <ul class="divide-y divide-slate-100 rounded-md ring-1 ring-slate-200" data-bulk-upload-target="list"></ul>
   </div>
 
   <div class="flex flex-wrap items-center gap-2">
-    <button type="submit" class="btn-primary" data-bulk-upload-target="submit">Upload</button>
-    <%= link_to "Cancel", aircraft_documents_path(@aircraft), class: "btn-secondary" %>
+    <button type="submit" class="btn-primary" data-bulk-upload-target="submit"><%= t(".upload") %></button>
+    <%= link_to t(".cancel"), aircraft_documents_path(@aircraft), class: "btn-secondary" %>
     <p class="text-sm text-slate-500" data-bulk-upload-target="status" role="status"></p>
   </div>
 <% end %>

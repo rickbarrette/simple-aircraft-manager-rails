@@ -1,18 +1,18 @@
-<% content_for :title, "Standardize airport codes" %>
+<% content_for :title, t(".standardize_airport_codes") %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <% changes = @standardizer.changes %>
 <%= form_with url: aircraft_airport_codes_path(@aircraft), method: :patch, class: "space-y-5" do |f| %>
   <section class="card">
     <div class="card-header">
-      <h2 class="card-title">Standardize airport codes</h2>
-      <span class="text-xs text-slate-500"><%= pluralize(changes.size, "code") %> to update · <%= changes.sum(&:flights) %> entries</span>
+      <h2 class="card-title"><%= t(".standardize_airport_codes") %></h2>
+      <span class="text-xs text-slate-500"><%= t(".to_update_entries_html", code: (t("counts.code", count: changes.size)), flights: (changes.sum(&:flights))) %></span>
     </div>
     <div class="card-body text-sm text-slate-600">
-      Rewrites the airport codes in <%= @aircraft.tail_number %>'s flight log to the airport database's standard code: the ICAO-style code AirTrail uses (e.g. 1B9 → K1B9). New flights picked from autocomplete already use these codes. Untick anything you'd rather keep as is.
+      <%= t(".rewrites_the_airport_codes_in_html", tail_number: @aircraft.tail_number) %>
     </div>
     <% if changes.any? %>
       <table class="table">
-        <thead><tr><th class="w-8"><input type="checkbox" checked aria-label="Select all" data-check-all></th><th>Logged</th><th>Standard</th><th>Airport</th><th class="text-right">Entries</th></tr></thead>
+        <thead><tr><th class="w-8"><input type="checkbox" checked aria-label="<%= t(".select_all") %>" data-check-all></th><th><%= t(".logged") %></th><th><%= t(".standard") %></th><th><%= t(".airport") %></th><th class="text-right"><%= t(".entries") %></th></tr></thead>
         <tbody>
           <% changes.each do |c| %>
             <tr>
@@ -27,31 +27,31 @@
         </tbody>
       </table>
     <% else %>
-      <%= empty_state "All logged codes already match the airport database." %>
+      <%= empty_state t(".all_logged_codes_already_match") %>
     <% end %>
   </section>
 
   <% if @standardizer.unknown.any? %>
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Not in the airport database</h2></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".not_in_the_airport_database") %></h2></div>
       <div class="card-body space-y-3 text-sm">
-        <p class="text-slate-600">Often a typo. Tick “Fix” and choose the airport these entries should be. Unticked codes are left unchanged.<% if current_user.admin? %> For a private strip that isn't listed, add it as a <%= link_to "custom airport", admin_airports_path, class: "link" %>.<% end %></p>
+        <p class="text-slate-600"><%= t(".often_a_typo_tick_fix") %><% if current_user.admin? %> <%= t(".for_a_private_strip_that_html", link: (link_to t(".custom_airport"), admin_airports_path, class: "link")) %><% end %></p>
         <% @standardizer.unknown.each do |u| %>
           <div class="flex flex-wrap items-start gap-3">
-            <label class="mt-2 flex items-center gap-2"><%= check_box_tag "fix[]", u.code, u.suggestion.present?, id: "fix_#{u.code.parameterize}" %> Fix</label>
+            <label class="mt-2 flex items-center gap-2"><%= t(".fix_html", checkbox: (check_box_tag "fix[]", u.code, u.suggestion.present?, id: "fix_#{u.code.parameterize}")) %></label>
             <div class="mt-2 w-16 font-mono"><%= u.code %></div>
-            <div class="mt-2 text-xs text-slate-500"><%= pluralize(u.flights, "entry") %> →</div>
+            <div class="mt-2 text-xs text-slate-500"><%= t("counts.entry", count: u.flights) %> →</div>
             <div class="relative w-72" data-controller="airport-autocomplete"
                  data-airport-autocomplete-url-value="<%= airport_search_path(aircraft_id: @aircraft.id) %>">
               <%= text_field_tag "fixes[#{u.code}]", u.suggestion&.code, class: "input font-mono uppercase placeholder:normal-case placeholder:font-sans",
-                    placeholder: "Airport code or name", "aria-label": "Airport for #{u.code}",
+                    placeholder: t(".airport_code_or_name"), "aria-label": t(".airport_for", code: u.code),
                     data: { airport_autocomplete_target: "input",
                             action: "input->airport-autocomplete#search keydown->airport-autocomplete#keydown blur->airport-autocomplete#blur" } %>
               <ul data-airport-autocomplete-target="list" role="listbox" hidden
                   class="absolute z-20 mt-1 max-h-72 w-[min(28rem,90vw)] overflow-auto rounded-md bg-surface py-1 shadow-lg ring-1 ring-slate-200"></ul>
               <p class="hint min-h-4" data-airport-autocomplete-target="hint"></p>
             </div>
-            <% if u.suggestion %><div class="mt-2 text-xs text-sky-800">Suggested: <%= u.suggestion.name %>, <%= u.suggestion.place %> (letters swapped?)</div><% end %>
+            <% if u.suggestion %><div class="mt-2 text-xs text-sky-800"><%= t(".suggested_letters_swapped_html", suggestion: u.suggestion.name, location: u.suggestion.place) %></div><% end %>
           </div>
         <% end %>
       </div>
@@ -59,7 +59,7 @@
   <% end %>
 
   <div class="flex gap-2">
-    <% if changes.any? || @standardizer.unknown.any? %><%= f.submit "Update selected codes", class: "btn-primary", data: { turbo_confirm: "Rewrite the selected airport codes in #{@aircraft.tail_number}'s flight log?" } %><% end %>
-    <%= link_to "Back to flights", aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %>
+    <% if changes.any? || @standardizer.unknown.any? %><%= f.submit t(".update_selected_codes"), class: "btn-primary", data: { turbo_confirm: t(".rewrite_the_selected_airport_codes", tail_number: @aircraft.tail_number) } %><% end %>
+    <%= link_to t(".back_to_flights"), aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %>
   </div>
 <% end %>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-white" data-theme="light">
+<html lang="<%= I18n.locale %>" class="bg-white" data-theme="light">
   <head>
     <meta charset="utf-8">
-    <title><%= [content_for(:title), "Simple Aircraft Manager"].compact.join(" · ") %></title>
+    <title><%= [content_for(:title), t(".simple_aircraft_manager")].compact.join(" · ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <%= csrf_meta_tags %>

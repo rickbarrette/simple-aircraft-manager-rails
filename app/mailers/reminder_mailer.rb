@@ -31,8 +31,8 @@ class ReminderMailer < ApplicationMailer
     @audit_due = self.class.audit_due_for?(user) && AuditRun.next_due
     @drs_due = self.class.drs_due_for(user)
     overdue = @items.sum { |_, issues, _| issues.count { _1.severity.in?(%w[RED LIMITED]) } }
-    subject = overdue.positive? ? "#{overdue} #{'item'.pluralize(overdue)} overdue" : "Maintenance coming due"
-    subject = (@certificates.any? ? "Certificate expiring" : (@audit_due ? "Records audit due" : "Refresh the AD list from DRS")) if @items.empty?
+    subject = overdue.positive? ? t(".subject_overdue", count: overdue) : t(".subject_due")
+    subject = t(@certificates.any? ? ".subject_certificate" : (@audit_due ? ".subject_audit" : ".subject_drs")) if @items.empty?
     mail subject: [ subject, @items.map { _1.first.tail_number }.to_sentence.presence ].compact.join(": "), to: user.email_address
   end
 end

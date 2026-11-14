@@ -1,44 +1,43 @@
-<% content_for :title, "#{@aircraft.tail_number} Logbook Import" %>
+<% content_for :title, t(".logbook_import", tail_number: @aircraft.tail_number) %>
 <% if @import.in_progress? %><% content_for :head, tag.meta("http-equiv": "refresh", content: "3") %><% end %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card card-body max-w-3xl space-y-4 text-sm">
   <div class="flex flex-wrap items-baseline justify-between gap-2">
-    <h2 class="card-title"><%= @import.document&.name || "Logbook pages" %></h2>
-    <span class="text-xs text-slate-500"><%= pluralize(@import.pages_total, "page") %><%= " · read by #{@import.model}" if @import.transcribe && @import.model %></span>
+    <h2 class="card-title"><%= @import.document&.name || t(".logbook_pages") %></h2>
+    <span class="text-xs text-slate-500"><%= t("counts.page", count: @import.pages_total) %><%= t(".read_by", model: @import.model) if @import.transcribe && @import.model %></span>
   </div>
 
   <% if @import.in_progress? %>
     <div>
       <div class="mb-1 flex justify-between text-xs text-slate-500">
-        <span><%= @import.transcribe ? "Claude is reading the pages…" : "Saving pages…" %></span>
+        <span><%= @import.transcribe ? t(".claude_is_reading_the_pages") : t(".saving_pages") %></span>
         <span class="tabular-nums"><%= @import.pages_done %> / <%= @import.pages_total %></span>
       </div>
       <div class="h-2 overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-valuenow="<%= @import.progress_percent %>" aria-valuemin="0" aria-valuemax="100">
         <div class="h-full rounded-full bg-sky-600 transition-all" style="width: <%= @import.progress_percent %>%"></div>
       </div>
-      <p class="hint mt-2"><%= pluralize(@import.entries_created, "entry") %> so far. This page updates by itself; a long logbook can take several minutes.</p>
+      <p class="hint mt-2"><%= t(".so_far_this_page_updates_html", entry: (t("counts.entry", count: @import.entries_created))) %></p>
     </div>
   <% elsif @import.done? %>
     <p class="font-medium text-emerald-700">
-      <%= @import.transcribe ? "Done: #{pluralize(@import.entries_created, 'logbook entry')} added." : "Pages saved." %>
+      <%= @import.transcribe ? t(".done_added", entry: (t("counts.logbook_entry", count: @import.entries_created))) : t(".pages_saved") %>
     </p>
     <% if @import.transcribe && @import.entries_created.positive? %>
-      <p class="text-slate-600">The new entries are marked unverified until someone checks them against the scans, since handwriting isn't always read perfectly.
-        <%= link_to "Check them now", aircraft_logbook_entries_path(@aircraft, unverified: 1), class: "link" %></p>
+      <p class="text-slate-600"><%= t(".the_new_entries_are_marked_html", link: (link_to t(".check_them_now"), aircraft_logbook_entries_path(@aircraft, unverified: 1), class: "link")) %></p>
     <% end %>
   <% else %>
-    <p class="font-medium text-red-700">The import stopped: <%= @import.error %></p>
-    <% if @import.entries_created.positive? %><p class="text-slate-600"><%= pluralize(@import.entries_created, "entry") %> were added before it stopped.</p><% end %>
+    <p class="font-medium text-red-700"><%= t(".the_import_stopped_html", error: @import.error) %></p>
+    <% if @import.entries_created.positive? %><p class="text-slate-600"><%= t(".were_added_before_it_stopped_html", entry: (t("counts.entry", count: @import.entries_created))) %></p><% end %>
   <% end %>
 
   <div class="flex flex-wrap gap-2">
-    <%= link_to "Logbook", aircraft_logbook_entries_path(@aircraft), class: "btn-secondary btn-sm" %>
-    <% if @import.document %><%= link_to "View scans", aircraft_document_path(@aircraft, @import.document), class: "btn-secondary btn-sm" %><% end %>
+    <%= link_to t(".logbook"), aircraft_logbook_entries_path(@aircraft), class: "btn-secondary btn-sm" %>
+    <% if @import.document %><%= link_to t(".view_scans"), aircraft_document_path(@aircraft, @import.document), class: "btn-secondary btn-sm" %><% end %>
   </div>
 
   <% if @import.warnings.any? %>
     <div class="border-t border-slate-100 pt-3">
-      <p class="mb-1 text-xs font-semibold text-slate-500"><%= pluralize(@import.warnings.size, "note") %></p>
+      <p class="mb-1 text-xs font-semibold text-slate-500"><%= t("counts.note", count: @import.warnings.size) %></p>
       <ul class="list-disc space-y-0.5 pl-5 text-slate-600"><% @import.warnings.each do |w| %><li><%= w %></li><% end %></ul>
     </div>
   <% end %>

@@ -5,7 +5,7 @@
 #   <%= f.field :public, as: :checkbox, label: "Show on share links" %>
 class AppFormBuilder < ActionView::Helpers::FormBuilder
   def field(method, as: :text, label: nil, hint: nil, collection: nil, include_blank: false, wrapper: {}, **opts)
-    label_text = label || method.to_s.humanize
+    label_text = label || (object.class.respond_to?(:human_attribute_name) ? object.class.human_attribute_name(method) : method.to_s.humanize)
     errors = object.respond_to?(:errors) ? object.errors[method] : []
 
     if as == :checkbox
@@ -35,7 +35,7 @@ class AppFormBuilder < ActionView::Helpers::FormBuilder
     @template.content_tag(:div, class: wrapper[:class]) do
       label(method, label_text, class: "label") + input +
         (hint ? @template.content_tag(:p, hint, class: "hint") : "".html_safe) +
-        errors.map { |e| @template.content_tag(:p, "#{label_text} #{e}", class: "field-error") }.join.html_safe
+        errors.map { |e| @template.content_tag(:p, I18n.t("errors.format", attribute: label_text, message: e), class: "field-error") }.join.html_safe
     end
   end
 
@@ -49,10 +49,10 @@ class AppFormBuilder < ActionView::Helpers::FormBuilder
       label(every, label, class: "label") +
         @template.content_tag(:div, class: "flex gap-2") do
           number_field(every, class: "input min-w-0 flex-1", min: 1, step: 1, inputmode: "numeric") +
-            select(:"#{name}_unit", CalendarInterval::UNITS.invert, {}, class: "input w-auto", "aria-label": "#{label} unit")
+            select(:"#{name}_unit", CalendarInterval::UNITS.invert, {}, class: "input w-auto", "aria-label": I18n.t("helpers.form.interval_unit", label: label))
         end +
         (hint ? @template.content_tag(:p, hint, class: "hint") : "".html_safe) +
-        errors.map { |e| @template.content_tag(:p, "#{label} #{e}", class: "field-error") }.join.html_safe
+        errors.map { |e| @template.content_tag(:p, I18n.t("errors.format", attribute: label, message: e), class: "field-error") }.join.html_safe
     end
   end
 

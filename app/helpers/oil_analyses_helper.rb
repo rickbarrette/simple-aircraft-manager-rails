@@ -10,7 +10,7 @@ module OilAnalysesHelper
 
   def oil_property(analysis, key)
     value = analysis.property(key) or return "—"
-    _, unit = OilAnalysis::PROPERTIES.fetch(key)
+    unit = OilAnalysis::PROPERTY_UNITS.fetch(key)
     number = number_with_precision(value, precision: 2, strip_insignificant_zeros: true)
     unit.present? ? "#{number} #{unit}" : number
   end
@@ -24,7 +24,7 @@ module OilAnalysesHelper
     value = analysis.value(element)
     flagged = analysis.flagged?(element)
     content = tag.span(ppm(value), class: [ "tabular-nums", ("font-semibold text-red-700" if flagged) ],
-                                   title: ("Over #{OilAnalysis::FLAG_RATIO}× the lab average" if flagged))
+                                   title: (I18n.t("helpers.oil_analyses.over_the_lab_average", _: (OilAnalysis::FLAG_RATIO)) if flagged))
     avg = analysis.average(element)
     avg ? safe_join([ content, tag.div("(#{ppm(avg)})", class: "text-xs text-slate-500 tabular-nums") ]) : content
   end

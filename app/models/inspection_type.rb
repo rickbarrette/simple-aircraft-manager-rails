@@ -1,16 +1,10 @@
 class InspectionType < ApplicationRecord
   # What it means for the aircraft when this inspection is overdue.
-  EFFECTS = {
-    "grounds" => "Grounds the aircraft",
-    "no_ifr" => "No IFR flight (e.g. pitot-static, 91.411)",
-    "no_transponder" => "Transponder can't be used (91.413)",
-    "advisory" => "Advisory only"
-  }.freeze
+  EFFECTS = LabelSet.new("inspection_type.effects", %w[grounds no_ifr no_transponder advisory])
   # In a sentence: "Overdue: no IFR."
-  EFFECT_SUMMARIES = { "grounds" => "grounds the aircraft", "no_ifr" => "no IFR", "no_transponder" => "transponder can't be used",
-                       "advisory" => "advisory only" }.freeze
+  EFFECT_SUMMARIES = LabelSet.new("inspection_type.effect_summaries", %w[grounds no_ifr no_transponder advisory])
   # Short form for the airworthiness status ("VFR only").
-  LIMITATIONS = { "no_ifr" => "VFR only", "no_transponder" => "No transponder" }.freeze
+  LIMITATIONS = LabelSet.new("inspection_type.limitations", %w[no_ifr no_transponder])
 
   include CalendarInterval
   calendar_interval :recurring, days: :recurring_days, months: :recurring_months, blank: 0
@@ -22,7 +16,7 @@ class InspectionType < ApplicationRecord
   validates :name, presence: true
   validates :effect, inclusion: { in: EFFECTS.keys }
   validates :hours_tolerance, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
-  validate { errors.add(:satisfies, "can't be the inspection itself") if satisfies_id.present? && satisfies_id == id }
+  validate { errors.add(:satisfies, :itself) if satisfies_id.present? && satisfies_id == id }
   # `required` mirrors effect, for archives shared with the original app.
   before_validation { self.required = effect != "advisory" }
 
@@ -43,12 +37,12 @@ class InspectionType < ApplicationRecord
   end
 
   def interval_description
-    return "One-time" unless recurring?
+    return I18n.t("models.inspection_type.one_time") unless recurring?
     parts = []
-    parts << "#{recurring_hours.to_s.sub(/\.0\z/, '')} hrs" if recurring_hours.to_f > 0
+    parts << I18n.t("models.inspection_type.hours", hours: recurring_hours.to_s.sub(/\.0\z/, "")) if recurring_hours.to_f > 0
     parts << recurring_interval_label if recurring_months > 0 && recurring_days.zero?
-    parts << "#{recurring_months} months" if recurring_months > 0 && recurring_days > 0
-    parts << "#{recurring_days} days" if recurring_days > 0
-    parts.any? ? "Every #{parts.join(' / ')}" : "Recurring"
+    parts << CalendarInterval.label(0, recurring_months) if recurring_months > 0 && recurring_days > 0
+    parts << CalendarInterval.label(recurring_days, 0) if recurring_days > 0
+    parts.any? ? I18n.t("models.inspection_type.every", interval: parts.join(" / ")) : I18n.t("models.inspection_type.recurring")
   end
 end

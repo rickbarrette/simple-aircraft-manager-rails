@@ -19,8 +19,8 @@ class DocumentsController < ApplicationController
   def create
     @document = @aircraft.documents.new(document_params)
     if @document.save
-      log_event("document", "Document added: #{@document.name}")
-      redirect_to aircraft_document_path(@aircraft, @document), notice: "Document added."
+      log_event("document", t("flash.documents.document_added_2", name: @document.name))
+      redirect_to aircraft_document_path(@aircraft, @document), notice: t("flash.documents.document_added")
     else
       render :new, status: :unprocessable_entity
     end
@@ -36,15 +36,15 @@ class DocumentsController < ApplicationController
   def bulk_create
     @bulk = bulk_defaults.merge(params.slice(:doc_type, :visibility, :document_collection_id, :new_collection).permit!.to_h.symbolize_keys)
     files = Array(params[:files]).compact_blank
-    return bulk_error("Choose some files to upload.") if files.empty?
-    return bulk_error("Upload at most #{MAX_BULK_FILES} files at a time.") if files.size > MAX_BULK_FILES
+    return bulk_error(t("flash.documents.choose_files")) if files.empty?
+    return bulk_error(t("flash.documents.too_many_files", max: MAX_BULK_FILES)) if files.size > MAX_BULK_FILES
 
     names = Array(params[:names])
     rejected = []
     groups = {}
     files.each_with_index do |file, i|
       upload = file.is_a?(String) ? unattached_blob(file) : file
-      next rejected << "file #{i + 1} (upload expired, try again)" unless upload
+      next rejected << t("flash.documents.upload_expired", number: i + 1) unless upload
       name = names[i].to_s.squish.presence || File.basename(upload_filename(upload), ".*").tr("_", " ").squish.presence || "Untitled"
       (groups[name.first(255)] ||= []) << upload
     end
@@ -58,18 +58,18 @@ class DocumentsController < ApplicationController
       if doc.save
         created << doc
       else
-        rejected << "#{name} (#{doc.errors.full_messages.to_sentence})"
+        rejected << t("flash.documents.rejected_file", name: name, errors: doc.errors.full_messages.to_sentence)
         pages.each { _1.purge_later if _1.is_a?(ActiveStorage::Blob) }
       end
     end
     if created.empty?
       @aircraft.document_collections.find_by(id: collection_id)&.destroy if @bulk[:new_collection].present?
-      return bulk_error("Nothing was uploaded: #{rejected.to_sentence}.")
+      return bulk_error(t("flash.documents.nothing_uploaded", items: rejected.to_sentence))
     end
 
-    log_event("document", "#{helpers.pluralize(created.size, 'document')} uploaded", notes: created.map(&:name).join(", ").truncate(1000))
-    flash[:alert] = "Not uploaded: #{rejected.to_sentence}." if rejected.any?
-    redirect_to aircraft_documents_path(@aircraft), notice: "#{helpers.pluralize(created.size, 'document')} uploaded.", status: :see_other
+    log_event("document", t("flash.documents.bulk_uploaded_event", count: created.size), notes: created.map(&:name).join(", ").truncate(1000))
+    flash[:alert] = t("flash.documents.not_uploaded", items: rejected.to_sentence) if rejected.any?
+    redirect_to aircraft_documents_path(@aircraft), notice: t("flash.documents.bulk_uploaded", count: created.size), status: :see_other
   end
 
   def edit; end
@@ -81,8 +81,8 @@ class DocumentsController < ApplicationController
     @document.pages.attach(new_pages) if new_pages.present?
     Array(params[:remove_page_ids]).each { |id| @document.pages.find_by(id: id)&.purge_later }
     if @document.save
-      log_event("document", "Document updated: #{@document.name}")
-      redirect_to aircraft_document_path(@aircraft, @document), notice: "Document updated."
+      log_event("document", t("flash.documents.document_updated_2", name: @document.name))
+      redirect_to aircraft_document_path(@aircraft, @document), notice: t("flash.documents.document_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -90,8 +90,8 @@ class DocumentsController < ApplicationController
 
   def destroy
     @document.destroy!
-    log_event("document", "Document deleted: #{@document.name}")
-    redirect_to aircraft_documents_path(@aircraft), notice: "Document deleted."
+    log_event("document", t("flash.documents.document_deleted_2", name: @document.name))
+    redirect_to aircraft_documents_path(@aircraft), notice: t("flash.documents.document_deleted")
   end
 
   private
@@ -120,7 +120,7 @@ class DocumentsController < ApplicationController
   def bulk_collection
     return [ scoped_id(@aircraft.document_collections, @bulk[:document_collection_id]), nil ] if @bulk[:new_collection].blank?
     col = @aircraft.document_collections.create(name: @bulk[:new_collection].squish, visibility: @bulk[:visibility].presence || "private")
-    col.persisted? ? [ col.id, nil ] : [ nil, "Couldn't create the collection: #{col.errors.full_messages.to_sentence}." ]
+    col.persisted? ? [ col.id, nil ] : [ nil, t("flash.documents.collection_failed", errors: col.errors.full_messages.to_sentence) ]
   end
 
   def set_document = @document = @aircraft.documents.find(params[:id])

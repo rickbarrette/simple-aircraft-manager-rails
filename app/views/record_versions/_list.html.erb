@@ -10,9 +10,9 @@
       <% if v.event.in?(%w[link unlink]) %>
         <% c = v.changes_hash %>
         <p class="mt-1 text-xs text-slate-600">
-          <%= c["record"] %> <%= v.event == "link" ? "applies to" : "no longer applies to" %> <%= c["applies_to"] == "component" ? c["component"] : "the airframe" %><%= " (#{c['reason']})" if c["reason"] %>.
+          <%= c["record"] %> <%= v.event == "link" ? "applies to" : t(".no_longer_applies_to") %> <%= c["applies_to"] == "component" ? c["component"] : t(".the_airframe") %><%= " (#{c['reason']})" if c["reason"] %>.
           <% if v.event == "unlink" && local_assigns[:aircraft] && local_assigns[:can_restore] && RecordVersionsController.restorable?(v, aircraft) %>
-            <%= button_to "Restore", restore_aircraft_record_version_path(aircraft, v), method: :post, class: "btn-secondary btn-sm ml-2", form: { class: "inline" } %>
+            <%= button_to t(".restore"), restore_aircraft_record_version_path(aircraft, v), method: :post, class: "btn-secondary btn-sm ml-2", form: { class: "inline" } %>
           <% end %>
         </p>
       <% end %>

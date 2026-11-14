@@ -14,7 +14,7 @@ class Admin::UsersController < ApplicationController
     @user = User.new(user_params)
     @user.admin = admin_flag
     if @user.save
-      redirect_to admin_users_path, notice: "User #{@user.email_address} created."
+      redirect_to admin_users_path, notice: t("flash.admin_users.user_created", email_address: @user.email_address)
     else
       render :new, status: :unprocessable_entity
     end
@@ -26,12 +26,12 @@ class Admin::UsersController < ApplicationController
     attrs = user_params
     attrs = attrs.except(:password, :password_confirmation) if attrs[:password].blank?
     if @user == current_user && !admin_flag
-      return redirect_to admin_users_path, alert: "You can't remove your own admin rights."
+      return redirect_to admin_users_path, alert: t("flash.admin_users.you_can_t_remove")
     end
     @user.admin = admin_flag
     if @user.update(attrs)
       @user.sessions.where.not(id: Current.session.id).destroy_all if attrs.key?(:password) # new password signs them out
-      redirect_to admin_users_path, notice: "User updated."
+      redirect_to admin_users_path, notice: t("flash.admin_users.user_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -41,7 +41,7 @@ class Admin::UsersController < ApplicationController
   # keeping their account, so the signatures they made stay attributed.
   def unlock
     @user.unlock!
-    redirect_to admin_users_path, notice: "#{@user.email_address} unlocked."
+    redirect_to admin_users_path, notice: t("flash.admin_users.unlocked", email_address: @user.email_address)
   end
 
   # For a user who lost their authenticator: they sign in with their password
@@ -49,28 +49,28 @@ class Admin::UsersController < ApplicationController
   def reset_two_factor
     @user.disable_otp!
     Rails.logger.info("[auth] #{current_user.email_address} turned off two-factor for #{@user.email_address}")
-    redirect_to admin_users_path, notice: "Two-factor turned off for #{@user.email_address}. Ask them to set it up again from their profile."
+    redirect_to admin_users_path, notice: t("flash.admin_users.two_factor_turned_off", email_address: @user.email_address)
   end
 
   def disable
-    return redirect_to admin_users_path, alert: "You can't disable yourself." if @user == current_user
+    return redirect_to admin_users_path, alert: t("flash.admin_users.you_can_t_disable") if @user == current_user
     @user.update!(disabled_at: Time.current)
     @user.sessions.destroy_all
-    redirect_to admin_users_path, notice: "#{@user.email_address} disabled: signed out, can't sign in or sign entries. Their past signatures are kept."
+    redirect_to admin_users_path, notice: t("flash.admin_users.disabled_signed_out_can", email_address: @user.email_address)
   end
 
   def enable
     @user.update!(disabled_at: nil)
-    redirect_to admin_users_path, notice: "#{@user.email_address} enabled."
+    redirect_to admin_users_path, notice: t("flash.admin_users.enabled", email_address: @user.email_address)
   end
 
   def destroy
-    return redirect_to admin_users_path, alert: "You can't delete yourself." if @user == current_user
+    return redirect_to admin_users_path, alert: t("flash.admin_users.you_can_t_delete") if @user == current_user
     if @user.entry_signatures.exists?
-      return redirect_to admin_users_path, alert: "#{@user.email_address} has signed logbook entries; disable the account instead of deleting it."
+      return redirect_to admin_users_path, alert: t("flash.admin_users.has_signed_logbook_entries", email_address: @user.email_address)
     end
     @user.destroy!
-    redirect_to admin_users_path, notice: "User deleted."
+    redirect_to admin_users_path, notice: t("flash.admin_users.user_deleted")
   end
 
   private

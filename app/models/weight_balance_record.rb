@@ -11,7 +11,7 @@ class WeightBalanceRecord < ApplicationRecord
   validates :empty_weight, numericality: { greater_than: 0 }
   validates :empty_arm, numericality: true
   validates :max_gross_weight, numericality: { greater_than: 0 }, allow_nil: true
-  validate { errors.add(:max_gross_weight, "must be more than the empty weight") if max_gross_weight && empty_weight && max_gross_weight <= empty_weight }
+  validate { errors.add(:max_gross_weight, :below_empty) if max_gross_weight && empty_weight && max_gross_weight <= empty_weight }
 
   scope :recent_first, -> { order(date: :desc, created_at: :desc) }
 

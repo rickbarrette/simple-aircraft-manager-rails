@@ -1,10 +1,7 @@
 class AirworthinessDirective < ApplicationRecord
-  COMPLIANCE_TYPES = { "standard" => "Standard", "conditional" => "Conditional" }.freeze
-  BULLETIN_TYPES = {
-    "ad" => "Airworthiness Directive", "saib" => "Special Airworthiness Information Bulletin",
-    "sb" => "Service Bulletin", "alert" => "Airworthiness Alert", "other" => "Other"
-  }.freeze
-  BULLETIN_LABELS = { "ad" => "AD", "saib" => "SAIB", "sb" => "SB", "alert" => "Alert", "other" => "Bulletin" }.freeze
+  COMPLIANCE_TYPES = LabelSet.new("airworthiness_directive.compliance_types", %w[standard conditional])
+  BULLETIN_TYPES = LabelSet.new("airworthiness_directive.bulletin_types", %w[ad saib sb alert other])
+  BULLETIN_LABELS = LabelSet.new("airworthiness_directive.bulletin_labels", %w[ad saib sb alert other])
 
   include CalendarInterval
   calendar_interval :recurring, days: :recurring_days, months: :recurring_months, blank: 0
@@ -36,7 +33,7 @@ class AirworthinessDirective < ApplicationRecord
   # exports carry one per AD; it can also be pasted in). DRS links use an
   # internal document id, so they can't be derived from the AD number.
   def reference_link
-    [ document_url, "View AD" ] if document_url.present?
+    [ document_url, I18n.t("models.airworthiness_directive.view") ] if document_url.present?
   end
 
   def conditional? = compliance_type == "conditional"

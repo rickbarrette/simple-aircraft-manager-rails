@@ -28,9 +28,9 @@ class AirTrailExport
 
   def valid?
     @errors = []
-    @errors << "AirTrail username must be 3–20 letters, numbers, “.”, “_” or “-”" unless @username.match?(USERNAME_FORMAT)
-    @errors << "Aircraft type must be an ICAO type designator like C150 (up to 4 letters/numbers)" if @aircraft_type && !@aircraft_type.match?(TYPE_FORMAT)
-    @errors << "No flights to export" if exportable.empty?
+    @errors << I18n.t("services.air_trail.airtrail_username_must_be_3") unless @username.match?(USERNAME_FORMAT)
+    @errors << I18n.t("services.air_trail.aircraft_type_must_be_an") if @aircraft_type && !@aircraft_type.match?(TYPE_FORMAT)
+    @errors << I18n.t("services.air_trail.no_flights_to_export") if exportable.empty?
     @errors.empty?
   end
 

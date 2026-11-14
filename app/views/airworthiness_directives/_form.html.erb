@@ -1,29 +1,29 @@
 <%= form_with model: ad, url: ad.new_record? ? aircraft_airworthiness_directives_path(aircraft) : aircraft_airworthiness_directive_path(aircraft, ad), class: "card card-body space-y-4 max-w-3xl" do |f| %>
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-3">
-    <%= f.field :name, label: "Number", required: true, placeholder: "2011-10-09" %>
-    <%= f.field :bulletin_type, as: :select, label: "Type", collection: AirworthinessDirective::BULLETIN_TYPES.invert %>
-    <%= f.field :compliance_type, as: :select, label: "Compliance", collection: AirworthinessDirective::COMPLIANCE_TYPES.invert,
-          hint: "Conditional ADs only apply when a trigger occurs and don't affect airworthiness." %>
+    <%= f.field :name, label: t(".number"), required: true, placeholder: "2011-10-09" %>
+    <%= f.field :bulletin_type, as: :select, label: t(".type"), collection: AirworthinessDirective::BULLETIN_TYPES.invert %>
+    <%= f.field :compliance_type, as: :select, label: t(".compliance"), collection: AirworthinessDirective::COMPLIANCE_TYPES.invert,
+          hint: t(".conditional_ads_only_apply_when") %>
   </div>
   <%= f.field :short_description, required: true %>
   <%= f.field :required_action, as: :textarea, rows: 3 %>
-  <%= f.field :trigger_condition, as: :textarea, rows: 2, hint: "For conditional ADs (e.g. “on prop strike”)." %>
+  <%= f.field :trigger_condition, as: :textarea, rows: 2, hint: t(".for_conditional_ads_e_g") %>
   <div class="flex gap-6">
-    <%= f.field :mandatory, as: :checkbox, label: "Mandatory" %>
-    <%= f.field :recurring, as: :checkbox, label: "Recurring" %>
+    <%= f.field :mandatory, as: :checkbox, label: t(".mandatory") %>
+    <%= f.field :recurring, as: :checkbox, label: t(".recurring") %>
   </div>
   <div class="grid gap-4 sm:grid-cols-3">
-    <%= f.field :recurring_hours, as: :number, step: 0.1, label: "Every (hours)" %>
-    <%= f.interval :recurring, label: "Every", hint: "Months and years are due at the end of the month." %>
-    <%= f.field :document_id, as: :select, label: "Reference document", collection: document_options(aircraft) %>
+    <%= f.field :recurring_hours, as: :number, step: 0.1, label: t(".every_hours") %>
+    <%= f.interval :recurring, label: t(".every"), hint: t(".months_and_years_are_due") %>
+    <%= f.field :document_id, as: :select, label: t(".reference_document"), collection: document_options(aircraft) %>
   </div>
-  <%= f.field :document_url, label: "Link to AD document", placeholder: "https://…",
-        hint: "Filled in automatically from a DRS Excel export. In DRS, open the AD and copy its link." %>
+  <%= f.field :document_url, label: t(".link_to_ad_document"), placeholder: t(".https"),
+        hint: t(".filled_in_automatically_from_a") %>
   <%= render "shared/applicability_fields", aircraft: aircraft, record: ad, applies_to_airframe: @applies_to_airframe %>
   <% if ad.persisted? && (ad.aircraft.count + ad.components.where.not(aircraft_id: aircraft.id).count) > 1 %>
-    <p class="rounded bg-amber-50 p-2 text-xs text-amber-800">This AD is shared with other aircraft; edits affect them too.</p>
+    <p class="rounded bg-amber-50 p-2 text-xs text-amber-800"><%= t(".this_ad_is_shared_with") %></p>
   <% end %>
-  <div class="flex gap-2"><%= f.submit "Save" %><%= link_to "Cancel", aircraft_airworthiness_directives_path(aircraft), class: "btn-secondary" %></div>
+  <div class="flex gap-2"><%= f.submit t(".save") %><%= link_to t(".cancel"), aircraft_airworthiness_directives_path(aircraft), class: "btn-secondary" %></div>
 <% end %>
-<% if ad.persisted? %><div class="mt-4"><%= delete_button "Remove from #{aircraft.tail_number}", aircraft_airworthiness_directive_path(aircraft, ad) %></div><% end %>
+<% if ad.persisted? %><div class="mt-4"><%= delete_button t(".remove_from", tail_number: aircraft.tail_number), aircraft_airworthiness_directive_path(aircraft, ad) %></div><% end %>

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 // Write / Preview tabs for a Markdown textarea. The preview is rendered by the
 // server, with the same Markdown rules and sanitizing as the saved note.
@@ -17,7 +18,7 @@ export default class extends Controller {
 
   async preview() {
     this.select(true)
-    this.outputTarget.textContent = "Loading preview…"
+    this.outputTarget.textContent = t("markdown.loading")
     const token = document.querySelector("meta[name=csrf-token]")?.content
     try {
       const response = await fetch(this.urlValue, {
@@ -29,7 +30,7 @@ export default class extends Controller {
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       this.outputTarget.innerHTML = await response.text() // sanitized server-side
     } catch (error) {
-      this.outputTarget.textContent = `Couldn't load the preview (${error.message}).`
+      this.outputTarget.textContent = t("markdown.load_failed", { message: error.message })
     }
   }
 

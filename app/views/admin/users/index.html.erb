@@ -1,18 +1,18 @@
-<% content_for :title, "Users" %>
-<div class="mb-4 flex items-center justify-between"><h1 class="text-2xl font-bold">Users</h1><%= link_to "+ New User", new_admin_user_path, class: "btn-primary" %></div>
+<% content_for :title, t(".users") %>
+<div class="mb-4 flex items-center justify-between"><h1 class="text-2xl font-bold"><%= t(".users") %></h1><%= link_to t(".new_user"), new_admin_user_path, class: "btn-primary" %></div>
 <section class="card"><table class="table">
-  <thead><tr><th>Name</th><th>Email</th><th>Aircraft</th><th>Last sign-in</th><th></th></tr></thead>
+  <thead><tr><th><%= t(".name") %></th><th><%= t(".email") %></th><th><%= t(".aircraft") %></th><th><%= t(".last_sign_in") %></th><th></th></tr></thead>
   <tbody><% @users.each do |u| %><tr>
-    <td><%= u.name %> <% if u.admin? %><span class="badge-blue">Admin</span><% end %><% if u.sso_uid? %> <span class="badge-gray" title="Signs in with <%= Sso.label %>"><%= Sso.label %></span><% end %><% if u.otp_enabled? %> <span class="badge-green" title="Authenticator app on">2FA</span><% end %><% if u.locked? %> <span class="badge-red" title="Too many failed sign-ins">Locked</span><% end %></td>
+    <td><%= u.name %> <% if u.admin? %><span class="badge-blue"><%= t(".admin") %></span><% end %><% if u.sso_uid? %> <span class="badge-gray" title="Signs in with <%= Sso.label %>"><%= Sso.label %></span><% end %><% if u.otp_enabled? %> <span class="badge-green" title="<%= t(".authenticator_app_on") %>"><%= t(".n2fa") %></span><% end %><% if u.locked? %> <span class="badge-red" title="<%= t(".too_many_failed_sign_ins") %>"><%= t(".locked") %></span><% end %></td>
     <td><%= u.email_address %><% if u.certificates.any? %><div class="text-xs text-slate-500"><%= u.certificates.map { "#{_1.short_label} #{_1.number}" }.join(", ") %></div><% end %></td>
     <td class="text-xs"><%= u.aircraft_roles.map { "#{_1.aircraft.tail_number} (#{_1.role})" }.join(", ").presence || "—" %></td>
     <td class="text-xs text-slate-500"><%= u.last_signed_in_at ? "#{time_ago_in_words(u.last_signed_in_at)} ago" : "never" %></td>
     <td class="whitespace-nowrap text-right">
-      <% if u.disabled? %><span class="badge-red mr-1">Disabled</span><%= button_to "Enable", enable_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %>
-      <% elsif u != current_user %><%= button_to "Disable", disable_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline", data: { turbo_confirm: "Disable #{u.email_address}? They'll be signed out and can't sign in or sign entries. Their past signatures are kept." } } %><% end %>
-      <% if u.locked? %><%= button_to "Unlock", unlock_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %><% end %>
-      <% if u.otp_enabled? %><%= button_to "Reset 2FA", reset_two_factor_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", title: "Turn off their authenticator app (lost phone)", form: { class: "inline", data: { turbo_confirm: "Turn off two-factor for #{u.email_address}? Only do this after confirming it's really them." } } %><% end %>
-      <%= link_to "Edit", edit_admin_user_path(u), class: "btn-secondary btn-sm" %></td>
+      <% if u.disabled? %><span class="badge-red mr-1"><%= t(".disabled") %></span><%= button_to t(".enable"), enable_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %>
+      <% elsif u != current_user %><%= button_to t(".disable"), disable_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline", data: { turbo_confirm: t(".disable_they_ll_be_signed", email_address: u.email_address) } } %><% end %>
+      <% if u.locked? %><%= button_to t(".unlock"), unlock_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %><% end %>
+      <% if u.otp_enabled? %><%= button_to t(".reset_2fa"), reset_two_factor_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", title: t(".turn_off_their_authenticator_app"), form: { class: "inline", data: { turbo_confirm: t(".turn_off_two_factor_for", email_address: u.email_address) } } %><% end %>
+      <%= link_to t(".edit"), edit_admin_user_path(u), class: "btn-secondary btn-sm" %></td>
   </tr><% end %></tbody>
 </table></section>
-<p class="hint mt-3">After creating an account, an aircraft owner can grant access from the aircraft's “Access & Sharing” tab.</p>
+<p class="hint mt-3"><%= t(".after_creating_an_account_an") %></p>

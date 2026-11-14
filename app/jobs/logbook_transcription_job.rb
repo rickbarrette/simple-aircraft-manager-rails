@@ -33,11 +33,11 @@ class LogbookTranscriptionJob < ApplicationJob
     readable = pages.each_with_index.filter_map do |attachment, index|
       type = attachment.blob.content_type
       if type == "application/pdf"
-        next warn("Page #{index + 1} (#{attachment.filename}) is over #{LogbookTranscriber::MAX_PDF_BYTES / 1.megabyte} MB, too large to transcribe.") if attachment.blob.byte_size > LogbookTranscriber::MAX_PDF_BYTES
+        next warn(I18n.t("jobs.logbook_transcription.pdf_too_large", page: index + 1, file: attachment.filename, mb: LogbookTranscriber::MAX_PDF_BYTES / 1.megabyte)) if attachment.blob.byte_size > LogbookTranscriber::MAX_PDF_BYTES
       elsif !LogbookTranscriber::IMAGE_TYPES.include?(type)
-        next warn("Page #{index + 1} (#{attachment.filename}) isn't a JPEG, PNG, GIF, WebP or PDF, so it wasn't transcribed.")
+        next warn(I18n.t("jobs.logbook_transcription.wrong_type", page: index + 1, file: attachment.filename))
       elsif attachment.blob.byte_size > LogbookTranscriber::MAX_IMAGE_BYTES
-        next warn("Page #{index + 1} (#{attachment.filename}) is over 5 MB, too large to transcribe. Scan it at a lower resolution.")
+        next warn(I18n.t("jobs.logbook_transcription.image_too_large", page: index + 1, file: attachment.filename))
       end
       { attachment: attachment, number: index + 1, pdf: type == "application/pdf" }
     end
@@ -50,10 +50,10 @@ class LogbookTranscriptionJob < ApplicationJob
 
   def transcribe_pdf(page)
     result = @transcriber.transcribe([ payload(page) ])
-    note_skipped(result, ->(i) { "#{page[:attachment].filename} page #{i + 1}" })
+    note_skipped(result, ->(i) { I18n.t("jobs.logbook_transcription.file_page", file: page[:attachment].filename, page: i + 1) })
     result.entries.sort_by { _1["page_start"].to_i }.each { save(_1, page[:number]) }
   rescue LogbookTranscriber::Error => e
-    warn("#{page[:attachment].filename} wasn't transcribed: #{e.message}.")
+    warn(I18n.t("jobs.logbook_transcription.file_failed", file: page[:attachment].filename, message: e.message))
   ensure
     tick(1)
   end
@@ -81,12 +81,12 @@ class LogbookTranscriptionJob < ApplicationJob
       rescue LogbookTranscriber::Error => e
         held.each { save(_1[:entry], _1[:number]) } # keep what the previous batch read
         held = []
-        pages = batch.size == 1 ? "Page #{batch.first[:number]} wasn't" : "Pages #{batch.first[:number]}–#{batch.last[:number]} weren't"
-        warn("#{pages} transcribed: #{e.message}.")
+        warn(batch.size == 1 ? I18n.t("jobs.logbook_transcription.page_failed", page: batch.first[:number], message: e.message)
+                             : I18n.t("jobs.logbook_transcription.pages_failed", first: batch.first[:number], last: batch.last[:number], message: e.message))
         tick(n.zero? ? batch.size : batch.size - 1)
         next
       end
-      note_skipped(result, ->(i) { "page #{batch[i]&.dig(:number) || '?'}" })
+      note_skipped(result, ->(i) { I18n.t("jobs.logbook_transcription.page", page: batch[i]&.dig(:number) || "?") })
 
       entries = result.entries.sort_by { _1["page_start"].to_i }
       held = []
@@ -109,10 +109,11 @@ class LogbookTranscriptionJob < ApplicationJob
 
   def save(entry, page_number)
     date = parse_date(entry["date"])
-    text = entry["text"].to_s.strip.presence || "[no text read]"
+    text = entry["text"].to_s.strip.presence || I18n.t("jobs.logbook_transcription.no_text")
     unless date
-      text = "[date unreadable] #{text}"
-      warn("An entry on page #{page_number} had no readable date#{@last_date ? "; it was given the previous entry's date (#{@last_date})" : ' and was dated today'}. Please check it.")
+      text = "#{I18n.t('jobs.logbook_transcription.date_unreadable')} #{text}"
+      warn(@last_date ? I18n.t("jobs.logbook_transcription.no_date_previous", page: page_number, date: @last_date)
+                      : I18n.t("jobs.logbook_transcription.no_date_today", page: page_number))
     end
     date ||= @last_date || Date.current
     @last_date = date
@@ -128,14 +129,14 @@ class LogbookTranscriptionJob < ApplicationJob
       verified: false, transcription_confidence: (entry["confidence"] if %w[high medium low].include?(entry["confidence"]))
     )
     @import.increment!(:entries_created)
-    warn("The #{date} entry on page #{page_number} was hard to read. Please check it against the scan.") if entry["confidence"] == "low"
+    warn(I18n.t("jobs.logbook_transcription.hard_to_read", date: date, page: page_number)) if entry["confidence"] == "low"
   end
 
   def note_skipped(result, label)
     forms = result.non_logbook_pages.map { label.(_1) }
     unreadable = result.unparseable_pages.map { label.(_1) }
-    warn("Not logbook entries (forms, tags…), so nothing was transcribed from: #{forms.uniq.to_sentence}.") if forms.any?
-    warn("Too hard to read: #{unreadable.uniq.to_sentence}.") if unreadable.any?
+    warn(I18n.t("jobs.logbook_transcription.not_entries", pages: forms.uniq.to_sentence)) if forms.any?
+    warn(I18n.t("jobs.logbook_transcription.unreadable", pages: unreadable.uniq.to_sentence)) if unreadable.any?
   end
 
   def parse_date(value)

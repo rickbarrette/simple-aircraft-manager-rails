@@ -2,56 +2,56 @@
   <%= f.errors_summary %>
   <div class="grid gap-4 sm:grid-cols-3">
     <div>
-      <%= f.field :component_type_id, as: :select, label: "Type",
-            collection: ComponentType.ordered.map { [_1.name, _1.id] }, include_blank: "— Select —" %>
-      <%= text_field_tag :new_component_type, params[:new_component_type], class: "input mt-2", placeholder: "…or type a new one" %>
+      <%= f.field :component_type_id, as: :select, label: t(".type"),
+            collection: ComponentType.ordered.map { [_1.name, _1.id] }, include_blank: t(".select") %>
+      <%= text_field_tag :new_component_type, params[:new_component_type], class: "input mt-2", placeholder: t(".or_type_a_new_one") %>
     </div>
     <%= f.field :manufacturer, required: true %>
     <%= f.field :model, required: true %>
     <%= f.field :serial_number %>
-    <%= f.field :install_location, hint: "e.g. Left mag, #3 cylinder" %>
+    <%= f.field :install_location, hint: t(".e_g_left_mag_3") %>
     <%= f.field :status, as: :select, collection: Component::STATUSES.invert %>
-    <%= f.field :parent_component_id, as: :select, label: "Parent component",
-          collection: [["— None —", nil]] + aircraft.components.where.not(id: component.id).includes(:component_type).map { [_1.to_s, _1.id] } %>
+    <%= f.field :parent_component_id, as: :select, label: t(".parent_component"),
+          collection: [[t(".none"), nil]] + aircraft.components.where.not(id: component.id).includes(:component_type).map { [_1.to_s, _1.id] } %>
   </div>
 
   <fieldset class="grid gap-4 sm:grid-cols-4">
-    <legend class="mb-2 text-sm font-semibold text-slate-900">Time</legend>
+    <legend class="mb-2 text-sm font-semibold text-slate-900"><%= t(".time") %></legend>
     <%= f.field :date_in_service, as: :date, required: true %>
-    <%= f.field :hours_in_service, as: :number, step: 0.1, label: "Total time (hours)" %>
-    <%= f.field :overhaul_date, as: :date, label: "Last overhaul / service" %>
-    <%= f.field :hours_since_overhaul, as: :number, step: 0.1, label: "Hours since OH / service" %>
-    <%= f.field :overhaul_kind, as: :select, label: "Overhaul type", include_blank: "—", collection: Component::OVERHAUL_KINDS.invert,
-          wrapper: { class: "sm:col-span-2" }, hint: "For engines and propellers: printed in logbook entries as SMOH, SFOH or SNEW." %>
+    <%= f.field :hours_in_service, as: :number, step: 0.1, label: t(".total_time_hours") %>
+    <%= f.field :overhaul_date, as: :date, label: t(".last_overhaul_service") %>
+    <%= f.field :hours_since_overhaul, as: :number, step: 0.1, label: t(".hours_since_oh_service") %>
+    <%= f.field :overhaul_kind, as: :select, label: t(".overhaul_type"), include_blank: "—", collection: Component::OVERHAUL_KINDS.invert,
+          wrapper: { class: "sm:col-span-2" }, hint: t(".for_engines_and_propellers_printed") %>
   </fieldset>
 
   <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold text-slate-900">Limits</legend>
-    <%= f.field :replacement_hours, as: :number, label: "Replace every (hrs)" %>
-    <%= f.interval :replacement, label: "Replace every" %>
-    <%= f.field :replacement_from_install, as: :select, label: "Replacement counts from",
-          collection: [ [ "Last service", false ], [ "Installation (life limit)", true ] ],
-          hint: "Installation: for a part that's cleaned and reused but has a life limit (e.g. a reusable oil filter); only Replaced restarts it." %>
-    <%= f.field :replacement_critical, as: :checkbox, label: "Replacement critical", hint: "Overdue replacement or expiry grounds the aircraft (oil, filters, ELT battery…)." %>
-    <%= f.field :expires_on, as: :date, label: "Expires on",
-          hint: "The date marked on the part, e.g. an ELT battery's replacement date (14 CFR 91.207(c): also replace it after 1 hour of cumulative use)." %>
-    <%= f.field :tbo_hours, as: :number, label: "TBO (hrs)" %>
-    <%= f.interval :tbo, label: "TBO (calendar)" %>
+    <legend class="mb-2 text-sm font-semibold text-slate-900"><%= t(".limits") %></legend>
+    <%= f.field :replacement_hours, as: :number, label: t(".replace_every_hrs") %>
+    <%= f.interval :replacement, label: t(".replace_every") %>
+    <%= f.field :replacement_from_install, as: :select, label: t(".replacement_counts_from"),
+          collection: [ [ t(".last_service"), false ], [ t(".installation_life_limit"), true ] ],
+          hint: t(".installation_for_a_part_that") %>
+    <%= f.field :replacement_critical, as: :checkbox, label: t(".replacement_critical"), hint: t(".overdue_replacement_or_expiry_grounds") %>
+    <%= f.field :expires_on, as: :date, label: t(".expires_on"),
+          hint: t(".the_date_marked_on_the") %>
+    <%= f.field :tbo_hours, as: :number, label: t(".tbo_hrs") %>
+    <%= f.interval :tbo, label: t(".tbo_calendar") %>
     <div class="space-y-2">
-      <%= f.field :tbo_critical, as: :checkbox, label: "Treat TBO as a hard limit",
-            hint: "Under Part 91, TBO is usually the manufacturer's recommendation, unless an AD or the Airworthiness Limitations make it mandatory." %>
-      <%= f.field :on_condition, as: :checkbox, label: "On condition (Part 91)",
-            hint: "Run past TBO based on condition: TBO is shown for reference, never as a limit (this overrides the hard limit)." %>
+      <%= f.field :tbo_critical, as: :checkbox, label: t(".treat_tbo_as_a_hard"),
+            hint: t(".under_part_91_tbo_is") %>
+      <%= f.field :on_condition, as: :checkbox, label: t(".on_condition_part_91"),
+            hint: t(".run_past_tbo_based_on") %>
     </div>
-    <p class="hint sm:col-span-3">Recurring inspections of this part (e.g. a 500-hour magneto inspection) are set up on the Inspections tab and applied to it.</p>
+    <p class="hint sm:col-span-3"><%= t(".recurring_inspections_of_this_part") %></p>
   </fieldset>
 
   <%= f.field :notes, as: :textarea, rows: 3 %>
   <div class="flex gap-2">
-    <%= f.submit component.new_record? ? "Add Component" : "Save" %>
-    <%= link_to "Cancel", aircraft_components_path(aircraft), class: "btn-secondary" %>
+    <%= f.submit component.new_record? ? t(".add_component") : t(".save") %>
+    <%= link_to t(".cancel"), aircraft_components_path(aircraft), class: "btn-secondary" %>
   </div>
 <% end %>
 <% if component.persisted? %>
-  <div class="mt-4"><%= delete_button "Delete component", aircraft_component_path(aircraft, component), confirm: "Delete #{component} and its sub-components?" %></div>
+  <div class="mt-4"><%= delete_button t(".delete_component"), aircraft_component_path(aircraft, component), confirm: t(".delete_and_its_sub_components", component: component) %></div>
 <% end %>

@@ -1,7 +1,7 @@
-<% content_for :title, "#{@aircraft.tail_number} Notes" %>
+<% content_for :title, t(".notes", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
-  <div class="card-header"><h2 class="card-title">Notes</h2><%= link_to "+ Add Note", new_aircraft_note_path(@aircraft), class: "btn-primary" %></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".notes_2") %></h2><%= link_to t(".add_note"), new_aircraft_note_path(@aircraft), class: "btn-primary" %></div>
   <% if @notes.any? %>
     <ul class="divide-y divide-slate-100">
       <% @notes.each do |note| %>
@@ -9,16 +9,16 @@
           <div class="min-w-0 flex-1">
             <div class="text-sm"><%= markdown note.text %></div>
             <div class="mt-1 text-xs text-slate-500">
-              <%= note.user&.display_name || "Unknown" %> · <%= fmt_time(note.created_at) %>
-              <%= "· edited" if note.edited_at %>
-              <% if note.public? %><span class="badge-green ml-1">Visible on share links</span><% end %>
+              <%= note.user&.display_name || t(".unknown") %> · <%= fmt_time(note.created_at) %>
+              <%= t(".edited") if note.edited_at %>
+              <% if note.public? %><span class="badge-green ml-1"><%= t(".visible_on_share_links") %></span><% end %>
             </div>
           </div>
-          <% if owner? %><%= link_to "Edit", edit_aircraft_note_path(@aircraft, note), class: "btn-secondary btn-sm" %><% end %>
+          <% if owner? %><%= link_to t(".edit"), edit_aircraft_note_path(@aircraft, note), class: "btn-secondary btn-sm" %><% end %>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <%= empty_state "No notes yet." %>
+    <%= empty_state t(".no_notes_yet") %>
   <% end %>
 </section>

@@ -14,7 +14,7 @@ class Admin::LogbookTemplatesController < ApplicationController
   def create
     @template = LogbookTemplate.new(template_params)
     if @template.save
-      redirect_to admin_logbook_templates_path, notice: "Template added."
+      redirect_to admin_logbook_templates_path, notice: t("flash.admin_logbook_templates.template_added")
     else
       render :new, status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class Admin::LogbookTemplatesController < ApplicationController
 
   def update
     if @template.update(template_params)
-      redirect_to admin_logbook_templates_path, notice: "Template updated."
+      redirect_to admin_logbook_templates_path, notice: t("flash.admin_logbook_templates.template_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -32,12 +32,12 @@ class Admin::LogbookTemplatesController < ApplicationController
 
   def destroy
     @template.destroy!
-    redirect_to admin_logbook_templates_path, notice: "Template deleted."
+    redirect_to admin_logbook_templates_path, notice: t("flash.admin_logbook_templates.template_deleted")
   end
 
   def restore
     added = LogbookTemplate.restore_defaults!
-    redirect_to admin_logbook_templates_path, notice: added.positive? ? "Restored #{helpers.pluralize(added, 'built-in template')}." : "All the built-in templates are already here."
+    redirect_to admin_logbook_templates_path, notice: added.positive? ? t("flash.admin_logbook_templates.restored", count: added) : t("flash.admin_logbook_templates.all_present")
   end
 
   private

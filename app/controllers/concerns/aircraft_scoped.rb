@@ -32,7 +32,7 @@ module AircraftScoped
   def require_owner!
     return if owner?
     redirect_back fallback_location: aircraft_path(@aircraft),
-                  alert: "Only owners can do that."
+                  alert: t("flash.common.only_owners_can_do")
   end
 
   # Returns id only if it belongs to the given (aircraft-scoped) relation; else nil.

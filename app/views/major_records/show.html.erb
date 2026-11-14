@@ -1,36 +1,36 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card max-w-4xl">
   <div class="card-header"><h2 class="card-title"><%= @record.type_label %>: <%= @record.title %></h2>
-    <% if owner? %><%= link_to "Edit", edit_aircraft_major_record_path(@aircraft, @record), class: "btn-secondary btn-sm" %><% end %></div>
+    <% if owner? %><%= link_to t(".edit"), edit_aircraft_major_record_path(@aircraft, @record), class: "btn-secondary btn-sm" %><% end %></div>
   <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4">
-    <dt class="text-slate-500">Date</dt><dd><%= fmt_date(@record.date_performed) %></dd>
-    <dt class="text-slate-500">Aircraft hours</dt><dd><%= hours(@record.aircraft_hours) %></dd>
-    <dt class="text-slate-500">Performed by</dt><dd><%= @record.performed_by.presence || "—" %></dd>
-    <dt class="text-slate-500">Component</dt><dd><%= @record.component || "—" %></dd>
-    <dt class="text-slate-500">Form 337</dt><dd><%= @record.form_337_document ? link_to(@record.form_337_document.name, aircraft_document_path(@aircraft, @record.form_337_document), class: "link") : "—" %></dd>
-    <dt class="text-slate-500">STC</dt><dd><%= [@record.stc_number, @record.stc_holder].compact_blank.join(" · ").presence || "—" %>
-      <%= link_to("(docs)", aircraft_document_path(@aircraft, @record.stc_document), class: "link") if @record.stc_document %></dd>
-    <dt class="text-slate-500">Logbook</dt><dd><%= @record.logbook_entry ? link_to(@record.logbook_entry.date, aircraft_logbook_entry_path(@aircraft, @record.logbook_entry), class: "link") : "—" %></dd>
-    <dt class="text-slate-500">Weight & balance</dt>
+    <dt class="text-slate-500"><%= t(".date") %></dt><dd><%= fmt_date(@record.date_performed) %></dd>
+    <dt class="text-slate-500"><%= t(".aircraft_hours") %></dt><dd><%= hours(@record.aircraft_hours) %></dd>
+    <dt class="text-slate-500"><%= t(".performed_by") %></dt><dd><%= @record.performed_by.presence || "—" %></dd>
+    <dt class="text-slate-500"><%= t(".component") %></dt><dd><%= @record.component || "—" %></dd>
+    <dt class="text-slate-500"><%= t(".form_337") %></dt><dd><%= @record.form_337_document ? link_to(@record.form_337_document.name, aircraft_document_path(@aircraft, @record.form_337_document), class: "link") : "—" %></dd>
+    <dt class="text-slate-500"><%= t(".stc") %></dt><dd><%= [@record.stc_number, @record.stc_holder].compact_blank.join(" · ").presence || "—" %>
+      <%= link_to(t(".docs"), aircraft_document_path(@aircraft, @record.stc_document), class: "link") if @record.stc_document %></dd>
+    <dt class="text-slate-500"><%= t(".logbook") %></dt><dd><%= @record.logbook_entry ? link_to(@record.logbook_entry.date, aircraft_logbook_entry_path(@aircraft, @record.logbook_entry), class: "link") : "—" %></dd>
+    <dt class="text-slate-500"><%= t(".weight_balance") %></dt>
     <dd>
       <% if (wb = @aircraft.weight_balance_records.where(major_record: @record).recent_first.first) %>
-        <%= link_to "#{fmt_date(wb.date)}: #{number_with_precision(wb.empty_weight, precision: 1)} lb @ #{number_with_precision(wb.empty_arm, precision: 2)} in", aircraft_weight_balance_records_path(@aircraft), class: "link" %>
+        <%= link_to t(".lb_in", date: fmt_date(wb.date), weight: number_with_precision(wb.empty_weight, precision: 1), arm: number_with_precision(wb.empty_arm, precision: 2)), aircraft_weight_balance_records_path(@aircraft), class: "link" %>
       <% elsif owner? %>
-        <%= link_to "Record the new W&B", new_aircraft_weight_balance_record_path(@aircraft, major_record_id: @record.id), class: "link" %>
+        <%= link_to t(".record_the_new_w_b"), new_aircraft_weight_balance_record_path(@aircraft, major_record_id: @record.id), class: "link" %>
       <% else %>—<% end %>
     </dd>
-    <dt class="text-slate-500">ICAs</dt>
+    <dt class="text-slate-500"><%= t(".icas") %></dt>
     <dd>
-      <%= @record.has_ica? ? "Yes" : "No" %>
+      <%= @record.has_ica? ? t(".yes") : t(".no") %>
       <% if (ica = @record.ica_inspection_type) %>
         <% row = Compliance.inspection_rows(@aircraft).find { _1.type == ica } %>
-        · Inspection: <%= link_to ica.name, aircraft_inspections_path(@aircraft), class: "link" %> <%= compliance_badge(row.status) if row %>
+        <%= t(".inspection_html", link: (link_to ica.name, aircraft_inspections_path(@aircraft), class: "link"), row: (compliance_badge(row.status) if row)) %>
       <% elsif @record.has_ica? && owner? %>
-        · <%= link_to "Add the ICA's recurring inspection", new_aircraft_inspection_type_path(@aircraft, major_record_id: @record.id), class: "link" %>
+        · <%= link_to t(".add_the_ica_s_recurring"), new_aircraft_inspection_type_path(@aircraft, major_record_id: @record.id), class: "link" %>
       <% end %>
     </dd>
   </dl>
-  <% [["Description", @record.description], ["ICA notes", @record.ica_notes], ["Notes", @record.notes]].each do |title, text| %>
+  <% [[t(".description"), @record.description], [t(".ica_notes"), @record.ica_notes], [t(".notes"), @record.notes]].each do |title, text| %>
     <% if text.present? %><div class="border-t border-slate-100 px-4 py-3 text-sm"><h3 class="mb-1 font-medium"><%= title %></h3><%= simple_format text %></div><% end %>
   <% end %>
 </section>

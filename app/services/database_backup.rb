@@ -43,7 +43,7 @@ class DatabaseBackup
     counts = %w[logbook_entries entry_signatures].map { |t| [ t, db.get_first_value("SELECT COUNT(*) FROM #{t}") ] }.to_h
     live = { "logbook_entries" => LogbookEntry.count, "entry_signatures" => EntrySignature.count }
     raise "record counts differ (#{counts} vs #{live})" unless counts == live
-    "Verified: SQLite integrity check ok; #{counts['logbook_entries']} logbook entries, #{counts['entry_signatures']} signatures"
+    I18n.t("services.database_backup.verified_sqlite_integrity_check_ok", logbook_entries: (counts["logbook_entries"]), entry_signatures: (counts["entry_signatures"]))
   ensure
     db&.close
   end

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 import { DirectUpload } from "@rails/activestorage"
 
 // Bulk document upload. Picked files (or a whole folder) are listed with an
@@ -53,7 +54,7 @@ export default class extends Controller {
   defaultName(item) {
     const parts = item.path.split("/")
     if (this.groupTarget.checked && parts.length > 1) return parts[parts.length - 2]
-    return parts[parts.length - 1].replace(/\.[^.]+$/, "").replace(/_/g, " ").replace(/\s+/g, " ").trim() || "Untitled"
+    return parts[parts.length - 1].replace(/\.[^.]+$/, "").replace(/_/g, " ").replace(/\s+/g, " ").trim() || t("bulk_upload.untitled")
   }
 
   render() {
@@ -72,7 +73,7 @@ export default class extends Controller {
     name.type = "text"
     name.className = "input"
     name.value = item.name
-    name.setAttribute("aria-label", `Document name for ${item.path}`)
+    name.setAttribute("aria-label", t("bulk_upload.name_for", { path: item.path }))
     name.disabled = this.uploading
     name.addEventListener("input", () => { item.name = name.value; item.custom = true; this.updateSummary() })
 
@@ -90,7 +91,7 @@ export default class extends Controller {
     remove.type = "button"
     remove.className = "btn-secondary btn-sm"
     remove.textContent = "✕"
-    remove.setAttribute("aria-label", `Remove ${item.path}`)
+    remove.setAttribute("aria-label", t("bulk_upload.remove", { path: item.path }))
     remove.disabled = this.uploading
     remove.addEventListener("click", () => { this.items.splice(index, 1); this.render() })
 
@@ -109,9 +110,9 @@ export default class extends Controller {
 
   updateSummary() {
     const files = this.items.length
-    const docs = new Set(this.items.map((item) => item.name.trim() || "Untitled")).size
+    const docs = new Set(this.items.map((item) => item.name.trim() || t("bulk_upload.untitled"))).size
     this.summaryTarget.textContent = `${files} ${files === 1 ? "file" : "files"} → ${docs} ${docs === 1 ? "document" : "documents"}`
-    this.submitTarget.textContent = files ? `Upload ${docs} ${docs === 1 ? "document" : "documents"}` : "Upload"
+    this.submitTarget.textContent = files ? t("bulk_upload.upload_count", { count: docs }) : t("bulk_upload.upload")
   }
 
   size(bytes) {
@@ -124,9 +125,9 @@ export default class extends Controller {
     if (this.ready) return
     event.preventDefault()
     if (this.uploading) return
-    if (this.items.length === 0) return this.say("Choose some files to upload.")
+    if (this.items.length === 0) return this.say(t("bulk_upload.choose_files"))
     if (this.items.some((item) => item.file.size > this.maxBytesValue)) {
-      return this.say("Remove the files marked in red first.")
+      return this.say(t("bulk_upload.remove_red"))
     }
 
     this.items.forEach((item) => { if (item.state === "error") item.state = "pending" })
@@ -134,11 +135,11 @@ export default class extends Controller {
     const queue = this.items.filter((item) => item.state === "pending")
     const total = queue.length
     let finished = 0
-    this.say(`Uploading 0 of ${total}…`)
+    this.say(t("bulk_upload.uploading", { done: 0, total }))
     const worker = async () => {
       for (let item = queue.shift(); item; item = queue.shift()) {
         await this.upload(item)
-        this.say(`Uploading ${++finished} of ${total}…`)
+        this.say(t("bulk_upload.uploading", { done: ++finished, total }))
       }
     }
     await Promise.all([ worker(), worker(), worker() ])
@@ -156,7 +157,7 @@ export default class extends Controller {
     }
     this.uploading = false
     this.ready = true
-    this.say("Saving…")
+    this.say(t("bulk_upload.saving"))
     // When nothing was left to upload this all ran inside the click's submit
     // event, during which the browser ignores requestSubmit, so wait a tick.
     setTimeout(() => this.element.requestSubmit())

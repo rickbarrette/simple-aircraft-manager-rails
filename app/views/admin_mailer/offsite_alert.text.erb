@@ -1,6 +1,6 @@
-<%= @run.kind == "restore_test" ? "The off-site restore test failed." : "Copying the backup to Google Drive failed." %>
+<%= @run.kind == "restore_test" ? t(".the_off_site_restore_test") : t(".copying_the_backup_to_google") %>
 
 <%= @run.message %>
 
-Check Admin → Off-site Backup: <%= admin_offsite_backup_url %>
-If Google Drive refused access, connect it again there.
+<%= raw t(".check_admin_off_site_backup_text", admin_offsite_backup_url: admin_offsite_backup_url) %>
+<%= raw t(".if_google_drive_refused_access") %>

@@ -12,7 +12,7 @@ class SetupController < ApplicationController
     @user.admin = true
     if @user.save
       start_new_session_for @user
-      redirect_to root_path, notice: "Welcome! You're the administrator. Add your first aircraft."
+      redirect_to root_path, notice: t("flash.setup.welcome_you_re_the")
     else
       render :new, status: :unprocessable_entity
     end

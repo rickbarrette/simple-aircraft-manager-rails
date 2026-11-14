@@ -33,9 +33,9 @@ class OilReportParser
     end
 
     def parse
-      date_label = label("Sample Date") or raise Error, "No sample dates found in the Blackstone report"
+      date_label = label("Sample Date") or raise Error, I18n.t("services.oil_report.no_sample_dates_found_in")
       dates = row(date_label).select { DATE.match?(_1.text) }.sort_by(&:x)
-      raise Error, "No sample dates found in the Blackstone report" if dates.empty?
+      raise Error, I18n.t("services.oil_report.no_sample_dates_found_in") if dates.empty?
       @columns = dates.map(&:endx)
       @universal_x = (@runs.find { _1.text == "UNIVERSAL" }&.x || 530) - 10
 

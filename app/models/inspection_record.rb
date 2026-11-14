@@ -7,7 +7,7 @@ class InspectionRecord < ApplicationRecord
   has_many :ad_compliances, dependent: :nullify
 
   validates :date, presence: true
-  validate { errors.add(:base, "Must belong to an aircraft or component") unless aircraft_id || component_id }
+  validate { errors.add(:base, :needs_owner) unless aircraft_id || component_id }
 
   scope :recent_first, -> { order(date: :desc, created_at: :desc) }
 

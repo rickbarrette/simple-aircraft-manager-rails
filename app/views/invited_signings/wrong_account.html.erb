@@ -1,6 +1,6 @@
-<% content_for :title, "Sign a logbook entry" %>
+<% content_for :title, t(".sign_a_logbook_entry") %>
 <div class="mx-auto max-w-md card card-body space-y-3">
-  <h1 class="card-title">Wrong account</h1>
-  <p class="text-sm text-slate-600">This invitation is for <strong><%= @invitation.email %></strong>, but you're signed in as <%= current_user.email_address %>. Sign out and sign in with the invited address.</p>
-  <%= button_to "Sign out", session_path, method: :delete, class: "btn-secondary" %>
+  <h1 class="card-title"><%= t(".wrong_account") %></h1>
+  <p class="text-sm text-slate-600"><%= t(".this_invitation_is_for_but_html", email: @invitation.email, email_address: current_user.email_address) %></p>
+  <%= button_to t(".sign_out"), session_path, method: :delete, class: "btn-secondary" %>
 </div>

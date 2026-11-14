@@ -67,7 +67,7 @@ class AirTrailClient
                                                    open_timeout: @timeout, read_timeout: @timeout) { _1.request(req) }
     handle(response)
   rescue Timeout::Error, SocketError, SystemCallError, OpenSSL::SSL::SSLError, EOFError, IOError => e
-    raise NetworkError, "Can't reach AirTrail at #{@base.host}: #{e.message}"
+    raise NetworkError, I18n.t("services.air_trail.can_t_reach_airtrail_at", host: @base.host, message: e.message)
   end
 
   def handle(response)

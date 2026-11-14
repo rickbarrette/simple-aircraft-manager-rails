@@ -1,6 +1,6 @@
 <% a = @report.aircraft %>
 <% clock = a.time_basis_label.downcase %>
-<% content_for :title, "#{a.tail_number} Maintenance Status" %>
+<% content_for :title, t(".maintenance_status", tail_number: a.tail_number) %>
 <% section = "mt-6 break-inside-avoid-page" %>
 <% th = "border-b border-slate-300 py-1 pr-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500" %>
 <% td = "border-b border-slate-100 py-1 pr-3 align-top" %>
@@ -8,32 +8,32 @@
 <% unless @standalone %>
 <div class="mb-4 flex flex-wrap items-center justify-between gap-2 print:hidden">
   <% back = @share ? shared_path(@share.token) : aircraft_path(a) %>
-  <%= link_to "← Back", back, class: "link text-sm" %>
-  <button type="button" class="btn-primary" data-print>Print or save as PDF</button>
+  <%= link_to t(".back"), back, class: "link text-sm" %>
+  <button type="button" class="btn-primary" data-print><%= t(".print_or_save_as_pdf") %></button>
 </div>
 <% end %>
 
 <header class="flex flex-wrap items-end justify-between gap-4 border-b-2 border-slate-800 pb-3">
   <div>
-    <p class="text-xs uppercase tracking-wide text-slate-500">Maintenance status · 14 CFR 91.417(a)(2)</p>
+    <p class="text-xs uppercase tracking-wide text-slate-500"><%= t(".maintenance_status_14_cfr_91") %></p>
     <h1 class="text-2xl font-bold"><%= a.tail_number %> <span class="text-lg font-normal text-slate-600"><%= [ a.make, a.model ].compact_blank.join(" ") %></span></h1>
-    <p class="text-sm text-slate-600">Serial number <%= a.serial_number.presence || "—" %></p>
+    <p class="text-sm text-slate-600"><%= t(".serial_number_html", serial_number: (a.serial_number.presence || "—")) %></p>
   </div>
   <dl class="grid grid-cols-2 gap-x-6 text-sm">
-    <dt class="text-slate-500">Prepared</dt><dd><%= l(@report.generated_at.to_date, format: :long) %></dd>
-    <dt class="text-slate-500">Airframe time in service</dt><dd class="font-semibold"><%= hours(@report.time_in_service) %> hrs (<%= clock %>)</dd>
-    <dt class="text-slate-500">Tach / Hobbs</dt><dd><%= hours(a.tach_time) %> / <%= hours(a.hobbs_time) %></dd>
-    <dt class="text-slate-500">Status</dt><dd><%= airworthiness_badge(@report.airworthiness) %></dd>
-    <dt class="text-slate-500">Electronic records since</dt><dd><%= a.electronic_records_since || "—" %></dd>
+    <dt class="text-slate-500"><%= t(".prepared") %></dt><dd><%= l(@report.generated_at.to_date, format: :long) %></dd>
+    <dt class="text-slate-500"><%= t(".airframe_time_in_service") %></dt><dd class="font-semibold"><%= t(".hrs_html", time_in_service: (hours(@report.time_in_service)), clock: clock) %></dd>
+    <dt class="text-slate-500"><%= t(".tach_hobbs") %></dt><dd><%= hours(a.tach_time) %> / <%= hours(a.hobbs_time) %></dd>
+    <dt class="text-slate-500"><%= t(".status") %></dt><dd><%= airworthiness_badge(@report.airworthiness) %></dd>
+    <dt class="text-slate-500"><%= t(".electronic_records_since") %></dt><dd><%= a.electronic_records_since || "—" %></dd>
   </dl>
 </header>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Total time in service: engines and propellers</h2>
+  <h2 class="text-base font-semibold"><%= t(".total_time_in_service_engines") %></h2>
   <% majors = @report.engines + @report.propellers %>
   <% if majors.any? %>
     <table class="mt-2 w-full text-sm">
-      <thead><tr><th class="<%= th %>">Item</th><th class="<%= th %>">Make / model</th><th class="<%= th %>">Serial</th><th class="<%= th %> text-right">Total time</th><th class="<%= th %> text-right">Since overhaul</th><th class="<%= th %>">Overhauled</th></tr></thead>
+      <thead><tr><th class="<%= th %>"><%= t(".item") %></th><th class="<%= th %>"><%= t(".make_model") %></th><th class="<%= th %>"><%= t(".serial") %></th><th class="<%= th %> text-right"><%= t(".total_time") %></th><th class="<%= th %> text-right"><%= t(".since_overhaul") %></th><th class="<%= th %>"><%= t(".overhauled") %></th></tr></thead>
       <tbody>
         <% majors.each do |c| %>
           <tr><td class="<%= td %>"><%= c %></td><td class="<%= td %>"><%= [ c.manufacturer, c.model ].compact_blank.join(" ") %></td><td class="<%= td %>"><%= c.serial_number.presence || "—" %></td>
@@ -41,70 +41,70 @@
         <% end %>
       </tbody>
     </table>
-  <% else %><p class="mt-1 text-sm text-slate-500">No engines or propellers recorded as components.</p><% end %>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".no_engines_or_propellers_recorded") %></p><% end %>
 </section>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Life-limited parts</h2>
+  <h2 class="text-base font-semibold"><%= t(".life_limited_parts") %></h2>
   <% if @report.life_limited.any? %>
     <table class="mt-2 w-full text-sm">
-      <thead><tr><th class="<%= th %>">Part</th><th class="<%= th %>">Serial</th><th class="<%= th %>">Limit</th><th class="<%= th %> text-right">Used</th><th class="<%= th %>">Remaining</th><th class="<%= th %>">Status</th></tr></thead>
+      <thead><tr><th class="<%= th %>"><%= t(".part") %></th><th class="<%= th %>"><%= t(".serial") %></th><th class="<%= th %>"><%= t(".limit") %></th><th class="<%= th %> text-right"><%= t(".used") %></th><th class="<%= th %>"><%= t(".remaining") %></th><th class="<%= th %>"><%= t(".status") %></th></tr></thead>
       <tbody>
         <% @report.life_limited.each do |c| %>
           <tr><td class="<%= td %>"><%= c %> <span class="text-slate-500"><%= c.model %></span></td><td class="<%= td %>"><%= c.serial_number.presence || "—" %></td>
             <td class="<%= td %>"><%= [ (c.replacement_hours && "#{hours(c.replacement_hours)} hrs"), c.replacement_interval_label, (c.expires_on && "expires #{fmt_date(c.expires_on)}") ].compact.join(" / ") %></td>
-            <td class="<%= td %> text-right tabular-nums"><%= hours(c.hours_since_overhaul) %> hrs</td>
+            <td class="<%= td %> text-right tabular-nums"><%= t(".hrs_2_html", hours_since_overhaul: (hours(c.hours_since_overhaul))) %></td>
             <td class="<%= td %>"><%= [ (c.hours_to_replacement && "#{hours(c.hours_to_replacement)} hrs"), (c.next_replacement_date && "by #{fmt_date(c.next_replacement_date)}") ].compact.join(", ") %></td>
             <td class="<%= td %>"><%= life_badge(c.life_status) %></td></tr>
         <% end %>
       </tbody>
     </table>
-  <% else %><p class="mt-1 text-sm text-slate-500">None recorded.</p><% end %>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".none_recorded") %></p><% end %>
 </section>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Time since overhaul</h2>
+  <h2 class="text-base font-semibold"><%= t(".time_since_overhaul") %></h2>
   <% if @report.overhaul_items.any? %>
     <table class="mt-2 w-full text-sm">
-      <thead><tr><th class="<%= th %>">Item</th><th class="<%= th %>">Serial</th><th class="<%= th %>">Overhaul interval</th><th class="<%= th %> text-right">Since overhaul</th><th class="<%= th %>">Remaining</th><th class="<%= th %>">Tracked as</th></tr></thead>
+      <thead><tr><th class="<%= th %>"><%= t(".item") %></th><th class="<%= th %>"><%= t(".serial") %></th><th class="<%= th %>"><%= t(".overhaul_interval") %></th><th class="<%= th %> text-right"><%= t(".since_overhaul") %></th><th class="<%= th %>"><%= t(".remaining") %></th><th class="<%= th %>"><%= t(".tracked_as") %></th></tr></thead>
       <tbody>
         <% @report.overhaul_items.each do |c| %>
           <tr><td class="<%= td %>"><%= c %> <span class="text-slate-500"><%= c.model %></span></td><td class="<%= td %>"><%= c.serial_number.presence || "—" %></td>
             <td class="<%= td %>"><%= [ (c.tbo_hours && "#{hours(c.tbo_hours)} hrs"), c.tbo_interval_label ].compact.join(" / ") %></td>
-            <td class="<%= td %> text-right tabular-nums"><%= hours(c.hours_since_overhaul) %> hrs</td>
+            <td class="<%= td %> text-right tabular-nums"><%= t(".hrs_2_html", hours_since_overhaul: (hours(c.hours_since_overhaul))) %></td>
             <td class="<%= td %>"><%= c.hours_to_tbo ? "#{hours(c.hours_to_tbo)} hrs" : "—" %></td>
-            <td class="<%= td %> text-xs"><%= c.on_condition? ? "On condition (Part 91)" : (c.tbo_critical? ? "Hard limit" : "Recommended") %></td></tr>
+            <td class="<%= td %> text-xs"><%= c.on_condition? ? t(".on_condition_part_91") : (c.tbo_critical? ? t(".hard_limit") : t(".recommended")) %></td></tr>
         <% end %>
       </tbody>
     </table>
-  <% else %><p class="mt-1 text-sm text-slate-500">None recorded.</p><% end %>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".none_recorded") %></p><% end %>
 </section>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Inspection status</h2>
+  <h2 class="text-base font-semibold"><%= t(".inspection_status") %></h2>
   <% if @report.inspections.any? %>
     <table class="mt-2 w-full text-sm">
-      <thead><tr><th class="<%= th %>">Inspection</th><th class="<%= th %>">Interval</th><th class="<%= th %>">Last done</th><th class="<%= th %> text-right">Since</th><th class="<%= th %>">Next due</th><th class="<%= th %>">Status</th></tr></thead>
+      <thead><tr><th class="<%= th %>"><%= t(".inspection") %></th><th class="<%= th %>"><%= t(".interval") %></th><th class="<%= th %>"><%= t(".last_done") %></th><th class="<%= th %> text-right"><%= t(".since") %></th><th class="<%= th %>"><%= t(".next_due") %></th><th class="<%= th %>"><%= t(".status") %></th></tr></thead>
       <tbody>
         <% @report.inspections.each do |row| %>
           <% last = row.latest %>
-          <tr><td class="<%= td %>"><%= row.type.name %><% if row.type.satisfies %><div class="text-xs text-slate-500">Also counts as <%= row.type.satisfies.name %></div><% end %></td>
+          <tr><td class="<%= td %>"><%= row.type.name %><% if row.type.satisfies %><div class="text-xs text-slate-500"><%= t(".also_counts_as_html", satisfies: row.type.satisfies.name) %></div><% end %></td>
             <td class="<%= td %> text-xs"><%= row.type.interval_description %></td>
-            <td class="<%= td %>"><%= last ? "#{fmt_date(last.date)}#{" @ #{hours(last.hours_at_inspection)}" if last.hours_at_inspection}" : "Never" %><%= " (#{last.inspection_type.name})" if last && last.inspection_type != row.type %></td>
+            <td class="<%= td %>"><%= last ? "#{fmt_date(last.date)}#{" @ #{hours(last.hours_at_inspection)}" if last.hours_at_inspection}" : t(".never") %><%= " (#{last.inspection_type.name})" if last && last.inspection_type != row.type %></td>
             <td class="<%= td %> text-right tabular-nums"><%= last&.hours_at_inspection ? "#{hours(@report.time_in_service - last.hours_at_inspection)} hrs" : "—" %></td>
             <td class="<%= td %>"><%= [ row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} hrs" ].compact.join(" / ").presence || "—" %></td>
             <td class="<%= td %>"><%= compliance_badge(row.status) %></td></tr>
         <% end %>
       </tbody>
     </table>
-  <% else %><p class="mt-1 text-sm text-slate-500">No inspections tracked.</p><% end %>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".no_inspections_tracked") %></p><% end %>
 </section>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Airworthiness directives</h2>
+  <h2 class="text-base font-semibold"><%= t(".airworthiness_directives") %></h2>
   <% if @report.ads.any? %>
     <table class="mt-2 w-full text-sm">
-      <thead><tr><th class="<%= th %>">AD</th><th class="<%= th %>">Revision complied with</th><th class="<%= th %>">Method of compliance</th><th class="<%= th %>">Complied</th><th class="<%= th %>">Recurring / next due</th><th class="<%= th %>">Status</th></tr></thead>
+      <thead><tr><th class="<%= th %>"><%= t(".ad") %></th><th class="<%= th %>"><%= t(".revision_complied_with") %></th><th class="<%= th %>"><%= t(".method_of_compliance") %></th><th class="<%= th %>"><%= t(".complied") %></th><th class="<%= th %>"><%= t(".recurring_next_due") %></th><th class="<%= th %>"><%= t(".status") %></th></tr></thead>
       <tbody>
         <% @report.ads.each do |row| %>
           <% c = row.latest %>
@@ -112,50 +112,50 @@
             <td class="<%= td %> text-xs"><%= c&.ad_revision.presence || "—" %></td>
             <td class="<%= td %> text-xs"><%= c ? c.method_label : "—" %><% if c&.compliance_notes.present? %><div class="text-slate-500"><%= c.compliance_notes.truncate(90) %></div><% end %></td>
             <td class="<%= td %>"><%= c ? "#{c.date_complied}#{" @ #{hours(c.aircraft_hours_at_compliance)}" if c.aircraft_hours_at_compliance}" : "—" %></td>
-            <td class="<%= td %> text-xs"><%= if c&.closed? then "No further action"
-                                                elsif row.ad.recurring? then [ row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} hrs" ].compact.join(" / ").presence || "Recurring"
-                                                else "One-time" end %></td>
+            <td class="<%= td %> text-xs"><%= if c&.closed? then t(".no_further_action")
+                                                elsif row.ad.recurring? then [ row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} hrs" ].compact.join(" / ").presence || t(".recurring")
+                                                else t(".one_time") end %></td>
             <td class="<%= td %>"><%= compliance_badge(row.status) %></td></tr>
         <% end %>
       </tbody>
     </table>
-  <% else %><p class="mt-1 text-sm text-slate-500">No ADs tracked.</p><% end %>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".no_ads_tracked") %></p><% end %>
 </section>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Major repairs and alterations</h2>
+  <h2 class="text-base font-semibold"><%= t(".major_repairs_and_alterations") %></h2>
   <% if (majors = @report.major_records.to_a).any? %>
     <table class="mt-2 w-full text-sm">
-      <thead><tr><th class="<%= th %>">Date</th><th class="<%= th %>">Type</th><th class="<%= th %>">Description</th><th class="<%= th %>">STC</th><th class="<%= th %>">Form 337</th></tr></thead>
+      <thead><tr><th class="<%= th %>"><%= t(".date") %></th><th class="<%= th %>"><%= t(".type") %></th><th class="<%= th %>"><%= t(".description") %></th><th class="<%= th %>"><%= t(".stc") %></th><th class="<%= th %>"><%= t(".form_337") %></th></tr></thead>
       <tbody>
         <% majors.each do |m| %>
           <tr><td class="<%= td %>"><%= fmt_date(m.date_performed) %></td><td class="<%= td %> text-xs"><%= m.type_label %></td>
             <td class="<%= td %>"><%= m.title %><%= " · #{m.component}" if m.component %></td>
             <td class="<%= td %> text-xs"><%= [ m.stc_number, m.stc_holder ].compact_blank.join(", ").presence || "—" %></td>
-            <td class="<%= td %> text-xs"><%= m.form_337_document ? "On file" : "—" %></td></tr>
+            <td class="<%= td %> text-xs"><%= m.form_337_document ? t(".on_file") : "—" %></td></tr>
         <% end %>
       </tbody>
     </table>
-  <% else %><p class="mt-1 text-sm text-slate-500">None recorded.</p><% end %>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".none_recorded") %></p><% end %>
 </section>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Weight and balance</h2>
+  <h2 class="text-base font-semibold"><%= t(".weight_and_balance") %></h2>
   <% if (wb = a.current_weight_balance) %>
-    <p class="mt-1 text-sm">Empty weight <strong><%= number_with_precision(wb.empty_weight, precision: 1, delimiter: ",") %> lb</strong>, CG <strong><%= number_with_precision(wb.empty_arm, precision: 2) %> in</strong><%= ", useful load #{number_with_precision(wb.useful_load, precision: 1, delimiter: ',')} lb" if wb.useful_load %>, as of <%= fmt_date(wb.date) %><%= " (#{wb.reason})" if wb.reason.present? %>.</p>
-  <% else %><p class="mt-1 text-sm text-slate-500">None recorded.</p><% end %>
+    <p class="mt-1 text-sm"><%= t(".empty_weight_lb_cg_in_html", delimiter: (number_with_precision(wb.empty_weight, precision: 1, delimiter: ",")), precision: (number_with_precision(wb.empty_arm, precision: 2)), useful_load: (t(".useful_load_lb", delimiter: (number_with_precision(wb.useful_load, precision: 1, delimiter: ','))) if wb.useful_load), date: (fmt_date(wb.date)), present: (" (#{wb.reason})" if wb.reason.present?)) %></p>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".none_recorded") %></p><% end %>
 </section>
 
 <section class="<%= section %>">
-  <h2 class="text-base font-semibold">Open discrepancies</h2>
+  <h2 class="text-base font-semibold"><%= t(".open_discrepancies") %></h2>
   <% if (squawks = @report.open_squawks.to_a).any? %>
     <ul class="mt-2 space-y-1 text-sm">
       <% squawks.each do |s| %><li><%= squawk_priority_badge(s) %> <%= s.issue_reported %><%= " · #{s.component}" if s.component %> <span class="text-xs text-slate-500">(<%= fmt_date(s.created_at.to_date) %>)</span></li><% end %>
     </ul>
-  <% else %><p class="mt-1 text-sm text-slate-500">None open.</p><% end %>
+  <% else %><p class="mt-1 text-sm text-slate-500"><%= t(".none_open") %></p><% end %>
 </section>
 
 <footer class="mt-8 border-t border-slate-300 pt-2 text-xs text-slate-500">
-  Prepared <%= l(@report.generated_at, format: :long) %> from the records kept in Simple Aircraft Manager. Times are in hours of <%= clock %> time.
-  This summary doesn't replace the aircraft's signed maintenance records. <%= Airworthiness::DISCLAIMER %>
+  <%= t(".prepared_from_the_records_kept_html", time: (l(@report.generated_at, format: :long)), clock: clock) %>
+  <%= t(".this_summary_doesn_t_replace_html", disclaimer: (Airworthiness.disclaimer)) %>
 </footer>

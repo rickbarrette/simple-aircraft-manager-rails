@@ -14,13 +14,13 @@ class ProfilesController < ApplicationController
     # Checked before assigning: setting a new password replaces the digest at once.
     if sensitive && !@user.authenticate_password(params.dig(:user, :current_password).to_s)
       @user.assign_attributes(attrs.except(:password, :password_confirmation))
-      @user.errors.add(:base, "Enter your current password to change your email or password")
+      @user.errors.add(:base, :current_password_needed)
       return render :edit, status: :unprocessable_entity
     end
     @user.assign_attributes(attrs)
     if @user.save
       @user.sessions.where.not(id: Current.session.id).destroy_all if attrs.key?(:password)
-      redirect_to root_path, notice: "Profile updated."
+      redirect_to root_path, notice: t("flash.profiles.profile_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -28,6 +28,6 @@ class ProfilesController < ApplicationController
 
   def sign_out_others
     count = current_user.sessions.where.not(id: Current.session.id).destroy_all.size
-    redirect_to edit_profile_path, notice: "Signed out #{helpers.pluralize(count, 'other session')}."
+    redirect_to edit_profile_path, notice: t("flash.profiles.signed_out_others", count: count)
   end
 end

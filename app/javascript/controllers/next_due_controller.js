@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 import { nextDue, describeDue } from "next_due"
 
 // Live next-due preview (and prefill of an AD's next-due tach reading) from
@@ -40,12 +41,12 @@ export default class extends Controller {
     if (!this.hasPreviewTarget) return
     const rule = this.currentRule
     let text
-    if (this.isPermanent) text = "Permanent compliance or not applicable: never due again."
+    if (this.isPermanent) text = t("next_due.permanent")
     else if (!this.ruleTarget.value) text = ""
-    else if (!rule) text = "One-time: no recurring due date."
+    else if (!rule) text = t("next_due.one_time")
     else {
       if (this.hasDueHoursTarget && this.manual) due = { ...due, hours: parseFloat(this.dueHoursTarget.value) }
-      text = describeDue(due) ? `Next due: ${describeDue(due)}` : "Enter the date and hours to calculate the next due."
+      text = describeDue(due) ? t("next_due.next_due", { due: describeDue(due) }) : t("next_due.enter")
     }
     this.previewTarget.textContent = text
     this.previewTarget.hidden = text === ""

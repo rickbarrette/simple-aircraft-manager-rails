@@ -1,62 +1,62 @@
-<% content_for :title, "Recordkeeping procedures" %>
-<h1 class="mb-1 text-2xl font-bold">Recordkeeping procedures</h1>
-<p class="mb-5 max-w-3xl text-sm text-slate-600">The standalone procedures document AC 120-78B asks for (paragraphs 2.2.11 and 3.2.8): how signatures and records work here, who's responsible, who may sign, backups, audits, and how records are produced and transferred. It's generated from the system's setup; fill in what the app can't know, review the draft, and adopt it as a revision. Adopt a new revision whenever users, hosting or procedures change.</p>
+<% content_for :title, t(".recordkeeping_procedures") %>
+<h1 class="mb-1 text-2xl font-bold"><%= t(".recordkeeping_procedures") %></h1>
+<p class="mb-5 max-w-3xl text-sm text-slate-600"><%= t(".the_standalone_procedures_document_ac") %></p>
 
 <div class="grid gap-5 lg:grid-cols-2">
   <%= form_with model: @policy, url: admin_procedures_path, method: :patch, class: "card card-body space-y-4" do |f| %>
-    <h2 class="card-title">Details</h2>
+    <h2 class="card-title"><%= t(".details") %></h2>
     <%= f.errors_summary %>
-    <%= f.field :operator_name, label: "Owner / operator", placeholder: "Jane Pilot" %>
+    <%= f.field :operator_name, label: t(".owner_operator"), placeholder: t(".jane_pilot") %>
     <div class="grid gap-4 sm:grid-cols-2">
-      <%= f.field :responsible_name, label: "Responsible person", placeholder: "Jane Pilot" %>
-      <%= f.field :responsible_title, label: "Their role", placeholder: "Owner" %>
+      <%= f.field :responsible_name, label: t(".responsible_person"), placeholder: t(".jane_pilot") %>
+      <%= f.field :responsible_title, label: t(".their_role"), placeholder: t(".owner") %>
     </div>
     <div data-controller="insert-text" data-insert-text-text-value="<%= ProceduresTemplates.hosting %>">
-      <%= f.field :hosting_description, as: :textarea, rows: 8, label: "Hosting and network",
-            hint: "Leave a blank line between paragraphs. Markdown works: **bold**, lists.", data: { insert_text_target: "field" },
-            placeholder: "Where the server is, who can administer it, how it's reached and protected, how updates are installed." %>
-      <button type="button" class="btn-secondary btn-sm mt-2" data-action="insert-text#insert">Insert suggested text</button>
+      <%= f.field :hosting_description, as: :textarea, rows: 8, label: t(".hosting_and_network"),
+            hint: t(".leave_a_blank_line_between"), data: { insert_text_target: "field" },
+            placeholder: t(".where_the_server_is_who") %>
+      <button type="button" class="btn-secondary btn-sm mt-2" data-action="insert-text#insert"><%= t(".insert_suggested_text") %></button>
     </div>
-    <%= f.field :offsite_backup_description, as: :textarea, rows: 2, label: (OffsiteConnection.connected? ? "Off-site backup (optional: Google Drive is connected)" : "Off-site backup"),
-          hint: (OffsiteConnection.connected? ? "The Google Drive backup is described automatically; add anything else here." : "Or set up the built-in Google Drive backup under Admin → Off-site Backup."),
-          placeholder: "The storage volume is backed up nightly with restic to an encrypted off-site repository; retention 30 days." %>
+    <%= f.field :offsite_backup_description, as: :textarea, rows: 2, label: (OffsiteConnection.connected? ? t(".off_site_backup_optional_google") : t(".off_site_backup")),
+          hint: (OffsiteConnection.connected? ? t(".the_google_drive_backup_is") : t(".or_set_up_the_built")),
+          placeholder: t(".the_storage_volume_is_backed") %>
     <div class="grid gap-4 sm:grid-cols-2">
-      <%= f.field :audit_interval_months, as: :number, min: 1, max: 24, label: "Audit every (months)" %>
-      <%= f.field :audit_sample_size, as: :number, min: 1, max: 50, label: "Entries sampled per audit" %>
+      <%= f.field :audit_interval_months, as: :number, min: 1, max: 24, label: t(".audit_every_months") %>
+      <%= f.field :audit_sample_size, as: :number, min: 1, max: 50, label: t(".entries_sampled_per_audit") %>
     </div>
     <div data-controller="insert-text" data-insert-text-text-value="<%= ProceduresTemplates.additional %>">
-      <%= f.field :additional_procedures, as: :textarea, rows: 12, label: "Additional procedures (optional)",
-            hint: "Leave a blank line between items. Markdown works: **bold** headings, lists.", data: { insert_text_target: "field" } %>
-      <button type="button" class="btn-secondary btn-sm mt-2" data-action="insert-text#insert">Insert suggested text</button>
+      <%= f.field :additional_procedures, as: :textarea, rows: 12, label: t(".additional_procedures_optional"),
+            hint: t(".leave_a_blank_line_between_2"), data: { insert_text_target: "field" } %>
+      <button type="button" class="btn-secondary btn-sm mt-2" data-action="insert-text#insert"><%= t(".insert_suggested_text") %></button>
     </div>
-    <p class="hint">Suggested text is filled in from this installation's settings, with [bracketed] blanks for what only you know. Edit it to match how you actually work, then save. A revision can't be adopted while a blank is left.</p>
-    <%= f.submit "Save" %>
+    <p class="hint"><%= t(".suggested_text_is_filled_in") %></p>
+    <%= f.submit t(".save") %>
   <% end %>
 
   <div class="space-y-5">
     <section class="card card-body space-y-3">
-      <h2 class="card-title">Current revision</h2>
+      <h2 class="card-title"><%= t(".current_revision") %></h2>
       <% current = @revisions.first %>
       <% if current %>
-        <p class="text-sm">Revision <strong><%= current.number %></strong>, adopted <%= fmt_date(current.adopted_at.to_date) %> by <%= current.adopted_by&.display_name %>. <%= link_to "View / print", revision_admin_procedures_path(current), class: "link", target: "_blank" %></p>
+        <p class="text-sm"><%= t(".revision_adopted_by_html", number: current.number, to_date: (fmt_date(current.adopted_at.to_date)), display_name: current.adopted_by&.display_name, link: (link_to t(".view_print"), revision_admin_procedures_path(current), class: "link", target: "_blank")) %></p>
       <% else %>
-        <p class="text-sm text-amber-800">No revision adopted yet.</p>
+        <p class="text-sm text-amber-800"><%= t(".no_revision_adopted_yet") %></p>
       <% end %>
-      <p class="text-sm"><%= link_to "Preview the draft", draft_admin_procedures_path, class: "link", target: "_blank" %> (generated from the current setup).</p>
+      <p class="text-sm"><%= t(".generated_from_the_current_setup_html", link: (link_to t(".preview_the_draft"), draft_admin_procedures_path, class: "link", target: "_blank")) %></p>
       <%= form_with url: adopt_admin_procedures_path, class: "flex flex-wrap items-end gap-2" do %>
-        <div class="min-w-0 flex-1"><%= label_tag :summary, "What changed", class: "label" %><%= text_field_tag :summary, nil, class: "input", placeholder: current ? "e.g. new mechanic added" : "Initial issue" %></div>
-        <% if @policy.unfilled_fields.any? %><p class="w-full text-sm text-amber-800">Fill in the [bracketed] blanks in: <%= @policy.unfilled_fields.to_sentence %>.</p><% end %>
-        <%= submit_tag "Adopt as revision #{(current&.number || 0) + 1}", class: "btn-primary", disabled: !@policy.complete?,
-                       title: (@policy.complete? ? nil : "Fill in the operator, responsible person, hosting and off-site backup (or connect Google Drive) first") %>
+        <div class="min-w-0 flex-1"><%= label_tag :summary, t(".what_changed"), class: "label" %><%= text_field_tag :summary, nil, class: "input", placeholder: current ? t(".e_g_new_mechanic_added") : t(".initial_issue") %></div>
+        <% if @policy.unfilled_fields.any? %><p class="w-full text-sm text-amber-800"><%= t(".fill_in_the_bracketed_blanks_html", to_sentence: @policy.unfilled_fields.to_sentence) %></p><% end %>
+        <%= submit_tag t(".adopt_as_revision", number: (current&.number || 0) + 1), class: "btn-primary", disabled: !@policy.complete?,
+                       title: (@policy.complete? ? nil : t(".fill_in_the_operator_responsible")) %>
       <% end %>
     </section>
     <section class="card">
-      <div class="card-header"><h2 class="card-title">Earlier revisions</h2></div>
+      <div class="card-header"><h2 class="card-title"><%= t(".earlier_revisions") %></h2></div>
       <% if @revisions.size > 1 %>
         <ul class="divide-y divide-slate-100 text-sm">
-          <% @revisions.drop(1).each do |r| %><li class="flex justify-between px-4 py-2"><span>Revision <%= r.number %> · <%= fmt_date(r.adopted_at.to_date) %> · <%= r.summary %></span><%= link_to "View", revision_admin_procedures_path(r), class: "link", target: "_blank" %></li><% end %>
+          <% @revisions.drop(1).each do |r| %><li class="flex justify-between px-4 py-2"><span><%= t(".revision_html", number: r.number, to_date: (fmt_date(r.adopted_at.to_date)), summary: r.summary) %></span><%= link_to t(".view"), revision_admin_procedures_path(r), class: "link", target: "_blank" %></li><% end %>
         </ul>
-      <% else %><%= empty_state "None." %><% end %>
+      <% else %><%= empty_state t(".none") %><% end %>
     </section>
   </div>
 </div>

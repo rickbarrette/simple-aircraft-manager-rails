@@ -1,6 +1,6 @@
-<% content_for :title, "Logbook entry signed" %>
+<% content_for :title, t(".logbook_entry_signed") %>
 <div class="mx-auto max-w-3xl space-y-4">
-  <h1 class="text-2xl font-bold">Entry signed</h1>
+  <h1 class="text-2xl font-bold"><%= t(".entry_signed") %></h1>
   <%= render "logbook_entries/signature", entry: @entry %>
   <%= render "logbook_entries/content", entry: @entry %>
 </div>

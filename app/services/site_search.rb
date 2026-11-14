@@ -4,8 +4,7 @@
 class SiteSearch
   Result = Data.define(:kind, :title, :snippet, :aircraft, :path)
   LIMIT = 25
-  KINDS = { "logbook" => "Logbook", "squawk" => "Squawks", "note" => "Notes", "ad" => "ADs", "document" => "Documents",
-            "component" => "Components", "flight" => "Flights", "major" => "Major repairs & alterations" }.freeze
+  KINDS = LabelSet.new("site_search.kinds", %w[logbook squawk note ad document component flight major])
 
   attr_reader :query
 
@@ -24,17 +23,17 @@ class SiteSearch
     return {} unless searchable?
     @results ||= {
       "logbook" => find(LogbookEntry.where(aircraft_id: @ids).order(date: :desc), %w[text signoff_person signoff_location]) { |e, s|
-        [ "#{e.date} · #{LogbookEntry::LOG_TYPES[e.log_type]} log", s, @urls.aircraft_logbook_entry_path(e.aircraft_id, e) ] },
+        [ I18n.t("services.site_search.logbook", date: e.date, log: LogbookEntry::LOG_TYPES[e.log_type]), s, @urls.aircraft_logbook_entry_path(e.aircraft_id, e) ] },
       "squawk" => find(Squawk.where(aircraft_id: @ids).order(created_at: :desc), %w[issue_reported notes deferral_notes]) { |q, s|
-        [ "#{q.issue_reported.truncate(80)}#{' (resolved)' if q.resolved?}", s, @urls.aircraft_squawks_path(q.aircraft_id) ] },
+        [ q.resolved? ? I18n.t("services.site_search.resolved", issue: q.issue_reported.truncate(80)) : q.issue_reported.truncate(80), s, @urls.aircraft_squawks_path(q.aircraft_id) ] },
       "note" => find(AircraftNote.where(aircraft_id: @ids).order(created_at: :desc), %w[text]) { |n, s|
-        [ "Note, #{n.created_at.to_date}", s, @urls.aircraft_notes_path(n.aircraft_id) ] },
+        [ I18n.t("services.site_search.note", date: n.created_at.to_date), s, @urls.aircraft_notes_path(n.aircraft_id) ] },
       "ad" => ads,
       "document" => find(Document.where(aircraft_id: @ids).order(:name), %w[name description pages_text]) { |d, s|
         [ d.name, s, @urls.aircraft_document_path(d.aircraft_id, d) ] },
       "component" => components,
       "flight" => find(FlightLog.where(aircraft_id: @ids).order(date: :desc), %w[departure_location destination_location route notes]) { |f, s|
-        [ "#{f.date} · #{f.route_summary.presence || 'Flight'}", s, @urls.aircraft_flight_log_path(f.aircraft_id, f) ] },
+        [ "#{f.date} · #{f.route_summary.presence || I18n.t('services.site_search.flight')}", s, @urls.aircraft_flight_log_path(f.aircraft_id, f) ] },
       "major" => find(MajorRecord.where(aircraft_id: @ids).order(date_performed: :desc), %w[title description stc_number stc_holder notes]) { |m, s|
         [ m.title.to_s, s, @urls.aircraft_major_record_path(m.aircraft_id, m) ] }
     }.reject { _2.empty? }
@@ -72,7 +71,7 @@ class SiteSearch
       cols = %w[name short_description required_action docket_number]
       sql = cols.map { "airworthiness_directives.#{_1} LIKE :t ESCAPE '\\'" }.join(" OR ")
       find_scope.where(sql, t: term).limit(LIMIT).map do |ad|
-        Result.new(kind: nil, title: "AD #{ad.name} · #{ad.short_description.to_s.truncate(70)}", snippet: snippet_for(ad, cols),
+        Result.new(kind: nil, title: I18n.t("services.site_search.ad", name: ad.name, description: ad.short_description.to_s.truncate(70)), snippet: snippet_for(ad, cols),
                    aircraft: a, path: @urls.aircraft_airworthiness_directives_path(a))
       end
     end.first(LIMIT)

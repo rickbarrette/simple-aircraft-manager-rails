@@ -1,3 +1,3 @@
-Your Simple Aircraft Manager account (<%= @user.email_address %>) was locked for <%= User::LOCK_FOR.inspect %> after <%= User::LOCK_AFTER %> failed sign-in attempts in a row.
+<%= raw t(".your_simple_aircraft_manager_account_text", email_address: @user.email_address, minutes: (User::LOCK_FOR.in_minutes.to_i), tries: (User::LOCK_AFTER)) %>
 
-If that was you, wait and try again. If it wasn't, someone may be guessing your password: change it once you're back in (Profile), turn on an authenticator app, and tell your administrator.
+<%= raw t(".if_that_was_you_wait") %>

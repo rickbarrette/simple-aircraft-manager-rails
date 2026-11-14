@@ -1,5 +1,5 @@
 class ShareToken < ApplicationRecord
-  PRIVILEGES = { "status" => "Current Status", "maintenance" => "Maintenance Detail" }.freeze
+  PRIVILEGES = LabelSet.new("share_token.privileges", %w[status maintenance])
   MAX_PER_AIRCRAFT = 10
 
   belongs_to :aircraft
@@ -22,7 +22,7 @@ class ShareToken < ApplicationRecord
 
   def within_limit
     if aircraft && aircraft.share_tokens.count >= MAX_PER_AIRCRAFT
-      errors.add(:base, "An aircraft can have at most #{MAX_PER_AIRCRAFT} share links")
+      errors.add(:base, :too_many, max: MAX_PER_AIRCRAFT)
     end
   end
 end

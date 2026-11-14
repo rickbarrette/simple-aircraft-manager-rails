@@ -35,7 +35,7 @@ module AircraftArchive
       Zip::File.open(path) do |zip|
         inner = nested_archive(zip)
         next yield(zip) unless inner
-        raise Error, "The archive inside the records package is too large." if inner.size > ARCHIVE_MAX_BYTES
+        raise Error, I18n.t("services.aircraft_archive.the_archive_inside_the_records") if inner.size > ARCHIVE_MAX_BYTES
         Tempfile.create([ "sam-inner", ".zip" ], binmode: true) do |tmp|
           inner.get_input_stream { |io| IO.copy_stream(io, tmp) }
           tmp.flush
@@ -43,7 +43,7 @@ module AircraftArchive
         end
       end
     rescue Zip::Error => e
-      raise Error, "Not a valid .sam.zip archive (#{e.message})"
+      raise Error, I18n.t("services.aircraft_archive.not_a_valid_sam_zip", message: e.message)
     end
 
     # The single *.sam.zip entry of a records package (no manifest of its own).
@@ -65,32 +65,32 @@ module AircraftArchive
     def self.validate_zip(zip)
       uncompressed = compressed = 0
       zip.each do |entry|
-        raise Error, "The archive contains a link (#{entry.name}), which isn't allowed." if entry.symlink?
-        raise Error, "The archive contains an unsafe path: #{entry.name}" unless safe_name?(entry.name)
+        raise Error, I18n.t("services.aircraft_archive.the_archive_contains_a_link", entry: entry.name) if entry.symlink?
+        raise Error, I18n.t("services.aircraft_archive.the_archive_contains_an_unsafe", entry: entry.name) unless safe_name?(entry.name)
         uncompressed += entry.size
         compressed += entry.compressed_size
-        raise Error, "The archive is too large once unpacked." if uncompressed > ARCHIVE_MAX_BYTES
+        raise Error, I18n.t("services.aircraft_archive.the_archive_is_too_large") if uncompressed > ARCHIVE_MAX_BYTES
       end
-      raise Error, "The archive is compressed suspiciously well (over #{MAX_RATIO}:1)." if compressed.positive? && uncompressed / compressed > MAX_RATIO
+      raise Error, I18n.t("services.aircraft_archive.the_archive_is_compressed_suspiciously", _: MAX_RATIO) if compressed.positive? && uncompressed / compressed > MAX_RATIO
 
-      entry = zip.find_entry("#{root_prefix(zip)}manifest.json") or raise Error, "The archive has no manifest.json. Is it a .sam.zip export?"
-      raise Error, "manifest.json is too large." if entry.size > MANIFEST_MAX_BYTES
+      entry = zip.find_entry("#{root_prefix(zip)}manifest.json") or raise Error, I18n.t("services.aircraft_archive.the_archive_has_no_manifest")
+      raise Error, I18n.t("services.aircraft_archive.manifest_json_is_too_large") if entry.size > MANIFEST_MAX_BYTES
       manifest = begin
         JSON.parse(entry.get_input_stream.read.force_encoding("UTF-8"))
       rescue JSON::ParserError => e
-        raise Error, "manifest.json couldn't be read (#{e.message.truncate(120)})"
+        raise Error, I18n.t("services.aircraft_archive.manifest_json_couldn_t_be", truncate: (e.message.truncate(120)))
       end
-      raise Error, "manifest.json isn't a JSON object." unless manifest.is_a?(Hash)
+      raise Error, I18n.t("services.aircraft_archive.manifest_json_isn_t_a") unless manifest.is_a?(Hash)
 
       version = manifest["schema_version"]
       unless version.is_a?(Integer) && version.between?(1, SCHEMA_VERSION)
-        raise Error, "Unsupported archive version #{version.inspect} (this app reads versions 1–#{SCHEMA_VERSION})."
+        raise Error, I18n.t("services.aircraft_archive.unsupported_archive_version_this_app", version: version.inspect, _: SCHEMA_VERSION)
       end
       required = TOP_LEVEL_KEYS - OPTIONAL_KEYS - (version < 2 ? %w[flight_logs] : [])
       missing = required - manifest.keys
-      raise Error, "manifest.json is missing #{missing.to_sentence}." if missing.any?
+      raise Error, I18n.t("services.aircraft_archive.manifest_json_is_missing", to_sentence: missing.to_sentence) if missing.any?
       raise Error, "manifest.json has no aircraft tail number." unless manifest["aircraft"].is_a?(Hash) && manifest["aircraft"]["tail_number"].present?
-      RECORD_SECTIONS.each { |key| raise Error, "manifest.json #{key} must be a list." unless manifest[key].nil? || manifest[key].is_a?(Array) }
+      RECORD_SECTIONS.each { |key| raise Error, I18n.t("services.aircraft_archive.manifest_json_must_be_a", key: key) unless manifest[key].nil? || manifest[key].is_a?(Array) }
       manifest
     end
 
@@ -207,7 +207,7 @@ module AircraftArchive
 
       ordered.each do |data|
         type_id = @map[:component_type][data["component_type_id"].to_s]
-        next warn("Component #{data['manufacturer']} #{data['model']}: unknown component type, skipped.") unless type_id
+        next warn(I18n.t("services.aircraft_archive.component_unknown_component_type_skipped", manufacturer: (data["manufacturer"]), model: (data["model"]))) unless type_id
         c = @aircraft.components.new(
           component_type_id: type_id, parent_component_id: @map[:component][data["parent_component_id"].to_s],
           manufacturer: data["manufacturer"].to_s, model: data["model"].to_s, serial_number: data["serial_number"].to_s,
@@ -329,7 +329,7 @@ module AircraftArchive
       end
       m("inspection_records").each do |data|
         type_id = @map[:inspection_type][data["inspection_type_id"].to_s]
-        next warn("An inspection record from #{data['date']} has no inspection type and was skipped.") unless type_id
+        next warn(I18n.t("services.aircraft_archive.an_inspection_record_from_has", date: (data["date"]))) unless type_id
         r = @aircraft.inspection_records.new(
           inspection_type_id: type_id, date: date(data["date"]) || Date.new(1900, 1, 1), aircraft_hours: num(data["aircraft_hours"]),
           logbook_entry_id: @map[:logbook][data["logbook_entry_id"].to_s], notes: data["notes"],
@@ -515,17 +515,17 @@ module AircraftArchive
     end
 
     def upload(archive_path)
-      raise Error, "unsafe file path #{archive_path}" unless self.class.safe_name?(archive_path)
-      entry = @zip.find_entry("#{@root}#{archive_path}") or raise Error, "file #{File.basename(archive_path)} isn't in the archive"
-      raise Error, "#{File.basename(archive_path)} is too large" if entry.size > FILE_MAX_BYTES
+      raise Error, I18n.t("services.aircraft_archive.unsafe_file_path", archive_path: archive_path) unless self.class.safe_name?(archive_path)
+      entry = @zip.find_entry("#{@root}#{archive_path}") or raise Error, I18n.t("services.aircraft_archive.file_isn_t_in_the", basename: (File.basename(archive_path)))
+      raise Error, I18n.t("services.aircraft_archive.is_too_large", basename: (File.basename(archive_path))) if entry.size > FILE_MAX_BYTES
       ext = AircraftArchive.extension(archive_path)
-      raise Error, "#{File.basename(archive_path)} isn't an allowed file type" unless EXTENSIONS.include?(ext)
+      raise Error, I18n.t("services.aircraft_archive.isn_t_an_allowed_file", basename: (File.basename(archive_path))) unless EXTENSIONS.include?(ext)
 
       Tempfile.create([ "sam-import", ".#{ext}" ], binmode: true) do |tmp|
         entry.get_input_stream { |input| IO.copy_stream(input, tmp) }
         tmp.rewind
         head = tmp.read(16).to_s
-        raise Error, "#{File.basename(archive_path)} doesn't contain what its name says (.#{ext})" unless AircraftArchive.content_matches?(head, ext)
+        raise Error, I18n.t("services.aircraft_archive.doesn_t_contain_what_its", basename: (File.basename(archive_path)), ext: ext) unless AircraftArchive.content_matches?(head, ext)
         tmp.rewind
         ActiveStorage::Blob.create_and_upload!(io: tmp, filename: File.basename(archive_path)).tap { @created_blobs << _1 }
       end

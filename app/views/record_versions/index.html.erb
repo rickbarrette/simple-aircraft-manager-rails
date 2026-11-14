@@ -1,14 +1,14 @@
-<% content_for :title, "#{@aircraft.tail_number} Record history" %>
+<% content_for :title, t(".record_history", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
   <div class="card-header">
     <div>
-      <h2 class="card-title">Record history</h2>
-      <p class="text-xs text-slate-500">Every change to the maintenance records, kept for good and chained so that removing or altering history shows in the nightly check.</p>
+      <h2 class="card-title"><%= t(".record_history_2") %></h2>
+      <p class="text-xs text-slate-500"><%= t(".every_change_to_the_maintenance") %></p>
     </div>
     <%= form_with url: aircraft_record_versions_path(@aircraft), method: :get, class: "flex gap-2" do %>
-      <%= select_tag :type, options_for_select([ [ "All records", "" ] ] + @types.map { [ _1.underscore.humanize, _1 ] }, @type), class: "input w-48", data: { submit_on_change: true } %>
+      <%= select_tag :type, options_for_select([ [ t(".all_records"), "" ] ] + @types.map { [ _1.underscore.humanize, _1 ] }, @type), class: "input w-48", data: { submit_on_change: true } %>
     <% end %>
   </div>
-  <% if @versions.any? %><%= render "record_versions/list", versions: @versions, aircraft: @aircraft, can_restore: owner? %><% else %><%= empty_state "No changes recorded yet." %><% end %>
+  <% if @versions.any? %><%= render "record_versions/list", versions: @versions, aircraft: @aircraft, can_restore: owner? %><% else %><%= empty_state t(".no_changes_recorded_yet") %><% end %>
 </section>

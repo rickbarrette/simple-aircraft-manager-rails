@@ -4,8 +4,7 @@
 class UserCertificate < ApplicationRecord
   KINDS = LogbookEntry::CERTIFICATE_TYPES
   MECHANIC_KINDS = %w[AP IA A P REPAIR_STATION REPAIRMAN].freeze
-  SHORT_LABELS = { "AP" => "A&P", "IA" => "IA", "A" => "Airframe", "P" => "Powerplant", "REPAIR_STATION" => "Repair station",
-                   "REPAIRMAN" => "Repairman", "PILOT" => "Pilot", "OTHER" => "Other" }.freeze
+  SHORT_LABELS = LabelSet.new("user_certificate.short_labels", %w[AP IA A P REPAIR_STATION REPAIRMAN PILOT OTHER])
   EXPIRY_WARNING_DAYS = 60
 
   belongs_to :user

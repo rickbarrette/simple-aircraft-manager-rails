@@ -9,7 +9,7 @@ class AdCompliancesController < ApplicationController
                                    aircraft_hours_at_compliance: @aircraft.current_hours,
                                    compliance_method: params[:not_applicable] == "1" ? "not_applicable" : "inspection")
     @compliance.apply_method
-    @compliance.compliance_notes = "Not applicable: " if @compliance.not_applicable?
+    @compliance.compliance_notes = t("flash.ad_compliances.not_applicable_prefix") if @compliance.not_applicable?
     @compliance.fill_next_due
   end
 
@@ -17,7 +17,7 @@ class AdCompliancesController < ApplicationController
     @compliance = AdCompliance.new(compliance_params.merge(aircraft: @aircraft))
     if @compliance.save
       log_event("ad", "#{@compliance.not_applicable? ? "Marked N/A" : "Compliance recorded"}: #{@compliance.airworthiness_directive.name}")
-      redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: "Compliance recorded."
+      redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: t("flash.ad_compliances.compliance_recorded")
     else
       render :new, status: :unprocessable_entity
     end
@@ -27,8 +27,8 @@ class AdCompliancesController < ApplicationController
 
   def update
     if @compliance.update(compliance_params)
-      log_event("ad", "Compliance updated: #{@compliance.airworthiness_directive.name}")
-      redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: "Compliance updated."
+      log_event("ad", t("flash.ad_compliances.compliance_updated_2", name: @compliance.airworthiness_directive.name))
+      redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: t("flash.ad_compliances.compliance_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -36,8 +36,8 @@ class AdCompliancesController < ApplicationController
 
   def destroy
     @compliance.destroy!
-    log_event("ad", "Compliance deleted: #{@compliance.airworthiness_directive.name}")
-    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: "Compliance record deleted."
+    log_event("ad", t("flash.ad_compliances.compliance_deleted", name: @compliance.airworthiness_directive.name))
+    redirect_to aircraft_airworthiness_directives_path(@aircraft), notice: t("flash.ad_compliances.compliance_record_deleted")
   end
 
   private

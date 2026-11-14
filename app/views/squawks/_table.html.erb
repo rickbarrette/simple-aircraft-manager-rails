@@ -1,6 +1,6 @@
 <div class="overflow-x-auto">
   <table class="table">
-    <thead><tr><th>Priority</th><th>Issue</th><th>Component</th><th>Reported</th><th></th></tr></thead>
+    <thead><tr><th><%= t(".priority") %></th><th><%= t(".issue") %></th><th><%= t(".component") %></th><th><%= t(".reported") %></th><th></th></tr></thead>
     <tbody>
       <% squawks.each do |s| %>
         <tr>
@@ -9,18 +9,18 @@
             <%= s.issue_reported %>
             <%= render "squawks/attachments", squawk: s %>
             <% if s.notes.present? %><div class="mt-1 text-xs text-slate-500"><%= s.notes %></div><% end %>
-            <% if s.deferred? %><div class="mt-1 text-xs text-sky-700"><%= s.deferral_action_label %>, <%= fmt_date(s.deferred_at.to_date) %>, determined by <%= s.deferred_by_name %> (<%= Squawk::DEFERRAL_ROLES[s.deferred_by_role]&.downcase %>)</div><% end %>
+            <% if s.deferred? %><div class="mt-1 text-xs text-sky-700"><%= t(".determined_by_html", deferral_action_label: s.deferral_action_label, to_date: (fmt_date(s.deferred_at.to_date)), deferred_by_name: s.deferred_by_name, deferred_by_role: (Squawk::DEFERRAL_ROLES[s.deferred_by_role]&.downcase)) %></div><% end %>
           </td>
           <td><%= s.component&.to_s || "—" %></td>
           <td class="whitespace-nowrap text-xs text-slate-500"><%= fmt_date(s.created_at.to_date) %><br><%= s.reported_by&.display_name %></td>
           <td class="whitespace-nowrap text-right">
-            <% if owner? %><%= link_to "Resolve", resolution_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm" %><% end %>
+            <% if owner? %><%= link_to t(".resolve"), resolution_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm" %><% end %>
             <% if s.deferred? %>
-              <% if owner? %><%= button_to "Undo deferral", undefer_aircraft_squawk_path(aircraft, s), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %><% end %>
+              <% if owner? %><%= button_to t(".undo_deferral"), undefer_aircraft_squawk_path(aircraft, s), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %><% end %>
             <% else %>
-              <%= link_to "Defer", deferral_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm", title: "Defer as inoperative (91.213(d))" %>
+              <%= link_to t(".defer"), deferral_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm", title: t(".defer_as_inoperative_91_213") %>
             <% end %>
-            <% if owner? %><%= link_to "Edit", edit_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm" %><% end %>
+            <% if owner? %><%= link_to t(".edit"), edit_aircraft_squawk_path(aircraft, s), class: "btn-secondary btn-sm" %><% end %>
           </td>
         </tr>
       <% end %>

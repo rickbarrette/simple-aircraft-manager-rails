@@ -8,12 +8,12 @@ class InspectionTypesController < ApplicationController
     @inspection_type = InspectionType.new(required: true, recurring: true)
     @applies_to_airframe = true
     if (@major_record = ica_record)
-      @inspection_type.name = "ICA: #{@major_record.title}".first(120)
+      @inspection_type.name = t("flash.inspection_types.ica_name", title: @major_record.title).first(120)
       @applies_to_airframe = @major_record.component.nil?
       @inspection_type.components = [ @major_record.component ] if @major_record.component
     elsif (component = @aircraft.components.find_by(id: params[:component_id]))
       # From a component's page: applies to that part, e.g. "Magneto 500-hour inspection".
-      @inspection_type.name = "#{component} inspection"
+      @inspection_type.name = t("flash.inspection_types.component_name", component: component)
       @inspection_type.components = [ component ]
       @applies_to_airframe = false
     end
@@ -26,11 +26,11 @@ class InspectionTypesController < ApplicationController
       apply_applicability(@inspection_type, to_airframe: applies_to_airframe?, component_ids: applicable_component_ids)
       ica_record&.update!(ica_inspection_type: @inspection_type)
     end
-    log_event("inspection", "Inspection type added: #{@inspection_type.name}")
+    log_event("inspection", t("flash.inspection_types.inspection_type_added_2", name: @inspection_type.name))
     if (record = ica_record)
-      redirect_to aircraft_major_record_path(@aircraft, record), notice: "ICA inspection added. Record when it was last done to see when it's next due."
+      redirect_to aircraft_major_record_path(@aircraft, record), notice: t("flash.inspection_types.ica_inspection_added_record")
     else
-      redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection type added."
+      redirect_to aircraft_inspections_path(@aircraft), notice: t("flash.inspection_types.inspection_type_added")
     end
   rescue ActiveRecord::RecordInvalid
     @applies_to_airframe = applies_to_airframe?
@@ -47,8 +47,8 @@ class InspectionTypesController < ApplicationController
       @inspection_type.update!(type_params)
       apply_applicability(@inspection_type, to_airframe: applies_to_airframe?, component_ids: applicable_component_ids)
     end
-    log_event("inspection", "Inspection type updated: #{@inspection_type.name}")
-    redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection type updated."
+    log_event("inspection", t("flash.inspection_types.inspection_type_updated_2", name: @inspection_type.name))
+    redirect_to aircraft_inspections_path(@aircraft), notice: t("flash.inspection_types.inspection_type_updated")
   rescue ActiveRecord::RecordInvalid
     @applies_to_airframe = applies_to_airframe?
     render :edit, status: :unprocessable_entity
@@ -56,8 +56,8 @@ class InspectionTypesController < ApplicationController
 
   def destroy
     detach_from_aircraft(@inspection_type)
-    log_event("inspection", "Inspection type removed: #{@inspection_type.name}")
-    redirect_to aircraft_inspections_path(@aircraft), notice: "Inspection removed from #{@aircraft.tail_number}."
+    log_event("inspection", t("flash.inspection_types.inspection_type_removed", name: @inspection_type.name))
+    redirect_to aircraft_inspections_path(@aircraft), notice: t("flash.inspection_types.inspection_removed_from", tail_number: @aircraft.tail_number)
   end
 
   private

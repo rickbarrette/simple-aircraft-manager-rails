@@ -101,7 +101,7 @@ class AirTrailSyncer
   # Look an airport code up in AirTrail (cached per connection).
   def airport_id(code)
     normalized = AirTrailFlightData.airport_code(code)
-    raise UnresolvedAirport, "Airport “#{code.presence || '(blank)'}” isn't a code AirTrail can use" unless normalized
+    raise UnresolvedAirport, I18n.t("services.air_trail.unusable_code", code: code.presence || I18n.t("services.air_trail.blank")) unless normalized
 
     cached = @connection.airports.find_or_initialize_by(code: normalized)
     fresh = cached.manual? || cached.remote_id || (cached.looked_up_at && cached.looked_up_at > AIRPORT_RECHECK.ago)
@@ -110,7 +110,7 @@ class AirTrailSyncer
       match = results.find { _1["icao"].to_s.casecmp?(normalized) } || results.find { _1["iata"].to_s.casecmp?(normalized) }
       cached.update!(remote_id: match&.dig("id"), remote_icao: match&.dig("icao"), looked_up_at: Time.current)
     end
-    cached.remote_id or raise UnresolvedAirport, "AirTrail doesn't know airport #{normalized}. Map it on your AirTrail settings page"
+    cached.remote_id or raise UnresolvedAirport, I18n.t("services.air_trail.airtrail_doesn_t_know_airport", normalized: normalized)
   end
 
   # Map a code to an airport the user names (e.g. its ICAO/GPS code in AirTrail).

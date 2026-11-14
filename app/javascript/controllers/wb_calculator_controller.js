@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { t } from "i18n"
 
 // Loading calculator: takeoff and landing weight and CG from the empty
 // weight & moment plus each station's load, checked against max gross weight,
@@ -42,19 +43,19 @@ export default class extends Controller {
     this.show("landing", landing)
 
     if (!loaded) {
-      this.messagesTarget.replaceChildren(Object.assign(document.createElement("li"), { className: "text-slate-500", textContent: "Enter the loading to check weight and CG." }))
+      this.messagesTarget.replaceChildren(Object.assign(document.createElement("li"), { className: "text-slate-500", textContent: t("wb.enter_loading") }))
       this.draw(takeoff, landing)
       return
     }
     if (this.maxGrossValue && takeoff.weight > this.maxGrossValue) {
-      messages.push([ "bad", `Takeoff weight is ${(takeoff.weight - this.maxGrossValue).toFixed(1)} lb over the maximum of ${this.maxGrossValue} lb.` ])
+      messages.push([ "bad", t("wb.over_gross", { over: (takeoff.weight - this.maxGrossValue).toFixed(1), max: this.maxGrossValue }) ])
     }
     if (this.envelopeValue.length >= 3) {
-      for (const [ name, point ] of [ [ "Takeoff", takeoff ], [ "Landing", landing ] ]) {
-        if (!this.inside(point)) messages.push([ "bad", `${name} CG ${point.cg.toFixed(2)} in at ${point.weight.toFixed(0)} lb is outside the envelope.` ])
+      for (const [ name, point ] of [ [ t("wb.takeoff"), takeoff ], [ t("wb.landing"), landing ] ]) {
+        if (!this.inside(point)) messages.push([ "bad", t("wb.outside", { name, cg: point.cg.toFixed(2), weight: point.weight.toFixed(0) }) ])
       }
     }
-    if (!messages.length) messages.push([ "ok", "Within the limits entered here." ])
+    if (!messages.length) messages.push([ "ok", t("wb.within_limits") ])
     this.messagesTarget.replaceChildren(...messages.map(([ kind, text ]) => {
       const li = document.createElement("li")
       li.className = kind === "ok" ? "text-emerald-700" : "text-red-700"

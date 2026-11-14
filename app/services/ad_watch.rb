@@ -136,9 +136,9 @@ class AdWatch
     response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 10, read_timeout: 20) do |http|
       http.get(uri.request_uri, "Accept" => "application/json", "User-Agent" => "SimpleAircraftManager")
     end
-    raise Error, "the Federal Register returned #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+    raise Error, I18n.t("services.ad_watch.the_federal_register_returned", code: response.code) unless response.is_a?(Net::HTTPSuccess)
     Array(JSON.parse(response.body)["results"]).select { _1["title"].to_s.start_with?("Airworthiness Directives") }
   rescue SocketError, SystemCallError, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError, JSON::ParserError => e
-    raise Error, "couldn't reach the Federal Register (#{e.class.name.demodulize})"
+    raise Error, I18n.t("services.ad_watch.couldn_t_reach_the_federal", error: e.class.name.demodulize)
   end
 end

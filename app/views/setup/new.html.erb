@@ -3,6 +3,12 @@
   <p class="mb-4 text-sm text-slate-600"><%= t(".create_the_administrator_account_to") %></p>
   <%= form_with model: @user, url: setup_path, class: "card card-body space-y-4" do |f| %>
     <%= f.errors_summary %>
+    <div>
+      <%= label_tag :setup_code, t(".setup_code"), class: "label" %>
+      <%= text_field_tag :setup_code, params[:setup_code], required: true, autocomplete: "off", autocapitalize: "characters", spellcheck: false,
+            class: "input font-mono tracking-widest", placeholder: "XXXX-XXXX" %>
+      <p class="hint"><%= t(".setup_code_hint_html") %></p>
+    </div>
     <%= f.field :name %>
     <%= f.field :email_address, as: :email, label: t(".email"), required: true %>
     <%= f.field :password, as: :password, required: true, hint: t(".at_least_characters_not_one", min: User::PASSWORD_MIN) %>

@@ -5,6 +5,8 @@ require "webmock/minitest"
 WebMock.disable_net_connect!(allow_localhost: true)
 Dir[File.expand_path("support/**/*.rb", __dir__)].each { require _1 }
 PwnedPasswords.checker = ->(password) { password == "breached-password-1" } # no network in tests
+# No DNS in tests: names resolve to a public address, IP addresses to themselves.
+AirTrailClient.resolver = ->(host) { host.match?(/\A[\d.]+\z|:/) ? [ host.delete("[]") ] : [ "203.0.113.10" ] }
 
 module ActiveSupport
   class TestCase

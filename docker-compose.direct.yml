@@ -1,0 +1,33 @@
+# Directly on the internet, with HTTPS and no proxy in front: the image's web
+# server (Thruster) gets and renews a Let's Encrypt certificate by itself.
+#
+#   1. Point a DNS name (A/AAAA record) at this server, and open ports 80 and
+#      443 to it (80 is needed for the certificate check and redirects).
+#   2. In .env: APP_HOST and TLS_DOMAIN set to that name, FORCE_SSL=true, and
+#      a SECRET_KEY_BASE from `bin/rails secret`.
+#   3. docker compose -f docker-compose.direct.yml up -d
+#   4. Open https://<name>, and create the admin account with the setup code
+#      from: docker compose -f docker-compose.direct.yml logs web | grep "Setup code"
+#
+# The certificate is kept in the storage volume, so it isn't requested again
+# on every start.
+services:
+  web:
+    image: barrettefab/simple-aircraft-manager-rails:latest   # or your own image, or: build: .
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file: .env
+    environment:
+      SOLID_QUEUE_IN_PUMA: "true"   # nightly backup, reminders and AD search run in the web process
+      FORCE_SSL: "true"
+    volumes:
+      - sam_storage:/rails/storage  # databases, uploaded files, nightly backups and the certificate: back this up
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  sam_storage:

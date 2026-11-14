@@ -28,7 +28,12 @@ class SystemDoctor
 
   def secret_key
     return ok("Secret key", "development/test key") unless production?
-    ENV["SECRET_KEY_BASE"].present? || ENV["RAILS_MASTER_KEY"].present? ? ok("Secret key", "set (keep a copy off the server)") : warning("Secret key", "SECRET_KEY_BASE isn't set in the environment")
+    return warning("Secret key", "SECRET_KEY_BASE isn't set in the environment") if ENV["SECRET_KEY_BASE"].blank? && ENV["RAILS_MASTER_KEY"].blank?
+    return ok("Secret key", "set (keep a copy off the server)") if ENV["SECRET_KEY_BASE"].blank?
+    case SecretKeyCheck.strength
+    when :ok then ok("Secret key", "set (keep a copy off the server)")
+    else failed("Secret key", "only #{ENV['SECRET_KEY_BASE'].length} characters: replace it with the output of bin/rails secret")
+    end
   end
 
   def host

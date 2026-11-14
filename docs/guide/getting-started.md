@@ -12,7 +12,7 @@ If you've set up an authenticator app (see [Your profile](profile.md#two-factor-
 
 After 10 failed tries in a row (wrong passwords or codes), an account is locked for 15 minutes and its owner is emailed. Wait, or ask the administrator to unlock it.
 
-The very first visit to a new installation asks for the administrator account instead.
+The very first visit to a new installation asks for the administrator account instead. It also asks for a one-time setup code, which is printed only in the server's log (the line starting `Setup code`; with Docker, `docker compose logs web | grep "Setup code"`), so only whoever runs the server can create that account.
 
 ## Roles
 

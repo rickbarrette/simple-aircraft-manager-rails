@@ -55,3 +55,5 @@ Turn it on on each phone or computer you want them on; **Send a test** checks it
 ## Integrations: AirTrail
 
 **AirTrail sync** pushes the flights you log to your AirTrail flight map, with their GPS tracks. In AirTrail, create an API key (Settings → Security) with the scopes shown, then paste your AirTrail address and key here. A full sync first links flights already in AirTrail, so nothing is duplicated. If an airport code can't be matched, enter the code AirTrail uses for it.
+
+If your AirTrail server is on your private network (an address like 192.168.x.x or 10.x.x.x), only an administrator can connect to it, unless the administrator lists it in `AIRTRAIL_ALLOWED_HOSTS`. This stops accounts from using the app to probe the private network. The app's own server and link-local addresses can't be used at all.

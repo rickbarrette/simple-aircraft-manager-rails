@@ -103,7 +103,7 @@ Run on the server like the account recovery commands (`docker compose exec web` 
 
 | Command | What it does |
 |---|---|
-| `bin/rails sam:doctor` | Health report: secret key, address, HTTPS, email (SMTP reachable), single sign-on (issuer reachable), Google Drive, migrations, disk space, background jobs, and how recent the backup, records check, off-site copy, procedures and audit are. Exits non-zero if something fails |
+| `bin/rails sam:doctor` | Health report: secret key (set and long enough), address, HTTPS, email (SMTP reachable), single sign-on (issuer reachable), Google Drive, migrations, disk space, background jobs, and how recent the backup, records check, off-site copy, procedures and audit are. Exits non-zero if something fails |
 | `bin/rails records:check` | Backs up the database now and checks the record history and every signature; prints any problems and exits non-zero |
 | `bin/rails backups:list` | Lists the nightly database copies |
 | `bin/rails "backups:restore[file]"` | Replaces the database with a backup (newest nightly copy if no file; a Google Drive `.sqlite3.gz` works too). The app must be stopped: `docker compose stop web`, then `docker compose run --rm web bin/rails backups:restore`. The current database is moved to `storage/pre-restore-…`, never deleted. `CONFIRM=yes` skips the question |

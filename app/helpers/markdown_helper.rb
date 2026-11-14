@@ -9,7 +9,7 @@ module MarkdownHelper
     extension: { strikethrough: true, tagfilter: true, table: true, autolink: true, tasklist: true, header_ids: nil, footnotes: false }
   }.freeze
   TAGS = %w[p br strong em del a ul ol li blockquote code pre h1 h2 h3 h4 h5 h6 hr table thead tbody tr th td input span].freeze
-  ATTRIBUTES = %w[href title type checked disabled align class].freeze
+  ATTRIBUTES = %w[href title type checked disabled align].freeze
 
   def markdown(text)
     return "".html_safe if text.blank?

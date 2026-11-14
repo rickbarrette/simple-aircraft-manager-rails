@@ -829,6 +829,8 @@ en:
       unreachable: couldn't reach or verify %{provider}; see the server log
     setup:
       welcome_you_re_the: Welcome! You're the administrator. Add your first aircraft.
+      wrong_code: That setup code isn't right. It's in the server's log, on the line starting "Setup code".
+      try_again_later: Too many tries. Wait a few minutes and try again.
     invited_signings:
       try_again_later: Try again later.
       sign_in_to_continue: Sign in to continue.
@@ -3109,6 +3111,8 @@ en:
     new:
       welcome: Welcome
       create_the_administrator_account_to: Create the administrator account to get started.
+      setup_code: Setup code
+      setup_code_hint_html: 'Shown in the server''s log, so only whoever runs the server can finish setup. With Docker: <code>docker compose logs web | grep "Setup code"</code>'
       email: Email
       at_least_characters_not_one: At least %{min} characters; not one known from a data breach.
       simple_aircraft_manager_is_provided: Simple Aircraft Manager is provided as is, without warranty, and is not approved by the FAA or any other aviation authority. It is up to you to verify that using it for your aircraft and operation is legal and suitable. The full disclaimer is under Help once you're signed in.
@@ -3671,6 +3675,8 @@ en:
       signed_event: Logbook entry signed electronically (%{date})
     air_trail:
       can_t_reach_airtrail_at: 'Can''t reach AirTrail at %{host}: %{message}'
+      blocked_never: "%{host} is this server or a link-local address, which AirTrail can't be."
+      blocked_private: "%{host} is on the private network. Ask an administrator to connect it, or to list it in AIRTRAIL_ALLOWED_HOSTS."
       airtrail_username_must_be_3: AirTrail username must be 3–20 letters, numbers, “.”, “_” or “-”
       aircraft_type_must_be_an: Aircraft type must be an ICAO type designator like C150 (up to 4 letters/numbers)
       no_flights_to_export: No flights to export

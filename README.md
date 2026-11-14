@@ -33,7 +33,7 @@ bin/dev                      # http://localhost:3000
 ```
 
 With demo data, sign in as `admin@example.com` / `demo-password-123` (admin, owner of N12345) or `pilot@example.com` / `demo-password-123` (pilot).
-Without demo data, the first visit asks you to create the admin account.
+Without demo data, the first visit asks you to create the admin account. It needs the one-time setup code printed in the server's log (the line starting `Setup code`), so only whoever runs the server can claim it.
 
 Run the tests: `bin/rails test`
 
@@ -48,11 +48,14 @@ cp .env.example .env          # set SECRET_KEY_BASE (bin/rails secret), APP_HOST
 docker compose up -d --build  # http://<host>:3000
 ```
 
-Data lives in the `sam_storage` volume. Set `FORCE_SSL=false` if you serve plain HTTP on a LAN. Set it to `true` when a TLS reverse proxy such as Caddy, Traefik, or Cloudflare Tunnel sits in front.
+Data lives in the `sam_storage` volume. Set `FORCE_SSL=false` only if you serve plain HTTP on a private network: passwords and sign-in cookies then travel unencrypted. Set it to `true` when a TLS reverse proxy such as Caddy, Traefik, or Cloudflare Tunnel sits in front, or use the built-in HTTPS below.
+
+The first visit asks for the setup code from the log: `docker compose logs web | grep "Setup code"`.
 
 Other examples in the repository:
 
 - [`docker-compose.image.yml`](docker-compose.image.yml): runs the published image (`barrettefab/simple-aircraft-manager-rails` on Docker Hub) without cloning the source, with a health check and update steps.
+- [`docker-compose.direct.yml`](docker-compose.direct.yml): directly on the internet with HTTPS and no proxy. The image's web server gets and renews a Let's Encrypt certificate for `TLS_DOMAIN` by itself (ports 80 and 443 must reach the server).
 - [`docker-compose.traefik.yml`](docker-compose.traefik.yml): behind Traefik with HTTPS, with optional Authentik forward auth (see [Running behind Authentik](docs/authentik.md)).
 
 [`.env.example`](.env.example) lists every setting, grouped and commented. After starting or updating, `docker compose exec web bin/rails sam:doctor` checks the installation.
@@ -69,9 +72,12 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 
 | Variable | Purpose |
 |---|---|
-| `SECRET_KEY_BASE` | Required in production (`bin/rails secret`). Alternatively provide `RAILS_MASTER_KEY`. |
-| `FORCE_SSL` | `true` (default) redirects to HTTPS and sets secure cookies. Use `false` for plain HTTP. |
-| `APP_HOST` | Host name the app is reached at, used in email links (password resets, sign-in links, signing invitations, reminders). |
+| `SECRET_KEY_BASE` | Required in production (`bin/rails secret`). Anyone who knows it can sign in as anyone, so the app won't start with a placeholder or one under 32 characters, and `sam:doctor` flags one under 64. Alternatively provide `RAILS_MASTER_KEY`. |
+| `FORCE_SSL` | `true` (default) redirects to HTTPS and sets secure cookies. Use `false` for plain HTTP, only on a private network. |
+| `TLS_DOMAIN` | Optional. HTTPS without a proxy: the app gets a Let's Encrypt certificate for this name (see `docker-compose.direct.yml`). |
+| `APP_HOST` | Host name the app is reached at, used in email links (password resets, sign-in links, signing invitations, reminders). When set, the app answers only for this name, the `APP_URL` host, `ALLOWED_HOSTS`, `localhost` and IP addresses. |
+| `ALLOWED_HOSTS` | Optional. Other names the app may be reached by, comma-separated (e.g. a LAN name). |
+| `AIRTRAIL_ALLOWED_HOSTS` | Optional. AirTrail servers on your private network that anyone may connect to, comma-separated. Admins can always connect to private addresses; nobody can use the server itself or link-local addresses. |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM` | Optional. They enable email: password resets and **Email me a sign-in link**. Without them an admin resets passwords from **Users**. Check the setup with **Admin → About → Send test email**. |
 | `SMTP_TLS` | `true` for servers that use TLS from the start. That's the default on port 465; other ports upgrade with STARTTLS. |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Optional. The key pair that signs push notifications (generate with `bin/rails runner 'k = WebPush.generate_key; puts k.public_key, k.private_key'`). Without them the app generates a pair once and keeps it in `storage/vapid_keys.json`. Changing it turns notifications off on every device until they're turned on again. |

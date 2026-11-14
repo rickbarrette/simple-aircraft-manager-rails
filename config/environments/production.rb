@@ -100,12 +100,26 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
-  # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  # Answer only for the app's own names (stops DNS rebinding and forged Host
+  # headers): APP_HOST, the APP_URL host, ALLOWED_HOSTS, localhost and IP
+  # addresses (a rebinding attack needs a name). Off when APP_HOST isn't set.
+  if ENV["APP_HOST"].present?
+    config.hosts = [
+      ENV["APP_HOST"].sub(/:\d+\z/, ""),
+      (URI.parse(ENV["APP_URL"]).host if ENV["APP_URL"].present?),
+      *ENV.fetch("ALLOWED_HOSTS", "").split(",").map(&:strip),
+      "localhost",
+      IPAddr.new("0.0.0.0/0"),
+      IPAddr.new("::/0")
+    ].compact_blank
+    config.host_authorization = {
+      exclude: ->(request) { request.path == "/up" },
+      # Say why, rather than a blank page: usually a name that's simply missing.
+      response_app: ->(env) {
+        host = ActionDispatch::Request.new(env).host.to_s.gsub(/[^a-z0-9.\-:\[\]]/i, "").first(253)
+        [ 403, { "content-type" => "text/plain; charset=utf-8" },
+          [ "This server doesn't answer for \"#{host}\". If that's a name for this app, add it to ALLOWED_HOSTS (comma-separated) and restart.\n" ] ]
+      }
+    }
+  end
 end

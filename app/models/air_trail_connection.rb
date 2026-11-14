@@ -20,7 +20,7 @@ class AirTrailConnection < ApplicationRecord
 
   scope :active, -> { where(enabled: true) }
 
-  def client = AirTrailClient.new(base_url: base_url, api_key: api_key)
+  def client = AirTrailClient.new(base_url: base_url, api_key: api_key, allow_private: user&.admin?)
 
   def ok? = status == "ok"
 

@@ -2271,6 +2271,9 @@ en:
       ago_html: "%{who} · %{created_at} ago"
       no_activity_yet: No activity yet.
       system: System
+    page:
+      load_more: Load more
+      loading_earlier_activity_html: Loading earlier activity… %{link}
   flight_imports:
     new:
       import_flights: Import Flights

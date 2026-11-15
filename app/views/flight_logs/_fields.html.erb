@@ -10,13 +10,13 @@
     <p class="hint"><%= t("flight_logs.fields.meters_locked_html", link: link_to(t("flight_logs.fields.update_hours"), aircraft_path(@aircraft), class: "link")) %></p>
   <% end %>
   <%= tag.fieldset class: "grid gap-4 sm:grid-cols-3", disabled: meters_locked do %>
-    <legend class="mb-2 text-sm font-semibold"><%= t("flight_logs.new.tach_required") %></legend>
+    <legend class="mb-2 text-sm font-semibold"><%= t("flight_logs.new.tach_required") %><% if meters_locked %> <span class="badge-gray ml-1"><%= t("flight_logs.fields.locked") %></span><% end %></legend>
     <%= f.field :tach_out, as: :number, step: 0.1, label: t("flight_logs.new.tach_out") %>
     <%= f.field :tach_in, as: :number, step: 0.1, label: t("flight_logs.new.tach_in") %>
     <%= f.field :tach_time, as: :number, step: 0.1, label: t("flight_logs.new.or_duration"), hint: t("flight_logs.new.calculated_from_out_in_if") %>
   <% end %>
   <%= tag.fieldset class: "grid gap-4 sm:grid-cols-3", disabled: meters_locked do %>
-    <legend class="mb-2 text-sm font-semibold"><%= t("flight_logs.new.hobbs_optional") %></legend>
+    <legend class="mb-2 text-sm font-semibold"><%= t("flight_logs.new.hobbs_optional") %><% if meters_locked %> <span class="badge-gray ml-1"><%= t("flight_logs.fields.locked") %></span><% end %></legend>
     <%= f.field :hobbs_out, as: :number, step: 0.1, label: t("flight_logs.new.hobbs_out") %>
     <%= f.field :hobbs_in, as: :number, step: 0.1, label: t("flight_logs.new.hobbs_in") %>
     <%= f.field :hobbs_time, as: :number, step: 0.1, label: t("flight_logs.new.or_duration") %>

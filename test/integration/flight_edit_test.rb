@@ -45,6 +45,7 @@ class FlightEditTest < ActionDispatch::IntegrationTest
 
     get edit_aircraft_flight_log_path(@a, first)
     assert_select "fieldset[disabled]", 2
+    assert_select "fieldset[disabled] legend .badge-gray", text: "Locked", count: 2
     assert_select ".hint a[href=?]", aircraft_path(@a), text: "Update Hours"
 
     patch aircraft_flight_log_path(@a, first), params: { flight_log: { tach_in: 1009, tach_time: 9, destination_location: "kbos" } }

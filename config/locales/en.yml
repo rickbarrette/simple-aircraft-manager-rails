@@ -2386,6 +2386,7 @@ en:
     fields:
       meters_locked_html: The readings can be corrected only on the latest flight, before the hours change again. To correct the hours, use %{link} on the Overview.
       update_hours: Update Hours
+      locked: Locked
     days:
       gps_track_attached: GPS track attached
       engine_data_attached: Engine data attached

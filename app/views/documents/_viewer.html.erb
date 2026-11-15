@@ -13,7 +13,14 @@
     <% if current.image? %>
       <%= image_tag rails_blob_path(current, disposition: :inline), alt: current.filename.to_s, class: "max-h-[80vh] max-w-full" %>
     <% elsif current.content_type == "application/pdf" %>
-      <iframe src="<%= rails_blob_path(current, disposition: :inline) %>" class="h-[80vh] w-full"></iframe>
+      <% pdf_url = rails_blob_path(current, disposition: :inline) %>
+      <%# Phones get the pages drawn by PDF.js; browsers with a PDF viewer of their own get it in the frame. %>
+      <div class="w-full space-y-2" data-controller="pdf-viewer" data-pdf-viewer-url-value="<%= pdf_url %>" data-pdf-viewer-pdfjs-value="<%= Rails.application.config.x.pdfjs_path %>">
+        <template data-pdf-viewer-target="frame"><iframe src="<%= pdf_url %>" title="<%= current.filename %>" class="h-[80vh] w-full"></iframe></template>
+        <p class="p-6 text-center text-sm text-slate-500" role="status" data-pdf-viewer-target="status"><%= t("js.pdf.loading") %></p>
+        <div class="space-y-2" data-pdf-viewer-target="pages"></div>
+        <noscript><iframe src="<%= pdf_url %>" title="<%= current.filename %>" class="h-[80vh] w-full"></iframe></noscript>
+      </div>
     <% else %>
       <p class="p-6 text-sm"><%= link_to t(".download", filename: current.filename), rails_blob_path(current, disposition: :attachment), class: "link" %></p>
     <% end %>

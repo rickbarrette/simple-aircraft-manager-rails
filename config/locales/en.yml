@@ -3924,6 +3924,12 @@ en:
       not_entries: 'Not logbook entries (forms, tags…), so nothing was transcribed from: %{pages}.'
       unreadable: 'Too hard to read: %{pages}.'
   js:
+    pdf:
+      loading: Loading the PDF…
+      page: Page %{page} of %{pages}
+      page_failed: This page couldn't be shown.
+      failed: This PDF can't be shown here.
+      open: Open it
     airports:
       not_found: Not in the airport database
     wb:

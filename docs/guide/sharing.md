@@ -27,4 +27,4 @@ Give it a label and optionally an expiry. Documents only appear if their visibil
 
 ## Activity
 
-The **Activity** tab lists everything done on the aircraft and by whom. **Record history** shows every change to the maintenance records field by field (see [Electronic records and signing](records.md)).
+The **Activity** tab lists everything done on the aircraft and by whom, newest first, loading more as you scroll (filter it by category). **Record history** shows every change to the maintenance records field by field (see [Electronic records and signing](records.md)).

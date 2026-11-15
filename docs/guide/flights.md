@@ -17,6 +17,8 @@ On a phone or tablet with the app installed (see [Getting started](getting-start
 
 Track and engine data files attached offline are kept and sent too.
 
+A signal so weak that nothing comes back counts as none. **Log Flight** says *Sending…* while it waits; if the server doesn't answer within 10 seconds (a minute with files attached), the flight is saved on the device as above and the top bar turns red. If it reached the server after all, the copy sent later is recognized and not logged twice. Nothing is sent while the top bar is red; it goes as soon as the server answers again.
+
 ## Correct a flight
 
 Open the flight and choose **Edit**. Owners can correct any flight; pilots, the flights they logged (the **Correct any flight** and **Correct own flights** permissions). The date, airports, route, notes, oil and fuel (its oil and fuel records follow), and the track and engine data files can always be changed.

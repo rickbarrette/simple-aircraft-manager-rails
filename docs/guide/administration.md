@@ -6,7 +6,7 @@ Admins see the **Admin** menu (on a phone, under ☰). Admins can see and edit e
 
 **Users** lists every account.
 
-- **+ New User**: name, email and a starting password. Tick **Administrator** to make them an admin. Then add them to aircraft from each aircraft's **More → Access & sharing** (or they add their own aircraft).
+- **+ New User**: name, email and a starting password. Tick **Administrator** to make them an admin. Then give them a role on aircraft: **Edit** → **Aircraft access** lists their role on every aircraft, to add, change or remove (an aircraft's Owner can also do it from **More → Access & sharing**, and anyone can add their own aircraft).
 - **Edit** to change details or reset a password when email isn't set up.
 - **Locked** marks an account locked for 15 minutes after 10 failed sign-ins in a row (the user is emailed). **Unlock** clears it straight away, once you know it was really them.
 - **2FA** marks someone using an authenticator app. **Reset 2FA** turns it off for a user who lost their phone and recovery codes. Confirm it's really them first (call them); they can then set it up again.
@@ -59,7 +59,7 @@ If single sign-on is broken and `PASSWORD_LOGIN=false` is set, remove that setti
 
 ## About
 
-**About** shows the running version (year.month.release, e.g. 2026.11.0) and build (the exact source commit), with a link to **What's new** (the release notes, also under Help), and the features and storage. It has tools:
+**About** shows the running version (year.month.release, e.g. 2026.11.0) and build (the exact source commit), **What's new in** this version, with a link to all releases (also under Help → What's new, where older releases are folded to one line each), and the features and storage. It has tools:
 
 - **Send test email** and **Send me this week's reminder** check that email works.
 - **Records integrity**: the last nightly backup, off-site copy and records check. **Back up and check now** runs the backup and check straight away.

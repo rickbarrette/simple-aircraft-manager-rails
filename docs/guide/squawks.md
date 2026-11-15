@@ -6,9 +6,9 @@ A squawk is a problem found with the aircraft. Anyone on the aircraft can report
 
 **Report Squawk** asks for the issue, a priority, optionally the component, attachments (photos, PDFs) and notes.
 
-Without signal (in the installed app: open it, tap the aircraft and **Report Squawk** as usual), the squawk and its photos are saved on the device and sent when the connection is back, like [flights](flights.md#with-no-signal). Sending twice never reports it twice.
+Without signal (in the installed app: open it, tap the aircraft and **Report Squawk** as usual), the squawk and its photos are saved on the device and sent when the connection is back, like [flights](flights.md#with-no-signal). A signal too weak to get an answer counts as none: after 10 seconds (a minute with photos) it's saved on the device instead of waiting. Sending twice never reports it twice.
 
-A **Ground Aircraft** squawk notifies the aircraft's other owners and pilots who turned on notifications.
+A **Ground Aircraft** squawk notifies everyone else on the aircraft who turned on notifications.
 
 | Priority | Meaning |
 |---|---|

@@ -45,11 +45,13 @@ Administrators can do everything on every aircraft, and manage users, roles, set
 
 The app works on phones. The tabs collapse into a **Section** menu, and wide tables scroll sideways.
 
+The top bar shows the connection at a glance. It turns **red** when the server can't be reached (no signal, or one too weak to get an answer) and back on its own when it can. A small **ring** next to the menu fills while pages are being saved for offline use or what you logged offline is being sent, with the percentage in its middle; while flights or squawks are waiting to send, it's **amber** with how many.
+
 Install it like an app from **Profile → This device** (or in Safari: **Share → Add to Home Screen**). Installed, it:
 
 - opens from the home screen, with **Log Flight** and **Report Squawk** shortcuts on a long press of its icon;
 - logs flights and reports squawks without signal and sends them when the connection is back (see [Flights](flights.md) and [Squawks](squawks.md)); the number waiting shows on the icon;
-- opens without signal: while you're online it saves the **Fleet** page and, for each of your aircraft (up to 10), the **Overview**, **W&B**, **Log Flight** and **Report Squawk** pages and its photo, refreshed at most hourly. So at the plane you can check airworthiness and loading, and log or report as usual. A copy shown offline says when it was saved;
+- opens without signal: while you're online it saves the **Fleet** page and, for each of your aircraft (up to 10), the **Overview**, **W&B**, **Log Flight** and **Report Squawk** pages and its photo, refreshed at most hourly. So at the plane you can check airworthiness and loading, and log or report as usual. A copy shown offline says when it was saved. Any other page shows the offline page, which links to the saved ones, instead of loading forever: after 10 seconds without an answer, and within a few seconds once the app knows it's offline;
 - can show notifications (**Profile → This device**).
 
 When a new version is installed on the server, a notice offers **Reload**. Signing out clears the forms and pages the device kept; flights or squawks not yet sent stay and are sent the next time you sign in on that device. They're only ever sent under the account that saved them.

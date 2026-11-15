@@ -138,9 +138,9 @@ To back up or move a single aircraft with all its files, use **More → Download
 | Fleet dashboard | Every aircraft you can access, with airworthiness status and its top issues. |
 | Airworthiness | Grounded / limited (e.g. "VFR only" for an overdue 91.411 check) / due soon / current, from AD compliance, grounding squawks, inspections, replacement-critical and expiring parts, and expiring documents (an expired registration grounds). Warnings start 10 hours or 30 days ahead. The pilot in command still decides airworthiness (91.7). Logic: `app/services/airworthiness.rb`, `app/services/compliance.rb`. |
 | Hours | Absolute tach/hobbs updates or per-flight logs. Both apply the delta to every in-service component. Downward corrections are clamped at 0. Each aircraft picks tach or Hobbs as its maintenance clock (time in service). |
-| Flight import | Owners can import historical flights from `.xlsx` or `.csv` (Date, From, To, Tach, Hobbs, Oil Added, Fuel Added). Each flight's time is derived from the previous row's reading. A preview flags typos such as a tach going backwards, and rows already imported are skipped. History only: component hours aren't changed unless you choose to advance the aircraft's meters. |
+| Flight import | Import historical flights from `.xlsx` or `.csv` (Date, From, To, Tach, Hobbs, Oil Added, Fuel Added). Each flight's time is derived from the previous row's reading. A preview flags typos such as a tach going backwards, and rows already imported are skipped. History only: component hours aren't changed unless you choose to advance the aircraft's meters. |
 | Airworthiness enforcement | Optional per aircraft. It blocks flight logs and hours updates while the aircraft is grounded (not for limitations). |
-| Components | Tree of parent and child parts, TBO and replacement limits, and service/replace reset. Owners can create new component types inline. |
+| Components | Tree of parent and child parts, TBO and replacement limits, and service/replace reset. New component types can be created inline. |
 | Squawks | Four priorities. "Ground Aircraft" grounds the aircraft. Inoperative items can be deferred under 91.213(d) after confirming each condition; resolving can record the fix as a logbook entry. Attachments, reopen. |
 | Notes | Per-aircraft notes in Markdown, with a preview; shown on share links. |
 | ADs and bulletins | Shared across aircraft and applicable to the airframe or to specific components. Hour- and month-based recurrence (due at end of month), conditional and non-mandatory types, per-aircraft "not applicable" determinations, and compliance history with method of compliance and the revision complied with. |
@@ -148,7 +148,7 @@ To back up or move a single aircraft with all its files, use **More → Download
 | AD import | Import ADs from an FAA DRS export (`.xlsx` recommended: its AD numbers link to each AD's DRS page, which the import keeps; `.csv` works without links). ADs are matched by number, so nothing is duplicated. The preview suggests Track, Not applicable or Skip for each AD, and flags superseded or non-current ADs, model mismatches, appliance or STC-only ADs, and repetitive actions. |
 | Inspections | Shared inspection types with hour, month, and day recurrence, plus history. Each says what overdue means (grounded, no IFR, no transponder, advisory); an annual can also count as the 100-hour, and the 100-hour's 10-hour overrun is credited (91.409(b)). One click adds the standard Part 91 set. |
 | Logbook | Maintenance entries with search and a link to a scanned document page. Records the signer's certificate kind and number and an inspection's result, and flags what 43.9 / 43.11 needs that's missing. Entries transcribed by Claude stay "unverified" until someone checks them against the scan. Entry templates (built-in pilot preventive maintenance per 43.3(g) and Part 43 Appendix A(c); admins add and edit their own under Admin → Logbook templates). Engine and propeller entries link the component and record its total time and time since overhaul (SMOH/SFOH/SNEW) at the entry, worked out from the entry's airframe total time; sub-components (an oil filter on the engine…) can be included with their own times. Print entries as a PDF on Avery 5163/8163 or 5164/8164 labels or half-letter/letter pages (boxed) to sign and put in the paper logbook. |
-| Documents | Collections, multi-file documents with a page viewer, per-document share visibility, bulk upload, and expiration dates (registration, insurance…). Their text is read for search: PDF text layers directly, scans by Tesseract OCR (in the image) or optionally Claude. |
+| Documents | Collections, multi-file documents with a page viewer (PDFs drawn page by page with PDF.js on phones, fetching only the pages viewed), per-document share visibility, bulk upload, and expiration dates (registration, insurance…). Their text is read for search: PDF text layers directly, scans by Tesseract OCR (in the image) or optionally Claude. |
 | Electronic signatures | Logbook entries can be signed electronically along the lines of AC 120-78B chapter 2: the signer reviews the entry, picks their certificate, re-enters their password (or signs in again with SSO) and confirms a "Certified by" statement. The signature records who, which certificate, the statement, the time and a SHA-256 fingerprint of the entry, sealed by the server; the signer gets an email. Signed entries are locked: a correction is a new signed entry that supersedes the original. Owners can invite an outside mechanic to sign one entry with their own account. Disabled accounts can't sign; their past signatures stay. |
 | Records integrity | Every change to maintenance records is kept (who, when, field by field) in a hash chain per aircraft (Activity → Record history). Nightly: a verified SQLite backup in `storage/backups` (how many are kept: Admin → Settings), then a check of the history chains and every signature; admins are emailed on a problem (Admin → About). Software versions are recorded. A records package (Access & Sharing) bundles every entry as a PDF with signatures, a signature register, the history, the status report and the `.sam.zip` for the FAA or a buyer, with a README (and a ready-to-run `viewer/docker-compose.yml`) so the recipient can browse the data in their own local copy of the app. Scans of paper logbooks can be marked as legacy records, with an "electronic records since" date per aircraft. |
 | Off-site backup | Nightly copy of the verified database snapshot (newest 30 kept) and every new uploaded file to Google Drive, using your own Google OAuth client and the `drive.file` scope (the app sees only its own files). Restore test from the admin page; failures emailed to admins; `bin/rails offsite:restore_files` brings files back after a restore. |
@@ -157,26 +157,31 @@ To back up or move a single aircraft with all its files, use **More → Download
 | Weight & balance | History of empty weight and CG (linked to the alteration that changed them) and a loading calculator: takeoff and landing weight and CG against max gross and the CG envelope. The envelope can be entered as CG (inches) or as moment (lb-in/1000, as in POH moment charts and Garmin Pilot). |
 | Status report | A printable maintenance status (91.417(a)(2)): total times, life-limited parts, time since overhaul, inspections, ADs with method and revision, major alterations, open discrepancies. Also on maintenance share links. |
 | Calendar feed | A private iCalendar link (Profile) with everything coming due on your aircraft as all-day events; hour-based items get a date projected from the past year's flying. |
-| Reminders | A Monday email to owners when something is overdue or coming due, and to anyone whose certificate (e.g. an IA) is about to expire; admins also get the records audit due date (needs SMTP; users can turn it off). |
+| Reminders | A Monday email to those whose role gets reminders (Owners and Mechanics by default) when something is overdue or coming due, plus push alerts when something becomes overdue, and to anyone whose certificate (e.g. an IA) is about to expire; admins also get the records audit due date (needs SMTP; users can turn it off). |
 | Oil and fuel | Records, trend charts, and averages (last 20 intervals, IQR outlier filtering, manual exclusion). |
-| Activity log | Every write is recorded as an `AircraftEvent`. |
-| Access | Admin, owner, and pilot roles, plus share links (Current Status or Maintenance Detail, optional expiry, at most 10 per aircraft). Admins can disable accounts; a disabled account can't sign in or sign entries, and its past signatures stay. |
+| Activity log | Every write is recorded as an `AircraftEvent`; the Activity tab loads them as you scroll. |
+| Access | Configurable roles per aircraft (see [Roles](#roles)), plus share links (Current Status or Maintenance Detail, optional expiry, at most 10 per aircraft). Admins can disable accounts; a disabled account can't sign in or sign entries, and its past signatures stay. |
 | Sign-in security | Passwords of at least 12 characters, checked against known breaches (Have I Been Pwned, k-anonymity). 10 failed sign-ins in a row lock an account for 15 minutes from any address, and the user is emailed; admins can unlock. Optional authenticator-app (TOTP) codes with recovery codes for password and emailed-link sign-in and for signing entries; admins can reset them. Rate limits per address on every sign-in form. |
+| Phones and offline | Installable (PWA). Flights and squawks logged without signal, or with one too weak to answer within 10 seconds, are kept on the device and sent later, never twice. The Fleet, Overview, W&B, Log Flight and Report Squawk pages are saved ahead of time; any other page falls back to an offline page. The top bar turns red when the server can't be reached, and a ring shows saving and sending progress. |
+| REST API | Personal and integration tokens with scopes, read endpoints, squawks, draft logbook entries for signing in the app, and signed webhooks ([docs](docs/guide/api.md)). Follows the person's role. |
 | Help | The [user guide](docs/guide/README.md), shown in the app under **Help**. |
 
 ### Roles
 
-| Action | Admin | Owner | Pilot |
-|---|:-:|:-:|:-:|
-| View everything on the aircraft | ✓ | ✓ | ✓ |
-| Update hours, log flights, add squawks/notes/oil/fuel | ✓ | ✓ | ✓ |
-| Defer squawks (91.213(d)) | ✓ | ✓ | ✓ |
-| Sign logbook entries with their own certificate | ✓ | ✓ | ✓ |
-| Edit or delete squawks and notes, resolve squawks | ✓ | ✓ | |
-| Components, logbook, ADs, inspections, documents, major records | ✓ | ✓ | |
-| Edit or delete aircraft, manage people and share links | ✓ | ✓ | |
-| Create aircraft (creator becomes owner) | ✓ | ✓ | ✓ |
-| Users, component types, airports, templates, settings, off-site backup, procedures and audits | ✓ | | |
+Each person has a role on each aircraft, and a role is a set of permissions (`app/models/permission.rb`) that administrators change under **Admin → Roles**, where they can also add their own. The built-in roles as they come:
+
+| Action | Viewer | Pilot | Mechanic | Owner |
+|---|:-:|:-:|:-:|:-:|
+| View everything on the aircraft | ✓ | ✓ | ✓ | ✓ |
+| Log flights, correct own flights | | ✓ | | ✓ |
+| Update hours, report and defer squawks (91.213(d)), add notes/oil/fuel | | ✓ | ✓ | ✓ |
+| Sign logbook entries with their own certificate | | ✓ | ✓ | ✓ |
+| Logbook, components, ADs, inspections, documents, major records, W&B; edit squawks, notes, oil/fuel | | | ✓ | ✓ |
+| Reminders and overdue alerts | | | ✓ | ✓ |
+| Correct or delete any flight, imports, exports, restore from history | | | | ✓ |
+| Edit or delete the aircraft, manage people and share links | | | | ✓ |
+
+Owner always has every permission. Only an Owner can give the Owner role, nobody changes their own, and every aircraft keeps an Owner. Administrators can do everything on every aircraft and manage users, roles, component types, airports, templates, settings, off-site backup, procedures and audits. Anyone can create an aircraft and becomes its Owner. Controllers declare the permission each action needs (`requires_permission`); a write with none declared is refused.
 
 Users who aren't on an aircraft get a 404 for it, identical to a missing record.
 

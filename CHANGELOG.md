@@ -2,6 +2,22 @@
 
 Each release has a **version** (year.month.release, e.g. 2026.11.0) and a **build** (the exact source commit, shown on Admin → About). The newest release is first.
 
+## 2026.11.6
+
+### Changes
+
+- **PDFs show on phones.** Android showed nothing for a PDF document and iPhones only its first page. On phones and tablets every page is now drawn in the app, as it scrolls into view, downloading only the parts of the file those pages need (a long manual opens quickly and doesn't use up mobile data). Computers keep the browser's own PDF viewer.
+- **Connection status in the top bar.** It turns red when the server can't be reached, and back on its own when it can. A ring fills while pages are saved for offline use or what was logged offline is sent; it's amber with a count while flights or squawks wait to send.
+- **A weak signal counts as no signal.** Log Flight and Report Squawk say "Sending…" and, if the server doesn't answer within 10 seconds (a minute with photos), keep the entry on the phone and send it when the connection's back. If it got through after all, it isn't logged twice. Every page falls back to its offline copy or the offline page instead of loading forever.
+- **The activity log loads as you scroll** (it stopped at 200 events).
+- **What's new** shows the running version's notes on Admin → About; older releases fold to one line each.
+- **REST API** for other programs, such as a script that pulls what's coming due or a work-order system: read aircraft, parts, due items, inspections, ADs, squawks and logbook entries; report and update squawks; send draft logbook entries to be signed in the app. Webhooks announce squawks reported, updated and resolved, entries signed, and drafts completed. Personal tokens are made in Profile. The API never signs an entry; see Help → REST API.
+
+### For administrators
+
+- **Admin → Integrations** makes tokens for other systems, acting for the person each request names, limited to the aircraft chosen, plus webhook endpoints.
+- The update adds the API's tables; they're created automatically when the new version starts.
+
 ## 2026.11.5
 
 ### Changes

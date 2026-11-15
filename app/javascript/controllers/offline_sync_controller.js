@@ -2,6 +2,8 @@ import { Controller } from "@hotwired/stimulus"
 import { t } from "i18n"
 import { queue } from "controllers/offline_queue"
 
+const report = (name, detail) => document.dispatchEvent(new CustomEvent(name, { detail }))
+
 // On every page: sends the flights and squawks this user saved offline once
 // there's a connection, says what happened, and shows the count on the app
 // icon. A rejected item stays until it's discarded.
@@ -23,19 +25,24 @@ export default class extends Controller {
   async sync() {
     let items
     try { items = await queue.mine() } catch (_) { return }
-    if (!items.length) { this.badge(0); return this.show("") }
+    if (!items.length) { this.badge(0); report("sam:waiting", { count: 0 }); return this.show("") }
     if (!navigator.onLine || this.running) return this.status(items)
     this.running = true
     const sent = []
+    const sending = items.filter((i) => !i.error)
     try {
-      for (const item of items.filter((i) => !i.error)) {
+      for (const [ index, item ] of sending.entries()) {
+        report("sam:progress", { source: "send", done: index, total: sending.length })
         const result = await this.send(item)
-        if (result === "sent") { await queue.remove(item.id); sent.push(item) }
+        if (result === "sent") { await queue.remove(item.id); sent.push(item); report("sam:reachable") }
         else if (result === "signin") { this.show(t("offline.sign_in")); return }
-        else if (result === "offline") break
+        else if (result === "offline") { report("sam:unreachable"); break }
         else { item.error = result; await queue.put(item) }
       }
-    } finally { this.running = false }
+    } finally {
+      this.running = false
+      report("sam:progress", { source: "send", done: 0, total: 0 })
+    }
     this.status(await queue.mine(), sent)
   }
 
@@ -68,6 +75,7 @@ export default class extends Controller {
     }
     this.show(parts.join(" "), failed)
     this.badge(items.length)
+    report("sam:waiting", { count: waiting.length })
   }
 
   // The number of unsent items on the installed app's icon.

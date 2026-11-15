@@ -8,6 +8,9 @@ import { currentUser } from "controllers/offline_queue"
 // your aircraft change. Signing out clears it.
 const EVERY = 60 * 60 * 1000
 
+// How far along it is, for the ring in the top bar (connection_controller.js).
+const progress = (done, total) => document.dispatchEvent(new CustomEvent("sam:progress", { detail: { source: "prep", done, total } }))
+
 export default class extends Controller {
   static values = { aircraft: Array }
 
@@ -30,13 +33,22 @@ export default class extends Controller {
       forms[a.flight] = { tail: a.tail, kind: "flight" }
       forms[a.squawk] = { tail: a.tail, kind: "squawk" }
     }
-    for (const path of paths) {
-      if (!navigator.onLine) return
-      // One at a time, after the page has settled, so it never competes with what you're doing.
-      await new Promise((resolve) => (window.requestIdleCallback || setTimeout)(resolve, { timeout: 2000 }))
-      try { await fetch(path, { credentials: "same-origin", headers: { Accept: "text/html" } }) } catch (_) { return }
-    }
-    await this.savePictures(this.aircraftValue.flatMap((a) => a.pictures || []))
+    const pictures = this.aircraftValue.flatMap((a) => a.pictures || [])
+    const total = paths.length + 1
+    try {
+      for (const [ index, path ] of paths.entries()) {
+        progress(index, total)
+        if (!navigator.onLine) return
+        // One at a time, after the page has settled, so it never competes with what you're doing.
+        await new Promise((resolve) => (window.requestIdleCallback || setTimeout)(resolve, { timeout: 2000 }))
+        try { await fetch(path, { credentials: "same-origin", headers: { Accept: "text/html" } }) } catch (_) {
+          document.dispatchEvent(new CustomEvent("sam:unreachable"))
+          return
+        }
+      }
+      progress(paths.length, total)
+      await this.savePictures(pictures)
+    } finally { progress(total, total) }
     try {
       localStorage.setItem("sam-offline-forms", JSON.stringify({ ...JSON.parse(localStorage.getItem("sam-offline-forms") || "{}"), ...forms }))
       localStorage.setItem("sam-offline-prep", JSON.stringify({ signature, at: Date.now() }))

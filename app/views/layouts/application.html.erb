@@ -27,11 +27,15 @@
   <body class="min-h-full text-slate-800" data-controller="offline-sync page-age app-update<%= " offline-prep" if current_user %>"<% if current_user %> data-offline-prep-aircraft-value="<%= offline_pages.to_json %>"<% end %>>
     <%= t(".skip_to_content_html") %>
     <%# Solid and stuck to the top: iOS 26 home-screen apps then extend its color under the status bar instead of blurring it. %>
-    <header class="sticky top-0 z-40 bg-header text-white">
+    <%# Red when the server can't be reached; the ring shows saving for offline and sending (connection_controller.js). %>
+    <header class="sticky top-0 z-40 bg-header text-white" data-controller="connection">
       <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <%= link_to root_path, class: "flex items-center gap-2 font-semibold tracking-tight whitespace-nowrap" do %>
           <span class="text-xl">✈</span> <span class="hidden sm:inline"><%= t(".simple_aircraft_manager") %></span><span class="sm:hidden" aria-label="<%= t(".simple_aircraft_manager") %>"><%= t(".sam") %></span>
         <% end %>
+        <div class="flex items-center gap-2 sm:gap-4">
+        <span class="sync-ring" role="img" hidden data-connection-target="ring"><span data-connection-target="label"></span></span>
+        <span class="sr-only" role="status" data-connection-target="announce"></span>
         <% if current_user %>
           <%# Phones: Fleet, theme and one menu for the rest. %>
           <nav class="flex items-center gap-1 text-sm sm:hidden" aria-label="<%= t(".main") %>">
@@ -79,6 +83,7 @@
             <%= button_to t(".sign_out"), session_path, method: :delete, class: "rounded bg-white/10 px-2 py-1 hover:bg-white/20", form: { data: { controller: "sign-out", action: "submit->sign-out#clean" } } %>
           </nav>
         <% end %>
+        </div>
       </div>
     </header>
     <div class="hidden bg-sky-50 px-4 py-2 text-center text-sm text-sky-900 ring-1 ring-sky-200" data-page-age-target="banner" role="status"></div>

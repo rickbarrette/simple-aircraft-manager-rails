@@ -4,8 +4,8 @@ class ApplicationController < ActionController::Base
   include TimeZones
   allow_browser versions: :modern
 
+  include RejectsNullBytes
   prepend_before_action :redirect_to_setup
-  prepend_before_action :reject_null_bytes
   before_action { Current.ip_address = request.remote_ip } # for record history
   helper_method :current_user
 
@@ -36,20 +36,6 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # No form sends a null byte; some libraries (password hashing, file paths)
-  # raise on one, so refuse the request up front.
-  def reject_null_bytes
-    head :bad_request if contains_null_byte?(request.params)
-  end
-
-  def contains_null_byte?(value)
-    case value
-    when String then value.include?("\0")
-    when Hash then value.any? { |k, v| contains_null_byte?(k) || contains_null_byte?(v) }
-    when Array then value.any? { contains_null_byte?(_1) }
-    else false
-    end
-  end
 
   def current_user = Current.user
 

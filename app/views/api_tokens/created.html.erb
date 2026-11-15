@@ -1,0 +1,8 @@
+<% content_for :title, t(".title") %>
+<section class="card card-body max-w-xl space-y-3">
+  <h1 class="card-title"><%= t(".title") %></h1>
+  <p class="text-sm text-slate-600"><%= t(".copy_now", name: @token.name) %></p>
+  <input class="input font-mono text-sm" value="<%= @token.token %>" readonly aria-label="<%= t(".token") %>">
+  <p class="hint"><%= t(".how_to_use_html") %></p>
+  <p><%= link_to t(".done"), edit_profile_path(anchor: "api"), class: "btn-primary" %></p>
+</section>

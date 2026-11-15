@@ -21,11 +21,7 @@ class SquawksController < ApplicationController
     end
     @squawk = @aircraft.squawks.new(squawk_params.merge(reported_by: current_user))
     if @squawk.save
-      log_event("squawk", t("flash.squawks.squawk_reported_2", priority_label: @squawk.priority_label), notes: @squawk.issue_reported.truncate(200))
-      if @squawk.grounding?
-        PushNotifier.notify(@aircraft.users.merge(User.active).where.not(id: current_user.id), :grounding_squawk, path: aircraft_squawks_path(@aircraft),
-                            tag: "squawk-#{@squawk.id}", tail: @aircraft.tail_number, issue: @squawk.issue_reported.truncate(120))
-      end
+      SquawkReported.call(@squawk, by: current_user)
       redirect_to aircraft_squawks_path(@aircraft), notice: t("flash.squawks.squawk_reported")
     else
       render :new, status: :unprocessable_entity

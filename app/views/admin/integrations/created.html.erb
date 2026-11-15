@@ -1,0 +1,15 @@
+<% content_for :title, @integration.name %>
+<section class="card card-body max-w-xl space-y-3">
+  <h1 class="card-title"><%= @integration.name %></h1>
+  <p class="text-sm text-slate-600"><%= t(".copy_now") %></p>
+  <% if @integration.token %>
+    <label class="label" for="integration_token"><%= t(".token") %></label>
+    <input id="integration_token" class="input font-mono text-sm" value="<%= @integration.token %>" readonly>
+  <% end %>
+  <% if @secret %>
+    <label class="label" for="webhook_secret"><%= t(".webhook_secret") %></label>
+    <input id="webhook_secret" class="input font-mono text-sm" value="<%= @secret %>" readonly>
+    <p class="hint"><%= t(".secret_hint") %></p>
+  <% end %>
+  <p><%= link_to t(".done"), admin_integration_path(@integration), class: "btn-primary" %></p>
+</section>

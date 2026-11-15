@@ -30,9 +30,6 @@ class AirTrailClient
     @allow_private = allow_private || self.class.allowed_hosts.include?(@base.host.to_s.downcase)
   end
 
-  # Host name → IP addresses (replaceable in tests, which have no DNS).
-  class_attribute :resolver, default: ->(host) { Addrinfo.getaddrinfo(host, nil, nil, :STREAM).map(&:ip_address) }
-
   def self.allowed_hosts = ENV.fetch("AIRTRAIL_ALLOWED_HOSTS", "").split(",").map { _1.strip.downcase }.compact_blank
 
   def me = request(:get, "/api/v1/me").fetch("data")
@@ -85,23 +82,12 @@ class AirTrailClient
     raise NetworkError, I18n.t("services.air_trail.can_t_reach_airtrail_at", host: @base.host, message: e.message)
   end
 
-  # The address to connect to: the host's first, once all of its addresses are
-  # ones this connection may reach.
+  # The address to connect to (see OutboundAddress).
   def address(host)
-    ips = resolver.call(host).map { IPAddr.new(_1.sub(/%.*/, "")) }.uniq
-    raise SocketError, "no address" if ips.empty?
-    ips.each do |ip|
-      ip = ip.native # ::ffff:10.0.0.1 → 10.0.0.1
-      reason = if ip.loopback? || ip.link_local? || UNREACHABLE.any? { _1.include?(ip) } then :never
-      elsif (ip.private? || CGNAT.include?(ip)) && !@allow_private then :private
-      end
-      raise BlockedAddress, I18n.t("services.air_trail.blocked_#{reason}", host: host) if reason
-    end
-    ips.first.to_s
+    OutboundAddress.resolve!(host, allow_private: @allow_private)
+  rescue OutboundAddress::Blocked => e
+    raise BlockedAddress, I18n.t("services.air_trail.blocked_#{e.reason}", host: host)
   end
-
-  UNREACHABLE = [ IPAddr.new("0.0.0.0/8"), IPAddr.new("::/128"), IPAddr.new("224.0.0.0/4"), IPAddr.new("ff00::/8") ].freeze
-  CGNAT = IPAddr.new("100.64.0.0/10") # shared address space, e.g. Tailscale
 
   def handle(response)
     status = response.code.to_i

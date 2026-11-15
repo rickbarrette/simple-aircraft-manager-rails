@@ -11,6 +11,15 @@ class Squawk < ApplicationRecord
   belongs_to :logbook_entry, optional: true
   has_many_attached :attachments
 
+  # Integrations hear about squawks (webhooks), once the change is saved.
+  after_create_commit { Webhooks.publish("squawk.created", aircraft: aircraft, data: ApiPresenter.squawk(self)) }
+  after_update_commit do
+    next if (saved_changes.keys - %w[updated_at]).empty?
+    event = saved_change_to_resolved? && resolved? ? "squawk.resolved" : "squawk.updated"
+    Webhooks.publish(event, aircraft: aircraft, data: ApiPresenter.squawk(self))
+  end
+
+  normalizes :external_ref, with: ->(r) { r.to_s.strip.first(200).presence }
   validates :priority, inclusion: { in: PRIORITIES.keys }
   validates :issue_reported, presence: true
   validates_uploads :attachments

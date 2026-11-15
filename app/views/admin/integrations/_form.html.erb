@@ -1,0 +1,32 @@
+<%= form_with model: integration, url: (integration.persisted? ? admin_integration_path(integration) : admin_integrations_path), scope: :api_token,
+      class: "card card-body max-w-2xl space-y-5", data: { turbo: false } do |f| %>
+  <%= f.errors_summary %>
+  <% if endpoint&.errors&.any? %><div class="rounded-md bg-red-50 p-3 text-sm text-red-700"><%= endpoint.errors.full_messages.to_sentence %></div><% end %>
+  <%= f.field :name, hint: t(".name_hint") %>
+  <fieldset>
+    <legend class="label"><%= t(".scopes") %></legend>
+    <% ApiToken::SCOPES.each do |key, label| %>
+      <label class="flex items-start gap-2 text-sm"><%= check_box_tag "api_token[scopes][]", key, integration.scopes.include?(key), id: "scope_#{key.parameterize}", class: "mt-1" %> <span><%= label %></span></label>
+    <% end %>
+  </fieldset>
+  <fieldset>
+    <legend class="label"><%= t(".aircraft") %></legend>
+    <p class="hint mb-1"><%= t(".aircraft_hint") %></p>
+    <% Aircraft.ordered.each do |a| %>
+      <label class="mr-4 inline-flex items-center gap-2 text-sm"><%= check_box_tag "api_token[aircraft_ids][]", a.id, Array(integration.aircraft_ids).include?(a.id), id: "aircraft_#{a.id}" %> <%= a.tail_number %></label>
+    <% end %>
+  </fieldset>
+  <fieldset class="space-y-2 border-t border-slate-200 pt-4">
+    <legend class="label"><%= t(".webhook") %></legend>
+    <p class="hint"><%= t(".webhook_hint") %></p>
+    <%= url_field_tag "webhook[url]", endpoint&.url, class: "input", placeholder: "https://redmine.example.com/sam/webhook", "aria-label": t(".webhook_url") %>
+    <% WebhookEndpoint::EVENTS.each do |key, label| %>
+      <label class="flex items-start gap-2 text-sm"><%= check_box_tag "webhook[events][]", key, Array(endpoint&.events).include?(key), id: "event_#{key.parameterize}", class: "mt-1" %> <span><%= label %> <code class="text-xs text-slate-500"><%= key %></code></span></label>
+    <% end %>
+    <% if endpoint&.persisted? %>
+      <%= hidden_field_tag "webhook[enabled]", "0", id: nil %>
+      <label class="flex items-center gap-2 text-sm"><%= check_box_tag "webhook[enabled]", "1", endpoint.enabled %> <%= t(".webhook_enabled") %></label>
+    <% end %>
+  </fieldset>
+  <%= f.submit integration.persisted? ? t(".save") : t(".create"), class: "btn-primary" %>
+<% end %>

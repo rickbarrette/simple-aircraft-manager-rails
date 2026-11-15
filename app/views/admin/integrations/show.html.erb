@@ -1,0 +1,49 @@
+<% content_for :title, @integration.name %>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold"><%= @integration.name %> <% if @integration.revoked? %><span class="badge-red align-middle text-sm"><%= t(".revoked") %></span><% end %></h1>
+  <% unless @integration.revoked? %>
+    <div class="flex gap-2">
+      <%= link_to t(".edit"), edit_admin_integration_path(@integration), class: "btn-secondary" %>
+      <%= button_to t(".revoke"), admin_integration_path(@integration), method: :delete, class: "btn-danger",
+            form: { data: { turbo_confirm: t(".revoke_confirm", name: @integration.name) } } %>
+    </div>
+  <% end %>
+</div>
+<div class="grid max-w-5xl items-start gap-5 lg:grid-cols-2">
+  <section class="card card-body">
+    <h2 class="card-title"><%= t(".token") %></h2>
+    <dl class="mt-2 grid gap-y-2 text-sm">
+      <div class="detail-row"><dt><%= t(".hint") %></dt><dd><code><%= @integration.token_hint %>…</code></dd></div>
+      <div class="detail-row"><dt><%= t(".scopes") %></dt><dd><%= @integration.scopes.map { ApiToken::SCOPES[_1] }.to_sentence %></dd></div>
+      <div class="detail-row"><dt><%= t(".aircraft") %></dt><dd><%= Aircraft.where(id: Array(@integration.aircraft_ids)).order(:tail_number).pluck(:tail_number).join(", ").presence || "—" %></dd></div>
+      <div class="detail-row"><dt><%= t(".created") %></dt><dd><%= fmt_time(@integration.created_at) %> · <%= @integration.user.display_name %></dd></div>
+      <div class="detail-row"><dt><%= t(".last_used") %></dt><dd><%= @integration.last_used_at ? "#{fmt_time(@integration.last_used_at)} · #{@integration.last_used_ip}" : t(".never") %></dd></div>
+    </dl>
+  </section>
+  <section class="card card-body">
+    <h2 class="card-title"><%= t(".webhook") %></h2>
+    <% if @endpoint %>
+      <dl class="mt-2 grid gap-y-2 text-sm">
+        <div class="detail-row"><dt><%= t(".url") %></dt><dd class="break-all"><%= @endpoint.url %> <% unless @endpoint.enabled %><span class="badge-gray"><%= t(".paused") %></span><% end %></dd></div>
+        <div class="detail-row"><dt><%= t(".events") %></dt><dd><%= @endpoint.events.map { WebhookEndpoint::EVENTS[_1] }.to_sentence %></dd></div>
+      </dl>
+      <% unless @integration.revoked? %>
+        <div class="mt-3"><%= button_to t(".new_secret"), new_secret_admin_integration_path(@integration), class: "btn-secondary btn-sm",
+              form: { data: { turbo: false, turbo_confirm: t(".new_secret_confirm") } } %></div>
+      <% end %>
+    <% else %>
+      <p class="mt-1 text-sm text-slate-600"><%= t(".no_webhook") %></p>
+    <% end %>
+  </section>
+</div>
+<% if @deliveries.any? %>
+  <section class="card mt-5 max-w-5xl">
+    <div class="card-header"><h2 class="card-title"><%= t(".recent_deliveries") %></h2></div>
+    <table class="table"><thead><tr><th><%= t(".when") %></th><th><%= t(".event") %></th><th><%= t(".result") %></th></tr></thead>
+      <tbody><% @deliveries.each do |d| %><tr>
+        <td class="text-xs"><%= fmt_time(d.created_at) %></td><td><code class="text-xs"><%= d.event %></code></td>
+        <td class="text-xs"><span class="<%= { "delivered" => "badge-green", "failed" => "badge-red" }.fetch(d.status, "badge-gray") %>"><%= t(".status.#{d.status}") %></span>
+          <%= d.response_status %> <%= d.last_error %> <% if d.attempts > 1 %>· <%= t(".attempts", count: d.attempts) %><% end %></td>
+      </tr><% end %></tbody></table>
+  </section>
+<% end %>

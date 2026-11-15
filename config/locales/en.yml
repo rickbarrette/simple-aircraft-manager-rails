@@ -4,7 +4,26 @@
 # a controller name are its views (t(".key") in the view).
 
 en:
+  api_tokens:
+    created:
+      title: Your new API token
+      copy_now: "Copy the token for %{name} now: it isn't shown again (only its first characters are kept, to tell tokens apart)."
+      token: API token
+      how_to_use_html: 'Send it with each request: <code>Authorization: Bearer &lt;token&gt;</code>. See the API reference in Help.'
+      done: Done
   labels:
+    api_token:
+      scopes:
+        read: Read aircraft, parts, due items, squawks and logbook entries
+        'squawks:write': Report and update squawks
+    webhook_endpoint:
+      events:
+        squawk:
+          created: A squawk is reported
+          updated: A squawk is changed
+          resolved: A squawk is resolved
+        entry:
+          signed: A logbook entry is signed
     aircraft:
       statuses:
         AVAILABLE: Available
@@ -286,6 +305,10 @@ en:
           signed_locked: This entry is signed, so it can't be changed. Make a correction entry instead
         squawk:
           confirm: 'Confirm: %{check}'
+        api_token:
+          attributes:
+            kind:
+              admins_only: "integration tokens can only be made by an administrator"
         ad_compliance:
           needs_owner: Must belong to an aircraft or component
           attributes:
@@ -705,6 +728,11 @@ en:
           envelope_weights: Envelope weights must be more than 0
           fuel_weight: Fuel weight per gallon must be between 4 and 9 lb
   flash:
+    admin_integrations:
+      saved: Integration saved.
+      revoked: "%{name} revoked: its token no longer works and its webhook is stopped."
+    api_tokens:
+      revoked: Token revoked. Programs using it can no longer connect.
     push_subscriptions:
       not_saved: "This browser's push service (%{host}) isn't one the app sends to."
       unknown_device: Unknown browser
@@ -1180,6 +1208,69 @@ en:
       matches: Matches
       update: Update
   admin:
+    integrations:
+      show:
+        revoked: Revoked
+        edit: Edit
+        revoke: Revoke
+        revoke_confirm: "Revoke %{name}? Its token stops working at once and its webhook stops. This can't be undone; make a new integration to reconnect."
+        token: Token
+        hint: Starts with
+        scopes: May
+        aircraft: Aircraft
+        created: Created
+        last_used: Last used
+        never: never
+        webhook: Webhook
+        url: Address
+        paused: Paused
+        events: Events
+        new_secret: New secret
+        new_secret_confirm: "Make a new webhook secret? The other system needs the new one; webhooks signed with the old one will fail its check."
+        no_webhook: "None: the system only calls the API."
+        recent_deliveries: Recent webhooks
+        when: When
+        event: Event
+        result: Result
+        attempts:
+          one: "%{count} attempt"
+          other: "%{count} attempts"
+        status:
+          pending: Pending
+          delivered: Delivered
+          failed: Failed
+      created:
+        copy_now: "Copy these now: they aren't shown again."
+        token: API token
+        webhook_secret: Webhook secret
+        secret_hint: The other system checks each webhook with it (see the API reference).
+        done: Done
+      new:
+        new_integration: New integration
+      form:
+        name_hint: The system it's for, e.g. Redmine.
+        scopes: What it may do
+        aircraft: Aircraft it may reach
+        aircraft_hint: When it acts for a person, only those of these aircraft that person can see.
+        webhook: Webhook (optional)
+        webhook_hint: "Where to post changes. Each post is signed with a secret shown once after saving (header SAM-Signature)."
+        webhook_url: Webhook address
+        webhook_enabled: Send webhooks
+        save: Save
+        create: Create integration
+      index:
+        integrations: Integrations
+        new_integration: New integration
+        what_html: "Let another system, such as Redmine, work with the aircraft through the REST API (%{docs}). Each integration has its own token, limited to the aircraft and actions you choose; its changes name the person they're for, so the record history shows who. It can be told about changes by webhook."
+        api_docs: API reference
+        name: Name
+        aircraft: Aircraft
+        webhook: Webhook
+        last_used: Last used
+        revoked: Revoked
+        ago: "%{ago} ago"
+        never: never
+        none_yet: No integrations yet.
     about:
       show:
         about: About
@@ -2471,6 +2562,7 @@ en:
       sign_out: Sign out
   layouts:
     application:
+      integrations: Integrations
       skip_to_content_html: <a href="#main" class="skip-link">Skip to content</a>
       simple_aircraft_manager: Simple Aircraft Manager
       sam: SAM
@@ -2946,6 +3038,15 @@ en:
       subject: Reset your password
   profiles:
     edit:
+      revoke: Revoke
+      api_tokens: API tokens
+      api_tokens_what_html: "Keys for scripts and other programs to read your aircraft and report squawks through the REST API, acting as you (%{docs}). Treat a token like a password: anyone who has it can do what it allows."
+      api_docs: API reference
+      api_token_used: used %{ago} ago
+      api_token_unused: never used
+      revoke_token: "Revoke %{name}? Programs using it stop working."
+      api_token_name: Name (what it's for)
+      create_api_token: Create token
       your_profile: Your Profile
       account: Account
       email: Email

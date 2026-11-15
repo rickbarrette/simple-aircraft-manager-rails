@@ -57,11 +57,11 @@ class InternetExposureTest < ActionDispatch::IntegrationTest
   private
 
   def resolving_to(*ips)
-    old = AirTrailClient.resolver
-    AirTrailClient.resolver = ->(_) { ips }
+    old = OutboundAddress.resolver
+    OutboundAddress.resolver = ->(_) { ips }
     yield
   ensure
-    AirTrailClient.resolver = old
+    OutboundAddress.resolver = old
   end
 
   def with_env(vars)

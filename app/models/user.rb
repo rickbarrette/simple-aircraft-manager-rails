@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :aircraft_roles, dependent: :destroy
   has_many :push_subscriptions, dependent: :delete_all
+  has_many :api_tokens, dependent: :destroy
 
   normalizes :time_zone, with: ->(z) { z.strip.presence }
   validates :time_zone, inclusion: { in: ->(_) { ActiveSupport::TimeZone.all.map(&:name) } }, allow_nil: true

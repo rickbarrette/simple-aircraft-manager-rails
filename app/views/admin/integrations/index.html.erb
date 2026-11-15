@@ -1,0 +1,17 @@
+<% content_for :title, t(".integrations") %>
+<div class="mb-4 flex items-center justify-between"><h1 class="text-2xl font-bold"><%= t(".integrations") %></h1><%= link_to t(".new_integration"), new_admin_integration_path, class: "btn-primary" %></div>
+<p class="mb-4 max-w-3xl text-sm text-slate-600"><%= t(".what_html", docs: link_to(t(".api_docs"), help_page_path("api"), class: "link")) %></p>
+<% if @integrations.any? %>
+  <section class="card"><table class="table">
+    <thead><tr><th><%= t(".name") %></th><th><%= t(".aircraft") %></th><th><%= t(".webhook") %></th><th><%= t(".last_used") %></th></tr></thead>
+    <tbody><% @integrations.each do |i| %><tr>
+      <td><%= link_to i.name, admin_integration_path(i), class: "link font-medium" %> <% if i.revoked? %><span class="badge-red"><%= t(".revoked") %></span><% end %>
+        <div class="text-xs text-slate-500"><code><%= i.token_hint %>…</code></div></td>
+      <td class="text-xs"><%= Aircraft.where(id: Array(i.aircraft_ids)).order(:tail_number).pluck(:tail_number).join(", ").presence || "—" %></td>
+      <td class="text-xs"><%= (e = i.webhook_endpoints.first) ? e.url : "—" %></td>
+      <td class="text-xs text-slate-500"><%= i.last_used_at ? t(".ago", ago: time_ago_in_words(i.last_used_at)) : t(".never") %></td>
+    </tr><% end %></tbody>
+  </table></section>
+<% else %>
+  <%= empty_state t(".none_yet") %>
+<% end %>

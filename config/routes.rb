@@ -27,6 +27,7 @@ Rails.application.routes.draw do
   # Home-screen shortcuts: the form for your aircraft, or a choice of aircraft.
   get "go/log-flight", to: "shortcuts#log_flight", as: :log_flight_shortcut
   get "go/report-squawk", to: "shortcuts#report_squawk", as: :report_squawk_shortcut
+  resources :api_tokens, path: "profile/api_tokens", only: %i[create destroy]
   resources :certificates, path: "profile/certificates", controller: "user_certificates", only: %i[create update destroy]
   resource :air_trail_connection, path: "profile/airtrail", only: %i[show create update destroy] do
     post :test
@@ -171,9 +172,31 @@ Rails.application.routes.draw do
     post "about/test_reminder", to: "about#test_reminder", as: :test_reminder
     post "about/check_records", to: "about#check_records", as: :check_records
     resources :users, except: :show
+    resources :integrations do
+      post :new_secret, on: :member
+    end
     resources :component_types, except: :show
     resources :airports, except: :show do
       collection { post :refresh }
+    end
+  end
+
+  # REST API (docs/api.md): bearer tokens, JSON.
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      get "me", to: "me#show"
+      resources :aircraft, only: %i[index show] do
+        member do
+          get :components
+          get :due
+          get :inspections
+          get :ads
+          get :logbook_entries
+        end
+        resources :squawks, only: %i[index create]
+      end
+      get "squawks", to: "squawks#lookup"
+      resources :squawks, only: %i[show update]
     end
   end
 

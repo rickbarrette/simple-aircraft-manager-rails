@@ -29,6 +29,7 @@ The same pages are in the app under **Help** in the menu.
 ## Administrators
 
 - [Administration](administration.md): users, settings, templates, backups and off-site backup to Google Drive, recordkeeping procedures and audits
+- [REST API](api.md): tokens, endpoints and webhooks, for scripts and other systems such as Redmine
 
 ## Legal
 

@@ -1,0 +1,3 @@
+<% content_for :title, @integration.name %>
+<h1 class="mb-4 text-2xl font-bold"><%= @integration.name %></h1>
+<%= render "form", integration: @integration, endpoint: @endpoint %>

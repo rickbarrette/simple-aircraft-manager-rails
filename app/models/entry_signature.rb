@@ -18,6 +18,12 @@ class EntrySignature < ApplicationRecord
   validates :auth_method, inclusion: { in: AUTH_METHODS.keys + [ "imported" ] }
   validates :logbook_entry_id, uniqueness: true
   before_create { self.seal ||= compute_seal unless imported? }
+  # Integrations hear about it (webhooks); not for signatures carried over by an import.
+  after_create_commit do
+    next if imported?
+    entry = logbook_entry
+    Webhooks.publish("entry.signed", aircraft: entry.aircraft, data: ApiPresenter.logbook_entry(entry))
+  end
   before_update { throw :abort } # signatures are permanent (2.1.2.7)
   before_destroy { throw :abort unless destroyed_by_association }
 

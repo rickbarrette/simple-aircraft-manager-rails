@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_15_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -289,6 +289,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
     t.index ["component_id", "airworthiness_directive_id"], name: "idx_component_ads", unique: true
   end
 
+  create_table "api_idempotency_keys", force: :cascade do |t|
+    t.integer "api_token_id", null: false
+    t.string "key", null: false
+    t.string "request_digest", null: false
+    t.integer "response_status", null: false
+    t.text "response_body", null: false
+    t.datetime "created_at", null: false
+    t.index ["api_token_id", "key"], name: "index_api_idempotency_keys_on_api_token_id_and_key", unique: true
+    t.index ["api_token_id"], name: "index_api_idempotency_keys_on_api_token_id"
+  end
+
+  create_table "api_tokens", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "kind", default: "personal", null: false
+    t.integer "user_id", null: false
+    t.string "token_digest", null: false
+    t.string "token_hint", null: false
+    t.json "scopes", default: [], null: false
+    t.json "aircraft_ids"
+    t.datetime "last_used_at"
+    t.string "last_used_ip"
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token_digest"], name: "index_api_tokens_on_token_digest", unique: true
+    t.index ["user_id"], name: "index_api_tokens_on_user_id"
+  end
+
   create_table "app_revisions", force: :cascade do |t|
     t.string "revision", null: false
     t.datetime "built_at"
@@ -347,13 +375,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
     t.boolean "tbo_critical", default: true, null: false
     t.boolean "on_condition", default: false, null: false
     t.boolean "replacement_critical", default: false, null: false
-    t.boolean "replacement_from_install", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "expires_on"
     t.string "overhaul_kind"
     t.integer "replacement_months"
     t.integer "tbo_months"
+    t.boolean "replacement_from_install", default: false, null: false
     t.index ["aircraft_id"], name: "index_components_on_aircraft_id"
     t.index ["component_type_id"], name: "index_components_on_component_type_id"
     t.index ["parent_component_id"], name: "index_components_on_parent_component_id"
@@ -719,6 +747,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
     t.string "prev_hash"
     t.string "chain_hash", null: false
     t.datetime "created_at", null: false
+    t.integer "api_token_id"
     t.index ["aircraft_id"], name: "index_record_versions_on_aircraft_id"
     t.index ["item_type", "item_id"], name: "index_record_versions_on_item_type_and_item_id"
   end
@@ -802,9 +831,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
     t.text "deferral_notes"
     t.integer "logbook_entry_id"
     t.string "client_key"
+    t.string "external_ref"
     t.index ["aircraft_id", "client_key"], name: "index_squawks_on_aircraft_id_and_client_key", unique: true
     t.index ["aircraft_id"], name: "index_squawks_on_aircraft_id"
     t.index ["component_id"], name: "index_squawks_on_component_id"
+    t.index ["external_ref"], name: "index_squawks_on_external_ref"
     t.index ["logbook_entry_id"], name: "index_squawks_on_logbook_entry_id"
     t.index ["reported_by_id"], name: "index_squawks_on_reported_by_id"
   end
@@ -841,6 +872,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
     t.index ["calendar_token"], name: "index_users_on_calendar_token", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["sso_uid"], name: "index_users_on_sso_uid", unique: true
+  end
+
+  create_table "webhook_deliveries", force: :cascade do |t|
+    t.integer "webhook_endpoint_id", null: false
+    t.string "event", null: false
+    t.text "payload", null: false
+    t.string "status", default: "pending", null: false
+    t.integer "attempts", default: 0, null: false
+    t.integer "response_status"
+    t.string "last_error"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["webhook_endpoint_id", "created_at"], name: "index_webhook_deliveries_on_webhook_endpoint_id_and_created_at"
+    t.index ["webhook_endpoint_id"], name: "index_webhook_deliveries_on_webhook_endpoint_id"
+  end
+
+  create_table "webhook_endpoints", force: :cascade do |t|
+    t.integer "api_token_id", null: false
+    t.string "url", null: false
+    t.text "secret", null: false
+    t.json "events", default: [], null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_token_id"], name: "index_webhook_endpoints_on_api_token_id"
   end
 
   create_table "weight_balance_records", force: :cascade do |t|
@@ -884,6 +941,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
   add_foreign_key "aircraft_roles", "users"
   add_foreign_key "airport_updates", "users", column: "requested_by_id", on_delete: :nullify
   add_foreign_key "airworthiness_directives", "documents", on_delete: :nullify
+  add_foreign_key "api_idempotency_keys", "api_tokens"
+  add_foreign_key "api_tokens", "users"
   add_foreign_key "audit_runs", "users", column: "performed_by_id", on_delete: :nullify
   add_foreign_key "components", "aircraft"
   add_foreign_key "components", "component_types"
@@ -935,6 +994,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_010000) do
   add_foreign_key "squawks", "logbook_entries", on_delete: :nullify
   add_foreign_key "squawks", "users", column: "reported_by_id", on_delete: :nullify
   add_foreign_key "user_certificates", "users"
+  add_foreign_key "webhook_deliveries", "webhook_endpoints"
+  add_foreign_key "webhook_endpoints", "api_tokens"
   add_foreign_key "weight_balance_records", "aircraft"
   add_foreign_key "weight_balance_records", "documents", on_delete: :nullify
   add_foreign_key "weight_balance_records", "major_records", on_delete: :nullify

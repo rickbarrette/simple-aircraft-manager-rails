@@ -136,6 +136,34 @@
       </div>
     </section>
 
+    <section class="card card-body" id="api">
+      <h2 class="card-title"><%= t(".api_tokens") %></h2>
+      <p class="mt-1 text-sm text-slate-600"><%= t(".api_tokens_what_html", docs: link_to(t(".api_docs"), help_page_path("api"), class: "link")) %></p>
+      <% tokens = @user.api_tokens.personal.active.order(:created_at) %>
+      <% if tokens.any? %>
+        <ul class="mt-3 divide-y divide-slate-100 rounded-md ring-1 ring-slate-200">
+          <% tokens.each do |token| %>
+            <li class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
+              <span><span class="font-medium"><%= token.name %></span> <code class="text-xs text-slate-500"><%= token.token_hint %>…</code>
+                <span class="block text-xs text-slate-500"><%= token.scopes.map { ApiToken::SCOPES[_1] }.to_sentence %> ·
+                  <%= token.last_used_at ? t(".api_token_used", ago: time_ago_in_words(token.last_used_at)) : t(".api_token_unused") %></span></span>
+              <%= button_to t(".revoke"), api_token_path(token), method: :delete, class: "btn-secondary btn-sm",
+                    form: { data: { turbo_confirm: t(".revoke_token", name: token.name) } } %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+      <%= form_with model: ApiToken.new, url: api_tokens_path, class: "mt-3 space-y-2", data: { turbo: false } do |f| %>
+        <%= f.text_field :name, class: "input", placeholder: t(".api_token_name"), required: true, maxlength: 80, "aria-label": t(".api_token_name") %>
+        <fieldset class="space-y-1 text-sm">
+          <% ApiToken::SCOPES.each do |key, label| %>
+            <label class="flex items-start gap-2"><%= check_box_tag "api_token[scopes][]", key, key == "read", id: "api_token_scope_#{key.parameterize}", class: "mt-1" %> <span><%= label %></span></label>
+          <% end %>
+        </fieldset>
+        <%= f.submit t(".create_api_token"), class: "btn-secondary" %>
+      <% end %>
+    </section>
+
     <section class="card card-body">
       <h2 class="card-title"><%= t(".integrations") %></h2>
       <p class="mt-1 text-sm text-slate-600">

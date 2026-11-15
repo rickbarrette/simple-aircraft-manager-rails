@@ -112,6 +112,7 @@ Rails.application.routes.draw do
     resource :loading_setup, path: "weight_balance/loading", only: %i[edit update] # before the records' :id routes
     resources :weight_balance_records, path: "weight_balance", except: :show
     resources :aircraft_roles, path: "access", only: %i[index create update destroy]
+    resources :invitations, controller: "aircraft_invitations", only: %i[create destroy]
     resources :share_tokens, only: %i[create destroy]
     resource :export, controller: "aircraft_exports", only: :show
     resource :report, controller: "maintenance_reports", only: :show
@@ -131,6 +132,10 @@ Rails.application.routes.draw do
   # Public read-only share links (no login).
   # Invited signers (outside mechanics) sign one entry.
   get "sign/:token", to: "invited_signings#show", as: :invited_signing
+  # Invitation codes (AccessInvitation): an account and roles on aircraft.
+  get "join/:token", to: "joins#show", as: :join
+  post "join/:token/accept", to: "joins#accept", as: :accept_join
+  post "join/:token/account", to: "joins#account", as: :account_join
   post "sign/:token", to: "invited_signings#create"
   post "sign/:token/account", to: "invited_signings#account", as: :account_invited_signing
 
@@ -175,6 +180,7 @@ Rails.application.routes.draw do
       resources :aircraft_roles, controller: "user_aircraft_roles", only: %i[create update destroy]
     end
     resources :roles, except: :show
+    resources :invitations, only: %i[index new create destroy]
     resources :integrations do
       post :new_secret, on: :member
     end

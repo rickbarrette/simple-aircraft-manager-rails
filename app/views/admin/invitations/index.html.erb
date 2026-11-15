@@ -1,0 +1,28 @@
+<% content_for :title, t(".invitations") %>
+<div class="mb-2 flex items-center justify-between"><h1 class="text-2xl font-bold"><%= t(".invitations") %></h1><%= link_to t(".new_invitation"), new_admin_invitation_path, class: "btn-primary" %></div>
+<p class="mb-4 text-sm text-slate-600"><%= t(".intro") %></p>
+<section class="card">
+  <% if @invitations.any? %>
+    <table class="table">
+      <thead><tr><th><%= t(".label") %></th><th><%= t(".gives") %></th><th><%= t(".uses") %></th><th><%= t(".status") %></th><th></th></tr></thead>
+      <tbody>
+        <% @invitations.each do |inv| %>
+          <tr class="invitation-row">
+            <td><span class="font-medium"><%= inv.label %></span><div class="text-xs text-slate-500"><%= [ inv.email, inv.created_by&.display_name, fmt_date(inv.created_at) ].compact.join(" · ") %></div></td>
+            <td class="text-xs" data-label="<%= t(".gives") %>"><%= inv.grants.map { "#{_1.aircraft.tail_number} (#{_1.role.name})" }.join(", ").presence || t(".account_only") %></td>
+            <td class="tabular-nums" data-label="<%= t(".uses") %>"><%= inv.uses_count %> / <%= inv.max_uses || "∞" %></td>
+            <td data-label="<%= t(".status") %>">
+              <% if inv.revoked? %><span class="badge-gray"><%= t(".revoked") %></span>
+              <% elsif inv.expired? %><span class="badge-red"><%= t(".expired") %></span>
+              <% elsif inv.used_up? %><span class="badge-gray"><%= t(".used") %></span>
+              <% else %><span class="badge-green"><%= t(".active") %></span><span class="block text-xs text-slate-500"><%= inv.expires_at ? t(".until", time: l(inv.expires_at, format: :app)) : t(".never_expires") %></span><% end %>
+            </td>
+            <td class="text-right"><% if inv.usable? %><%= delete_button t(".revoke"), admin_invitation_path(inv), confirm: t(".revoke_invitation") %><% end %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <%= empty_state t(".no_invitations") %>
+  <% end %>
+</section>

@@ -9,6 +9,7 @@ class Aircraft < ApplicationRecord
   end
 
   has_many :roles, class_name: "AircraftRole", dependent: :destroy
+  has_many :invitation_grants, class_name: "AccessInvitationRole", dependent: :delete_all
   has_many :users, through: :roles
   has_many :notes, class_name: "AircraftNote", dependent: :destroy
   has_many :events, class_name: "AircraftEvent", dependent: :delete_all

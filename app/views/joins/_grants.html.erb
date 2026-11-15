@@ -1,0 +1,11 @@
+<%# What the invitation gives: a role on each of its aircraft (or just an account). %>
+<% grants = invitation.grants.includes(:aircraft, :role).sort_by { _1.aircraft.tail_number } %>
+<% if grants.any? %>
+  <ul class="space-y-1 text-sm">
+    <% grants.each do |g| %>
+      <li class="flex items-baseline gap-2"><span class="font-semibold"><%= g.aircraft.tail_number %></span> <span class="text-slate-500"><%= [ g.aircraft.make, g.aircraft.model ].compact_blank.join(" ") %></span> <span class="badge-blue" title="<%= g.role.description %>"><%= g.role.name %></span></li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-sm text-slate-600"><%= t("joins.grants.account_only") %></p>
+<% end %>

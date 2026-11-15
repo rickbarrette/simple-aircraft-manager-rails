@@ -562,6 +562,9 @@ en:
         notes: Notes
         reason: Reason
   models:
+    access_invitation:
+      already_has: already %{role}, unchanged
+      creator_gone: not given (whoever made the invitation can't give roles any more)
     logbook_entry:
       inspection_blank: a ______________
       inspection_a: a %{name}
@@ -875,6 +878,20 @@ en:
         one: Imported %{count} flight.
         other: Imported %{count} flights.
       flights_imported_but_aircraft: 'Flights imported, but aircraft hours weren''t updated: the aircraft is grounded and enforcement is on.'
+    joins:
+      try_again_later: Too many tries; wait a few minutes.
+      already_accepted: You've already accepted this invitation.
+      sign_in_to_continue: Sign in to accept the invitation.
+      account_exists: There's already an account for that email address. Sign in, then open the link again.
+      welcome: Welcome! Your account is ready.
+      accepted: Invitation accepted.
+    aircraft_invitations:
+      default_label: Invitation to %{tail_number}
+      created_event: Invitation made (%{role})
+      revoked_event: Invitation revoked
+      revoked: Invitation revoked.
+    admin_invitations:
+      revoked: Invitation revoked.
     aircraft_roles:
       no_user_with_that: No user with that email. Ask an administrator to create their account first.
       added: "%{display_name} added."
@@ -1224,6 +1241,41 @@ en:
       matches: Matches
       update: Update
   admin:
+    invitations:
+      index:
+        invitations: Invitations
+        new_invitation: New invitation
+        intro: An invitation is a link someone opens to create an account, or accept with the one they have, and get roles on aircraft. An aircraft's Owner can also invite people to that aircraft from its Access page.
+        label: Invitation
+        gives: Gives
+        uses: Used
+        status: Status
+        account_only: An account only
+        revoked: Revoked
+        expired: Expired
+        used: Used up
+        active: Active
+        until: until %{time}
+        never_expires: never expires
+        revoke: Revoke
+        revoke_invitation: Revoke this invitation? Its link stops working; people who already used it keep their access.
+        no_invitations: No invitations yet.
+      new:
+        new_invitation: New Invitation
+        label_hint: For you, e.g. "Flying club pilots, spring 2027".
+        email: Email (optional)
+        email_hint: Only that address can use it; the link is emailed to it when email is set up.
+        name: Name (optional)
+        name_hint: Filled in when they create their account.
+        max_uses: Uses
+        max_uses_hint: Empty for unlimited.
+        expires: Expires
+        expires_hint: Empty for never.
+        roles: Roles on aircraft
+        no_access: No access
+        roles_hint: Where they already have a role, it stays as it is.
+        create: Create invitation
+        cancel: Cancel
     roles:
       index:
         roles: Roles
@@ -1901,6 +1953,21 @@ en:
       role_for: Role for %{display_name}
       role: Role
       what_each_role_can_do: What each role can do
+      invitations: Invitations
+      expired: Expired
+      used: Used
+      uses_html: "%{used} of %{max} used"
+      until: until %{time}
+      never_expires: never expires
+      revoke: Revoke
+      revoke_invitation: Revoke this invitation? Its link stops working; people who already used it keep their access.
+      no_invitations: No open invitations.
+      invite_email: Email
+      optional: Optional
+      max_uses: Uses
+      expires: Expires
+      invitation_hint: A link that gives the role on this aircraft to whoever opens it, with a new or existing account. With an email, it only works for that address (and is emailed to it when email is set up). Leave the expiry empty for never, or the uses empty for unlimited.
+      create_invitation: Create invitation
       roles_are_set_by_an_administrator: An administrator sets what each role can do, and can add roles (Admin → Roles). Only an Owner can give or take away the Owner role.
       share_links: Share Links
       expired: Expired
@@ -2649,6 +2716,7 @@ en:
   layouts:
     application:
       roles: Roles
+      invitations: Invitations
       integrations: Integrations
       skip_to_content_html: <a href="#main" class="skip-link">Skip to content</a>
       simple_aircraft_manager: Simple Aircraft Manager
@@ -3315,6 +3383,19 @@ en:
       simple_aircraft_manager_is_provided: Simple Aircraft Manager is provided as is, without warranty, and is not approved by the FAA or any other aviation authority. It is up to you to verify that using it for your aircraft and operation is legal and suitable. The full disclaimer is under Help once you're signed in.
       create_admin_account: Create Admin Account
   shared:
+    invitation_created:
+      title: Invitation created
+      copy_now: Copy the link now and send it to the person; it isn't shown again (only a fingerprint of it is kept).
+      link: Invitation link
+      emailed: Emailed to %{email}.
+      only_for: Only works for %{email}.
+      uses:
+        one: Works once.
+        other: Works %{count} times.
+      unlimited: Works any number of times.
+      expires: Until %{time}.
+      never_expires: Never expires.
+      done: Done
     aircraft_header:
       admin: Admin
       tach_hobbs_html: Tach %{tach_time} · Hobbs %{hobbs_time}
@@ -3397,6 +3478,51 @@ en:
       statement_2_text: 'Statement: %{statement}'
       fingerprint_text: 'Fingerprint: %{content_digest}'
       subject: You signed a logbook entry for %{tail_number}
+  access_invitation_mailer:
+    invite:
+      subject: "%{who} invites you to Simple Aircraft Manager"
+      an_administrator: An administrator
+      invites_you_text: "%{who} invites you to Simple Aircraft Manager:"
+      invites_you_html: "%{who} invites you to Simple Aircraft Manager:"
+      open_the_link_text: 'Open this link to create your account, or accept with the one you have:'
+      accept_the_invitation: Accept the invitation
+      expires_text: The link works until %{date}.
+      expires_html: The link works until %{date}.
+  joins:
+    grants:
+      account_only: An account (no aircraft yet).
+    welcome:
+      invitation: Invitation
+      youre_invited: You're invited
+      invited_by_html: "<strong>%{who}</strong> invites you (%{label}):"
+      an_administrator: An administrator
+      i_have_an_account: I have an account – sign in
+      for_email: This invitation is for %{email}.
+      or_create_an_account: Or create an account
+      email: Email
+      your_name: Your name
+      password: Password
+      password_hint: At least %{min} characters.
+      confirm_password: Confirm password
+      create_account: Create account and accept
+      creating: Creating…
+    accept:
+      invitation: Invitation
+      youre_invited: You're invited
+      invited_by_html: "<strong>%{who}</strong> invites you (%{label}):"
+      an_administrator: An administrator
+      existing_roles_stay: Where you already have a role, it stays as it is.
+      accept: Accept invitation
+      signed_in_as: Signed in as %{email}
+    wrong_account:
+      invitation: Invitation
+      wrong_account: This invitation is for someone else
+      for_another_email_html: It's for <strong>%{email}</strong>, but you're signed in as %{email_address}. Sign out and sign in (or create an account) with that address.
+      sign_out: Sign out
+    invalid:
+      invitation: Invitation
+      not_valid: This invitation isn't valid
+      ask_for_a_new_one: It may have expired, been used up or revoked. Ask whoever sent it for a new one.
   signing_invitation_mailer:
     invite:
       asks_you_to_sign_a_html: "%{owner} asks you to sign a logbook entry for <strong>%{tail_number}</strong> (%{date}, %{log_type} log)."

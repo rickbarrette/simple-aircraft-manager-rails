@@ -26,6 +26,12 @@ Signing a logbook entry needs the **Sign logbook entries** permission *and* a cu
 
 To give someone a role on any aircraft, open them in **Admin → Users**: **Aircraft access** lists their role on each aircraft, to change, remove or add.
 
+## Invitations
+
+**Admin → Invitations → New invitation** makes a link someone opens to create their own account (or accept with the one they have) and get roles on aircraft: a label for you, optionally an email address (then only that address can use it, and the link is emailed to it when email is set up) and a name, how many times it works (empty for unlimited, e.g. for a flying club), when it expires (empty for never), and a role on any of the aircraft (none at all gives just an account). The link is shown once, when it's made; copy it then.
+
+Where someone already has a role on an aircraft, an invitation leaves it as it is. An invitation never gives more than whoever made it can give when it's used. **Revoke** stops a link working; people who already used it keep their access. With sign-in by single sign-on only, people accept invitations after signing in with it.
+
 ## Account recovery from the command line
 
 If nobody can sign in to fix an account in the app (a forgotten admin password, a lockout, a lost phone with no recovery codes, the only admin disabled), run these on the server. With Docker Compose, put `docker compose exec web` in front; in Portainer, open the container's **Console** and run them there. Anyone who can run commands on the server already has the data, so they ask for nothing else. Each one is written to the log.

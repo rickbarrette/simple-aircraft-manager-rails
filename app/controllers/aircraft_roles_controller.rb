@@ -11,6 +11,8 @@ class AircraftRolesController < ApplicationController
     @access = AircraftAccess.new(@aircraft, actor: current_user)
     @roles = @aircraft.roles.includes(:user, :role).joins(:role).order("roles.position", :created_at)
     @share_tokens = @aircraft.share_tokens.order(created_at: :desc).includes(:created_by)
+    @invitations = AccessInvitation.where(id: AircraftInvitationsController.only_for(@aircraft), revoked_at: nil)
+                                   .recent_first.includes(:created_by, grants: :role).limit(20)
   end
 
   def create

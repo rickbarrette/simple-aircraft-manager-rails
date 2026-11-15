@@ -100,6 +100,8 @@ What each group is for:
 | `/help/records` | The "How signing works" link on the signing form | The signing instructions, for signed-in accounts |
 | `/calendar/<token>.ics` | Calendar apps fetching the due-items feed (Profile → Calendar feed) | The due list of that user's aircraft, only with their secret 32-character token; making a new link retires the old one |
 
+Invitation links (`/join/…`) are deliberately not on the list: behind forward auth, someone with only an app account still couldn't get past the proxy to use the app, so invited people need an Authentik account anyway. They sign in to Authentik, then open the link and accept it.
+
 Leave out lines for features you don't use: without share links drop `/shared` and Active Storage; without calendar feeds drop `/calendar`; if mechanics never sign through invitations drop `/sign`, `/session`, `/profile/…` and `/help/records`.
 
 Everything else stays behind Authentik: the fleet, records, admin pages, the emailed sign-in links and password resets (an invited mechanic who forgets their password asks the administrator, who resets it under Admin → Users or sends a new invitation), and the Google Drive callback (`/admin/offsite_backup/callback`), which comes back to the administrator's own signed-in browser.

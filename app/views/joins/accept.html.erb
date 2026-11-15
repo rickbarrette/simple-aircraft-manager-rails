@@ -1,0 +1,11 @@
+<% content_for :title, t(".invitation") %>
+<div class="mx-auto max-w-md space-y-4">
+  <h1 class="text-2xl font-bold"><%= t(".youre_invited") %></h1>
+  <div class="card card-body space-y-3">
+    <p class="text-sm text-slate-600"><%= t(".invited_by_html", who: (@invitation.created_by&.display_name || t(".an_administrator")), label: @invitation.label) %></p>
+    <%= render "joins/grants", invitation: @invitation %>
+    <p class="hint"><%= t(".existing_roles_stay") %></p>
+    <%= button_to t(".accept"), accept_join_path(params[:token]), class: "btn-primary w-full justify-center", form: { class: "pt-1" } %>
+  </div>
+  <p class="text-center text-sm text-slate-500"><%= t(".signed_in_as", email: current_user.email_address) %></p>
+</div>

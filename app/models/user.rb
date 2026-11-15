@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :aircraft_roles, dependent: :destroy
+  has_many :access_invitations, foreign_key: :created_by_id, dependent: :nullify, inverse_of: :created_by
+  has_many :access_invitation_redemptions, dependent: :delete_all
   has_many :push_subscriptions, dependent: :delete_all
   has_many :api_tokens, dependent: :destroy
 

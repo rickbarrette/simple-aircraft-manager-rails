@@ -1,0 +1,27 @@
+<% content_for :title, t(".invitation") %>
+<div class="mx-auto max-w-md space-y-4">
+  <h1 class="text-2xl font-bold"><%= t(".youre_invited") %></h1>
+  <div class="card card-body space-y-3">
+    <p class="text-sm text-slate-600"><%= t(".invited_by_html", who: (@invitation.created_by&.display_name || t(".an_administrator")), label: @invitation.label) %></p>
+    <%= render "joins/grants", invitation: @invitation %>
+  </div>
+  <div class="card card-body space-y-3">
+    <%= link_to t(".i_have_an_account"), new_session_path, class: "btn-primary w-full justify-center" %>
+    <% if @invitation.email %><p class="hint"><%= t(".for_email", email: @invitation.email) %></p><% end %>
+  </div>
+  <% if Sso.password_login? && !(@invitation.email && User.exists?(email_address: @invitation.email)) %>
+    <%= form_with url: account_join_path(params[:token]), class: "card card-body space-y-3" do %>
+      <h2 class="card-title"><%= t(".or_create_an_account") %></h2>
+      <% if @account_errors.present? %><div class="rounded-md bg-red-50 p-2 text-sm text-red-700" role="alert"><%= @account_errors.to_sentence %></div><% end %>
+      <% if @invitation.email %>
+        <div><label class="label" for="invited_email"><%= t(".email") %></label><input id="invited_email" class="input" value="<%= @invitation.email %>" disabled></div>
+      <% else %>
+        <div><%= label_tag :email_address, t(".email"), class: "label" %><%= email_field_tag :email_address, params[:email_address], class: "input", required: true, autocomplete: "username" %></div>
+      <% end %>
+      <div><%= label_tag :name, t(".your_name"), class: "label" %><%= text_field_tag :name, params[:name] || @invitation.name, class: "input", required: true, autocomplete: "name" %></div>
+      <div><%= label_tag :password, t(".password"), class: "label" %><%= password_field_tag :password, nil, class: "input", required: true, autocomplete: "new-password", minlength: User::PASSWORD_MIN, maxlength: 72 %><p class="hint"><%= t(".password_hint", min: User::PASSWORD_MIN) %></p></div>
+      <div><%= label_tag :password_confirmation, t(".confirm_password"), class: "label" %><%= password_field_tag :password_confirmation, nil, class: "input", required: true, autocomplete: "new-password" %></div>
+      <%= submit_tag t(".create_account"), class: "btn-secondary", data: { turbo_submits_with: t(".creating") } %>
+    <% end %>
+  <% end %>
+</div>

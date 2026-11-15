@@ -1,0 +1,3 @@
+<% content_for :title, t("shared.invitation_created.title") %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= render "shared/invitation_created", invitation: @invitation, back_path: aircraft_aircraft_roles_path(@aircraft, anchor: "invitations") %>

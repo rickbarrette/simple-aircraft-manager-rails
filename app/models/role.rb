@@ -7,6 +7,7 @@ class Role < ApplicationRecord
   BUILT_IN = %w[owner mechanic pilot viewer].freeze
 
   has_many :aircraft_roles, dependent: :restrict_with_error
+  has_many :invitation_grants, class_name: "AccessInvitationRole", dependent: :delete_all
 
   normalizes :name, with: ->(name) { name.squish }
   validates :name, presence: true, uniqueness: { case_sensitive: false }, length: { maximum: 40 }

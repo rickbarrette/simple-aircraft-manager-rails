@@ -1,0 +1,14 @@
+<%# A just-made invitation's link: shown this once (only a digest is kept). %>
+<section class="card card-body max-w-xl space-y-3">
+  <h1 class="card-title"><%= t("shared.invitation_created.title") %></h1>
+  <p class="text-sm text-slate-600"><%= t("shared.invitation_created.copy_now") %></p>
+  <input type="text" class="input font-mono text-xs" value="<%= join_url(invitation.token) %>" readonly data-select-on-click aria-label="<%= t("shared.invitation_created.link") %>">
+  <%= render "joins/grants", invitation: invitation %>
+  <p class="hint">
+    <%= [ (t("shared.invitation_created.emailed", email: invitation.email) if invitation.email && MailSettings.configured?),
+          (t("shared.invitation_created.only_for", email: invitation.email) if invitation.email),
+          (invitation.max_uses ? t("shared.invitation_created.uses", count: invitation.max_uses) : t("shared.invitation_created.unlimited")),
+          (invitation.expires_at ? t("shared.invitation_created.expires", time: l(invitation.expires_at, format: :app)) : t("shared.invitation_created.never_expires")) ].compact.join(" ") %>
+  </p>
+  <p><%= link_to t("shared.invitation_created.done"), back_path, class: "btn-primary" %></p>
+</section>

@@ -10,7 +10,45 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_16_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_16_020000) do
+  create_table "access_invitation_redemptions", force: :cascade do |t|
+    t.integer "access_invitation_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["access_invitation_id", "user_id"], name: "index_access_invitation_redemptions_unique", unique: true
+    t.index ["access_invitation_id"], name: "index_access_invitation_redemptions_on_access_invitation_id"
+    t.index ["user_id"], name: "index_access_invitation_redemptions_on_user_id"
+  end
+
+  create_table "access_invitation_roles", force: :cascade do |t|
+    t.integer "access_invitation_id", null: false
+    t.integer "aircraft_id", null: false
+    t.integer "role_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["access_invitation_id", "aircraft_id"], name: "index_access_invitation_roles_unique", unique: true
+    t.index ["access_invitation_id"], name: "index_access_invitation_roles_on_access_invitation_id"
+    t.index ["aircraft_id"], name: "index_access_invitation_roles_on_aircraft_id"
+    t.index ["role_id"], name: "index_access_invitation_roles_on_role_id"
+  end
+
+  create_table "access_invitations", force: :cascade do |t|
+    t.string "label", null: false
+    t.string "email"
+    t.string "name"
+    t.string "token_digest", null: false
+    t.integer "max_uses"
+    t.integer "uses_count", default: 0, null: false
+    t.datetime "expires_at"
+    t.datetime "revoked_at"
+    t.integer "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_access_invitations_on_created_by_id"
+    t.index ["token_digest"], name: "index_access_invitations_on_token_digest", unique: true
+  end
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -950,6 +988,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_010000) do
     t.index ["major_record_id"], name: "index_weight_balance_records_on_major_record_id"
   end
 
+  add_foreign_key "access_invitation_redemptions", "access_invitations"
+  add_foreign_key "access_invitation_redemptions", "users"
+  add_foreign_key "access_invitation_roles", "access_invitations"
+  add_foreign_key "access_invitation_roles", "aircraft"
+  add_foreign_key "access_invitation_roles", "roles"
+  add_foreign_key "access_invitations", "users", column: "created_by_id"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ad_alerts", "aircraft"

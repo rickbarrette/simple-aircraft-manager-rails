@@ -1,0 +1,4 @@
+<p><%= t(".invites_you_html", who: (@invitation.created_by&.display_name || t(".an_administrator"))) %></p>
+<% if @grants.any? %><ul><% @grants.each do |g| %><li><strong><%= g.aircraft.tail_number %></strong>: <%= g.role.name %></li><% end %></ul><% end %>
+<p><%= link_to t(".accept_the_invitation"), @url %></p>
+<% if @invitation.expires_at %><p style="color:#64748b;font-size:12px"><%= t(".expires_html", date: fmt_date(@invitation.expires_at.to_date)) %></p><% end %>

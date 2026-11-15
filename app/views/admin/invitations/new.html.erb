@@ -1,0 +1,29 @@
+<% content_for :title, t(".new_invitation") %>
+<h1 class="mb-4 text-2xl font-bold"><%= t(".new_invitation") %></h1>
+<%= form_with model: @invitation, url: admin_invitations_path, method: :post, class: "card card-body max-w-3xl space-y-5" do |f| %>
+  <%= f.errors_summary %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :label, required: true, hint: t(".label_hint") %>
+    <%= f.field :email, as: :email, label: t(".email"), hint: t(".email_hint") %>
+    <%= f.field :name, label: t(".name"), hint: t(".name_hint") %>
+    <%= f.field :max_uses, as: :number, label: t(".max_uses"), hint: t(".max_uses_hint"), min: 1, max: 1000 %>
+    <%= f.field :expires_at, as: :datetime, label: t(".expires"), hint: t(".expires_hint") %>
+  </div>
+  <fieldset>
+    <legend class="mb-2 text-sm font-semibold"><%= t(".roles") %></legend>
+    <% aircraft = Aircraft.ordered.to_a %>
+    <% if aircraft.any? %>
+      <div class="grid gap-2 sm:grid-cols-2">
+        <% roles = Role.ordered.map { [ _1.name, _1.id ] } %>
+        <% aircraft.each do |a| %>
+          <label class="flex items-center justify-between gap-3 text-sm">
+            <span><span class="font-medium"><%= a.tail_number %></span> <span class="text-xs text-slate-500"><%= [ a.make, a.model ].compact_blank.join(" ") %></span></span>
+            <%= select_tag "roles[#{a.id}]", options_for_select([ [ t(".no_access"), "" ] ] + roles, params.dig(:roles, a.id.to_s)), class: "input w-36" %>
+          </label>
+        <% end %>
+      </div>
+    <% end %>
+    <p class="hint mt-2"><%= t(".roles_hint") %></p>
+  </fieldset>
+  <div class="flex flex-wrap gap-2"><%= f.submit t(".create") %><%= link_to t(".cancel"), admin_invitations_path, class: "btn-secondary" %></div>
+<% end %>

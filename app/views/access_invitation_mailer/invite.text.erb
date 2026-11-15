@@ -1,0 +1,11 @@
+<%= raw t(".invites_you_text", who: (@invitation.created_by&.display_name || t(".an_administrator"))) %>
+<% @grants.each do |g| %>
+- <%= g.aircraft.tail_number %>: <%= g.role.name %>
+<% end %>
+
+<%= raw t(".open_the_link_text") %>
+<%= @url %>
+<% if @invitation.expires_at %>
+
+<%= raw t(".expires_text", date: fmt_date(@invitation.expires_at.to_date)) %>
+<% end %>

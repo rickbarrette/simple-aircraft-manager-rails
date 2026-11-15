@@ -67,7 +67,52 @@ class HoursService
     flight
   end
 
+  # Correct a saved flight. Its readings change only when it's the latest
+  # (FlightLog#meters_editable?); the aircraft and its components then move by
+  # the difference. Its oil and fuel records follow. With both readings given,
+  # the duration is worked out from them.
+  def update_flight!(flight, attributes)
+    Aircraft.transaction do
+      before = flight.attributes.slice(*FlightLog::METERS, "date", "departure_location", "destination_location",
+                                       "oil_added", "fuel_added", "route", "notes")
+      flight.assign_attributes(attributes)
+      flight.tach_time = flight.tach_in - flight.tach_out if flight.tach_in && flight.tach_out
+      flight.hobbs_time = flight.hobbs_in - flight.hobbs_out if flight.hobbs_in && flight.hobbs_out
+      flight.save!
+
+      tach_delta = flight.tach_time - before["tach_time"].to_d
+      hobbs_delta = flight.hobbs_time.to_d - before["hobbs_time"].to_d
+      if tach_delta.nonzero? || hobbs_delta.nonzero?
+        @aircraft.tach_time += tach_delta
+        @aircraft.hobbs_time += hobbs_delta if @aircraft.hobbs_time
+        @aircraft.save!
+        cascade_to_components(@aircraft.hobbs? && flight.hobbs_time ? hobbs_delta : tach_delta, clamp: true)
+      end
+      sync_consumables(flight)
+
+      changed = before.keys.reject { |key| before[key] == flight[key] }
+      @aircraft.log_event!("flight", I18n.t("#{H}.flight_corrected", date: I18n.l(flight.date, format: :app)), user: @user,
+                           notes: changed.map { |key| FlightLog.human_attribute_name(key) }.join(", ").presence)
+    end
+    flight
+  end
+
   private
+
+  # The flight's oil and fuel records match what it says was added.
+  def sync_consumables(flight)
+    { "oil" => [ flight.oil_added, flight.oil_level_after, flight.oil_added_type ],
+      "fuel" => [ flight.fuel_added, flight.fuel_level_after, flight.fuel_added_type ] }.each do |type, (qty, level, kind)|
+      record = flight.consumable_records.find_by(record_type: type)
+      if qty.to_f.positive?
+        record ||= @aircraft.consumable_records.new(record_type: type, flight_log: flight, flight_hours: @aircraft.tach_time,
+                                                     notes: I18n.t("#{H}.auto_created_from_flight_log"))
+        record.update!(date: flight.date, quantity_added: qty, level_after: level, consumable_type: kind)
+      else
+        record&.destroy!
+      end
+    end
+  end
 
   def cascade_to_components(delta, clamp: false)
     @aircraft.components.in_use.find_each do |c|

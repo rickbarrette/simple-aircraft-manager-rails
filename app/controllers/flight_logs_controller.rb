@@ -1,7 +1,9 @@
 class FlightLogsController < ApplicationController
   include AircraftScoped
   before_action :require_owner!, only: :destroy
-  before_action :set_flight_log, only: %i[show engine_data_series attach_engine_data remove_engine_data]
+  before_action :set_flight_log, only: %i[show edit update engine_data_series attach_engine_data remove_engine_data]
+  before_action :require_flight_editor!, only: %i[edit update]
+  helper_method :can_edit_flight?
   before_action :require_engine_data_access!, only: %i[attach_engine_data remove_engine_data]
   helper_method :manage_engine_data?
 
@@ -99,6 +101,22 @@ class FlightLogsController < ApplicationController
     redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: t("flash.flight_logs.engine_data_removed")
   end
 
+  def edit
+    @meters_editable = @flight_log.meters_editable?
+  end
+
+  # A correction. The readings only change on the latest flight (see
+  # FlightLog#meters_editable?); on earlier ones they're left as they are.
+  def update
+    @meters_editable = @flight_log.meters_editable?
+    attributes = flight_log_params.except(:client_key)
+    attributes = attributes.except(*FlightLog::METERS) unless @meters_editable
+    HoursService.new(@aircraft).update_flight!(@flight_log, attributes)
+    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), notice: t("flash.flight_logs.flight_corrected")
+  rescue ActiveRecord::RecordInvalid
+    render :edit, status: :unprocessable_entity
+  end
+
   # Deleting a flight does not roll back hours; correct those with an hours update.
   def destroy
     @aircraft.flight_logs.find(params[:id]).destroy!
@@ -108,14 +126,19 @@ class FlightLogsController < ApplicationController
 
   private
 
+  def can_edit_flight?(flight) = flight.editable_by?(current_user, role: current_role)
+
+  def require_flight_editor!
+    return if can_edit_flight?(@flight_log)
+    redirect_to aircraft_flight_log_path(@aircraft, @flight_log), alert: t("flash.flight_logs.only_owners_or_the")
+  end
+
   def set_flight_log
     @flight_log = @aircraft.flight_logs.find(params[:id])
   end
 
   # Owners, or the pilot who logged the flight.
-  def manage_engine_data?
-    owner? || (@flight_log.user_id.present? && @flight_log.user_id == current_user.id)
-  end
+  def manage_engine_data? = can_edit_flight?(@flight_log)
 
   def require_engine_data_access!
     return if manage_engine_data?

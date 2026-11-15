@@ -2,7 +2,10 @@
 <div class="space-y-6">
 <section class="card max-w-3xl">
   <div class="card-header"><h2 class="card-title"><%= t(".flight_on_html", date: (fmt_date(@flight_log.date))) %></h2>
-    <% if owner? %><%= delete_button t(".delete"), aircraft_flight_log_path(@aircraft, @flight_log), confirm: t(".delete_this_flight_log_aircraft") %><% end %></div>
+    <div class="flex flex-wrap gap-2">
+      <% if can_edit_flight?(@flight_log) %><%= link_to t(".edit"), edit_aircraft_flight_log_path(@aircraft, @flight_log), class: "btn-secondary btn-sm" %><% end %>
+      <% if owner? %><%= delete_button t(".delete"), aircraft_flight_log_path(@aircraft, @flight_log), confirm: t(".delete_this_flight_log_aircraft") %><% end %>
+    </div></div>
   <%# One item per row on a phone (label, then value); two columns on wider screens. %>
   <dl class="card-body grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
     <div class="detail-row"><dt><%= t(".tach") %></dt><dd><%= hours(@flight_log.tach_time) %> <span class="text-xs text-slate-500"><%= "(#{@flight_log.tach_out} → #{@flight_log.tach_in})" if @flight_log.tach_out && @flight_log.tach_in %></span></dd></div>

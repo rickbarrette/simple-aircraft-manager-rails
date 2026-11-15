@@ -1,0 +1,12 @@
+<% content_for :title, t(".correct_flight") %>
+<%= render "shared/aircraft_header", aircraft: @aircraft %>
+<%= form_with model: [@aircraft, @flight_log], class: "card card-body space-y-5 max-w-3xl" do |f| %>
+  <h2 class="card-title"><%= t(".correct_the_flight_on", date: fmt_date(@flight_log.date_was)) %></h2>
+  <%= f.errors_summary %>
+  <%= render "flight_logs/fields", f: f, meters_locked: !@meters_editable %>
+  <% if @meters_editable %><p class="hint"><%= t(".changing_the_readings") %></p><% end %>
+  <div class="flex flex-wrap gap-2">
+    <%= f.submit t(".save"), data: { turbo_submits_with: t("flight_logs.new.sending") } %>
+    <%= link_to t(".cancel"), aircraft_flight_log_path(@aircraft, @flight_log), class: "btn-secondary" %>
+  </div>
+<% end %>

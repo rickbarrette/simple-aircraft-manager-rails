@@ -6,38 +6,7 @@
   <%= f.hidden_field :client_key, data: { offline_form_target: "key" } %>
   <div class="hidden rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-offline-form-target="notice" role="status"></div>
   <%= f.errors_summary %>
-  <div class="grid gap-4 sm:grid-cols-3">
-    <%= f.field :date, as: :date, required: true %>
-    <%= render "shared/airport_field", f: f, attribute: :departure_location, label: t(".from"), aircraft: @aircraft, placeholder: t(".koqu") %>
-    <%= render "shared/airport_field", f: f, attribute: :destination_location, label: t(".to"), aircraft: @aircraft, placeholder: t(".code_or_name") %>
-  </div>
-  <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold"><%= t(".tach_required") %></legend>
-    <%= f.field :tach_out, as: :number, step: 0.1, label: t(".tach_out") %>
-    <%= f.field :tach_in, as: :number, step: 0.1, label: t(".tach_in") %>
-    <%= f.field :tach_time, as: :number, step: 0.1, label: t(".or_duration"), hint: t(".calculated_from_out_in_if") %>
-  </fieldset>
-  <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold"><%= t(".hobbs_optional") %></legend>
-    <%= f.field :hobbs_out, as: :number, step: 0.1, label: t(".hobbs_out") %>
-    <%= f.field :hobbs_in, as: :number, step: 0.1, label: t(".hobbs_in") %>
-    <%= f.field :hobbs_time, as: :number, step: 0.1, label: t(".or_duration") %>
-  </fieldset>
-  <fieldset class="grid gap-4 sm:grid-cols-3">
-    <legend class="mb-2 text-sm font-semibold"><%= t(".oil_fuel_added") %></legend>
-    <%= f.field :oil_added, as: :number, step: 0.25, label: t(".oil_added_qt") %>
-    <%= f.field :oil_level_after, as: :number, step: 0.25, label: t(".oil_level_after_qt") %>
-    <%= f.field :oil_added_type, label: t(".oil_type"), placeholder: t(".aeroshell_w100") %>
-    <%= f.field :fuel_added, as: :number, step: 0.1, label: t(".fuel_added_gal") %>
-    <%= f.field :fuel_level_after, as: :number, step: 0.1, label: t(".fuel_level_after_gal") %>
-    <%= f.field :fuel_added_type, label: t(".fuel_type"), placeholder: t(".n100ll") %>
-  </fieldset>
-  <%= f.field :route, as: :textarea, rows: 2 %>
-  <%= f.field :notes, as: :textarea, rows: 2 %>
-  <div class="grid gap-4 sm:grid-cols-2">
-    <%= f.field :track_log, as: :file, label: t(".track_log_gpx_kml_csv") %>
-    <%= f.field :engine_data, as: :file, label: t(".engine_monitor_data"), hint: t(".cgr_30p_cgr_30c_flight"), accept: ".csv,text/csv" %>
-  </div>
+  <%= render "flight_logs/fields", f: f %>
   <p class="hint"><%= t(".saving_adds_the_tach_time") %></p>
   <div class="flex flex-wrap gap-2">
     <%= f.submit t(".log_flight"), data: { turbo_submits_with: t(".sending") } %>

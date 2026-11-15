@@ -1,0 +1,38 @@
+<%# The flight's fields, for Log Flight and for correcting one. Its meter
+    readings are locked (meters_locked) on all but the latest flight. %>
+<% meters_locked = local_assigns.fetch(:meters_locked, false) %>
+  <div class="grid gap-4 sm:grid-cols-3">
+    <%= f.field :date, as: :date, required: true %>
+    <%= render "shared/airport_field", f: f, attribute: :departure_location, label: t("flight_logs.new.from"), aircraft: @aircraft, placeholder: t("flight_logs.new.koqu") %>
+    <%= render "shared/airport_field", f: f, attribute: :destination_location, label: t("flight_logs.new.to"), aircraft: @aircraft, placeholder: t("flight_logs.new.code_or_name") %>
+  </div>
+  <% if meters_locked %>
+    <p class="hint"><%= t("flight_logs.fields.meters_locked_html", link: link_to(t("flight_logs.fields.update_hours"), aircraft_path(@aircraft), class: "link")) %></p>
+  <% end %>
+  <%= tag.fieldset class: "grid gap-4 sm:grid-cols-3", disabled: meters_locked do %>
+    <legend class="mb-2 text-sm font-semibold"><%= t("flight_logs.new.tach_required") %></legend>
+    <%= f.field :tach_out, as: :number, step: 0.1, label: t("flight_logs.new.tach_out") %>
+    <%= f.field :tach_in, as: :number, step: 0.1, label: t("flight_logs.new.tach_in") %>
+    <%= f.field :tach_time, as: :number, step: 0.1, label: t("flight_logs.new.or_duration"), hint: t("flight_logs.new.calculated_from_out_in_if") %>
+  <% end %>
+  <%= tag.fieldset class: "grid gap-4 sm:grid-cols-3", disabled: meters_locked do %>
+    <legend class="mb-2 text-sm font-semibold"><%= t("flight_logs.new.hobbs_optional") %></legend>
+    <%= f.field :hobbs_out, as: :number, step: 0.1, label: t("flight_logs.new.hobbs_out") %>
+    <%= f.field :hobbs_in, as: :number, step: 0.1, label: t("flight_logs.new.hobbs_in") %>
+    <%= f.field :hobbs_time, as: :number, step: 0.1, label: t("flight_logs.new.or_duration") %>
+  <% end %>
+  <fieldset class="grid gap-4 sm:grid-cols-3">
+    <legend class="mb-2 text-sm font-semibold"><%= t("flight_logs.new.oil_fuel_added") %></legend>
+    <%= f.field :oil_added, as: :number, step: 0.25, label: t("flight_logs.new.oil_added_qt") %>
+    <%= f.field :oil_level_after, as: :number, step: 0.25, label: t("flight_logs.new.oil_level_after_qt") %>
+    <%= f.field :oil_added_type, label: t("flight_logs.new.oil_type"), placeholder: t("flight_logs.new.aeroshell_w100") %>
+    <%= f.field :fuel_added, as: :number, step: 0.1, label: t("flight_logs.new.fuel_added_gal") %>
+    <%= f.field :fuel_level_after, as: :number, step: 0.1, label: t("flight_logs.new.fuel_level_after_gal") %>
+    <%= f.field :fuel_added_type, label: t("flight_logs.new.fuel_type"), placeholder: t("flight_logs.new.n100ll") %>
+  </fieldset>
+  <%= f.field :route, as: :textarea, rows: 2 %>
+  <%= f.field :notes, as: :textarea, rows: 2 %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :track_log, as: :file, label: t("flight_logs.new.track_log_gpx_kml_csv") %>
+    <%= f.field :engine_data, as: :file, label: t("flight_logs.new.engine_monitor_data"), hint: t("flight_logs.new.cgr_30p_cgr_30c_flight"), accept: ".csv,text/csv" %>
+  </div>

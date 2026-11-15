@@ -17,6 +17,14 @@ On a phone or tablet with the app installed (see [Getting started](getting-start
 
 Track and engine data files attached offline are kept and sent too.
 
+## Correct a flight
+
+Open the flight and choose **Edit**. Owners can correct any flight; a pilot, the flights they logged. The date, airports, route, notes, oil and fuel (its oil and fuel records follow), and the track and engine data files can always be changed.
+
+The meter readings can be changed only on the latest flight, and only until the hours change again (another flight, an hours update or an import). The aircraft and its installed components then move by the difference: fixing a tach in of 1001.4 to 1001.6 adds 0.2 hours. On earlier flights the readings are locked, since the flights after them started from those readings; correct the aircraft's hours with **Update Hours** instead.
+
+Deleting a flight (owners) doesn't take its hours back off; use **Update Hours** for that too.
+
 ## Update hours
 
 When you don't log each flight, use **Update Hours** on the overview: enter the current meter readings and the difference is applied to every installed component. A reading lower than the current one is treated as a correction.

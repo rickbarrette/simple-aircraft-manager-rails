@@ -26,6 +26,21 @@ class FlightLog < ApplicationRecord
     [ departure_location, destination_location ].compact_blank.join(" → ")
   end
 
+  # The meter readings that move the aircraft's and components' hours.
+  METERS = %w[tach_out tach_in tach_time hobbs_out hobbs_in hobbs_time].freeze
+
+  # Its readings can be corrected only while it's the last flight logged and
+  # nothing has changed the hours since (an hours update, an import): only
+  # then is the aircraft's time just this flight's on top of the one before.
+  def meters_editable?
+    aircraft.flight_logs.maximum(:id) == id && (tach_in.nil? || tach_in == aircraft.tach_time)
+  end
+
+  # Owners can correct any flight; a pilot, the flights they logged.
+  def editable_by?(user, role:)
+    role.in?(%w[admin owner]) || (user_id.present? && user_id == user.id)
+  end
+
   private
 
   # Reject files the engine data parser can't read, before they're stored.

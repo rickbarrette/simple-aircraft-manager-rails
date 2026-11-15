@@ -821,6 +821,7 @@ en:
     flight_logs:
       flight_already_logged: Flight already logged.
       flight_logged_hrs: Flight logged (%{tach_time} hrs).
+      flight_corrected: Flight corrected.
       choose_an_engine_data: Choose an engine data file.
       engine_data_attached: Engine data attached.
       engine_data_removed: Engine data removed.
@@ -2331,6 +2332,15 @@ en:
       skipped: Skipped
       warning: Warning
   flight_logs:
+    edit:
+      correct_flight: Correct Flight
+      correct_the_flight_on: Correct the flight on %{date}
+      changing_the_readings: Changing the readings moves the aircraft's and its components' hours by the difference.
+      save: Save
+      cancel: Cancel
+    fields:
+      meters_locked_html: The readings can be corrected only on the latest flight, before the hours change again. To correct the hours, use %{link} on the Overview.
+      update_hours: Update Hours
     days:
       gps_track_attached: GPS track attached
       engine_data_attached: Engine data attached
@@ -2437,6 +2447,7 @@ en:
       flight_on_html: Flight on %{date}
       delete_this_flight_log_aircraft: Delete this flight log? Aircraft and component hours will NOT be rolled back.
       delete: Delete
+      edit: Edit
       tach: Tach
       hobbs: Hobbs
       route: Route
@@ -3640,6 +3651,7 @@ en:
       hours_notes: 'Previous: %{old}, delta: %{delta}'
       consumable_added: "%{type} added: %{quantity} %{unit}"
       flight_logged: 'Flight logged: %{hours} hrs'
+      flight_corrected: 'Flight corrected: %{date}'
       flight_logged_route: 'Flight logged: %{hours} hrs (%{route})'
     aircraft_grounded_error:
       message: Aircraft is grounded and airworthiness enforcement is enabled

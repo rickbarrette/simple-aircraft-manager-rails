@@ -194,9 +194,12 @@ Rails.application.routes.draw do
           get :logbook_entries
         end
         resources :squawks, only: %i[index create]
+        resources :draft_batches, only: %i[index create]
       end
       get "squawks", to: "squawks#lookup"
       resources :squawks, only: %i[show update]
+      get "draft_batches", to: "draft_batches#lookup"
+      resources :draft_batches, only: %i[show destroy]
     end
   end
 

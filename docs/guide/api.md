@@ -35,6 +35,7 @@ Reading works without it (limited to the integration's aircraft). Every write ne
 |---|---|
 | `read` | Aircraft, parts, due items, inspections, ADs, squawks and logbook entries |
 | `squawks:write` | Reporting squawks and updating them |
+| `drafts:write` | Sending draft logbook entries for signing, and withdrawing them (acting for an owner of the aircraft) |
 
 ## Requests and answers
 
@@ -68,6 +69,11 @@ Squawks have an `external_ref`: your own id for them, such as `redmine:issue:451
 | `GET /squawks?external_ref=…` | Find squawks by your id for them |
 | `GET /squawks/:id` | One squawk |
 | `PATCH /squawks/:id` | Update a squawk |
+| `POST /aircraft/:id/draft_batches` | Send a visit's work as draft logbook entries for signing |
+| `GET /aircraft/:id/draft_batches` | Its drafts (`?status=awaiting_signature`, `completed` or `withdrawn`) |
+| `GET /draft_batches?external_ref=…` | Find drafts by your id for them |
+| `GET /draft_batches/:id` | One draft, with its entries and whether they're signed |
+| `DELETE /draft_batches/:id` | Withdraw a draft nothing in which is signed yet |
 
 ### Reporting a squawk
 
@@ -94,6 +100,46 @@ The answer is `201` with the squawk:
 
 `PATCH /squawks/:id` with `{ "squawk": { … } }`. Anyone who may write can set `external_ref`; changing `issue_reported`, `priority`, `component_id` or `notes` needs an owner of the aircraft, as in the app. A resolved squawk can't be changed. Squawks are resolved by a signed logbook entry, in the app.
 
+## Draft entries
+
+Another system that tracks the work, such as Redmine's issues, can send a finished visit to SAM as **draft logbook entries**: the person certifying the work then reviews and signs them in the app. Like writing entries in the app, sending drafts is for the aircraft's owners: an integration acts for an owner (`SAM-On-Behalf-Of`), such as the director of maintenance.
+
+```
+POST /api/v1/aircraft/12/draft_batches
+{ "draft_batch": {
+    "date": "2026-11-20",
+    "aircraft_hours": 4321.4,
+    "external_ref": "redmine:visit:77",
+    "items": [
+      { "log": "ENG", "text": "Changed oil and filter, 7 qt Aeroshell W100.", "external_ref": "redmine:issue:4512" },
+      { "log": "AC",  "text": "Replaced left brake linings.", "resolves_squawks": [88], "external_ref": "redmine:issue:4513" },
+      { "log": "AC",  "text": "Annual inspection completed IAW Part 43 Appendix D.", "external_ref": "redmine:issue:4519" }
+    ],
+    "completes_inspections": [ { "inspection_type_id": 3, "result": "approved" } ],
+    "signer": { "email": "mechanic@example.com", "send_email": false }
+} }
+```
+
+- **One entry per logbook.** Items are grouped by `log` (`AC`, `ENG`, `PROP` or `OTHER`) into one unsigned entry each, their texts in order, so a visit that touched the engine and the airframe makes two entries, signed one after the other.
+- **Inspections** (`completes_inspections`): each needs its `result`, `approved` (airworthy) or `discrepancies` (a list was given to the owner), and the draft needs `aircraft_hours`. The entry recording it is an inspection entry, in the logbook named by `log`, else the airframe log if an item is for it.
+- **Nothing is resolved until it's signed.** The squawks the items resolve and the inspections they complete are held until **every** entry of the draft is signed; then they're resolved and recorded, attributed to the person who signed last, and linked to the entry that described the work. A draft never clears a squawk on its own. The signer sees what signing will do before they sign.
+- **The signer.** Anyone with access to the aircraft and a certificate in their profile can sign, from each entry's `sign_url`. Give `signer.email` for someone else (a mechanic without an account): each entry then gets an `invitation_url`, a link that lets that person create an account for that address and sign that entry, for 14 days. Pass the link on yourself (for example inside Redmine), or set `send_email: true` to have SAM email it.
+
+The answer (`201`):
+
+```json
+{ "data": { "id": 301, "status": "awaiting_signature", "external_ref": "redmine:visit:77",
+            "held": { "resolves_squawks": [88], "completes_inspections": [3] },
+            "entries": [
+              { "id": 9001, "log": "AC",  "entry_type": "INSPECTION", "text": "Replaced left brake linings.\n\nAnnual inspection…", "signed": false,
+                "sign_url": "https://sam.example.com/aircraft/12/logbook_entries/9001/signature/new", "invitation_url": "https://sam.example.com/sign/…" },
+              { "id": 9002, "log": "ENG", "entry_type": "MAINTENANCE", "text": "Changed oil and filter…", "signed": false, … } ] } }
+```
+
+When every entry is signed, the draft's `status` becomes `completed` and the `draft_batch.completed` webhook is sent: the moment to close the work order.
+
+A draft can be withdrawn (`DELETE /draft_batches/:id`) while nothing in it is signed; its entries are removed, and the record history keeps them. Once an entry is signed it's a record: mistakes are fixed with a correction entry in the app, never through the API.
+
 ## Webhooks
 
 An integration can be told about changes. In Admin → Integrations, give it a webhook address and choose the events. SAM then posts JSON there after each change:
@@ -104,6 +150,7 @@ An integration can be told about changes. In Admin → Integrations, give it a w
 | `squawk.updated` | A squawk is changed |
 | `squawk.resolved` | A squawk is resolved |
 | `entry.signed` | A logbook entry is signed |
+| `draft_batch.completed` | Every entry of a draft is signed, and what it resolves is done |
 
 Only events on the integration's aircraft are sent. The body:
 

@@ -4,6 +4,11 @@
 # a controller name are its views (t(".key") in the view).
 
 en:
+  api:
+    draft_batches:
+      sent:
+        one: "Draft logbook entry sent by %{name} for signing"
+        other: "%{count} draft logbook entries sent by %{name} for signing"
   api_tokens:
     created:
       title: Your new API token
@@ -16,6 +21,7 @@ en:
       scopes:
         read: Read aircraft, parts, due items, squawks and logbook entries
         'squawks:write': Report and update squawks
+        'drafts:write': Send draft logbook entries for signing (acting for an owner of the aircraft)
     webhook_endpoint:
       events:
         squawk:
@@ -24,6 +30,8 @@ en:
           resolved: A squawk is resolved
         entry:
           signed: A logbook entry is signed
+        draft_batch:
+          completed: All the entries of a draft are signed (and what it resolves is done)
     aircraft:
       statuses:
         AVAILABLE: Available
@@ -2623,6 +2631,13 @@ en:
       cg_in: "= CG (in)"
       cg_in_2: CG (in)
   logbook_entries:
+    draft_batch:
+      from: "Draft sent through %{name} for %{person} (their reference: %{ref})."
+      the_api: the API
+      when_signed: "When you sign it, this also:"
+      when_all_signed: "When all %{count} entries of this draft are signed, this also:"
+      resolves: "Resolves the squawk: %{issue}"
+      completes: "Records the %{name} as completed"
     component_fields:
       component: Component
       for_engine_and_propeller_logs: 'For engine and propeller logs: printed with its serial number and times.'
@@ -3607,6 +3622,9 @@ en:
     aircraft_grounded_error:
       message: Aircraft is grounded and airworthiness enforcement is enabled
     procedures_templates:
+      api: "**Programs that use the records (API).** %{integrations} Each has its own key, limited to chosen aircraft and actions, which the administrator can revoke at any time; the system records when each key was last used and from where, and every change made through it is in the record history with the key and the person it was for. Through the API, another program can read records, report squawks and send draft logbook entries; it cannot sign an entry, change or delete a signed one, or change users, roles or the record history. Draft entries are reviewed and signed in the system by the person certifying the work, and the squawks or inspections they resolve take effect only once signed. [Describe what each program is used for and who looks after it.]"
+      api_integrations: "The following programs are connected: %{names}."
+      api_no_integrations: "No other systems are connected; users may make personal keys for their own scripts, which act with their own access."
       server: "**Server.** The system runs %{location} at [location, e.g. the owner's home or a hosting provider]. Its data (the database, the uploaded files and the nightly verified database copies) is on that server's storage volume. Only [the owner] has administrative access to the server."
       server_docker: as a Docker container on a server
       server_plain: on a server

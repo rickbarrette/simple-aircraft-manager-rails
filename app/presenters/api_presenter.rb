@@ -42,10 +42,21 @@ module ApiPresenter
     { id: e.id, aircraft_id: e.aircraft_id, component_id: e.component_id, log: e.log_type, entry_type: e.entry_type,
       date: e.date.iso8601, text: e.text, aircraft_hours: dec(e.aircraft_hours_at_entry),
       inspection_result: e.inspection_result.presence, verified: e.verified, superseded: e.superseded_at.present?,
-      signed: sig.present?, signature: sig && signature(sig),
+      signed: sig.present?, signature: sig && signature(sig), draft_batch_id: e.draft_batch_id, external_ref: e.external_ref,
       signoff: sig ? nil : { person: e.signoff_person.presence, certificate_type: e.signoff_certificate_type.presence,
                              certificate_number: e.signoff_certificate_number.presence }.compact.presence,
       created_at: time(e.created_at), updated_at: time(e.updated_at) }
+  end
+
+  def draft_batch(b, invitations: {})
+    urls = Rails.application.routes.url_helpers
+    { id: b.id, aircraft_id: b.aircraft_id, status: b.status, external_ref: b.external_ref, signer_email: b.signer_email,
+      held: { resolves_squawks: b.held_squawks.map { _1["id"] }, completes_inspections: b.held_inspections.map { _1["id"] } },
+      entries: b.entries.sort_by(&:log_type).map do |e|
+        logbook_entry(e).merge(sign_url: "#{Sso.app_url}#{urls.new_aircraft_logbook_entry_signature_path(b.aircraft_id, e)}",
+                               invitation_url: invitations[e.id] && "#{Sso.app_url}#{urls.invited_signing_path(invitations[e.id])}")
+      end,
+      completed_at: time(b.completed_at), created_at: time(b.created_at) }
   end
 
   def signature(sig)

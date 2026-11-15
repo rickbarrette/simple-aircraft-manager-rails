@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_15_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_15_020000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -441,6 +441,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_010000) do
     t.index ["document_collection_id"], name: "index_documents_on_document_collection_id"
   end
 
+  create_table "draft_batches", force: :cascade do |t|
+    t.integer "aircraft_id", null: false
+    t.integer "api_token_id"
+    t.integer "created_by_id"
+    t.string "external_ref"
+    t.string "status", default: "awaiting_signature", null: false
+    t.string "signer_email"
+    t.json "held", default: {}, null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aircraft_id"], name: "index_draft_batches_on_aircraft_id"
+    t.index ["api_token_id"], name: "index_draft_batches_on_api_token_id"
+    t.index ["created_by_id"], name: "index_draft_batches_on_created_by_id"
+    t.index ["external_ref"], name: "index_draft_batches_on_external_ref"
+  end
+
   create_table "drs_imports", force: :cascade do |t|
     t.integer "aircraft_id", null: false
     t.integer "user_id"
@@ -569,9 +586,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_010000) do
     t.decimal "component_since_overhaul_at_entry", precision: 8, scale: 1
     t.integer "supersedes_id"
     t.datetime "superseded_at"
+    t.integer "draft_batch_id"
+    t.string "external_ref"
     t.index ["aircraft_id"], name: "index_logbook_entries_on_aircraft_id"
     t.index ["component_id"], name: "index_logbook_entries_on_component_id"
     t.index ["document_id"], name: "index_logbook_entries_on_document_id"
+    t.index ["draft_batch_id"], name: "index_logbook_entries_on_draft_batch_id"
     t.index ["supersedes_id"], name: "index_logbook_entries_on_supersedes_id"
   end
 
@@ -952,6 +972,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_010000) do
   add_foreign_key "document_collections", "aircraft"
   add_foreign_key "documents", "aircraft"
   add_foreign_key "documents", "document_collections"
+  add_foreign_key "draft_batches", "aircraft"
+  add_foreign_key "draft_batches", "api_tokens"
+  add_foreign_key "draft_batches", "users", column: "created_by_id"
   add_foreign_key "drs_imports", "aircraft", on_delete: :cascade
   add_foreign_key "drs_imports", "users", on_delete: :nullify
   add_foreign_key "entry_signatures", "logbook_entries"
@@ -966,6 +989,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_010000) do
   add_foreign_key "logbook_entries", "aircraft"
   add_foreign_key "logbook_entries", "components", on_delete: :nullify
   add_foreign_key "logbook_entries", "documents", on_delete: :nullify
+  add_foreign_key "logbook_entries", "draft_batches"
   add_foreign_key "logbook_entries", "logbook_entries", column: "supersedes_id", on_delete: :nullify
   add_foreign_key "logbook_entry_parts", "components", on_delete: :cascade
   add_foreign_key "logbook_entry_parts", "logbook_entries", on_delete: :cascade

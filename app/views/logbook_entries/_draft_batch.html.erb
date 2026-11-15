@@ -1,0 +1,16 @@
+<%# An entry sent through the API as a draft: where it came from and what
+    signing will do (held until every entry of the draft is signed). Locals: entry. %>
+<% batch = entry.draft_batch %>
+<% if batch %>
+  <% effects = batch.awaiting? ? batch.held_effects_for(entry) : { squawks: [], inspections: [] } %>
+  <div class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200">
+    <p><%= t(".from", name: batch.api_token&.name || t(".the_api"), person: batch.created_by&.display_name || "—", ref: batch.external_ref.presence || "—") %></p>
+    <% if effects[:squawks].any? || effects[:inspections].any? %>
+      <p class="mt-1 font-medium"><%= t(batch.entries.size > 1 ? ".when_all_signed" : ".when_signed", count: batch.entries.size) %></p>
+      <ul class="mt-1 list-disc pl-5">
+        <% effects[:squawks].each do |s| %><li><%= t(".resolves", issue: s.issue_reported.truncate(120)) %></li><% end %>
+        <% effects[:inspections].each do |type| %><li><%= t(".completes", name: type.name) %></li><% end %>
+      </ul>
+    <% end %>
+  </div>
+<% end %>

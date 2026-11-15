@@ -19,6 +19,7 @@
     </div>
   </div>
   <div class="card-body space-y-3">
+    <%= render "logbook_entries/draft_batch", entry: @entry %>
     <% if @entry.signed? %><%= render "logbook_entries/signature", entry: @entry %>
     <% elsif LogbookEntry::RECORD_TYPES.include?(@entry.entry_type) %>
       <p class="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-600 ring-1 ring-slate-200"><%= t(".not_signed_electronically_sign_it_html", supersedes: (t(".pending_correction_of_the_entry", date: (fmt_date(@entry.supersedes.date))) if @entry.supersedes)) %></p>

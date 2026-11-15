@@ -1,7 +1,7 @@
 # Where an integration wants to hear about changes (squawks, signed entries):
 # SAM posts JSON there, signed with the shared secret (see WebhookDeliveryJob).
 class WebhookEndpoint < ApplicationRecord
-  EVENTS = LabelSet.new("webhook_endpoint.events", %w[squawk.created squawk.updated squawk.resolved entry.signed])
+  EVENTS = LabelSet.new("webhook_endpoint.events", %w[squawk.created squawk.updated squawk.resolved entry.signed draft_batch.completed])
 
   belongs_to :api_token
   has_many :deliveries, class_name: "WebhookDelivery", dependent: :delete_all

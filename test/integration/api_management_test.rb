@@ -100,4 +100,12 @@ class ApiManagementTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", "REST API"
   end
+
+  test "the suggested procedures describe the API once it's in use" do
+    assert_no_match "API", ProceduresTemplates.hosting
+    ApiToken.create!(name: "Redmine", kind: "integration", user: @admin, scopes: %w[read], aircraft_ids: [ @a.id ])
+    text = ProceduresTemplates.hosting
+    assert_match "The following programs are connected: Redmine.", text
+    assert_match "cannot sign an entry", text
+  end
 end

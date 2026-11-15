@@ -4,6 +4,7 @@
   <div class="card-body space-y-4">
     <p class="text-sm text-slate-600"><%= t(".review_the_entry_your_signature_html", link: (link_to t(".how_signing_works"), records_help_path, class: "link", target: "_blank")) %></p>
     <%= render "logbook_entries/content", entry: entry %>
+    <%= render "logbook_entries/draft_batch", entry: entry %>
     <% if @signing_error %>
       <div class="rounded-md bg-red-50 p-3 text-sm text-red-700 ring-1 ring-red-200" role="alert"><%= @signing_error %></div>
     <% end %>

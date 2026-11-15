@@ -14,6 +14,7 @@ class LogbookEntry < ApplicationRecord
   belongs_to :document, optional: true
   # For engine / propeller logs: which one, and its times at this entry.
   belongs_to :component, optional: true
+  belongs_to :draft_batch, optional: true # made through the API, see DraftBatch
   # Sub-components it also covers (the oil filter on the engine…).
   has_many :parts, -> { includes(component: :component_type).order(:id) }, class_name: "LogbookEntryPart",
                    dependent: :destroy, autosave: true
@@ -33,6 +34,7 @@ class LogbookEntry < ApplicationRecord
   validates :signoff_certificate_type, inclusion: { in: CERTIFICATE_TYPES.keys }, allow_blank: true
   validates :inspection_result, inclusion: { in: INSPECTION_RESULTS.keys }, allow_blank: true
   validates :component_hours_at_entry, :component_since_overhaul_at_entry, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  normalizes :external_ref, with: ->(r) { r.to_s.strip.first(200).presence }
   normalizes :signoff_certificate_type, :inspection_result, :signoff_certificate_number, with: ->(v) { v.strip.presence }
 
   # Fields that may still change on a signed entry: its link to a scanned

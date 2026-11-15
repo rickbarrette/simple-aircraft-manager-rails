@@ -7,7 +7,7 @@
 #              for (SAM-On-Behalf-Of), so the record history always shows who.
 class ApiToken < ApplicationRecord
   KINDS = %w[personal integration].freeze
-  SCOPES = LabelSet.new("api_token.scopes", %w[read squawks:write])
+  SCOPES = LabelSet.new("api_token.scopes", %w[read squawks:write drafts:write])
   PREFIX = "sam_"
 
   belongs_to :user

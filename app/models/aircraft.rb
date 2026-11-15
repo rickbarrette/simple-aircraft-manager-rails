@@ -16,6 +16,7 @@ class Aircraft < ApplicationRecord
   has_many :components, dependent: :destroy
   has_many :squawks, dependent: :destroy
   has_many :logbook_entries, dependent: :destroy
+  has_many :draft_batches, dependent: :destroy
   has_many :logbook_imports, dependent: :destroy
   has_many :document_collections, dependent: :destroy
   has_many :documents, dependent: :destroy

@@ -12,9 +12,10 @@ module ProceduresTemplates
       t(:sign_in, sentence: sign_in_sentence, min: User::PASSWORD_MIN, minutes: User::LOCK_FOR.in_minutes.to_i,
                   tries: User::LOCK_AFTER, days: Authentication::SESSION_IDLE_TIMEOUT.in_days.to_i),
       t(Sso.enabled? ? :signing_sso : :signing),
+      api_sentence,
       t(:updates),
       t(:secret_key)
-    ].join("\n\n")
+    ].compact.join("\n\n")
   end
 
   def additional
@@ -35,6 +36,13 @@ module ProceduresTemplates
     elsif Sso.enabled? then t(:sign_in_sso, provider: Sso.label)
     else t(:sign_in_password)
     end
+  end
+
+  # Only when the API is in use: who can reach the records through it, and that signing stays in the app.
+  def api_sentence
+    integrations = ApiToken.integration.active.order(:name).pluck(:name)
+    return if integrations.empty? && !ApiToken.personal.active.exists?
+    t(:api, integrations: integrations.any? ? t(:api_integrations, names: integrations.to_sentence) : t(:api_no_integrations))
   end
 
   def docker? = File.exist?("/.dockerenv")

@@ -23,6 +23,7 @@ class EntrySignature < ApplicationRecord
     next if imported?
     entry = logbook_entry
     Webhooks.publish("entry.signed", aircraft: entry.aircraft, data: ApiPresenter.logbook_entry(entry))
+    entry.draft_batch&.entry_signed! # a draft from the API: its held changes once all its entries are signed
   end
   before_update { throw :abort } # signatures are permanent (2.1.2.7)
   before_destroy { throw :abort unless destroyed_by_association }

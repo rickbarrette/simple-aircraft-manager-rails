@@ -27,7 +27,11 @@ class HelpGuide
   # Sanitized HTML. Links to other guide pages ("records.md#mistakes") go
   # through `link` (slug, anchor) -> URL, or become plain text when nil.
   def self.html(page, link:, title: true)
-    source = title ? page.markdown : page.markdown.sub(/\A# .+\n+/, "")
+    render(title ? page.markdown : page.markdown.sub(/\A# .+\n+/, ""), link: link)
+  end
+
+  # Any Markdown from the guide (or a part of it, such as one release of the changelog).
+  def self.render(source, link:)
     html = Commonmarker.to_html(source, options: OPTIONS, plugins: { syntax_highlighter: nil })
     html = Rails::HTML5::SafeListSanitizer.new.sanitize(html, tags: TAGS, attributes: ATTRIBUTES)
     html.gsub(%r{<a href="([a-z-]+|README)\.md(?:#([a-z0-9-]+))?">(.*?)</a>}m) do

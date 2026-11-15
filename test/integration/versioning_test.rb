@@ -19,7 +19,7 @@ class VersioningTest < ActionDispatch::IntegrationTest
     get help_page_path("changelog")
     assert_response :success
     assert_select "h1", text: /What.s new/
-    assert_select "h2", text: version # the current version has release notes
+    assert_select "details[open] summary h3", text: version # the current version has release notes
   end
 
   test "each recorded software build remembers its version" do

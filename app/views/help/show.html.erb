@@ -10,5 +10,7 @@
                                                 aria: { current: (p == @page ? "page" : nil) } %></li><% end %>
     </ul>
   </nav>
-  <article class="card card-body min-w-0 max-w-3xl"><%= guide_html(@page) %></article>
+  <article class="card card-body min-w-0 max-w-3xl">
+    <%= @page.slug == "changelog" ? render("help/changelog", changelog: Changelog.load, running: SystemInfo.new.version) : guide_html(@page) %>
+  </article>
 </div>

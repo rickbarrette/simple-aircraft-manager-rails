@@ -1,0 +1,20 @@
+<%# The release notes (CHANGELOG.md, see Changelog): the running version and
+    any newer open, older releases folded to one line each, by month. %>
+<h1 class="mb-3 text-2xl font-bold"><%= changelog.title %></h1>
+<%= guide_markdown(changelog.intro, class: "mb-2") if changelog.intro.present? %>
+<% changelog.releases.group_by(&:month_start).each do |month, releases| %>
+  <h2 class="mt-6 mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><%= l(month, format: "%B %Y") %></h2>
+  <div class="divide-y divide-slate-200 rounded-md ring-1 ring-slate-200">
+    <% releases.each do |release| %>
+      <details id="<%= release.anchor %>" class="group release" <%= "open" if changelog.open?(release, running: running) %>>
+        <summary class="flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-3 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+          <span aria-hidden="true" class="inline-block text-xs text-slate-400 transition-transform group-open:rotate-90">▶</span>
+          <h3 class="font-mono text-base font-semibold"><%= release.version %></h3>
+          <% if release.version == running %><span class="badge-blue"><%= t(".this_version") %></span><% end %>
+          <span class="text-sm text-slate-500"><%= release_summary(release) %></span>
+        </summary>
+        <%= guide_markdown(release.markdown, class: "px-4 pb-4") %>
+      </details>
+    <% end %>
+  </div>
+<% end %>

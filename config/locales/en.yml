@@ -1287,6 +1287,8 @@ en:
         this_commit_on_github: This commit on GitHub
         build_html: Build %{build}
         what_s_new: What's new
+        whats_new_in: What's new in %{version}
+        all_releases: All releases
         disclaimer: Disclaimer
         source_code: Source code
         built: Built
@@ -2485,6 +2487,21 @@ en:
       past_30_days: Past 30 days
       this_year: This year
   help:
+    changelog:
+      this_version: This version
+      counts:
+        changes:
+          one: 1 change
+          other: "%{count} changes"
+        fixes:
+          one: 1 fix
+          other: "%{count} fixes"
+        administrators:
+          one: 1 for administrators
+          other: "%{count} for administrators"
+        notes:
+          one: 1 note
+          other: "%{count} notes"
     show:
       help: 'Help: %{title}'
       help_pages: Help pages

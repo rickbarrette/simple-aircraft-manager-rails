@@ -1,8 +1,13 @@
 class ReminderMailer < ApplicationMailer
-  # [[aircraft, issues, new AD alerts], …] for the aircraft the user owns
-  # that need attention.
+  # Aircraft where the user's role includes the permission.
+  def self.aircraft_where(user, permission)
+    Aircraft.where(id: AircraftRole.with_permission(permission).where(user_id: user.id).select(:aircraft_id)).ordered
+  end
+
+  # [[aircraft, issues, new AD alerts], …] for the aircraft the user gets
+  # reminders for (their role's "gets reminders") that need attention.
   def self.items_for(user)
-    Aircraft.joins(:roles).where(aircraft_roles: { user_id: user.id, role: "owner" }).ordered
+    aircraft_where(user, :receive_reminders)
             .map { [ _1, _1.airworthiness.issues, _1.ad_alerts.pending.to_a ] }.reject { _2.empty? && _3.empty? }
   end
 
@@ -10,10 +15,11 @@ class ReminderMailer < ApplicationMailer
 
   def self.audit_due_for?(user) = user.admin? && AuditRun.due_soon?
 
-  # Owned aircraft whose AD baseline needs a (new) DRS import: none yet, a
-  # year old, or a model never covered.
+  # Aircraft they get reminders for and manage the ADs of, whose AD baseline
+  # needs a (new) DRS import: none yet, a year old, or a model never covered.
   def self.drs_due_for(user)
-    Aircraft.joins(:roles).where(aircraft_roles: { user_id: user.id, role: "owner" }).ordered
+    aircraft_where(user, :receive_reminders)
+      .where(id: AircraftRole.with_permission(:manage_ads).where(user_id: user.id).select(:aircraft_id))
             .select { DrsImport.renewal_due?(_1) || DrsImport.missing_models(_1).any? }
   end
 

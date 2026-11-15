@@ -1,6 +1,8 @@
 class FlightLogsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, only: :destroy
+  requires_permission :log_flights, only: %i[new create]
+  requires_permission :delete_flights, only: :destroy
+  checks_permission_itself only: %i[edit update attach_engine_data remove_engine_data]
   before_action :set_flight_log, only: %i[show edit update engine_data_series attach_engine_data remove_engine_data]
   before_action :require_flight_editor!, only: %i[edit update]
   helper_method :can_edit_flight?
@@ -126,7 +128,10 @@ class FlightLogsController < ApplicationController
 
   private
 
-  def can_edit_flight?(flight) = flight.editable_by?(current_user, role: current_role)
+  # Any flight with "correct any flight"; the ones they logged with "correct own flights".
+  def can_edit_flight?(flight)
+    can?(:edit_any_flight) || (can?(:edit_own_flights) && flight.user_id.present? && flight.user_id == current_user.id)
+  end
 
   def require_flight_editor!
     return if can_edit_flight?(@flight_log)

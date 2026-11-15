@@ -4,7 +4,7 @@
 
 <div class="grid gap-5 lg:grid-cols-3">
   <div class="space-y-5 lg:col-span-2">
-    <% if owner? %><%= render "aircraft/setup", aircraft: @aircraft %><% end %>
+    <% if can?(:edit_aircraft) %><%= render "aircraft/setup", aircraft: @aircraft %><% end %>
     <section class="card">
       <div class="card-header">
         <h2 class="card-title"><%= t(".airworthiness") %></h2>
@@ -58,6 +58,7 @@
   </div>
 
   <div class="space-y-5">
+    <% if can?(:update_hours) %>
     <section class="card">
       <div class="card-header"><h2 class="card-title"><%= t(".update_hours") %></h2></div>
       <%= form_with url: hours_aircraft_path(@aircraft), method: :patch, class: "card-body space-y-3",
@@ -69,17 +70,18 @@
           <div><%= f.label :hobbs_time, t(".hobbs"), class: "label" %>
             <%= f.number_field :hobbs_time, value: @aircraft.hobbs_time, step: 0.1, class: "input", data: { hours_confirm_target: "hobbs" } %></div>
         </div>
-        <p class="hint"><%= t(".enter_the_current_meter_readings_html", link: (link_to t(".log_flight"), new_aircraft_flight_log_path(@aircraft), class: "link")) %></p>
+        <p class="hint"><%= can?(:log_flights) ? t(".enter_the_current_meter_readings_html", link: (link_to t(".log_flight"), new_aircraft_flight_log_path(@aircraft), class: "link")) : t(".enter_the_current_meter_readings") %></p>
         <%= f.submit t(".update_hours"), class: "btn-primary" %>
       <% end %>
     </section>
+    <% end %>
 
     <%= render "aircraft/last_flight", aircraft: @aircraft, last_day: @last_day %>
 
     <section class="card">
       <div class="card-header">
         <h2 class="card-title"><%= t(".details") %></h2>
-        <% if owner? %><%= link_to t(".edit"), edit_aircraft_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+        <% if can?(:edit_aircraft) %><%= link_to t(".edit"), edit_aircraft_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
       </div>
       <dl class="card-body grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
         <dt class="text-slate-500"><%= t(".serial") %></dt><dd><%= @aircraft.serial_number.presence || "—" %></dd>
@@ -94,7 +96,7 @@
 
     <section class="card">
       <div class="card-header"><h2 class="card-title"><%= t(".notes") %></h2>
-        <%= link_to t(".add"), new_aircraft_note_path(@aircraft), class: "btn-secondary btn-sm" %></div>
+        <% if can?(:write_notes) %><%= link_to t(".add"), new_aircraft_note_path(@aircraft), class: "btn-secondary btn-sm" %><% end %></div>
       <% if @notes.any? %>
         <ul class="divide-y divide-slate-100">
           <% @notes.each do |note| %>

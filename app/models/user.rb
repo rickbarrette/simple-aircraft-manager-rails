@@ -114,10 +114,14 @@ class User < ApplicationRecord
     admin? ? Aircraft.all : aircraft
   end
 
-  # 'admin' | 'owner' | 'pilot' | nil
+  # Their Role on the aircraft (nil for none; administrators may have none).
   def role_for(aircraft)
-    return "admin" if admin?
-    aircraft_roles.find_by(aircraft: aircraft)&.role
+    aircraft_roles.includes(:role).find_by(aircraft: aircraft)&.role
+  end
+
+  # Administrators can do everything on every aircraft.
+  def can?(permission, aircraft)
+    admin? || role_for(aircraft)&.can?(permission) || false
   end
 
   def display_name

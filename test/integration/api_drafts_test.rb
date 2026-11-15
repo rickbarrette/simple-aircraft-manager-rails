@@ -70,7 +70,7 @@ class ApiDraftsTest < ActionDispatch::IntegrationTest
   test "drafts are for owners: an integration must act for one, with the drafts scope" do
     post "/api/v1/aircraft/#{@a.id}/draft_batches", params: batch_params, headers: headers(as: @mech), as: :json
     assert_response :forbidden
-    assert_equal "owners_only", JSON.parse(response.body).dig("error", "code")
+    assert_equal "not_permitted", JSON.parse(response.body).dig("error", "code")
     @token.update!(scopes: %w[read])
     post "/api/v1/aircraft/#{@a.id}/draft_batches", params: batch_params, headers: headers(as: @owner), as: :json
     assert_equal "missing_scope", JSON.parse(response.body).dig("error", "code")

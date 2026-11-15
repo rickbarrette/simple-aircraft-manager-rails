@@ -8,6 +8,6 @@
   </div>
   <div class="flex items-center gap-2">
     <%= visibility_badge(doc.effective_visibility) %>
-    <% if owner? %><%= link_to t(".edit"), edit_aircraft_document_path(aircraft, doc), class: "btn-secondary btn-sm" %><% end %>
+    <% if can?(:manage_documents) %><%= link_to t(".edit"), edit_aircraft_document_path(aircraft, doc), class: "btn-secondary btn-sm" %><% end %>
   </div>
 </li>

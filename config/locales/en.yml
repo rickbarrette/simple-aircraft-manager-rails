@@ -165,10 +165,6 @@ en:
       privileges:
         status: Current Status
         maintenance: Maintenance Detail
-    aircraft_role:
-      roles:
-        owner: Owner
-        pilot: Pilot
     airport:
       kinds:
         seaplane_base: seaplane base
@@ -826,7 +822,7 @@ en:
       engine_data_attached: Engine data attached.
       engine_data_removed: Engine data removed.
       flight_log_deleted_aircraft: Flight log deleted. Aircraft hours were not changed.
-      only_owners_or_the: Only owners or the flight's pilot can do that.
+      only_owners_or_the: Your role on this aircraft doesn't allow changing this flight.
       flight_log_deleted: Flight log deleted
       track_unreadable: 'Couldn''t read track: %{message}'
       engine_data_unreadable: 'Couldn''t read engine data: %{message}'
@@ -1110,7 +1106,18 @@ en:
         one: Restored %{count} built-in template.
         other: Restored %{count} built-in templates.
       all_present: All the built-in templates are already here.
+    admin_roles:
+      created: Role “%{name}” created.
+      updated: Role “%{name}” saved.
+      deleted: Role “%{name}” deleted.
+      built_in: Built-in roles can't be deleted.
+      in_use:
+        one: "“%{name}” is still given to 1 person; give them another role first."
+        other: "“%{name}” is still given to %{count} people; give them another role first."
     admin_users:
+      access_added: Added to %{tail_number}.
+      access_changed: Role on %{tail_number} changed.
+      access_removed: Removed from %{tail_number}.
       user_created: User %{email_address} created.
       you_can_t_remove: You can't remove your own admin rights.
       user_updated: User updated.
@@ -1137,7 +1144,7 @@ en:
       component_type_updated: Component type updated.
       component_type_deleted: Component type deleted.
     common:
-      only_owners_can_do: Only owners can do that.
+      not_allowed: Your role on this aircraft doesn't allow that.
     calendar_feeds:
       name: Aircraft maintenance
       projected: projected from recent flying
@@ -1217,6 +1224,30 @@ en:
       matches: Matches
       update: Update
   admin:
+    roles:
+      index:
+        roles: Roles
+        new_role: New role
+        intro: What people can do on an aircraft depends on their role there. Change what a role allows, or add your own (a partner, an instructor, an insurer). Everyone can see the records of the aircraft they have a role on.
+        name: Role
+        can: Can
+        people: People
+        built_in: Built in
+        everything: Everything, including people and sharing
+        view_only: View only
+        edit: Edit
+      new:
+        new_role: New Role
+      edit:
+        edit_role: 'Edit Role: %{name}'
+      form:
+        description_hint: Shown when choosing a role.
+        owner_has_everything: Owner always has every permission, so every aircraft can always be managed. Its name and description can be changed.
+        viewing_needs_nothing: Seeing the aircraft's records needs no permission. Signing a logbook entry also needs a current certificate on the person's profile.
+        save: Save
+        cancel: Cancel
+        delete_role: Delete role
+        delete_role_confirm: Delete the role “%{name}”?
     integrations:
       show:
         revoked: Revoked
@@ -1658,6 +1689,16 @@ en:
     users:
       edit:
         edit_user: Edit User
+        aircraft_access: Aircraft access
+        role_on: Role on %{tail_number}
+        remove: Remove
+        remove_access: Remove their access to %{tail_number}?
+        no_aircraft: No access to any aircraft yet.
+        aircraft: Aircraft
+        role: Role
+        add: Add
+        roles: Roles
+        roles_hint_html: What each role can do is set under %{link}. As an administrator they can see and change every aircraft whatever their roles.
       form:
         email: Email
         administrator: Administrator
@@ -1787,6 +1828,7 @@ en:
       hobbs: Hobbs
       log_flight: Log Flight
       enter_the_current_meter_readings_html: Enter the current meter readings. The difference is applied to every in-service component. For a single flight, use %{link}.
+      enter_the_current_meter_readings: Enter the current meter readings. The difference is applied to every in-service component.
       details: Details
       edit: Edit
       serial: Serial
@@ -1856,7 +1898,10 @@ en:
       remove: Remove
       add_by_email: Add by email
       add: Add
-      owners_can_edit_everything_pilots_html: "<strong>Owners</strong> can edit everything. <strong>Pilots</strong> can view all records, log flights, update hours, and add squawks, notes and oil/fuel."
+      role_for: Role for %{display_name}
+      role: Role
+      what_each_role_can_do: What each role can do
+      roles_are_set_by_an_administrator: An administrator sets what each role can do, and can add roles (Admin → Roles). Only an Owner can give or take away the Owner role.
       share_links: Share Links
       expired: Expired
       revoke_this_link_anyone_using: Revoke this link? Anyone using it will lose access.
@@ -2602,6 +2647,7 @@ en:
       sign_out: Sign out
   layouts:
     application:
+      roles: Roles
       integrations: Integrations
       skip_to_content_html: <a href="#main" class="skip-link">Skip to content</a>
       simple_aircraft_manager: Simple Aircraft Manager
@@ -3269,6 +3315,7 @@ en:
       create_admin_account: Create Admin Account
   shared:
     aircraft_header:
+      admin: Admin
       tach_hobbs_html: Tach %{tach_time} · Hobbs %{hobbs_time}
       your_access_to_this_aircraft: Your access to this aircraft
       log_flight: Log Flight
@@ -3546,6 +3593,120 @@ en:
       an_owner_needs_to_set: An owner needs to set up the loading stations first.
     new:
       weight_balance: "%{tail_number} Weight & Balance"
+  roles:
+    owner:
+      name: Owner
+      description: Everything on the aircraft, including its people and sharing.
+    mechanic:
+      name: Mechanic
+      description: 'Maintenance records: logbook entries, components, inspections, ADs and squawks.'
+    pilot:
+      name: Pilot
+      description: 'Flying: logs flights and hours, reports squawks, adds notes and oil and fuel.'
+    viewer:
+      name: Viewer
+      description: Sees everything on the aircraft and changes nothing.
+  permissions:
+    groups:
+      flying: Flying
+      squawks_and_notes: Squawks, notes, oil and fuel
+      maintenance: Maintenance records
+      data: Imports and exports
+      aircraft: The aircraft
+      notifications: Notifications
+    log_flights:
+      label: Log flights
+      description: Log Flight (also offline) and the AirTrail export.
+    update_hours:
+      label: Update hours
+      description: Set the tach and Hobbs readings without logging a flight.
+    import_flights:
+      label: Import flights
+      description: From a spreadsheet.
+    edit_own_flights:
+      label: Correct own flights
+      description: The flights they logged, and their engine data.
+    edit_any_flight:
+      label: Correct any flight
+      description: Any flight and its engine data, and standardizing airport codes.
+    delete_flights:
+      label: Delete flights
+      description: Deleting doesn't take the hours back off.
+    report_squawks:
+      label: Report squawks
+      description: Also offline, and through the API.
+    defer_squawks:
+      label: Defer squawks
+      description: As inoperative equipment (14 CFR 91.213).
+    manage_squawks:
+      label: Manage squawks
+      description: Edit, resolve, reopen and delete squawks, and undo deferrals.
+    write_notes:
+      label: Write notes
+      description: Add notes to the aircraft.
+    manage_notes:
+      label: Manage notes
+      description: Edit and delete anyone's notes.
+    record_consumables:
+      label: Record oil and fuel
+      description: Add oil and fuel records.
+    manage_consumables:
+      label: Manage oil and fuel
+      description: Edit and delete oil and fuel records.
+    write_logbook:
+      label: Write logbook entries
+      description: Create and edit unsigned entries, correct signed ones, ask someone to sign, and send drafts through the API.
+    sign_logbook:
+      label: Sign logbook entries
+      description: Also needs a current certificate on their profile.
+    manage_components:
+      label: Manage components
+      description: Add, edit and remove components, and record service.
+    manage_inspections:
+      label: Manage inspections
+      description: Inspection types and records.
+    manage_ads:
+      label: Manage ADs
+      description: ADs, compliance, the DRS import and new-AD alerts.
+    manage_major_records:
+      label: Manage major repairs and alterations
+      description: Form 337s and their ICAs.
+    manage_weight_balance:
+      label: Manage weight and balance
+      description: Records and the loading setup.
+    manage_documents:
+      label: Manage documents
+      description: Upload, edit and delete documents and collections.
+    record_oil_analyses:
+      label: Add oil analyses
+      description: Enter or import lab reports.
+    manage_oil_analyses:
+      label: Manage oil analyses
+      description: Edit and delete oil analyses.
+    import_records:
+      label: Import logbook scans
+      description: Turn photos or PDFs of paper logbooks into entries.
+    export_data:
+      label: Export
+      description: The .sam.zip backup and the records package.
+    restore_history:
+      label: Restore from history
+      description: Put a record back as it was in the record history.
+    edit_aircraft:
+      label: Edit the aircraft
+      description: Its details, photo and settings, and the setup checklist.
+    delete_aircraft:
+      label: Delete the aircraft
+      description: With all its records.
+    manage_people:
+      label: Manage people
+      description: Give people roles on the aircraft.
+    manage_sharing:
+      label: Share links
+      description: Create and revoke read-only links.
+    receive_reminders:
+      label: Get reminders
+      description: The weekly email of what's coming due, and alerts when something becomes overdue.
   helpers:
     aircraft:
       overview: Overview
@@ -3590,6 +3751,11 @@ en:
     form:
       interval_unit: "%{label} unit"
   services:
+    aircraft_access:
+      not_found: Choose a person and a role.
+      owner_only: Only an Owner can give or take away the Owner role.
+      own_role: You can't change your own role; ask another Owner or an administrator.
+      last_owner: An aircraft must keep at least one Owner.
     airworthiness:
       disclaimer: Based on the records in this app. Before each flight the pilot in command decides whether the aircraft is airworthy (14 CFR 91.7).
       categories:

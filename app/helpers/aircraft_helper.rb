@@ -3,11 +3,14 @@ module AircraftHelper
 
   # What the app saves ahead of time for use without signal (see
   # offline_prep_controller.js): for each of your aircraft, the Overview, W&B,
-  # Log Flight and Report Squawk pages, and its photo (at both page sizes).
+  # Log Flight and Report Squawk pages (when their role allows them), and its
+  # photo (at both page sizes).
   def offline_pages
     current_user.accessible_aircraft.ordered.limit(OFFLINE_AIRCRAFT).map do |a|
+      role = current_user.role_for(a)
+      can = ->(permission) { current_user.admin? || role&.can?(permission) }
       { tail: a.tail_number, pages: [ aircraft_path(a), aircraft_weight_balance_records_path(a) ],
-        flight: new_aircraft_flight_log_path(a), squawk: new_aircraft_squawk_path(a),
+        flight: (new_aircraft_flight_log_path(a) if can.(:log_flights)), squawk: (new_aircraft_squawk_path(a) if can.(:report_squawks)),
         pictures: (%i[thumb card].map { url_for(a.picture_for(_1)) }.uniq if a.picture_shown?) }.compact
     end
   end

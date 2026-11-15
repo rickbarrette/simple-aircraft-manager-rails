@@ -5,14 +5,14 @@
     <div class="flex gap-2">
       <% if @entry.signed? %>
         <%= link_to t(".print_for_logbook"), new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "btn-secondary btn-sm" %>
-        <% if owner? && !@entry.superseded? && !@entry.superseded_by %>
+        <% if can?(:write_logbook) && !@entry.superseded? && !@entry.superseded_by %>
           <%= more_menu(small: true) do %><%= link_to t(".correct_this_entry"), new_aircraft_logbook_entry_path(@aircraft, supersedes: @entry.id), class: "menu-item" %><% end %>
         <% end %>
       <% else %>
-        <%= link_to t(".sign"), new_aircraft_logbook_entry_signature_path(@aircraft, @entry), class: "btn-primary btn-sm" %>
-        <% if owner? %><%= link_to t(".edit"), edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
+        <% if can?(:sign_logbook) %><%= link_to t(".sign"), new_aircraft_logbook_entry_signature_path(@aircraft, @entry), class: "btn-primary btn-sm" %><% end %>
+        <% if can?(:write_logbook) %><%= link_to t(".edit"), edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "btn-secondary btn-sm" %><% end %>
         <%= more_menu(small: true) do %>
-          <% if owner? %><%= link_to t(".ask_someone_to_sign"), new_aircraft_logbook_entry_signing_invitation_path(@aircraft, @entry), class: "menu-item" %><% end %>
+          <% if can?(:write_logbook) %><%= link_to t(".ask_someone_to_sign"), new_aircraft_logbook_entry_signing_invitation_path(@aircraft, @entry), class: "menu-item" %><% end %>
           <%= link_to t(".print_for_logbook"), new_aircraft_logbook_print_path(@aircraft, ids: [ @entry.id ]), class: "menu-item" %>
         <% end %>
       <% end %>
@@ -27,7 +27,7 @@
     <% unless @entry.verified? %>
       <div class="flex flex-wrap items-center justify-between gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
         <span><%= t(".transcribed_by_claude_and_not_html", transcription_confidence: (t(".confidence", transcription_confidence: @entry.transcription_confidence) if @entry.transcription_confidence), logbook: (@entry.document ? "" : t(".or_the_paper_logbook"))) %></span>
-        <% if owner? %><%= button_to t(".matches_the_scan_mark_verified"), verify_aircraft_logbook_entry_path(@aircraft, @entry), method: :patch, class: "btn-secondary btn-sm" %><% end %>
+        <% if can?(:write_logbook) %><%= button_to t(".matches_the_scan_mark_verified"), verify_aircraft_logbook_entry_path(@aircraft, @entry), method: :patch, class: "btn-secondary btn-sm" %><% end %>
       </div>
     <% end %>
     <div class="flex flex-wrap gap-4 text-sm text-slate-600">
@@ -53,7 +53,7 @@
     <% if (missing = @entry.missing_record_items).any? %>
       <p class="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
         <%= t(".missing_for_html", entry_type: (@entry.entry_type == "INSPECTION" ? "43.11" : "43.9"), items: missing.to_sentence) %>
-        <%= link_to(t(".fill_in"), edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "link") if owner? %>
+        <%= link_to(t(".fill_in"), edit_aircraft_logbook_entry_path(@aircraft, @entry), class: "link") if can?(:write_logbook) %>
         <%= t(".check_against_the_signed_logbook") %>
       </p>
     <% end %>

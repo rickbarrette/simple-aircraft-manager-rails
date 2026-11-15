@@ -3,6 +3,7 @@
 <%= render "shared/oil_subnav", aircraft: @aircraft %>
 <% recent = @analyses.first(OilAnalysesController::COMPARE_SAMPLES) %>
 <div class="space-y-5">
+  <% if can?(:record_oil_analyses) %>
   <section class="card">
     <div class="card-header">
       <div>
@@ -12,11 +13,12 @@
       <%= render "import", aircraft: @aircraft %>
     </div>
   </section>
+  <% end %>
 
   <section class="card">
     <div class="card-header">
       <h2 class="card-title"><%= t(".wear_metal_trends") %></h2>
-      <%= link_to t(".add_oil_analysis"), new_aircraft_oil_analysis_path(@aircraft), class: "btn-secondary btn-sm" %>
+      <% if can?(:record_oil_analyses) %><%= link_to t(".add_oil_analysis"), new_aircraft_oil_analysis_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
     </div>
     <div class="card-body">
       <% series = oil_trend_series(@analyses) %>

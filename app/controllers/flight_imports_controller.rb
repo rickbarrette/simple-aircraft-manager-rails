@@ -2,7 +2,7 @@
 class FlightImportsController < ApplicationController
   include AircraftScoped
   include StoredUpload
-  before_action :require_owner!
+  requires_permission :import_flights
 
   def new; end
 

@@ -1,7 +1,9 @@
 class AircraftController < ApplicationController
   include AircraftScoped
-  skip_before_action :set_aircraft, only: %i[index new create]
-  before_action :require_owner!, only: %i[edit update destroy]
+  skip_before_action :set_aircraft, :authorize_permission!, only: %i[index new create]
+  requires_permission :edit_aircraft, only: %i[edit update]
+  requires_permission :delete_aircraft, only: :destroy
+  requires_permission :update_hours, only: :update_hours
 
   def index
     @aircraft_list = current_user.accessible_aircraft.ordered.with_attached_picture

@@ -44,7 +44,7 @@ class RecordsAudit
     (signed + pool.where.not(id: signed.map(&:id)).order(Arel.sql("RANDOM()")).limit(@policy.audit_sample_size - signed.size).to_a).first(@policy.audit_sample_size)
   end
 
-  def users = User.order(:email_address).includes(:certificates, aircraft_roles: :aircraft)
+  def users = User.order(:email_address).includes(:certificates, aircraft_roles: %i[aircraft role])
 
   # Saves the audit from the auditor's answers: { key => { "passed" => "1", "note" => … } }.
   def record!(user:, answers:, notes:, sample_ids:)

@@ -1,7 +1,7 @@
 # Download every record of an aircraft in one ZIP (owners).
 class RecordsPackagesController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :export_data
 
   def show
     package = RecordsPackage.new(@aircraft, source: request.host)

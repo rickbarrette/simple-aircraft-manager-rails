@@ -20,7 +20,7 @@
             <td class="truncate" data-label="Product"><%= r.consumable_type %></td>
             <td class="text-right tabular-nums" data-label="Tach"><%= hours(r.flight_hours) %></td>
             <td class="text-xs text-slate-500 break-words"><%= r.notes %><%= t(".excluded_from_average") if r.excluded_from_averages? %></td>
-            <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_consumable_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+            <td class="text-right"><% if can?(:manage_consumables) %><%= link_to t(".edit"), edit_aircraft_consumable_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>
       </tbody>

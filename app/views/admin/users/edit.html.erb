@@ -1,2 +1,35 @@
 <h1 class="mb-4 text-2xl font-bold"><%= t(".edit_user") %></h1>
 <%= render "form", user: @user %>
+
+<%# Their role on each aircraft (same rules as each aircraft's Access page, AircraftAccess). %>
+<section class="card mt-6 max-w-3xl" id="access">
+  <div class="card-header"><h2 class="card-title"><%= t(".aircraft_access") %></h2></div>
+  <% roles = Role.ordered.to_a %>
+  <% memberships = @user.aircraft_roles.includes(:aircraft, :role).sort_by { _1.aircraft.tail_number } %>
+  <% if memberships.any? %>
+    <table class="table">
+      <tbody>
+        <% memberships.each do |m| %>
+          <tr>
+            <td><%= link_to m.aircraft.tail_number, aircraft_path(m.aircraft), class: "link font-medium" %> <span class="text-xs text-slate-500"><%= [ m.aircraft.make, m.aircraft.model ].compact_blank.join(" ") %></span></td>
+            <td><%= form_with url: admin_user_aircraft_role_path(@user, m), method: :patch do |f| %>
+              <%= f.select :role_id, roles.map { [ _1.name, _1.id ] }, { selected: m.role_id }, class: "input w-36", "aria-label": t(".role_on", tail_number: m.aircraft.tail_number), data: { submit_on_change: true } %>
+            <% end %></td>
+            <td class="text-right"><%= delete_button t(".remove"), admin_user_aircraft_role_path(@user, m), confirm: t(".remove_access", tail_number: m.aircraft.tail_number) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <%= empty_state t(".no_aircraft") %>
+  <% end %>
+  <% others = Aircraft.where.not(id: memberships.map(&:aircraft_id)).ordered %>
+  <% if others.any? %>
+    <%= form_with url: admin_user_aircraft_roles_path(@user), class: "flex flex-wrap items-end gap-2 border-t border-slate-100 p-4" do |f| %>
+      <div><%= f.label :aircraft_id, t(".aircraft"), class: "label" %><%= f.select :aircraft_id, others.map { [ _1.tail_number, _1.id ] }, {}, class: "input" %></div>
+      <div><%= f.label :role_id, t(".role"), class: "label" %><%= f.select :role_id, roles.map { [ _1.name, _1.id ] }, { selected: Role.for_key("pilot").id }, class: "input w-36" %></div>
+      <%= f.submit t(".add"), class: "btn-primary" %>
+    <% end %>
+  <% end %>
+  <p class="hint px-4 pb-4"><%= t(".roles_hint_html", link: link_to(t(".roles"), admin_roles_path, class: "link")) %></p>
+</section>

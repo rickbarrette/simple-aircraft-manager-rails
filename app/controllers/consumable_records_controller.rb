@@ -1,6 +1,7 @@
 class ConsumableRecordsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, only: %i[edit update destroy]
+  requires_permission :record_consumables, only: %i[new create]
+  requires_permission :manage_consumables, only: %i[edit update destroy]
   before_action :set_record, only: %i[edit update destroy]
 
   RECORDS_PER_PAGE = 50

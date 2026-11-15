@@ -31,6 +31,7 @@ module Api
       # POST /aircraft/:aircraft_id/squawks
       def create
         aircraft = find_aircraft
+        return not_permitted(:report_squawks) unless can?(:report_squawks, aircraft)
         squawk = aircraft.squawks.new(create_params.merge(reported_by: acting_user, resolved: false))
         squawk.component_id = nil unless aircraft.components.exists?(id: squawk.component_id)
         squawk.save!
@@ -39,13 +40,13 @@ module Api
       end
 
       # PATCH /squawks/:id: external_ref by anyone who may write; the rest
-      # (issue, priority, component, notes) by the aircraft's owners, as in the app.
+      # (issue, priority, component, notes) with "manage squawks", as in the app.
       def update
         squawk = find_squawk
         return render_error(:unprocessable_entity, "resolved", "A resolved squawk can't be changed.") if squawk.resolved?
         attrs = params.require(:squawk).permit(:external_ref, :issue_reported, :priority, :component_id, :notes)
-        if (attrs.keys - %w[external_ref]).any? && !owner_of?(squawk.aircraft)
-          return render_error(:forbidden, "owners_only", "Only the aircraft's owners can change a squawk's details.")
+        if (attrs.keys - %w[external_ref]).any? && !can?(:manage_squawks, squawk.aircraft)
+          return not_permitted(:manage_squawks)
         end
         attrs[:component_id] = nil if attrs.key?(:component_id) && !squawk.aircraft.components.exists?(id: attrs[:component_id])
         squawk.update!(attrs)

@@ -3,7 +3,7 @@
 <section class="card">
   <div class="card-header">
     <h2 class="card-title"><%= t(".airworthiness_directives_bulletins") %></h2>
-    <% if owner? %>
+    <% if can?(:manage_ads) %>
       <div class="flex flex-wrap items-center gap-2">
         <% if @attachable.any? %>
           <%= form_with url: attach_aircraft_airworthiness_directives_path(@aircraft), class: "flex gap-2" do |f| %>
@@ -34,7 +34,7 @@
               <td class="text-xs"><%= [row.next_due_date && l(row.next_due_date, format: :month_year), row.next_due_hours && t(".due_hours", hours: hours(row.next_due_hours), meter: Aircraft::TIME_BASES[@aircraft.time_basis].downcase, left: hours(row.next_due_hours - @aircraft.current_hours))].compact.join(" / ").presence || "—" %></td>
               <td><%= compliance_badge(row.status) %></td>
               <td class="whitespace-nowrap text-right">
-                <% if owner? %>
+                <% if can?(:manage_ads) %>
                   <%= link_to t(".comply"), new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id), class: "btn-secondary btn-sm" %>
                   <% if row.status.in?(%w[no_compliance overdue due_soon conditional]) %><%= link_to "N/A", new_aircraft_ad_compliance_path(@aircraft, ad_id: ad.id, not_applicable: 1), class: "btn-secondary btn-sm", title: t(".record_that_this_ad_doesn") %><% end %>
                   <%= link_to t(".edit"), edit_aircraft_airworthiness_directive_path(@aircraft, ad), class: "btn-secondary btn-sm" %>
@@ -58,7 +58,7 @@
       <h2 class="card-title"><%= t(".ad_baseline_from_faa_drs") %></h2>
       <p class="text-xs text-slate-500"><%= t(".the_full_list_comes_from") %></p>
     </div>
-    <% if owner? %><%= link_to t(".import_from_faa_drs"), new_aircraft_ad_import_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+    <% if can?(:manage_ads) %><%= link_to t(".import_from_faa_drs"), new_aircraft_ad_import_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
   </div>
   <div class="card-body space-y-2 text-sm">
     <% if last_drs %>
@@ -77,7 +77,7 @@
       <h2 class="card-title"><%= t(".newly_published_ads_that_may") %></h2>
       <p class="text-xs text-slate-500"><%= t(".searched_weekly_in_the_federal_html", components: (AdWatch.new(@aircraft).terms.map(&:label).uniq.to_sentence.presence || t(".the_aircraft_and_its_installed")), ad_watch_checked_at: (t(".last_checked_ago", ad_watch_checked_at: (time_ago_in_words(@aircraft.ad_watch_checked_at))) if @aircraft.ad_watch_checked_at)) %></p>
     </div>
-    <% if owner? %><%= button_to t(".check_now"), check_aircraft_ad_alerts_path(@aircraft), class: "btn-secondary btn-sm", data: { turbo_submits_with: t(".checking") } %><% end %>
+    <% if can?(:manage_ads) %><%= button_to t(".check_now"), check_aircraft_ad_alerts_path(@aircraft), class: "btn-secondary btn-sm", data: { turbo_submits_with: t(".checking") } %><% end %>
   </div>
   <% if @alerts.any? %>
     <ul class="divide-y divide-slate-100">
@@ -89,7 +89,7 @@
             <p class="mt-1 text-xs text-slate-600"><%= alert.abstract.to_s.truncate(400) %></p>
             <%= link_to t(".read_it_in_the_federal"), alert.html_url, class: "link text-xs", target: "_blank", rel: "noopener" %>
           </div>
-          <% if owner? %>
+          <% if can?(:manage_ads) %>
             <div class="flex gap-2">
               <%= button_to t(".track"), track_aircraft_ad_alert_path(@aircraft, alert), class: "btn-primary btn-sm", title: t(".add_it_to_this_aircraft") %>
               <%= button_to t(".dismiss"), dismiss_aircraft_ad_alert_path(@aircraft, alert), class: "btn-secondary btn-sm", title: t(".doesn_t_apply") %>
@@ -101,7 +101,7 @@
   <% else %>
     <%= empty_state t(".nothing_new_to_review") %>
   <% end %>
-  <% if owner? %>
+  <% if can?(:manage_ads) %>
     <%= form_with url: terms_aircraft_ad_alerts_path(@aircraft), method: :patch, class: "flex flex-wrap items-end gap-2 border-t border-slate-100 px-4 py-3" do %>
       <div class="min-w-0 flex-1">
         <%= label_tag :ad_watch_terms, t(".additional_search_terms"), class: "label" %>
@@ -140,7 +140,7 @@
                 </div>
               <% end %>
             </td>
-            <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_ad_compliance_path(@aircraft, c), class: "btn-secondary btn-sm" %><% end %></td>
+            <td class="text-right"><% if can?(:manage_ads) %><%= link_to t(".edit"), edit_aircraft_ad_compliance_path(@aircraft, c), class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>
       </tbody>

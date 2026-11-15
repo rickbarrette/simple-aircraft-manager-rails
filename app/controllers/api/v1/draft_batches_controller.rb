@@ -27,7 +27,7 @@ module Api
       # POST /aircraft/:aircraft_id/draft_batches
       def create
         @aircraft = find_aircraft
-        return render_error(:forbidden, "owners_only", "Draft entries are for the aircraft's owners (act for an owner).") unless owner_of?(@aircraft)
+        return not_permitted(:write_logbook) unless can?(:write_logbook, @aircraft)
 
         input = params.require(:draft_batch)
         items = Array(input[:items]).map { _1.permit(:log, :text, :external_ref, resolves_squawks: []) }
@@ -54,7 +54,7 @@ module Api
       # DELETE /draft_batches/:id: withdraw it while nothing in it is signed.
       def destroy
         batch = find_batch
-        return render_error(:forbidden, "owners_only", "Only the aircraft's owners can withdraw a draft.") unless owner_of?(batch.aircraft)
+        return not_permitted(:write_logbook) unless can?(:write_logbook, batch.aircraft)
         unless batch.awaiting? && batch.entries.none?(&:signed?)
           return render_error(:conflict, "signed", "Part of this draft is signed (or it's no longer awaiting signature); correct it in the app instead.")
         end

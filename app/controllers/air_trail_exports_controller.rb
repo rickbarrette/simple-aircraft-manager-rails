@@ -1,6 +1,7 @@
 # Download the aircraft's flights as an AirTrail import file.
 class AirTrailExportsController < ApplicationController
   include AircraftScoped
+  requires_permission :log_flights
 
   def new
     @export = build_export

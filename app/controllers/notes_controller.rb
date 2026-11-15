@@ -1,6 +1,7 @@
 class NotesController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, only: %i[edit update destroy]
+  requires_permission :write_notes, only: %i[new create preview]
+  requires_permission :manage_notes, only: %i[edit update destroy]
   before_action :set_note, only: %i[edit update destroy]
 
   def index

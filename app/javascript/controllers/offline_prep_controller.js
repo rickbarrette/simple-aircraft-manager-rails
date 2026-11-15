@@ -29,9 +29,9 @@ export default class extends Controller {
     const forms = {}
     const paths = [ "/" ]
     for (const a of this.aircraftValue) {
-      paths.push(...a.pages, a.flight, a.squawk)
-      forms[a.flight] = { tail: a.tail, kind: "flight" }
-      forms[a.squawk] = { tail: a.tail, kind: "squawk" }
+      paths.push(...a.pages)
+      if (a.flight) { paths.push(a.flight); forms[a.flight] = { tail: a.tail, kind: "flight" } }
+      if (a.squawk) { paths.push(a.squawk); forms[a.squawk] = { tail: a.tail, kind: "squawk" } }
     }
     const pictures = this.aircraftValue.flatMap((a) => a.pictures || [])
     const total = paths.length + 1

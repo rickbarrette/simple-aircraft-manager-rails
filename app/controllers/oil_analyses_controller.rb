@@ -1,6 +1,7 @@
 class OilAnalysesController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, only: %i[edit update destroy]
+  requires_permission :record_oil_analyses, only: %i[new create import]
+  requires_permission :manage_oil_analyses, only: %i[edit update destroy]
   before_action :set_analysis, only: %i[show edit update destroy]
 
   COMPARE_SAMPLES = 6 # columns in the trend table, like the lab report's history

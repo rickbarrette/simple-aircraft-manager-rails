@@ -2,7 +2,7 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
   <div class="card-header"><h2 class="card-title"><%= t(".inspection_status") %></h2>
-    <% if owner? %><div class="flex flex-wrap gap-2"><%= more_menu do %><%= link_to t(".add_standard_inspections"), new_aircraft_standard_inspections_path(@aircraft), class: "menu-item" %><% end %><%= link_to t(".inspection_type"), new_aircraft_inspection_type_path(@aircraft), class: "btn-primary" %></div><% end %></div>
+    <% if can?(:manage_inspections) %><div class="flex flex-wrap gap-2"><%= more_menu do %><%= link_to t(".add_standard_inspections"), new_aircraft_standard_inspections_path(@aircraft), class: "menu-item" %><% end %><%= link_to t(".inspection_type"), new_aircraft_inspection_type_path(@aircraft), class: "btn-primary" %></div><% end %></div>
   <% if @rows.any? %>
     <div class="overflow-x-auto">
       <table class="table">
@@ -17,7 +17,7 @@
               <td class="text-xs"><%= [row.next_due_date&.to_s, row.next_due_hours && "#{hours(row.next_due_hours)} h"].compact.join(" / ").presence || "—" %></td>
               <td><%= compliance_badge(row.status) %></td>
               <td class="whitespace-nowrap text-right">
-                <% if owner? %>
+                <% if can?(:manage_inspections) %>
                   <%= link_to t(".record"), new_aircraft_inspection_record_path(@aircraft, inspection_type_id: row.type.id), class: "btn-secondary btn-sm" %>
                   <%= link_to t(".edit"), edit_aircraft_inspection_type_path(@aircraft, row.type), class: "btn-secondary btn-sm" %>
                 <% end %>
@@ -44,7 +44,7 @@
             <td><%= r.inspection_type.name %><%= " (#{r.component})" if r.component %></td>
             <td class="text-right"><%= hours(r.hours_at_inspection) %></td>
             <td class="text-xs"><%= r.notes %><% if r.logbook_entry %> <%= link_to "logbook", aircraft_logbook_entry_path(@aircraft, r.logbook_entry), class: "link" %><% end %></td>
-            <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_inspection_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+            <td class="text-right"><% if can?(:manage_inspections) %><%= link_to t(".edit"), edit_aircraft_inspection_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
           </tr>
         <% end %>
       </tbody>

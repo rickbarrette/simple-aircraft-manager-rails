@@ -1,0 +1,27 @@
+<%# A role's name, description and permissions, grouped as in Permission.
+    Owner's permissions are shown but can't be changed: it always has all. %>
+<%= form_with model: [:admin, role], class: "card card-body max-w-3xl space-y-5" do |f| %>
+  <%= f.errors_summary %>
+  <div class="grid gap-4 sm:grid-cols-2">
+    <%= f.field :name, required: true %>
+    <%= f.field :description, hint: t(".description_hint") %>
+  </div>
+  <% if role.owner? %><p class="rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200"><%= t(".owner_has_everything") %></p><% end %>
+  <%= hidden_field_tag "role[permissions][]", "", id: nil %>
+  <div class="grid gap-5 sm:grid-cols-2">
+    <% Permission::GROUPS.each do |group, keys| %>
+      <fieldset class="space-y-2" <%= "disabled" if role.owner? %>>
+        <legend class="mb-1 text-sm font-semibold"><%= Permission.group_label(group) %></legend>
+        <% keys.each do |key| %>
+          <label class="flex items-start gap-2 text-sm">
+            <%= check_box_tag "role[permissions][]", key, role.can?(key), id: "permission_#{key}", class: "mt-0.5" %>
+            <span><%= Permission.label(key) %><span class="block text-xs text-slate-500"><%= Permission.description(key) %></span></span>
+          </label>
+        <% end %>
+      </fieldset>
+    <% end %>
+  </div>
+  <p class="hint"><%= t(".viewing_needs_nothing") %></p>
+  <div class="flex flex-wrap gap-2"><%= f.submit t(".save") %><%= link_to t(".cancel"), admin_roles_path, class: "btn-secondary" %></div>
+<% end %>
+<% if role.persisted? && !role.built_in? %><div class="mt-4"><%= delete_button t(".delete_role"), admin_role_path(role), confirm: t(".delete_role_confirm", name: role.name) %></div><% end %>

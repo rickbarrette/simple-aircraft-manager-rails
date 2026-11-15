@@ -26,6 +26,6 @@ class SetupTest < ActionDispatch::IntegrationTest
     post aircraft_index_path, params: { aircraft: { tail_number: "N1", tach_time: 50 } }
     a = Aircraft.find_by!(tail_number: "N1")
     assert_redirected_to aircraft_path(a)
-    assert_equal "owner", user.role_for(a)
+    assert_equal "owner", user.role_for(a).key
   end
 end

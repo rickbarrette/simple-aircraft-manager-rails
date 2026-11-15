@@ -1,7 +1,7 @@
 # Download an aircraft as a .sam.zip archive (owners and admins).
 class AircraftExportsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :export_data
 
   EXPORT_DIR = Rails.root.join("tmp/exports")
 

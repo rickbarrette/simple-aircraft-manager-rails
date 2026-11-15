@@ -2,7 +2,7 @@
     Locals: policy, number, adopted_at, adopted_by, revisions, summary. %>
 <% info = SystemInfo.new %>
 <% aircraft = Aircraft.ordered.includes(:roles) %>
-<% users = User.order(:email_address).includes(:certificates, aircraft_roles: :aircraft) %>
+<% users = User.order(:email_address).includes(:certificates, aircraft_roles: %i[aircraft role]) %>
 <% h2 = "mt-6 text-base font-semibold" %>
 <% p_ = "mt-1 text-sm leading-relaxed" %>
 <article class="text-slate-900">
@@ -50,7 +50,7 @@
       <% users.each do |u| %>
         <% current = u.certificates.reject(&:expired?) %>
         <tr class="border-b border-slate-100 align-top"><td class="py-1"><%= u.display_name %><div class="text-xs text-slate-500"><%= u.email_address %></div></td>
-          <td class="text-xs"><%= [ (t(".administrator") if u.admin?), *u.aircraft_roles.map { "#{_1.role.capitalize}, #{_1.aircraft.tail_number}" } ].compact.join("; ").presence || "—" %><%= t(".disabled") if u.disabled? %></td>
+          <td class="text-xs"><%= [ (t(".administrator") if u.admin?), *u.aircraft_roles.map { "#{_1.role.name}, #{_1.aircraft.tail_number}" } ].compact.join("; ").presence || "—" %><%= t(".disabled") if u.disabled? %></td>
           <td class="text-xs"><%= u.certificates.map { "#{_1.short_label} #{_1.number}#{" #{t('.expires_short', date: _1.expires_on)}" if _1.expires_on}" }.join("; ").presence || "—" %></td>
           <td class="text-xs"><%= if u.disabled? || current.empty? then t(".no")
                                   elsif current.any?(&:mechanic?) then t(".maintenance_and_inspection_entries")

@@ -13,10 +13,8 @@
         <%= f.submit t(".filter"), class: "sr-only" %>
       <% end %>
       <% if @entries.any? %><button type="submit" form="print-entries" class="btn-secondary" hidden data-needs-selection="print-entries" title="<%= t(".print_the_ticked_entries_on") %>"><%= t(".print_selected") %></button><% end %>
-      <% if owner? %>
-        <%= more_menu do %><%= link_to t(".import_scans"), new_aircraft_logbook_import_path(@aircraft), class: "menu-item" %><% end %>
-        <%= link_to t(".new_entry"), new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %>
-      <% end %>
+      <% if can?(:import_records) %><%= more_menu do %><%= link_to t(".import_scans"), new_aircraft_logbook_import_path(@aircraft), class: "menu-item" %><% end %><% end %>
+      <% if can?(:write_logbook) %><%= link_to t(".new_entry"), new_aircraft_logbook_entry_path(@aircraft), class: "btn-primary" %><% end %>
     </div>
   </div>
   <% if @entries.any? %>

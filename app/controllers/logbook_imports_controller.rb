@@ -3,7 +3,7 @@
 # entries in the background (LogbookTranscriptionJob).
 class LogbookImportsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :import_records
 
   def new
     @collections = @aircraft.document_collections.ordered

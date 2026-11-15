@@ -1,6 +1,6 @@
 class DocumentsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, except: %i[index show]
+  requires_permission :manage_documents, except: %i[index show]
   before_action :set_document, only: %i[show edit update destroy]
 
   def index

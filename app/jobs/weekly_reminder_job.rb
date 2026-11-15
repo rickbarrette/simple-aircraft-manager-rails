@@ -1,4 +1,4 @@
-# Weekly email to aircraft owners listing what's overdue or coming due
+# Weekly email to those who get an aircraft's reminders (Role "gets reminders") listing what's overdue or coming due
 # (inspections, ADs, components, expiring documents), deferred items, new
 # ADs, and the user's own certificates that are about to expire.
 # Nothing is sent when nothing needs attention, or when email isn't set up.

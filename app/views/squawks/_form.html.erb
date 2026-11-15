@@ -29,6 +29,6 @@
     <%= link_to t(".cancel"), aircraft_squawks_path(aircraft), class: "btn-secondary" %>
   </div>
 <% end %>
-<% if squawk.persisted? && owner? %>
+<% if squawk.persisted? && can?(:manage_squawks) %>
   <div class="mt-4"><%= delete_button t(".delete_squawk"), aircraft_squawk_path(aircraft, squawk) %></div>
 <% end %>

@@ -1,6 +1,6 @@
 class ComponentsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, except: %i[index show]
+  requires_permission :manage_components, except: %i[index show]
   before_action :set_component, only: %i[show edit update destroy reset_service]
 
   def index

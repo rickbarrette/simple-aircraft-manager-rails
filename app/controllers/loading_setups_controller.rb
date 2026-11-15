@@ -2,7 +2,7 @@
 # the loading calculator.
 class LoadingSetupsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :manage_weight_balance
 
   def edit
     @setup = @aircraft.loading_setup

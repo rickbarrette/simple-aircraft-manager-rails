@@ -171,7 +171,10 @@ Rails.application.routes.draw do
     post "about/test_email", to: "about#test_email", as: :test_email
     post "about/test_reminder", to: "about#test_reminder", as: :test_reminder
     post "about/check_records", to: "about#check_records", as: :check_records
-    resources :users, except: :show
+    resources :users, except: :show do
+      resources :aircraft_roles, controller: "user_aircraft_roles", only: %i[create update destroy]
+    end
+    resources :roles, except: :show
     resources :integrations do
       post :new_secret, on: :member
     end

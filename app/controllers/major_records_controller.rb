@@ -1,6 +1,6 @@
 class MajorRecordsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, except: %i[index show]
+  requires_permission :manage_major_records, except: %i[index show]
   before_action :set_record, only: %i[show edit update destroy]
 
   def index

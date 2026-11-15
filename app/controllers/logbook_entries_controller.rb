@@ -1,6 +1,6 @@
 class LogbookEntriesController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, except: %i[index show]
+  requires_permission :write_logbook, except: %i[index show]
   before_action :set_entry, only: %i[show edit update destroy verify]
   before_action :require_unsigned, only: %i[edit update destroy]
 

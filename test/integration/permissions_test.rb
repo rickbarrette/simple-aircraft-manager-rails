@@ -79,15 +79,20 @@ class PermissionsTest < ActionDispatch::IntegrationTest
   test "owner manages roles with last-owner protection" do
     sign_in @owner
     owner_role = @a.roles.find_by(user: @owner)
-    patch aircraft_aircraft_role_path(@a, owner_role), params: { role: "pilot" }
-    assert_equal "owner", owner_role.reload.role
+    patch aircraft_aircraft_role_path(@a, owner_role), params: { role_id: Role.for_key("pilot").id }
+    assert_equal "owner", owner_role.reload.role.key # not their own role
 
     newbie = create_user("newbie@example.com")
-    post aircraft_aircraft_roles_path(@a), params: { email_address: "NewBie@example.com ", role: "owner" }
-    assert_equal "owner", @a.roles.find_by(user: newbie).role
+    post aircraft_aircraft_roles_path(@a), params: { email_address: "NewBie@example.com ", role_id: Role.owner.id }
+    assert_equal "owner", @a.roles.find_by(user: newbie).role.key
 
     delete aircraft_aircraft_role_path(@a, owner_role)
     assert AircraftRole.exists?(owner_role.id), "can't remove self"
+
+    newbie_role = @a.roles.find_by(user: newbie)
+    patch aircraft_aircraft_role_path(@a, newbie_role), params: { role_id: Role.for_key("mechanic").id }
+    assert_equal "mechanic", newbie_role.reload.role.key
+    assert_equal 1, @a.roles.owners.count
   end
 
   test "owner full workflow: component service, AD compliance, inspection" do

@@ -14,6 +14,18 @@ Admins see the **Admin** menu (on a phone, under ☰). Admins can see and edit e
 
 With single sign-on, accounts can be created automatically at first sign-in, and admin rights can follow a group at the provider (see the main README).
 
+## Roles
+
+**Admin → Roles** sets what people can do on an aircraft. Each person has one role per aircraft; a role is a set of permissions, grouped as flying, squawks and notes, maintenance records, imports and exports, the aircraft itself, and notifications. Everyone can see the records of the aircraft they have a role on; the permissions are for changing things.
+
+- **Owner** always has every permission, so every aircraft can always be managed. Its name and description can be changed.
+- **Mechanic**, **Pilot** and **Viewer** come with sensible permissions (the table in [Getting started](getting-started.md#roles)) that you can change.
+- **New role** adds your own, such as a partner, an instructor or an insurer. A role can be deleted once nobody has it.
+
+Signing a logbook entry needs the **Sign logbook entries** permission *and* a current certificate on the person's profile. **Get reminders** decides who receives the weekly email of what's coming due and the alerts when something becomes overdue.
+
+To give someone a role on any aircraft, open them in **Admin → Users**: **Aircraft access** lists their role on each aircraft, to change, remove or add.
+
 ## Account recovery from the command line
 
 If nobody can sign in to fix an account in the app (a forgotten admin password, a lockout, a lost phone with no recovery codes, the only admin disabled), run these on the server. With Docker Compose, put `docker compose exec web` in front; in Portainer, open the container's **Console** and run them there. Anyone who can run commands on the server already has the data, so they ask for nothing else. Each one is written to the log.

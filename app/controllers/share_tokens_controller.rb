@@ -1,6 +1,6 @@
 class ShareTokensController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :manage_sharing
 
   def create
     token = @aircraft.share_tokens.new(params.require(:share_token).permit(:label, :privilege, :expires_at))

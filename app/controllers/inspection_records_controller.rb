@@ -1,6 +1,6 @@
 class InspectionRecordsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :manage_inspections
   before_action :set_record, only: %i[edit update destroy]
 
   def new

@@ -1,6 +1,6 @@
 class StandardInspectionsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :manage_inspections
 
   def new; end
 

@@ -14,18 +14,18 @@
         <%= airworthiness_badge(aw) %>
         <%= aircraft_status_badge(aircraft) unless aircraft.status == "AVAILABLE" %>
         <span class="text-slate-500"><%= t(".tach_hobbs_html", tach_time: (hours(aircraft.tach_time)), hobbs_time: (hours(aircraft.hobbs_time))) %></span>
-        <span class="badge-gray" title="<%= t(".your_access_to_this_aircraft") %>"><%= (current_user.aircraft_roles.find_by(aircraft: aircraft)&.role || current_role).capitalize %></span>
+        <span class="badge-gray" title="<%= t(".your_access_to_this_aircraft") %>"><%= current_role&.name || t(".admin") %></span>
       </div>
     </div>
   </div>
   <div class="flex w-full gap-2 sm:w-auto [&>a]:flex-1 [&>a]:justify-center [&>a]:whitespace-nowrap max-sm:[&>a]:px-2 sm:[&>a]:flex-none">
-    <%= link_to t(".log_flight"), new_aircraft_flight_log_path(aircraft), class: "btn-primary" %>
-    <%= link_to t(".report_squawk"), new_aircraft_squawk_path(aircraft), class: "btn-secondary" %>
+    <% if can?(:log_flights) %><%= link_to t(".log_flight"), new_aircraft_flight_log_path(aircraft), class: "btn-primary" %><% end %>
+    <% if can?(:report_squawks) %><%= link_to t(".report_squawk"), new_aircraft_squawk_path(aircraft), class: "btn-secondary" %><% end %>
     <%= more_menu do %>
       <%= link_to t(".status_report"), aircraft_report_path(aircraft), class: "menu-item" %>
-      <% if owner? %>
-        <%= link_to t(".access_sharing"), aircraft_aircraft_roles_path(aircraft), class: "menu-item" %>
-        <%= link_to t(".edit_aircraft"), edit_aircraft_path(aircraft), class: "menu-item" %>
+      <% if can?(:manage_people) || can?(:manage_sharing) || can?(:export_data) %><%= link_to t(".access_sharing"), aircraft_aircraft_roles_path(aircraft), class: "menu-item" %><% end %>
+      <% if can?(:edit_aircraft) %><%= link_to t(".edit_aircraft"), edit_aircraft_path(aircraft), class: "menu-item" %><% end %>
+      <% if can?(:export_data) %>
         <%= link_to t(".download_sam_zip"), aircraft_export_path(aircraft), class: "menu-item", data: { turbo: false } %>
         <%= link_to t(".download_records_package"), aircraft_records_package_path(aircraft), class: "menu-item", data: { turbo: false } %>
       <% end %>

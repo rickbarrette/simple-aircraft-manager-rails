@@ -2,7 +2,7 @@
 class AdImportsController < ApplicationController
   include AircraftScoped
   include StoredUpload
-  before_action :require_owner!
+  requires_permission :manage_ads
 
   def new; end
 

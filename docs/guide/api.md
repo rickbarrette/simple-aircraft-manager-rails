@@ -35,14 +35,14 @@ Reading works without it (limited to the integration's aircraft). Every write ne
 |---|---|
 | `read` | Aircraft, parts, due items, inspections, ADs, squawks and logbook entries |
 | `squawks:write` | Reporting squawks and updating them |
-| `drafts:write` | Sending draft logbook entries for signing, and withdrawing them (acting for an owner of the aircraft) |
+| `drafts:write` | Sending draft logbook entries for signing, and withdrawing them (acting for someone who can write logbook entries on the aircraft) |
 
 ## Requests and answers
 
 - Base address: `https://<your server>/api/v1`
 - JSON in and out. Times are ISO 8601 in UTC, hours are decimals, and values are codes (`ENG`, `IN-USE`) rather than translated labels.
 - Lists answer `{ "data": [ … ], "next_after": 123 }`. Ask for more with `?after=123`; `?limit=` sets the page size (up to 200, default 50); `?updated_since=2026-11-01T00:00:00Z` lists only what changed since then.
-- Errors answer `{ "error": { "code": "invalid", "message": "…", "fields": { "issue_reported": ["can't be blank"] } } }` with the matching HTTP status: 400 bad request, 401 no or wrong token, 403 not allowed (`missing_scope`, `owners_only`), 404 not found or not reachable with this token, 409 `idempotency_conflict`, 422 invalid, 429 too many requests (600 a minute per token).
+- Errors answer `{ "error": { "code": "invalid", "message": "…", "fields": { "issue_reported": ["can't be blank"] } } }` with the matching HTTP status: 400 bad request, 401 no or wrong token, 403 not allowed (`missing_scope`; `not_permitted` when the person's role on the aircraft doesn't allow it), 404 not found or not reachable with this token, 409 `idempotency_conflict`, 422 invalid, 429 too many requests (600 a minute per token).
 
 ### Safe retries
 
@@ -98,11 +98,11 @@ The answer is `201` with the squawk:
 
 ### Updating a squawk
 
-`PATCH /squawks/:id` with `{ "squawk": { … } }`. Anyone who may write can set `external_ref`; changing `issue_reported`, `priority`, `component_id` or `notes` needs an owner of the aircraft, as in the app. A resolved squawk can't be changed. Squawks are resolved by a signed logbook entry, in the app.
+`PATCH /squawks/:id` with `{ "squawk": { … } }`. Anyone who may write can set `external_ref`; changing `issue_reported`, `priority`, `component_id` or `notes` needs the **Manage squawks** permission on the aircraft, as in the app. Reporting one needs **Report squawks**. A resolved squawk can't be changed. Squawks are resolved by a signed logbook entry, in the app.
 
 ## Draft entries
 
-Another system that tracks the work, such as Redmine's issues, can send a finished visit to SAM as **draft logbook entries**: the person certifying the work then reviews and signs them in the app. Like writing entries in the app, sending drafts is for the aircraft's owners: an integration acts for an owner (`SAM-On-Behalf-Of`), such as the director of maintenance.
+Another system that tracks the work, such as Redmine's issues, can send a finished visit to SAM as **draft logbook entries**: the person certifying the work then reviews and signs them in the app. Like writing entries in the app, sending drafts needs the **Write logbook entries** permission (Owners and Mechanics have it): an integration acts for such a person (`SAM-On-Behalf-Of`), such as the director of maintenance.
 
 ```
 POST /api/v1/aircraft/12/draft_batches

@@ -1,0 +1,15 @@
+<% content_for :title, t(".roles") %>
+<div class="mb-2 flex items-center justify-between"><h1 class="text-2xl font-bold"><%= t(".roles") %></h1><%= link_to t(".new_role"), new_admin_role_path, class: "btn-primary" %></div>
+<p class="mb-4 text-sm text-slate-600"><%= t(".intro") %></p>
+<section class="card"><table class="table">
+  <thead><tr><th><%= t(".name") %></th><th><%= t(".can") %></th><th class="text-right"><%= t(".people") %></th><th></th></tr></thead>
+  <tbody><% @roles.each do |role| %><tr class="role-row" id="<%= dom_id(role) %>">
+    <td class="align-top"><span class="font-medium"><%= role.name %></span> <% if role.built_in? %><span class="badge-gray"><%= t(".built_in") %></span><% end %>
+      <% if role.description.present? %><div class="text-xs text-slate-500"><%= role.description %></div><% end %></td>
+    <td class="align-top text-xs text-slate-600" data-label="<%= t(".can") %>">
+      <%= role.owner? ? t(".everything") : (role.permissions.map { Permission.label(_1) }.to_sentence.presence || t(".view_only")) %>
+    </td>
+    <td class="align-top text-right tabular-nums" data-label="<%= t(".people") %>"><%= @counts.fetch(role.id, 0) %></td>
+    <td class="align-top text-right"><%= link_to t(".edit"), edit_admin_role_path(role), class: "btn-secondary btn-sm" %></td>
+  </tr><% end %></tbody>
+</table></section>

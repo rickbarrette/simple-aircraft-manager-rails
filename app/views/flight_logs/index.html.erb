@@ -5,9 +5,9 @@
   <div class="card-header">
     <h2 class="card-title"><%= t(".flight_log") %></h2>
     <%= more_menu do %>
-      <% if owner? %><%= link_to t(".import_from_spreadsheet"), new_aircraft_flight_import_path(@aircraft), class: "menu-item" %><% end %>
-      <%= link_to t(".export_for_airtrail"), new_aircraft_air_trail_export_path(@aircraft), class: "menu-item" %>
-      <% if owner? %><%= link_to t(".standardize_airport_codes"), aircraft_airport_codes_path(@aircraft), class: "menu-item" %><% end %>
+      <% if can?(:import_flights) %><%= link_to t(".import_from_spreadsheet"), new_aircraft_flight_import_path(@aircraft), class: "menu-item" %><% end %>
+      <% if can?(:log_flights) %><%= link_to t(".export_for_airtrail"), new_aircraft_air_trail_export_path(@aircraft), class: "menu-item" %><% end %>
+      <% if can?(:edit_any_flight) %><%= link_to t(".standardize_airport_codes"), aircraft_airport_codes_path(@aircraft), class: "menu-item" %><% end %>
     <% end %>
   </div>
   <% if @days.any? %>

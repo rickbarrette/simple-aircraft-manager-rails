@@ -19,7 +19,7 @@ Track and engine data files attached offline are kept and sent too.
 
 ## Correct a flight
 
-Open the flight and choose **Edit**. Owners can correct any flight; a pilot, the flights they logged. The date, airports, route, notes, oil and fuel (its oil and fuel records follow), and the track and engine data files can always be changed.
+Open the flight and choose **Edit**. Owners can correct any flight; pilots, the flights they logged (the **Correct any flight** and **Correct own flights** permissions). The date, airports, route, notes, oil and fuel (its oil and fuel records follow), and the track and engine data files can always be changed.
 
 The meter readings can be changed only on the latest flight, and only until the hours change again (another flight, an hours update or an import). The aircraft and its installed components then move by the difference: fixing a tach in of 1001.4 to 1001.6 adds 0.2 hours. On earlier flights the readings are locked, since the flights after them started from those readings; correct the aircraft's hours with **Update Hours** instead.
 

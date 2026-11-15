@@ -70,8 +70,12 @@ module Api
 
       def find_aircraft(id = params[:aircraft_id]) = aircraft_scope.find(id)
 
-      def role_on(aircraft) = acting_user&.role_for(aircraft)
-      def owner_of?(aircraft) = role_on(aircraft).in?(%w[admin owner])
+      # What the person it's acting for can do on the aircraft, as in the app (Role).
+      def can?(permission, aircraft) = acting_user&.can?(permission, aircraft) || false
+
+      def not_permitted(permission)
+        render_error(:forbidden, "not_permitted", "This needs the \"#{Permission.label(permission)}\" permission on the aircraft.")
+      end
 
       # ?limit= (1–200, default 50), ?after=<id> to continue, ?updated_since=<ISO time>.
       def paginate(scope)

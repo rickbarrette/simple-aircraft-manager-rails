@@ -2,7 +2,9 @@ class SquawksController < ApplicationController
   include AircraftScoped
   # Pilots may create squawks and defer inoperative items (91.213(d) lets the
   # pilot decide); editing and resolving need an owner.
-  before_action :require_owner!, except: %i[index new create deferral defer]
+  requires_permission :report_squawks, only: %i[new create]
+  requires_permission :defer_squawks, only: %i[deferral defer]
+  requires_permission :manage_squawks, except: %i[index new create deferral defer]
   before_action :set_squawk, only: %i[edit update destroy resolution resolve reopen deferral defer undefer]
 
   def index

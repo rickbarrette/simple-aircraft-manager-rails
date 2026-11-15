@@ -1,6 +1,6 @@
 class DocumentCollectionsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :manage_documents
   before_action :set_collection, only: %i[edit update destroy]
 
   def new

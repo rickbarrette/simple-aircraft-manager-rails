@@ -16,20 +16,21 @@ The very first visit to a new installation asks for the administrator account in
 
 ## Roles
 
-What you can do depends on your role on each aircraft:
+What you can do depends on your role on each aircraft. These are the built-in roles as they come; the administrator can change what each allows and add others (see [Administration](administration.md#roles)).
 
-| | Pilot | Owner | Admin |
-|---|:-:|:-:|:-:|
-| See everything on the aircraft | ✓ | ✓ | ✓ |
-| Log flights, update hours, report squawks, add notes, oil and fuel | ✓ | ✓ | ✓ |
-| Defer a squawk as inoperative | ✓ | ✓ | ✓ |
-| Sign logbook entries (with your own certificate) | ✓ | ✓ | ✓ |
-| Edit squawks and notes, resolve squawks | | ✓ | ✓ |
-| Components, logbook, inspections, ADs, documents, major records, W&B | | ✓ | ✓ |
-| Edit the aircraft, manage people and share links | | ✓ | ✓ |
-| Users, settings, procedures and audits for the whole app | | | ✓ |
+| | Viewer | Pilot | Mechanic | Owner |
+|---|:-:|:-:|:-:|:-:|
+| See everything on the aircraft | ✓ | ✓ | ✓ | ✓ |
+| Log flights, correct the ones you logged | | ✓ | | ✓ |
+| Update hours, report and defer squawks, add notes, oil and fuel | | ✓ | ✓ | ✓ |
+| Sign logbook entries (with your own certificate) | | ✓ | ✓ | ✓ |
+| Write logbook entries; components, inspections, ADs, major records, W&B, documents | | | ✓ | ✓ |
+| Edit squawks and notes, resolve squawks; edit oil and fuel records | | | ✓ | ✓ |
+| Weekly reminders and overdue alerts | | | ✓ | ✓ |
+| Correct or delete any flight, imports, exports, restore from history | | | | ✓ |
+| Edit the aircraft, manage people and share links | | | | ✓ |
 
-Anyone can add an aircraft and becomes its owner. You only see aircraft you have a role on; admins see all of them.
+Administrators can do everything on every aircraft, and manage users, roles, settings, procedures and audits for the whole app. Anyone can add an aircraft and becomes its Owner. You only see aircraft you have a role on; administrators see all of them.
 
 ## Finding your way around
 

@@ -1,7 +1,7 @@
 <% content_for :title, t(".documents", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <div class="mb-4 flex flex-wrap justify-end gap-2">
-  <% if owner? %>
+  <% if can?(:manage_documents) %>
     <%= more_menu do %>
       <%= link_to t(".upload_several_files"), new_bulk_aircraft_documents_path(@aircraft), class: "menu-item" %>
       <%= link_to t(".new_collection"), new_aircraft_document_collection_path(@aircraft), class: "menu-item" %>
@@ -25,7 +25,7 @@
         </div>
         <div class="flex items-center gap-2">
           <%= visibility_badge(col.visibility) %>
-          <% if owner? %>
+          <% if can?(:manage_documents) %>
             <%= link_to t(".document"), new_aircraft_document_path(@aircraft, collection_id: col.id), class: "btn-secondary btn-sm" %>
             <%= link_to t(".edit"), edit_aircraft_document_collection_path(@aircraft, col), class: "btn-secondary btn-sm" %>
           <% end %>

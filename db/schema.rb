@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_15_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_16_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -210,11 +210,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_020000) do
   create_table "aircraft_roles", force: :cascade do |t|
     t.integer "aircraft_id", null: false
     t.integer "user_id", null: false
-    t.string "role", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "role_id", null: false
     t.index ["aircraft_id", "user_id"], name: "index_aircraft_roles_on_aircraft_id_and_user_id", unique: true
     t.index ["aircraft_id"], name: "index_aircraft_roles_on_aircraft_id"
+    t.index ["role_id"], name: "index_aircraft_roles_on_role_id"
     t.index ["user_id"], name: "index_aircraft_roles_on_user_id"
   end
 
@@ -785,6 +786,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_020000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "roles", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "key"
+    t.string "description"
+    t.json "permissions", default: [], null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_roles_on_key", unique: true
+    t.index ["name"], name: "index_roles_on_name", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -958,6 +971,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_15_020000) do
   add_foreign_key "aircraft_notes", "aircraft"
   add_foreign_key "aircraft_notes", "users", on_delete: :nullify
   add_foreign_key "aircraft_roles", "aircraft"
+  add_foreign_key "aircraft_roles", "roles"
   add_foreign_key "aircraft_roles", "users"
   add_foreign_key "airport_updates", "users", column: "requested_by_id", on_delete: :nullify
   add_foreign_key "airworthiness_directives", "documents", on_delete: :nullify

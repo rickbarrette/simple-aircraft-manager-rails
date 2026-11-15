@@ -32,7 +32,7 @@
             </ul>
           <% elsif key == "users" %>
             <ul class="ml-6 list-disc text-xs text-slate-600">
-              <% @audit.users.each do |u| %><li><%= t(".last_sign_in_html", display_name: u.display_name, email_address: u.email_address, admin: (t(".admin") if u.admin?), any: (" · #{u.aircraft_roles.map { "#{AircraftRole::ROLES[_1.role]} #{_1.aircraft.tail_number}" }.join(', ')}" if u.aircraft_roles.any?), never: (u.last_signed_in_at ? t(".ago", time: time_ago_in_words(u.last_signed_in_at)) : t(".never")), disabled: (t(".disabled") if u.disabled?)) %></li><% end %>
+              <% @audit.users.each do |u| %><li><%= t(".last_sign_in_html", display_name: u.display_name, email_address: u.email_address, admin: (t(".admin") if u.admin?), any: (" · #{u.aircraft_roles.map { "#{_1.role.name} #{_1.aircraft.tail_number}" }.join(', ')}" if u.aircraft_roles.any?), never: (u.last_signed_in_at ? t(".ago", time: time_ago_in_words(u.last_signed_in_at)) : t(".never")), disabled: (t(".disabled") if u.disabled?)) %></li><% end %>
             </ul>
           <% end %>
           <%= text_field_tag "answers[#{key}][note]", nil, class: "input", placeholder: t(".note_what_was_checked_or") %>

@@ -1,7 +1,7 @@
 class InspectionTypesController < ApplicationController
   include AircraftScoped
   include Applicability
-  before_action :require_owner!
+  requires_permission :manage_inspections
   before_action :set_type, only: %i[edit update destroy]
 
   def new

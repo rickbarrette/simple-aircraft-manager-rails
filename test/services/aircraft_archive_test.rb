@@ -83,7 +83,7 @@ class AircraftArchiveTest < ActiveSupport::TestCase
     assert_equal [ "N54321", "Cessna", "150", "C150", 2000 ], [ a.tail_number, a.make, a.model, a.icao_type, a.tach_time.to_i ]
     refute_equal original.id, a.id
     assert a.picture.attached?
-    assert_equal [ "owner" ], a.roles.where(user: other).pluck(:role)
+    assert_equal [ "owner" ], a.roles.where(user: other).map { _1.role.key }
     assert_equal 2, a.components.count
     oil = a.components.find_by(component_type: component_type("Oil"))
     assert_equal a.components.find_by(serial_number: "900001"), oil.parent_component

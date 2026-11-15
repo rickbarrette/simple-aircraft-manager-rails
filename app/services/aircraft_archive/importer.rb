@@ -149,7 +149,7 @@ module AircraftArchive
       import_notes
       import_oil_analyses
       import_flight_logs
-      @aircraft.roles.find_or_create_by!(user: @owner, role: "owner") if @owner
+      @aircraft.roles.find_or_create_by!(user: @owner) { _1.role = Role.owner } if @owner
       @aircraft.log_event!("aircraft", "Aircraft imported from a .sam.zip archive",
                            notes: [ @manifest["source_instance"].presence && "Source: #{@manifest['source_instance']}", summary ].compact.join(". "),
                            user: @owner)

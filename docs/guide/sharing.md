@@ -1,10 +1,12 @@
 # Access, sharing and transfer
 
-**Access & sharing** is for the aircraft's owners: open it from **More** at the top of the aircraft's pages.
+**Access & sharing** is for people whose role lets them manage the aircraft's people, share links or exports (Owners): open it from **More** at the top of the aircraft's pages.
 
 ## People
 
-Add people by email as **owner** or **pilot** (they need an account; ask the administrator). Change or remove their role at any time. See the roles table in [Getting started](getting-started.md).
+Add people by email with a role: **Owner**, **Mechanic**, **Pilot**, **Viewer**, or one the administrator added (they need an account; ask the administrator). Change or remove their role at any time; **What each role can do** on the page lists them. See the roles table in [Getting started](getting-started.md).
+
+Only an Owner can give or take away the Owner role, nobody can change their own, and an aircraft always keeps at least one Owner. An administrator can also give people roles on any aircraft from **Admin → Users**.
 
 ## Share links
 

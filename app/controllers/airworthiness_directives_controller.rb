@@ -1,14 +1,14 @@
 class AirworthinessDirectivesController < ApplicationController
   include AircraftScoped
   include Applicability
-  before_action :require_owner!, except: :index
+  requires_permission :manage_ads, except: :index
   before_action :set_ad, only: %i[edit update destroy]
 
   def index
     @rows = Compliance.ad_rows(@aircraft)
     @history = AdCompliance.for_aircraft(@aircraft).recent_first
                            .includes(:component, :logbook_entry, airworthiness_directive: :document, inspection_record: :inspection_type)
-    @attachable = AirworthinessDirective.where.not(id: @aircraft.applicable_ads.select(:id)).ordered if owner?
+    @attachable = AirworthinessDirective.where.not(id: @aircraft.applicable_ads.select(:id)).ordered if can?(:manage_ads)
     @alerts = @aircraft.ad_alerts.pending
   end
 

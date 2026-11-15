@@ -3,6 +3,7 @@
 # who they are again (password, or single sign-on just now), and confirms.
 class EntrySignaturesController < ApplicationController
   include AircraftScoped
+  requires_permission :sign_logbook
   include EntrySigning
   before_action :set_entry
 

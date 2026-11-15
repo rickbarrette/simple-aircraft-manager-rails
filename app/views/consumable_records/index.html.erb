@@ -6,7 +6,7 @@
     <section class="card">
       <div class="card-header">
         <h2 class="card-title"><%= stats.oil? ? t(".oil_consumption") : t(".fuel_burn") %></h2>
-        <%= link_to t(stats.oil? ? ".add_oil" : ".add_fuel"), new_aircraft_consumable_record_path(@aircraft, type: stats.record_type), class: "btn-secondary btn-sm" %>
+        <% if can?(:record_consumables) %><%= link_to t(stats.oil? ? ".add_oil" : ".add_fuel"), new_aircraft_consumable_record_path(@aircraft, type: stats.record_type), class: "btn-secondary btn-sm" %><% end %>
       </div>
       <div class="card-body">
         <div class="mb-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">

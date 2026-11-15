@@ -5,7 +5,7 @@
   <tbody><% @users.each do |u| %><tr>
     <td><%= u.name %> <% if u.admin? %><span class="badge-blue"><%= t(".admin") %></span><% end %><% if u.sso_uid? %> <span class="badge-gray" title="Signs in with <%= Sso.label %>"><%= Sso.label %></span><% end %><% if u.otp_enabled? %> <span class="badge-green" title="<%= t(".authenticator_app_on") %>"><%= t(".n2fa") %></span><% end %><% if u.locked? %> <span class="badge-red" title="<%= t(".too_many_failed_sign_ins") %>"><%= t(".locked") %></span><% end %></td>
     <td><%= u.email_address %><% if u.certificates.any? %><div class="text-xs text-slate-500"><%= u.certificates.map { "#{_1.short_label} #{_1.number}" }.join(", ") %></div><% end %></td>
-    <td class="text-xs"><%= u.aircraft_roles.map { "#{_1.aircraft.tail_number} (#{_1.role})" }.join(", ").presence || "—" %></td>
+    <td class="text-xs"><%= u.aircraft_roles.map { "#{_1.aircraft.tail_number} (#{_1.role.name})" }.join(", ").presence || "—" %></td>
     <td class="text-xs text-slate-500"><%= u.last_signed_in_at ? "#{time_ago_in_words(u.last_signed_in_at)} ago" : "never" %></td>
     <td class="whitespace-nowrap text-right">
       <% if u.disabled? %><span class="badge-red mr-1"><%= t(".disabled") %></span><%= button_to t(".enable"), enable_admin_user_path(u), method: :patch, class: "btn-secondary btn-sm", form: { class: "inline" } %>

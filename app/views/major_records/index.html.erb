@@ -2,7 +2,7 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
   <div class="card-header"><h2 class="card-title"><%= t(".major_repairs_alterations") %></h2>
-    <% if owner? %><div class="flex gap-2">
+    <% if can?(:manage_major_records) %><div class="flex gap-2">
       <%= link_to t(".repair"), new_aircraft_major_record_path(@aircraft, type: "repair"), class: "btn-secondary" %>
       <%= link_to t(".alteration"), new_aircraft_major_record_path(@aircraft, type: "alteration"), class: "btn-primary" %></div><% end %></div>
   <% if @records.any? %>

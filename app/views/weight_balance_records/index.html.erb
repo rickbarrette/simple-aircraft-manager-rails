@@ -5,7 +5,7 @@
   <section class="card">
     <div class="card-header">
       <h2 class="card-title"><%= t(".current_weight_balance") %></h2>
-      <% if owner? %><%= link_to t(".new_w_b"), new_aircraft_weight_balance_record_path(@aircraft), class: "btn-primary btn-sm" %><% end %>
+      <% if can?(:manage_weight_balance) %><%= link_to t(".new_w_b"), new_aircraft_weight_balance_record_path(@aircraft), class: "btn-primary btn-sm" %><% end %>
     </div>
     <% if @current %>
       <dl class="card-body grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
@@ -24,14 +24,14 @@
   <section class="card">
     <div class="card-header">
       <h2 class="card-title"><%= t(".loading_calculator") %></h2>
-      <% if owner? %><%= link_to t(".loading_setup"), edit_aircraft_loading_setup_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
+      <% if can?(:manage_weight_balance) %><%= link_to t(".loading_setup"), edit_aircraft_loading_setup_path(@aircraft), class: "btn-secondary btn-sm" %><% end %>
     </div>
     <% if @current && setup.configured? %>
       <%= render "weight_balance_records/calculator", record: @current, setup: setup %>
     <% elsif !@current %>
       <%= empty_state t(".record_the_current_weight_balance") %>
     <% else %>
-      <%= empty_state(owner? ? t(".set_up_the_loading_stations") : t(".an_owner_needs_to_set")) %>
+      <%= empty_state(can?(:manage_weight_balance) ? t(".set_up_the_loading_stations") : t(".an_owner_needs_to_set")) %>
     <% end %>
   </section>
 </div>
@@ -52,7 +52,7 @@
               <td class="text-xs"><%= r.reason %>
                 <% if r.major_record %><div><%= link_to r.major_record.title, aircraft_major_record_path(@aircraft, r.major_record), class: "link" %></div><% end %>
                 <% if r.document %><div><%= link_to "📄 #{r.document.name}", aircraft_document_path(@aircraft, r.document), class: "link" %></div><% end %></td>
-              <td class="text-right"><% if owner? %><%= link_to t(".edit"), edit_aircraft_weight_balance_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
+              <td class="text-right"><% if can?(:manage_weight_balance) %><%= link_to t(".edit"), edit_aircraft_weight_balance_record_path(@aircraft, r), class: "btn-secondary btn-sm" %><% end %></td>
             </tr>
           <% end %>
         </tbody>

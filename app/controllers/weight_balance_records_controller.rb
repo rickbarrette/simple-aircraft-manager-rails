@@ -2,7 +2,7 @@
 # keep the records and the loading setup).
 class WeightBalanceRecordsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, except: :index
+  requires_permission :manage_weight_balance, except: :index
   before_action :set_record, only: %i[edit update destroy]
 
   def index

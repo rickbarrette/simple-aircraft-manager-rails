@@ -1,6 +1,6 @@
 class AdCompliancesController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :manage_ads
   before_action :set_compliance, only: %i[edit update destroy]
 
   def new

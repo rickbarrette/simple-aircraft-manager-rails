@@ -1,7 +1,7 @@
 # Flights → Standardize airport codes (owners).
 class AirportCodesController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :edit_any_flight
 
   def show
     @standardizer = AirportCodeStandardizer.new(@aircraft)

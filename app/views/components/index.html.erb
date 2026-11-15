@@ -6,7 +6,7 @@
     <div class="flex items-center gap-3">
       <%= link_to (@show_disposed ? t(".hide_disposed") : t(".show_disposed")),
             aircraft_components_path(@aircraft, disposed: (@show_disposed ? nil : 1)), class: "link text-sm" %>
-      <% if owner? %><%= link_to t(".add_component"), new_aircraft_component_path(@aircraft), class: "btn-primary" %><% end %>
+      <% if can?(:manage_components) %><%= link_to t(".add_component"), new_aircraft_component_path(@aircraft), class: "btn-primary" %><% end %>
     </div>
   </div>
   <% if @rows.empty? %>
@@ -39,7 +39,7 @@
               </td>
               <td><%= life_badge(c.life_status) %></td>
               <td class="whitespace-nowrap text-right">
-                <% if owner? %>
+                <% if can?(:manage_components) %>
                   <%= link_to t(".edit"), edit_aircraft_component_path(@aircraft, c), class: "btn-secondary btn-sm" %>
                   <%= link_to t(".service"), aircraft_component_path(@aircraft, c, anchor: "service"), class: "btn-secondary btn-sm" %>
                 <% end %>

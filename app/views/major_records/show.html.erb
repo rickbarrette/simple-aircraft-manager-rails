@@ -1,7 +1,7 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card max-w-4xl">
   <div class="card-header"><h2 class="card-title"><%= @record.type_label %>: <%= @record.title %></h2>
-    <% if owner? %><%= link_to t(".edit"), edit_aircraft_major_record_path(@aircraft, @record), class: "btn-secondary btn-sm" %><% end %></div>
+    <% if can?(:manage_major_records) %><%= link_to t(".edit"), edit_aircraft_major_record_path(@aircraft, @record), class: "btn-secondary btn-sm" %><% end %></div>
   <dl class="card-body grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
     <div class="detail-row"><dt><%= t(".date") %></dt><dd><%= fmt_date(@record.date_performed) %></dd></div>
     <div class="detail-row"><dt><%= t(".aircraft_hours") %></dt><dd><%= hours(@record.aircraft_hours) %></dd></div>
@@ -15,7 +15,7 @@
     <dd>
       <% if (wb = @aircraft.weight_balance_records.where(major_record: @record).recent_first.first) %>
         <%= link_to t(".lb_in", date: fmt_date(wb.date), weight: number_with_precision(wb.empty_weight, precision: 1), arm: number_with_precision(wb.empty_arm, precision: 2)), aircraft_weight_balance_records_path(@aircraft), class: "link" %>
-      <% elsif owner? %>
+      <% elsif can?(:manage_major_records) %>
         <%= link_to t(".record_the_new_w_b"), new_aircraft_weight_balance_record_path(@aircraft, major_record_id: @record.id), class: "link" %>
       <% else %>—<% end %>
     </dd></div>
@@ -25,7 +25,7 @@
       <% if (ica = @record.ica_inspection_type) %>
         <% row = Compliance.inspection_rows(@aircraft).find { _1.type == ica } %>
         <%= t(".inspection_html", link: (link_to ica.name, aircraft_inspections_path(@aircraft), class: "link"), row: (compliance_badge(row.status) if row)) %>
-      <% elsif @record.has_ica? && owner? %>
+      <% elsif @record.has_ica? && can?(:manage_major_records) %>
         · <%= link_to t(".add_the_ica_s_recurring"), new_aircraft_inspection_type_path(@aircraft, major_record_id: @record.id), class: "link" %>
       <% end %>
     </dd></div>

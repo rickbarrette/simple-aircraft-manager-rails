@@ -1,7 +1,7 @@
 <% content_for :title, t(".notes", tail_number: @aircraft.tail_number) %>
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <section class="card">
-  <div class="card-header"><h2 class="card-title"><%= t(".notes_2") %></h2><%= link_to t(".add_note"), new_aircraft_note_path(@aircraft), class: "btn-primary" %></div>
+  <div class="card-header"><h2 class="card-title"><%= t(".notes_2") %></h2><% if can?(:write_notes) %><%= link_to t(".add_note"), new_aircraft_note_path(@aircraft), class: "btn-primary" %><% end %></div>
   <% if @notes.any? %>
     <ul class="divide-y divide-slate-100">
       <% @notes.each do |note| %>
@@ -14,7 +14,7 @@
               <% if note.public? %><span class="badge-green ml-1"><%= t(".visible_on_share_links") %></span><% end %>
             </div>
           </div>
-          <% if owner? %><%= link_to t(".edit"), edit_aircraft_note_path(@aircraft, note), class: "btn-secondary btn-sm" %><% end %>
+          <% if can?(:manage_notes) %><%= link_to t(".edit"), edit_aircraft_note_path(@aircraft, note), class: "btn-secondary btn-sm" %><% end %>
         </li>
       <% end %>
     </ul>

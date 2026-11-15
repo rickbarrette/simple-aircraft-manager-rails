@@ -2,7 +2,7 @@
 # search terms used.
 class AdAlertsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :manage_ads
   before_action :set_alert, only: %i[track dismiss]
   rate_limit to: 5, within: 1.minute, only: :check, with: -> { redirect_to aircraft_airworthiness_directives_path(@aircraft), alert: t("flash.ad_alerts.try_again_in_a") }
 

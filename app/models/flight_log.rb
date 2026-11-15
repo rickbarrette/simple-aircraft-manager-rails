@@ -36,11 +36,6 @@ class FlightLog < ApplicationRecord
     aircraft.flight_logs.maximum(:id) == id && (tach_in.nil? || tach_in == aircraft.tach_time)
   end
 
-  # Owners can correct any flight; a pilot, the flights they logged.
-  def editable_by?(user, role:)
-    role.in?(%w[admin owner]) || (user_id.present? && user_id == user.id)
-  end
-
   private
 
   # Reject files the engine data parser can't read, before they're stored.

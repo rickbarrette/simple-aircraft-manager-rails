@@ -98,7 +98,7 @@ class AircraftArchiveFlowTest < ActionDispatch::IntegrationTest
     assert_equal "done", import.status, import.error
     copy = import.aircraft
     assert_equal [ "N54321", "Cessna" ], [ copy.tail_number, copy.make ]
-    assert_equal [ "owner" ], copy.roles.where(user: @pilot).pluck(:role) # the importer owns the copy
+    assert_equal [ "owner" ], copy.roles.where(user: @pilot).map { _1.role.key } # the importer owns the copy
     assert_equal "notes.txt", copy.squawks.sole.attachments.sole.filename.to_s
     assert_equal 1, import.counts["logbook_entries"]
 

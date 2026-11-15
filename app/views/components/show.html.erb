@@ -4,7 +4,7 @@
   <section class="card lg:col-span-2">
     <div class="card-header">
       <h2 class="card-title"><%= @component %> <%= life_badge(@component.life_status) %></h2>
-      <% if owner? %>
+      <% if can?(:manage_components) %>
         <div class="flex gap-2">
           <%= link_to t(".sub_component"), new_aircraft_component_path(@aircraft, parent_id: @component.id), class: "btn-secondary btn-sm" %>
           <%= link_to t(".edit"), edit_aircraft_component_path(@aircraft, @component), class: "btn-secondary btn-sm" %>
@@ -37,7 +37,7 @@
     <% if @component.notes.present? %><div class="border-t border-slate-100 px-4 py-3 text-sm"><%= simple_format @component.notes %></div><% end %>
   </section>
 
-  <% if owner? %>
+  <% if can?(:manage_components) %>
     <section class="card" id="service">
       <div class="card-header"><h2 class="card-title"><%= t(".service_replace") %></h2></div>
       <%= form_with url: reset_service_aircraft_component_path(@aircraft, @component), method: :post, class: "card-body space-y-3",
@@ -53,11 +53,11 @@
   <% end %>
 </div>
 
-<% if @inspection_rows.any? || owner? %>
+<% if @inspection_rows.any? || can?(:manage_inspections) %>
   <section class="card mt-5" id="inspections">
     <div class="card-header">
       <h2 class="card-title"><%= t(".inspections_of_this_component") %></h2>
-      <% if owner? %><%= link_to t(".inspection"), new_aircraft_inspection_type_path(@aircraft, component_id: @component.id), class: "btn-secondary btn-sm" %><% end %>
+      <% if can?(:manage_inspections) %><%= link_to t(".inspection"), new_aircraft_inspection_type_path(@aircraft, component_id: @component.id), class: "btn-secondary btn-sm" %><% end %>
     </div>
     <% if @inspection_rows.any? %>
       <table class="table">

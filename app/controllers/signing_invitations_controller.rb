@@ -1,7 +1,7 @@
 # An owner asks someone outside the aircraft (a mechanic) to sign an entry.
 class SigningInvitationsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!
+  requires_permission :write_logbook
   before_action :set_entry
   rate_limit to: 10, within: 1.hour, only: :create, with: -> { redirect_back fallback_location: root_path, alert: t("flash.signing_invitations.too_many_invitations_try") }
 

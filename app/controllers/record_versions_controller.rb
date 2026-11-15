@@ -1,7 +1,7 @@
 # Every change to the aircraft's maintenance records (AC 120-78B 3.2.2).
 class RecordVersionsController < ApplicationController
   include AircraftScoped
-  before_action :require_owner!, only: :restore
+  requires_permission :restore_history, only: :restore
 
   SHARED = { "AirworthinessDirective" => AirworthinessDirective, "InspectionType" => InspectionType }.freeze
 

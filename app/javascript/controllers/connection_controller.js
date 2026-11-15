@@ -12,6 +12,8 @@ import { t } from "i18n"
 //   sam:progress    { source, done, total }  (done >= total when finished)
 //   sam:waiting     { count }
 //   sam:unreachable / sam:reachable
+// and it says when the server answers again with sam:back-online (what was
+// logged offline is sent then).
 // The header is replaced on every page, so the state and the listeners live
 // in this module and the header on the page just shows them.
 const RETRY_EVERY = 15 * 1000
@@ -38,6 +40,7 @@ function setOnline(online) {
   state.online = online
   header?.announce(online ? t("connection.back_online") : t("connection.offline"))
   update()
+  if (online) document.dispatchEvent(new CustomEvent("sam:back-online"))
 }
 
 // Several reports often arrive together (done sending, then none waiting):
@@ -55,6 +58,9 @@ document.addEventListener("turbo:fetch-request-error", () => setOnline(false))
 document.addEventListener("sam:reachable", () => setOnline(true))
 document.addEventListener("sam:progress", ({ detail }) => { state.progress[detail.source] = detail; update() })
 document.addEventListener("sam:waiting", ({ detail }) => { state.waiting = detail.count; update() })
+
+// Whether the server answered last time (false while the top bar is red).
+export const serverReachable = () => state.online
 
 export default class extends Controller {
   static targets = [ "ring", "label", "announce" ]

@@ -1,10 +1,18 @@
 import { Controller } from "@hotwired/stimulus"
 import { t } from "i18n"
 import { queue, formFields, newKey, currentUser } from "controllers/offline_queue"
+import { serverReachable } from "controllers/connection_controller"
+
+// How long to wait for the server before keeping it here instead. Photos
+// on a squawk take longer to send.
+const WAIT = 10 * 1000
+const WAIT_WITH_FILES = 60 * 1000
 
 // Log Flight and Report Squawk: with no connection, the form is kept on this
 // device and sent later (see offline_sync_controller). For flights, the next
-// leg starts where the last saved one ended.
+// leg starts where the last saved one ended. A signal so weak the server
+// doesn't answer counts as none: it's kept here too, and if it got through
+// after all, the server drops the copy sent later (same client_key).
 export default class extends Controller {
   static targets = [ "key", "notice" ]
   static values = { kind: { type: String, default: "flight" }, tail: String }
@@ -23,12 +31,19 @@ export default class extends Controller {
 
   get flight() { return this.kindValue === "flight" }
 
-  // No connection: keep it here instead of submitting.
+  // No connection (or the top bar is red): keep it here instead of submitting.
   async submit(event) {
-    if (navigator.onLine) return
+    if (navigator.onLine && serverReachable()) return
     event.preventDefault()
     event.stopImmediatePropagation()
     await this.save(formFields(this.element))
+  }
+
+  // Give up waiting after a while; the request then fails (networkFailed).
+  limit(event) {
+    const options = event.detail.fetchOptions
+    const files = [ ...this.element.querySelectorAll("input[type=file]") ].some((input) => input.files?.length)
+    options.signal = AbortSignal.any([ options.signal, AbortSignal.timeout(files ? WAIT_WITH_FILES : WAIT) ].filter(Boolean))
   }
 
   // Kept in case the request fails on the way (no signal but the browser thinks it's online).

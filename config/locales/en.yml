@@ -2401,6 +2401,7 @@ en:
       oil_qt: Oil (qt)
       no_flights_logged_yet: No flights logged yet.
     new:
+      sending: Sending…
       log_flight: Log Flight
       from: From
       koqu: KOQU
@@ -3382,6 +3383,7 @@ en:
     edit:
       edit_squawk: Edit Squawk
     form:
+      sending: Sending…
       ground_aircraft_makes_the_aircraft: "“Ground Aircraft” makes the aircraft not airworthy until resolved."
       issue: Issue
       component_optional: Component (optional)

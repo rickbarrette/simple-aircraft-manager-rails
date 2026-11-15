@@ -9,6 +9,8 @@
 // - each aircraft's photo (put in sam-images ahead of time), shown when offline.
 // The forms and pages are saved ahead of time for all your aircraft
 // (offline_prep_controller.js), not only the ones you've opened.
+// Any other page, when the server can't be reached (no signal, or one so
+// weak nothing comes back within NETWORK_TIMEOUT), gets the offline page.
 // Nothing else is cached; signing out clears the forms and pages.
 // The version changes with every build, so a release refreshes the cached shell.
 const VERSION = "<%= j "#{SystemInfo.new.revision}-#{I18n.locale}" %>"
@@ -24,6 +26,19 @@ const SHORTCUTS = { "/go/log-flight": "flight_logs", "/go/report-squawk": "squaw
 // A proxy in front of the app (Traefik, Authentik) answers these when the app
 // itself can't be reached: treat them like no connection.
 const UNREACHABLE = [ 502, 503, 504 ]
+// A weak signal can leave a request hanging for minutes: give up after this.
+const NETWORK_TIMEOUT = 10 * 1000
+// Downloads made while you wait (the .sam.zip, the records package, PDFs)
+// can take longer than that to start, so they get no time limit.
+const DOWNLOADS = /\.\w+$|^\/aircraft\/\d+\/(export|records)$/
+// After a request fails, pages go straight to the kept copy or the offline
+// page for a moment instead of trying again (Turbo follows a failed visit
+// with a full page load, which would otherwise wait all over again), then
+// for a while longer wait only briefly, so moving around offline is quick.
+const RECENTLY = 5 * 1000
+const STILL_OFFLINE = 60 * 1000
+const OFFLINE_TIMEOUT = 3 * 1000
+let failedAt = 0
 const SHELL = [ "/offline", "/offline.js", "/icon.svg", "/icon-192.png", "/favicon.svg" ]
 
 self.addEventListener("install", (event) => {
@@ -53,11 +68,9 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(keptPage(request, PAGE_CACHE))
   } else if (request.mode === "navigate" && SHORTCUTS[url.pathname]) {
     event.respondWith(shortcut(request, SHORTCUTS[url.pathname]))
-  } else if (request.mode === "navigate") {
-    // Always go to the network for pages; show the offline page if it's unreachable.
-    event.respondWith(fetch(request)
-      .then((response) => UNREACHABLE.includes(response.status) ? offlinePage() : response)
-      .catch(() => offlinePage()))
+  } else if (wantsHtml) {
+    // Any other page comes from the network; the offline page when it's unreachable.
+    event.respondWith(page(request))
   } else if (SHELL.includes(url.pathname)) {
     // The offline page's own script and icon: fresh when online, kept copy when not.
     event.respondWith(fetch(request).then((r) => r.ok ? r : caches.match(url.pathname).then((hit) => hit || r))
@@ -74,6 +87,39 @@ self.addEventListener("fetch", (event) => {
 })
 
 const offlinePage = () => caches.match("/offline")
+
+// The network, within NETWORK_TIMEOUT. A proxy's "can't reach the app" counts
+// as no connection. Rejects when there isn't one (and remembers that).
+async function network(request) {
+  const since = Date.now() - failedAt
+  if (since < RECENTLY) throw new Error("offline")
+  const wait = since < STILL_OFFLINE ? OFFLINE_TIMEOUT : NETWORK_TIMEOUT
+  let timer
+  try {
+    const limit = DOWNLOADS.test(new URL(request.url).pathname) ? [] :
+      [ new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("timed out")), wait) }) ]
+    const response = await Promise.race([ fetch(request), ...limit ])
+    if (UNREACHABLE.includes(response.status)) throw new Error("unreachable")
+    failedAt = 0
+    return response
+  } catch (error) {
+    failedAt = Date.now()
+    throw error
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+// A page with no kept copy. A Turbo fetch gets the error instead, so Turbo
+// falls back to a full page load, which then gets the offline page.
+async function page(request) {
+  try {
+    return await network(request)
+  } catch (error) {
+    if (request.mode !== "navigate") throw error
+    return offlinePage()
+  }
+}
 const savedImage = async (request, response) => {
   const key = imageKey(request.url)
   return (key && await caches.open(IMAGE_CACHE).then((c) => c.match(key))) || response || Response.error()
@@ -114,12 +160,7 @@ async function keptPage(request, cacheName) {
   const cache = await caches.open(cacheName)
   const key = request.url.split("?")[0]
   try {
-    const response = await fetch(request)
-    if (UNREACHABLE.includes(response.status)) {
-      const kept = await cache.match(key)
-      if (kept) return kept
-      return request.mode === "navigate" ? offlinePage() : response
-    }
+    const response = await network(request)
     const html = (response.headers.get("Content-Type") || "").includes("text/html")
     if (response.ok && !response.redirected && html) await cache.put(key, response.clone())
     return response
@@ -136,8 +177,7 @@ async function keptPage(request, cacheName) {
 // of that kind (one aircraft), otherwise the offline page, which lists them.
 async function shortcut(request, kind) {
   try {
-    const response = await fetch(request)
-    if (!UNREACHABLE.includes(response.status)) return response
+    return await network(request)
   } catch (_) { /* offline */ }
   const cache = await caches.open(FORM_CACHE)
   const forms = (await cache.keys()).filter((r) => new URL(r.url).pathname.includes(`/${kind}/new`))

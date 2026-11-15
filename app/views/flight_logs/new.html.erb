@@ -2,7 +2,7 @@
 <%= render "shared/aircraft_header", aircraft: @aircraft %>
 <%= form_with model: [@aircraft, @flight_log], class: "card card-body space-y-5 max-w-3xl",
       data: { controller: "offline-form", offline_form_kind_value: "flight", offline_form_tail_value: @aircraft.tail_number,
-              action: "submit->offline-form#submit turbo:submit-start->offline-form#remember turbo:fetch-request-error->offline-form#networkFailed turbo:before-fetch-response->offline-form#gatewayFailed" } do |f| %>
+              action: "submit->offline-form#submit turbo:before-fetch-request->offline-form#limit turbo:submit-start->offline-form#remember turbo:fetch-request-error->offline-form#networkFailed turbo:before-fetch-response->offline-form#gatewayFailed" } do |f| %>
   <%= f.hidden_field :client_key, data: { offline_form_target: "key" } %>
   <div class="hidden rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-900 ring-1 ring-sky-200" data-offline-form-target="notice" role="status"></div>
   <%= f.errors_summary %>
@@ -40,8 +40,8 @@
   </div>
   <p class="hint"><%= t(".saving_adds_the_tach_time") %></p>
   <div class="flex flex-wrap gap-2">
-    <%= f.submit t(".log_flight") %>
-    <%= f.submit t(".log_and_next_leg"), name: "next_leg", class: "btn-secondary", title: t(".log_and_next_leg_title") %>
+    <%= f.submit t(".log_flight"), data: { turbo_submits_with: t(".sending") } %>
+    <%= f.submit t(".log_and_next_leg"), name: "next_leg", class: "btn-secondary", title: t(".log_and_next_leg_title"), data: { turbo_submits_with: t(".sending") } %>
     <%= link_to t(".cancel"), aircraft_flight_logs_path(@aircraft), class: "btn-secondary" %>
   </div>
 <% end %>

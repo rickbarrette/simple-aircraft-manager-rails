@@ -1,12 +1,20 @@
 import { Controller } from "@hotwired/stimulus"
 import { t } from "i18n"
 import { queue } from "controllers/offline_queue"
+import { serverReachable } from "controllers/connection_controller"
+
+// How long to wait for the server to take one before trying again later
+// (a weak signal can leave a request hanging for minutes). Photos take longer.
+const WAIT = 15 * 1000
+const WAIT_WITH_FILES = 60 * 1000
 
 const report = (name, detail) => document.dispatchEvent(new CustomEvent(name, { detail }))
 
 // On every page: sends the flights and squawks this user saved offline once
 // there's a connection, says what happened, and shows the count on the app
-// icon. A rejected item stays until it's discarded.
+// icon. A rejected item stays until it's discarded. Nothing is tried while
+// the top bar is red; it goes again as soon as it turns back
+// (connection_controller.js), signal or not.
 export default class extends Controller {
   static targets = [ "banner" ]
 
@@ -14,19 +22,21 @@ export default class extends Controller {
     this.sync = this.sync.bind(this)
     window.addEventListener("online", this.sync)
     document.addEventListener("offline-queue:changed", this.sync)
+    document.addEventListener("sam:back-online", this.sync)
     this.sync()
   }
 
   disconnect() {
     window.removeEventListener("online", this.sync)
     document.removeEventListener("offline-queue:changed", this.sync)
+    document.removeEventListener("sam:back-online", this.sync)
   }
 
   async sync() {
     let items
     try { items = await queue.mine() } catch (_) { return }
     if (!items.length) { this.badge(0); report("sam:waiting", { count: 0 }); return this.show("") }
-    if (!navigator.onLine || this.running) return this.status(items)
+    if (!navigator.onLine || !serverReachable() || this.running) return this.status(items)
     this.running = true
     const sent = []
     const sending = items.filter((i) => !i.error)
@@ -53,7 +63,9 @@ export default class extends Controller {
     if (token) body.append("authenticity_token", token)
     let response
     try {
-      response = await fetch(item.url, { method: "POST", body, credentials: "same-origin", headers: { Accept: "text/html" } })
+      const files = item.fields.some(([ , value ]) => value instanceof Blob)
+      response = await fetch(item.url, { method: "POST", body, credentials: "same-origin", headers: { Accept: "text/html" },
+                                         signal: AbortSignal.timeout(files ? WAIT_WITH_FILES : WAIT) })
     } catch (_) { return "offline" }
     if ([ 502, 503, 504 ].includes(response.status)) return "offline"
     if (response.url.includes("/session/new")) return "signin"

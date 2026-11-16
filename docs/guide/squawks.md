@@ -23,4 +23,4 @@ For inoperative equipment that isn't required, **Defer** records the decision. Y
 
 ## Resolve a squawk
 
-Owners choose **Resolve**. You can record the fix as a logbook entry at the same time: the date, logbook, airframe total time, work performed and who signed it off. A resolved squawk can be **Reopen**ed.
+Owners and Mechanics (the **Manage squawks** permission) choose **Resolve**. You can record the fix as a logbook entry at the same time: the date, logbook, airframe total time, work performed and who signed it off. A resolved squawk can be **Reopen**ed.

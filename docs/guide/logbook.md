@@ -1,6 +1,6 @@
 # The logbook
 
-The **Logbook** tab holds the maintenance record entries. Owners write and edit them; anyone with a certificate can sign them (see [Electronic records and signing](records.md)).
+The **Logbook** tab holds the maintenance record entries. Owners and Mechanics write and edit them; anyone whose role can sign entries (Owners, Mechanics and Pilots, as roles come) and who has a certificate can sign them (see [Electronic records and signing](records.md)).
 
 ## Writing an entry
 

@@ -6,7 +6,7 @@ Open your name in the top bar (☰ → **Profile** on a phone).
 
 Change your name, email and password. Leave the password blank to keep the current one. A password needs at least 12 characters, and one that has appeared in a known data breach is refused (checked with Have I Been Pwned, which never receives the password itself).
 
-**Weekly maintenance reminders**: on Mondays the app emails owners about anything overdue or coming due on their aircraft, and certificates about to expire. Untick it to stop them. (Emails need the administrator to have set up email.)
+**Weekly maintenance reminders**: on Mondays the app emails those whose role gets reminders (Owners and Mechanics, as roles come) about anything overdue or coming due on their aircraft, and certificates about to expire. Untick it to stop them. (Emails need the administrator to have set up email.)
 
 **Time zone** is *Automatic* by default: times show in your device's zone, and "today" (for example a new flight's date) is your local date. Choose a zone to use it on every device. Signatures and the record history always show UTC.
 

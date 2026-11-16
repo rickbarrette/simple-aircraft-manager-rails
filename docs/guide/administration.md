@@ -53,7 +53,7 @@ If single sign-on is broken and `PASSWORD_LOGIN=false` is set, remove that setti
 
 ## Component Types, Airports, Logbook Templates
 
-- **Component Types**: the list of types used for components (owners can also add new types while adding a component).
+- **Component Types**: the list of types used for components (anyone who manages components can also add new types while adding one).
 - **Airports**: airport data from OurAirports, used for From/To autocomplete and AirTrail. It downloads by itself when the app first starts; **Update from OurAirports** refreshes it. Add private strips here; they're never overwritten.
 - **Logbook Templates**: the wording offered when writing an entry. Use `__` for blanks. **Restore built-in templates** adds back any deleted built-in ones.
 

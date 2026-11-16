@@ -4,7 +4,7 @@ These are the instructions for everyone who keeps or signs maintenance records h
 
 ## Writing an entry
 
-On the aircraft's **Logbook** tab, choose **+ New Entry** (owners). Give the date, the logbook (aircraft, engine, propeller), the airframe total time and what was done. For an engine or propeller entry, pick the component (its times fill in) and tick any sub-components. A template can start the wording. An entry isn't a signed record until it's signed. See [The logbook](logbook.md).
+On the aircraft's **Logbook** tab, choose **+ New Entry** (Owners and Mechanics: the **Write logbook entries** permission). Give the date, the logbook (aircraft, engine, propeller), the airframe total time and what was done. For an engine or propeller entry, pick the component (its times fill in) and tick any sub-components. A template can start the wording. An entry isn't a signed record until it's signed. See [The logbook](logbook.md).
 
 ## Signing
 
@@ -17,11 +17,11 @@ Never share your password or let someone else sign while you're signed in: a sig
 
 ## Mistakes
 
-A signed entry can't be edited or deleted. Open it and choose **More → Correct this entry** (owners): a new entry starts from the original. Fix it, save it and sign it. The original stays, marked “Superseded by a correction”, with a link to the correction.
+A signed entry can't be edited or deleted. Open it and choose **More → Correct this entry** (Owners and Mechanics): a new entry starts from the original. Fix it, save it and sign it. The original stays, marked “Superseded by a correction”, with a link to the correction.
 
 ## Someone else did the work
 
-The owner can choose **More → Ask someone to sign** on the entry. The mechanic gets a one-time email link (valid for 14 days), signs in with their own account (or creates one for that address, when an Owner sent the invitation), adds their certificate and signs.
+Owners and Mechanics can choose **More → Ask someone to sign** on the entry. The mechanic gets a one-time email link (valid for 14 days), signs in with their own account (or creates one for that address, when an Owner sent the invitation), adds their certificate and signs.
 
 If they prefer paper, print the entry (**Print for logbook**), have it signed in ink, and keep the paper with the logbooks (scan it into Documents).
 

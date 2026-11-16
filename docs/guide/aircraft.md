@@ -2,7 +2,7 @@
 
 ## The fleet
 
-**Fleet** shows every aircraft you have access to, with its airworthiness and its most pressing issues. **+ Add Aircraft** creates one (you become its owner). **More → Import from a .sam.zip archive** loads an aircraft from a `.sam.zip` archive (see [Access, sharing and transfer](sharing.md)).
+**Fleet** shows every aircraft you have access to, with its airworthiness and its most pressing issues. **+ Add Aircraft** creates one (you become its Owner). **More → Import from a .sam.zip archive** loads an aircraft from a `.sam.zip` archive (see [Access, sharing and transfer](sharing.md)). Both are for administrators unless the administrator lets everyone add aircraft (Admin → Settings); otherwise ask them to add it and give you a role.
 
 ## An aircraft's overview
 
@@ -27,7 +27,7 @@ It's only as good as the records entered, and the pilot in command still decides
 
 ## Editing the aircraft
 
-**Edit** (owners) on the overview changes:
+**Edit** (Owners: the **Edit the aircraft** permission) on the overview changes:
 
 - Tail number, make, model, serial number, status (Available, In Maintenance, Grounded, Unavailable), ICAO type (used for AirTrail), description and picture.
 - **Current tach / hobbs**, and **offsets** subtracted for maintenance math after a meter is replaced.

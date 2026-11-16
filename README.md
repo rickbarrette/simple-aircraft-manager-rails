@@ -88,7 +88,7 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 | `APP_URL` | Optional public base URL, e.g. `https://aircraft.example.com` (default `https://APP_HOST`). Used for the SSO and Google Drive redirect URIs. |
 | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Optional. Turn on single sign-on with an OpenID Connect provider (see below). |
 | `OIDC_PROVIDER_NAME` | Button label, e.g. `Authentik` (default `SSO`). |
-| `OIDC_AUTO_CREATE_USERS` | `true` creates an account for anyone the provider lets in, without an invitation. New accounts start with no aircraft. Default off: accounts come only from an admin or an admin's invitation (SSO sign-in from the invitation link makes the account). |
+| `OIDC_AUTO_CREATE_USERS` | `true` creates an account for anyone the provider lets in, without an invitation. New accounts start with no aircraft. Default off: accounts come only from an admin, an admin's invitation, or an Owner's signing invitation (signing in with SSO from the link makes the account). |
 | `OIDC_TRUST_EMAIL` | `true` links existing accounts by email even if the provider doesn't mark it verified. Only use it if users can't edit their own email at the provider. |
 | `OIDC_ADMIN_GROUP` | Optional. Members of this provider group become admins and others lose admin, synced at each sign-in. |
 | `PWNED_PASSWORDS_CHECK` | `false` turns off the check of new passwords against Have I Been Pwned (only the first 5 characters of the password's SHA-1 are sent). Use it if the server has no outbound internet access; the check also allows the password if the service can't be reached. |

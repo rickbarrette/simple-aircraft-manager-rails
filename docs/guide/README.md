@@ -24,11 +24,11 @@ The same pages are in the app under **Help** in the menu.
 - [Airworthiness directives](ads.md)
 - [Documents](documents.md)
 - [Major repairs, alterations and weight & balance](major-records.md)
-- [Access, sharing and transfer](sharing.md): people, share links, the records package, moving an aircraft
+- [Access, sharing and transfer](sharing.md): people and their roles, share links, the records package, moving an aircraft
 
 ## Administrators
 
-- [Administration](administration.md): users, settings, templates, backups and off-site backup to Google Drive, recordkeeping procedures and audits
+- [Administration](administration.md): users, roles and what each can do, invitations, settings (including who can add aircraft), templates, backups and off-site backup to Google Drive, recordkeeping procedures and audits
 - [REST API](api.md): tokens, endpoints and webhooks, for scripts and other systems such as Redmine
 
 ## Legal

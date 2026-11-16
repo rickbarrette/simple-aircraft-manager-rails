@@ -1,6 +1,6 @@
 # Components
 
-The **Components** tab is a tree of the aircraft's parts: engine, propeller, magnetos, filters, ELT battery and so on, each with its own time and limits. Owners manage it.
+The **Components** tab is a tree of the aircraft's parts: engine, propeller, magnetos, filters, ELT battery and so on, each with its own time and limits. Owners and Mechanics manage it (the **Manage components** permission); everyone on the aircraft can see it.
 
 ## Adding a component
 

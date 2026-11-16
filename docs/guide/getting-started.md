@@ -36,7 +36,7 @@ Administrators can do everything on every aircraft, and manage users, roles, set
 
 - **Fleet** (top left) lists your aircraft with their airworthiness.
 - Each aircraft has tabs: **Overview, Components, Squawks, Flights, Oil & Fuel, Logbook, Inspections, ADs, Documents, Major Records, W&B, Notes, Activity**.
-- **Log Flight** and **Report Squawk** are at the top of every aircraft page. Next to them, **More** has the status report and, for owners, **Access & sharing**, editing the aircraft, and its downloads.
+- **Log Flight** and **Report Squawk** are at the top of every aircraft page (when your role allows them). Next to them, **More** has the status report and, depending on your role, **Access & sharing**, editing the aircraft, and its downloads. Buttons for things your role doesn't allow aren't shown.
 - Each section shows its main action as a button (such as **+ New Entry**). Less frequent ones, such as imports, exports and printing, are under that section's **More** button.
 - **Search** (the box in the top bar, or ☰ → Search on a phone) looks through the logbook, squawks, notes, ADs, documents (including the text of their pages), components, flights and major records of your aircraft at once.
 - Your name (or ☰ on a phone) leads to your **Profile**, this **Help**, and for admins the **Admin** pages.

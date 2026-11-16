@@ -76,30 +76,35 @@ class RecordsPackage
     "#{image.sub(/:[^:\/]+\z/, '')}:#{version}"
   end
 
-  # A ready-to-run local viewer, with its own throwaway secret key (never this
-  # installation's), plain HTTP on localhost.
+  # A ready-to-run local viewer of the archive: read-only, no account needed
+  # (viewer mode, see Viewer), reachable only from that computer, with its own
+  # throwaway secret key (never this installation's).
   def viewer_compose
     image = viewer_image
+    archive = "#{@aircraft.tail_number.downcase}.sam.zip"
     <<~YAML
-      # Simple Aircraft Manager on your own computer, to browse #{@aircraft.tail_number.downcase}.sam.zip.
-      #   1. docker compose up -d
-      #   2. Open http://localhost:3000 and create the first (admin) account. It asks
-      #      for a one-time setup code:   docker compose logs web | grep "Setup code"
-      #   3. Fleet -> More -> Import from a .sam.zip archive: choose #{@aircraft.tail_number.downcase}.sam.zip
-      #   Stop: docker compose down (add -v to delete this local copy)
+      # Simple Aircraft Manager on your own computer, showing #{archive} read-only.
+      #   1. In this folder:   docker compose up
+      #      The first start imports the records; wait for "Viewer ready".
+      #   2. Open http://localhost:3000 (no account needed).
+      #   Stop: Ctrl+C, then docker compose down (add -v to delete this local copy).
       # Prepared with software version #{SystemInfo.new.version_label}.#{" Source: #{repository}" if repository}
       services:
         web:
           #{image ? "image: #{image}" : "build: .   # no published image known: build from the source code"}
           restart: "no"
           ports:
-            - "3000:80"
+            - "127.0.0.1:3000:80"   # this computer only
           environment:
+            SAM_VIEWER: "true"
+            SAM_VIEWER_ARCHIVE: /import/#{archive}
             SECRET_KEY_BASE: #{SecureRandom.hex(64)}   # for this local copy only
             APP_HOST: localhost:3000
             FORCE_SSL: "false"
             SOLID_QUEUE_IN_PUMA: "true"
+            SOLID_QUEUE_SKIP_RECURRING: "true"   # no reminders, backups or AD searches
           volumes:
+            - ../#{archive}:/import/#{archive}:ro   # the archive next to this folder, in the package
             - viewer_storage:/rails/storage
       volumes:
         viewer_storage:

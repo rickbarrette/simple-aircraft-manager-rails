@@ -45,7 +45,7 @@
               <summary class="flex cursor-pointer list-none items-center rounded px-3 py-2 text-lg leading-none hover:bg-white/10 [&::-webkit-details-marker]:hidden" aria-label="<%= t(".menu") %>">☰</summary>
               <div class="absolute right-0 z-30 mt-2 w-56 rounded-md bg-surface py-1 text-slate-700 shadow-lg ring-1 ring-slate-200">
                 <p class="truncate px-4 pt-2 pb-1 text-xs text-slate-500"><%= current_user.email_address %></p>
-                <%= link_to t(".profile"), edit_profile_path, class: "block px-4 py-2.5 hover:bg-slate-100" %>
+                <% unless Viewer.enabled? %><%= link_to t(".profile"), edit_profile_path, class: "block px-4 py-2.5 hover:bg-slate-100" %><% end %>
                 <%= link_to t(".search"), search_path, class: "block px-4 py-2.5 hover:bg-slate-100" %>
                 <%= link_to t(".help"), help_path, class: "block px-4 py-2.5 hover:bg-slate-100" %>
                 <% if current_user.admin? %>
@@ -54,7 +54,7 @@
                     <%= link_to label, path, class: "block px-4 py-2.5 hover:bg-slate-100" %>
                   <% end %>
                 <% end %>
-                <div class="border-t border-slate-100"><%= button_to t(".sign_out"), session_path, method: :delete, class: "block w-full px-4 py-2.5 text-left hover:bg-slate-100", form: { data: { controller: "sign-out", action: "submit->sign-out#clean" } } %></div>
+                <% unless Viewer.enabled? %><div class="border-t border-slate-100"><%= button_to t(".sign_out"), session_path, method: :delete, class: "block w-full px-4 py-2.5 text-left hover:bg-slate-100", form: { data: { controller: "sign-out", action: "submit->sign-out#clean" } } %></div><% end %>
               </div>
             </details>
           </nav>
@@ -78,9 +78,9 @@
               </details>
             <% end %>
             <%= link_to t(".help"), help_path, class: "hover:text-sky-300" %>
-            <%= link_to current_user.display_name, edit_profile_path, class: "text-white/70 hover:text-sky-300 hidden sm:inline" %>
+            <% unless Viewer.enabled? %><%= link_to current_user.display_name, edit_profile_path, class: "text-white/70 hover:text-sky-300 hidden sm:inline" %><% end %>
             <%= render "shared/theme_toggle" %>
-            <%= button_to t(".sign_out"), session_path, method: :delete, class: "rounded bg-white/10 px-2 py-1 hover:bg-white/20", form: { data: { controller: "sign-out", action: "submit->sign-out#clean" } } %>
+            <% unless Viewer.enabled? %><%= button_to t(".sign_out"), session_path, method: :delete, class: "rounded bg-white/10 px-2 py-1 hover:bg-white/20", form: { data: { controller: "sign-out", action: "submit->sign-out#clean" } } %><% end %>
           </nav>
         <% end %>
         </div>
@@ -92,6 +92,13 @@
     </div>
     <div class="hidden space-y-1 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900 ring-1 ring-amber-200" data-offline-sync-target="banner" role="status"></div>
 
+    <% if Viewer.enabled? %>
+      <%# Viewer mode: a read-only copy of a records package's archive (see Viewer). %>
+      <% info = Viewer.info %>
+      <div class="bg-sky-50 px-4 py-2 text-center text-sm text-sky-900 ring-1 ring-sky-200" role="note" id="viewer-banner">
+        <%= info ? t("viewer.banner", file: info["file"], date: (info["exported_at"] ? fmt_date(Time.zone.parse(info["exported_at"])) : t("viewer.unknown_date"))) : t("viewer.banner_no_archive") %>
+      </div>
+    <% end %>
     <main id="main" tabindex="-1" class="mx-auto max-w-7xl px-4 py-6 focus:outline-none">
       <%= render "shared/flash" %>
       <%= yield %>

@@ -49,10 +49,11 @@ module AircraftScoped
     @current_role = current_user.role_for(@aircraft)
   end
 
-  def can?(permission) = current_user.admin? || current_role&.can?(permission) || false
+  # Nothing in viewer mode (a read-only copy, see Viewer).
+  def can?(permission) = !Viewer.enabled? && (current_user.admin? || current_role&.can?(permission) || false)
 
   # The Owner role (or an administrator): everything.
-  def owner? = current_user.admin? || current_role&.owner? || false
+  def owner? = !Viewer.enabled? && (current_user.admin? || current_role&.owner? || false)
 
   def authorize_permission!
     rules = self.class.permission_rules.select do |_, only, except|

@@ -9,6 +9,10 @@ fi
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
+  # Viewer mode (records package): refuse a real database, import the archive.
+  if [ "${SAM_VIEWER}" == "true" ]; then
+    ./bin/rails sam:viewer:prepare
+  fi
 fi
 
 exec "${@}"

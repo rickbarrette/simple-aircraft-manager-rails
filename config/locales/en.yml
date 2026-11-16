@@ -1641,7 +1641,7 @@ en:
         n8_quality_control_and_auditing: 8. Quality control and auditing
         every_months_the_responsible_person_html: Every %{audit_interval_months} months the responsible person carries out and records an audit in the system (3.2.8.5). The app checks that the integrity check and backups are passing, the procedures are adopted, signatures are intact, and lists expired certificates and software versions since the last audit. The auditor restores the off-site backup somewhere separate and opens it, compares %{audit_sample_size} randomly chosen entries with their work orders or source documents, reviews the users and roles (disabling accounts no longer needed), and confirms the paper logbooks are kept. Audit results are kept in the system.%{latest}
         n9_making_records_available_to: 9. Making records available to the FAA and NTSB
-        on_request_14_cfr_91: 'On request (14 CFR 91.417(c), 49 CFR 830), the responsible person provides the records package for the aircraft: every logbook entry as a PDF with its electronic signature, a signature register, the full change history, the maintenance status report and the data archive, with a README. Printed copies are produced the same way. Direct access to the system can be offered but isn''t required (3.2.8.6).'
+        on_request_14_cfr_91: 'On request (14 CFR 91.417(c), 49 CFR 830), the responsible person provides the records package for the aircraft: every logbook entry as a PDF with its electronic signature, a signature register, the full change history, the maintenance status report and the data archive, with a README and a viewer that shows the records, read-only, on the recipient''s own computer. Printed copies are produced the same way. Direct access to the system can be offered but isn''t required (3.2.8.6).'
         n10_transfer_of_records: 10. Transfer of records
         at_sale_91_419_3_html: "<strong>At sale (91.419, 3.2.8.12):</strong> the buyer receives the records package and the data archive, which another installation of the system can import, together with the paper logbooks. <strong>To another system (3.2.8.9):</strong> records are exported as the data archive and the records package; both systems run side by side until the transfer is checked."
         n11_continuity: 11. Continuity
@@ -4208,14 +4208,13 @@ en:
         inspections, documents, flights, oil and fuel) the way the owner sees it, run the app on your own computer:
 
           1. Install Docker Desktop (https://www.docker.com/products/docker-desktop/).
-          2. In a terminal, go to the "viewer" folder of this package and run:   docker compose up -d
-          3. Open http://localhost:3000 and create the first (admin) account. It asks for a one-time setup code,
-             which this shows (in the same folder):   docker compose logs web | grep "Setup code"
-          4. Choose Fleet -> More -> Import from a .sam.zip archive and select %{archive} from this package (or this whole zip file).
+          2. Unzip this package, and in a terminal go to its "viewer" folder and run:   docker compose up
+             The first start imports %{archive}; wait for the line "Viewer ready".
+          3. Open http://localhost:3000. No account is needed: it's a read-only copy.
 
-        The copy runs only on your computer and stays separate from the owner's system. Electronic signatures are
-        shown as imported: compare their fingerprints with signatures.csv and logbook-entries.pdf. To stop it:
-        docker compose down (add -v to delete the local copy).
+        The copy runs only on your computer (it can't be reached from other machines), can't be changed, and stays
+        separate from the owner's system. Electronic signatures are shown as imported: compare their fingerprints with
+        signatures.csv and logbook-entries.pdf. To stop it: Ctrl+C, then docker compose down (add -v to delete the copy).
         %{repository}
       not_recorded: not recorded
       not_stated: not stated
@@ -4415,6 +4414,12 @@ en:
     test:
       title: Notifications are working
       body: This device will get notifications from Simple Aircraft Manager.
+  viewer:
+    account_name: Viewer
+    read_only: This is a read-only copy of the records; nothing can be changed here.
+    banner: 'Read-only copy of the records in %{file}, exported %{date}. Nothing here can be changed, and it isn''t connected to the owner''s system.'
+    banner_no_archive: Read-only viewer. No archive was imported (see the viewer folder's docker-compose.yml).
+    unknown_date: on an unknown date
   shortcuts:
     choose:
       log_flight: 'Log Flight: choose the aircraft'

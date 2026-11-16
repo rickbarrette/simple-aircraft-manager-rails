@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
 
   include RejectsNullBytes
   prepend_before_action :redirect_to_setup
+  prepend_before_action :viewer_guard # first (see Viewer)
   before_action { Current.ip_address = request.remote_ip } # for record history
   helper_method :current_user
 
@@ -40,6 +41,18 @@ class ApplicationController < ActionController::Base
   def current_user = Current.user
 
   # First run: no users yet → create the initial admin.
+  # Viewer mode: never with real accounts, and nothing can be changed.
+  def viewer_guard
+    return unless Viewer.enabled?
+    return render(plain: Viewer::RealAccounts.new.message, status: :service_unavailable) if Viewer.real_accounts?
+    Viewer.user
+    return if request.get? || request.head?
+    respond_to do |format|
+      format.html { redirect_back fallback_location: root_path, alert: t("viewer.read_only") }
+      format.any { head :forbidden }
+    end
+  end
+
   def redirect_to_setup
     redirect_to new_setup_path if !User.exists? && !is_a?(SetupController)
   end

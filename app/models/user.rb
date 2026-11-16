@@ -123,10 +123,11 @@ class User < ApplicationRecord
 
   # Adding an aircraft (or importing one) makes you its Owner: administrators,
   # or everyone when Admin → Settings allows it.
-  def can_add_aircraft? = admin? || Setting.anyone_adds_aircraft?
+  def can_add_aircraft? = !Viewer.enabled? && (admin? || Setting.anyone_adds_aircraft?)
 
   # Administrators can do everything on every aircraft.
   def can?(permission, aircraft)
+    return false if Viewer.enabled?
     admin? || role_for(aircraft)&.can?(permission) || false
   end
 

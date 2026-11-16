@@ -82,12 +82,13 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
       def zip.text(name) = read(name).force_encoding("UTF-8")
       assert_equal %w[README.txt logbook-entries.pdf n12345.sam.zip record-history.csv signatures.csv status-report.html viewer/docker-compose.yml], zip.entries.map(&:name).sort
       readme = zip.text("README.txt")
-      assert_includes readme, 'docker compose logs web | grep "Setup code"'
-      viewer = YAML.safe_load(zip.text("viewer/docker-compose.yml"))
-      version = SystemInfo.new.version
-      assert_equal "barrettefab/simple-aircraft-manager-rails:#{version}", viewer.dig("services", "web", "image") # the release that made it
-      assert_equal "false", viewer.dig("services", "web", "environment", "FORCE_SSL")
-      assert_includes zip.text("viewer/docker-compose.yml"), 'grep "Setup code"'
+      assert_includes readme, "No account is needed: it's a read-only copy."
+      web = YAML.safe_load(zip.text("viewer/docker-compose.yml")).dig("services", "web")
+      assert_equal "barrettefab/simple-aircraft-manager-rails:#{SystemInfo.new.version}", web["image"] # the release that made it
+      assert_equal({ "SAM_VIEWER" => "true", "SAM_VIEWER_ARCHIVE" => "/import/n12345.sam.zip", "SOLID_QUEUE_SKIP_RECURRING" => "true" },
+                   web["environment"].slice("SAM_VIEWER", "SAM_VIEWER_ARCHIVE", "SOLID_QUEUE_SKIP_RECURRING"))
+      assert_equal [ "127.0.0.1:3000:80" ], web["ports"] # this computer only
+      assert_includes web["volumes"], "../n12345.sam.zip:/import/n12345.sam.zip:ro"
       assert_includes readme, "All 2 logbook entries, oldest first. 1 are signed electronically"
       assert_includes readme, "Electronic records since: 2026-01-01"
       assert_includes readme, "scans marked \"legacy record\""

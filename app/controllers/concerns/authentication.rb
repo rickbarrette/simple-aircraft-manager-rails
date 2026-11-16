@@ -21,7 +21,12 @@ module Authentication
     end
 
     def require_authentication
-      resume_session || request_authentication
+      resume_session || start_viewer_session || request_authentication
+    end
+
+    # Viewer mode: everyone is its built-in account, without signing in.
+    def start_viewer_session
+      start_new_session_for(Viewer.user) if Viewer.enabled? && !Viewer.real_accounts?
     end
 
     def resume_session

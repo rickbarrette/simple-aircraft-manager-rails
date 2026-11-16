@@ -2,6 +2,31 @@
 
 Each release has a **version** (year.month.release, e.g. 2026.11.0) and a **build** (the exact source commit, shown on Admin → About). The newest release is first.
 
+## 2026.11.7
+
+### Changes
+
+- **Correct a flight.** Open it and choose **Edit**: the date, airports, route, notes, oil and fuel (its oil and fuel records follow) and its files can always be fixed. The meter readings only on the latest flight, while nothing else has changed the hours; the aircraft and its components then move by the difference. On earlier flights the readings are shown locked. Owners can correct any flight; pilots, the ones they logged.
+- **Roles you can set up.** Each person has a role on each aircraft: **Owner**, **Mechanic** (maintenance records, signing, components, inspections, ADs, squawks, reminders), **Pilot** (as before) or **Viewer** (sees everything, changes nothing). Owners and pilots keep exactly what they could do. Buttons for what your role doesn't allow aren't shown.
+- **Reminders and overdue alerts** go to the roles that get them: Owners and Mechanics, as roles come.
+- **Records package viewer, with no account.** The package's `viewer/docker-compose.yml` now runs a read-only copy on the recipient's computer: `docker compose up`, open http://localhost:3000, and the records are there (imported by itself, nothing can be changed, reachable only from that computer). It runs the release that made the package.
+
+### For administrators
+
+- **Admin → Roles**: change what Mechanic, Pilot and Viewer can do (31 permissions, grouped), or add your own roles (a partner, an instructor). Owner always has everything. **Admin → Users → Edit** lists each person's role on every aircraft, to add, change or remove. Only an Owner (or an administrator) can give the Owner role, nobody changes their own, and every aircraft keeps an Owner.
+- **Admin → Invitations**: a link that makes an account (or is accepted with one) and gives roles on aircraft; limited uses, an expiry, optionally one email address (and then emailed). With single sign-on, **Continue with** on the invitation makes the account.
+- **New accounts come only from an administrator**, an administrator's invitation, or an Owner's signing invitation to an outside mechanic (for that address). Signing invitations from others need an existing account.
+- **Who can add aircraft** (Admin → Settings) is **administrators only** by default: adding or importing an aircraft makes you its Owner, who can bring in mechanics. **After this update, other users can't add aircraft** until you choose *Everyone* there.
+- `OIDC_AUTO_CREATE_USERS=true` still gives an account to anyone the identity provider lets in, without an invitation; leave it off to keep accounts to administrators and their invitations.
+- The REST API follows the person's role; its `owners_only` error is now `not_permitted`.
+- The update adds the roles and invitations tables, filled in automatically when the new version starts.
+- The compose files and `.env.example` mention the first-run setup code and the push notification, language and image settings.
+
+### Fixes
+
+- Disabled fields look disabled (they looked like any other).
+- The records package's viewer said to just create an account (it needs the setup code since 2026.11.5) and named the wrong menu.
+
 ## 2026.11.6
 
 ### Changes

@@ -30,7 +30,7 @@ What you can do depends on your role on each aircraft. These are the built-in ro
 | Correct or delete any flight, imports, exports, restore from history | | | | ✓ |
 | Edit the aircraft, manage people and share links | | | | ✓ |
 
-Administrators can do everything on every aircraft, and manage users, roles, settings, procedures and audits for the whole app. Anyone can add an aircraft and becomes its Owner. You only see aircraft you have a role on; administrators see all of them.
+Administrators can do everything on every aircraft, and manage users, roles, settings, procedures and audits for the whole app. Whoever adds an aircraft becomes its Owner; the administrator decides who can (Admin → Settings: administrators only, or everyone). You only see aircraft you have a role on; administrators see all of them.
 
 ## Finding your way around
 

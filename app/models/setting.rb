@@ -10,6 +10,9 @@ class Setting < ApplicationRecord
     "backups_kept" => { default: 14, in: 1..365 },
     "offsite_backups_kept" => { default: 30, in: 1..365 },
     "documents_claude_text" => { default: 0, in: 0..1 },
+    # Who can add aircraft (and so become an Owner, who invites people): 0
+    # administrators only, 1 everyone.
+    "anyone_adds_aircraft" => { default: 0, in: 0..1 },
     "logbook_templates_seeded" => { default: 0, in: 0..1 } # internal flag
   }.freeze
   LABELS = LabelSet.new("setting.keys", INTEGERS.keys)
@@ -20,6 +23,7 @@ class Setting < ApplicationRecord
   class << self
     def max_upload_mb = integer("max_upload_mb")
     def max_upload_bytes = max_upload_mb.megabytes
+    def anyone_adds_aircraft? = integer("anyone_adds_aircraft") == 1
 
     def integer(key)
       definition = INTEGERS.fetch(key)

@@ -2,6 +2,7 @@
 # create an aircraft with all its records. The archive is checked right away;
 # the import itself runs in the background (AircraftImportJob).
 class AircraftImportsController < ApplicationController
+  before_action :require_aircraft_adder!, only: %i[new create]
   before_action :set_import, only: :show
 
   def new; end

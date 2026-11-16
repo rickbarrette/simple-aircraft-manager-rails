@@ -4,6 +4,7 @@ class AircraftArchiveFlowTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
 
   setup do
+    Setting.update_integers("anyone_adds_aircraft" => 1) # anyone may add aircraft here
     @owner = create_user("owner@example.com")
     @pilot = create_user("pilot@example.com")
     @a = create_aircraft(owner: @owner, pilot: @pilot, tail_number: "N12345", make: "Cessna")

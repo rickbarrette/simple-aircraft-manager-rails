@@ -21,7 +21,7 @@ A signed entry can't be edited or deleted. Open it and choose **More → Correct
 
 ## Someone else did the work
 
-The owner can choose **More → Ask someone to sign** on the entry. The mechanic gets a one-time email link (valid for 14 days), signs in with their own account (the administrator adds it first, or invites them), adds their certificate and signs.
+The owner can choose **More → Ask someone to sign** on the entry. The mechanic gets a one-time email link (valid for 14 days), signs in with their own account (or creates one for that address, when an Owner sent the invitation), adds their certificate and signs.
 
 If they prefer paper, print the entry (**Print for logbook**), have it signed in ink, and keep the paper with the logbooks (scan it into Documents).
 

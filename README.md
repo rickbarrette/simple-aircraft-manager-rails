@@ -181,7 +181,7 @@ Each person has a role on each aircraft, and a role is a set of permissions (`ap
 | Correct or delete any flight, imports, exports, restore from history | | | | ✓ |
 | Edit or delete the aircraft, manage people and share links | | | | ✓ |
 
-Owner always has every permission. Only an Owner can give the Owner role, nobody changes their own, and every aircraft keeps an Owner. Administrators can do everything on every aircraft and manage users, roles, component types, airports, templates, settings, off-site backup, procedures and audits. Anyone can create an aircraft and becomes its Owner. Controllers declare the permission each action needs (`requires_permission`); a write with none declared is refused.
+Owner always has every permission. Only an Owner can give the Owner role, nobody changes their own, and every aircraft keeps an Owner. Administrators can do everything on every aircraft and manage users, roles, component types, airports, templates, settings, off-site backup, procedures and audits. Whoever adds an aircraft becomes its Owner (who can add aircraft is an admin setting: administrators only by default). Controllers declare the permission each action needs (`requires_permission`); a write with none declared is refused.
 
 Users who aren't on an aircraft get a 404 for it, identical to a missing record.
 
@@ -202,7 +202,7 @@ Users who aren't on an aircraft get a 404 for it, identical to a missing record.
 Differences from the original:
 - Integer primary keys instead of UUIDs. Share tokens are 32-character random strings.
 - Logbook entries and inspection records don't keep many-to-many links to components. An inspection record or AD compliance can reference one component.
-- Accounts are created only by an admin, by the first-run setup, by someone opening an admin's invitation link (with a password, or SSO), or at first SSO sign-in when `OIDC_AUTO_CREATE_USERS` is on. Invitations from an aircraft's Access page and signing invitations are for existing accounts.
+- Accounts are created only by an admin, by the first-run setup, by someone opening an admin's invitation link (with a password, or SSO), by an outside mechanic from an Owner's signing invitation (for its address), or at first SSO sign-in when `OIDC_AUTO_CREATE_USERS` is on. Invitations from an aircraft's Access page are for existing accounts. Who can add aircraft, and so become an Owner, is an admin setting (administrators only by default).
 
 ### Not yet ported
 

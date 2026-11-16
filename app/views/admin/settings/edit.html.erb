@@ -38,6 +38,14 @@
     <p class="hint"><%= t(".with_off_site_backup_to") %></p>
   </div>
 
+  <h2 class="card-title pt-2"><%= t(".aircraft") %></h2>
+  <div>
+    <%= label_tag "settings[anyone_adds_aircraft]", t(".who_can_add_aircraft"), class: "label" %>
+    <%= select_tag "settings[anyone_adds_aircraft]", options_for_select([ [ t(".administrators_only"), 0 ], [ t(".everyone"), 1 ] ], @values["anyone_adds_aircraft"].to_i),
+          id: "settings_anyone_adds_aircraft", class: "input" %>
+    <p class="hint"><%= t(".who_can_add_aircraft_hint") %></p>
+  </div>
+
   <h2 class="card-title pt-2"><%= t(".document_search") %></h2>
   <div>
     <%= label_tag "settings[documents_claude_text]", t(".read_scanned_documents_with"), class: "label" %>

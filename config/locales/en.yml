@@ -285,6 +285,7 @@ en:
         backups_kept: Database backups kept
         offsite_backups_kept: Database copies kept in Google Drive
         documents_claude_text: Read scanned documents with Claude
+        anyone_adds_aircraft: Who can add aircraft
         logbook_templates_seeded: Built-in logbook templates added
     recordkeeping_policy:
       fillable:
@@ -838,6 +839,7 @@ en:
       inspection_record_updated_2: 'Inspection record updated: %{name}'
       inspection_record_deleted_2: 'Inspection record deleted: %{name}'
     aircraft:
+      ask_an_administrator: Only an administrator can add aircraft here; ask one to add it and make you its Owner.
       added: "%{tail_number} added."
       aircraft_updated: Aircraft updated.
       deleted: "%{tail_number} deleted."
@@ -869,6 +871,9 @@ en:
       wrong_code: That setup code isn't right. It's in the server's log, on the line starting "Setup code".
       try_again_later: Too many tries. Wait a few minutes and try again.
     invited_signings:
+      try_again_later: Too many tries; wait a few minutes.
+      sign_in_to_continue: Sign in to continue.
+      account_created_add_your: Account created. Add your certificate, then sign.
       signed: Signed. %{label} %{signer_name}, %{certificate_label} %{certificate_number}.
     flight_imports:
       imported_flights:
@@ -1729,6 +1734,11 @@ en:
         a_verified_copy_of_the_html: 'A verified copy of the database is made nightly in storage/backups; this many of the newest are kept. Back up off the server too: %{link}.'
         with_off_site_backup_to: With off-site backup to Google Drive, this many of the newest nightly database copies are kept there. Uploaded files are copied once and kept.
         document_search: Document search
+        aircraft: Aircraft
+        who_can_add_aircraft: Who can add aircraft
+        administrators_only: Administrators only
+        everyone: Everyone
+        who_can_add_aircraft_hint: Adding an aircraft (or importing a .sam.zip) makes you its Owner, and Owners can invite people, including outside mechanics who then make their own account. With administrators only, an administrator adds each aircraft and gives it its Owners.
         text_in_documents_is_read_html: Text in documents is read so search can find it. PDFs that contain text are read directly either way. Claude is used only when an ANTHROPIC_API_KEY is set%{blank}, and costs API credit per page.
         save_settings: Save Settings
         cancel: Cancel
@@ -1838,6 +1848,7 @@ en:
       import_from_a_sam_zip: Import from a .sam.zip archive
       add_aircraft: "+ Add Aircraft"
       no_aircraft_yet: No aircraft yet.
+      ask_an_administrator: An administrator adds aircraft and gives you a role on them.
       add_your_first_aircraft: Add your first aircraft
       photo_of: Photo of %{tail_number}
       tach_html: Tach <strong>%{tach_time}</strong>
@@ -2700,6 +2711,14 @@ en:
       you_ve_been_asked_to_html: You've been asked to sign the %{date} %{log_type} log entry for %{tail_number}. First, sign in as <strong>%{email}</strong>.
       i_have_an_account_sign: 'I have an account: sign in'
       no_account_yet: There's no account for %{email} yet. Ask the aircraft's owner to have the administrator add you (or invite you), then open this link again.
+      continue_with: Continue with %{provider}
+      or_create_an_account: Or create an account
+      email: Email
+      your_name: Your name
+      password: Password
+      at_least_characters_not_one_html: At least %{min} characters; not one known from a data breach.
+      confirm_password: Confirm password
+      create_account: Create account
     wrong_account:
       sign_a_logbook_entry: Sign a logbook entry
       wrong_account: Wrong account
@@ -3523,18 +3542,20 @@ en:
       asks_you_to_sign_a_html: "%{owner} asks you to sign a logbook entry for <strong>%{tail_number}</strong> (%{date}, %{log_type} log)."
       review_and_sign_the_entry: Review and sign the entry
       the_link_works_once_until_html: "%{link} (the link works once, until %{to_date})."
+      sign_in_or_create_html: You'll sign in or create an account for %{email}, add your certificate, and sign with your password.
       you_ll_sign_in_or_html: You'll sign in with your account for %{email} (if you don't have one, ask the owner to have the administrator add you first), add your certificate, and sign with your password.
       asks_you_to_sign_a_2_html: "%{owner} asks you to sign a logbook entry for %{tail_number} (%{date}, %{log_type} log)."
       review_and_sign_it_here_html: 'Review and sign it here (the link works once, until %{to_date}):'
       asks_you_to_sign_a_2_text: "%{owner} asks you to sign a logbook entry for %{tail_number} (%{date}, %{log_type} log)."
       review_and_sign_it_here_text: 'Review and sign it here (the link works once, until %{to_date}):'
+      sign_in_or_create_text: You'll sign in or create an account for %{email}, add your certificate, and sign with your password.
       you_ll_sign_in_or_text: You'll sign in with your account for %{email} (if you don't have one, ask the owner to have the administrator add you first), add your certificate, and sign with your password.
       the_owner: The owner
       subject: Please sign a logbook entry for %{tail_number}
   signing_invitations:
     new:
       ask_someone_to_sign: Ask someone to sign
-      for_a_mechanic_who_did: 'For a mechanic who did the work: they get a one-time link by email, sign in with their own account, add their certificate, and sign this entry with their own password. They see only this entry. They need an account first: the administrator adds it, or invites them.'
+      for_a_mechanic_who_did: 'For a mechanic who did the work: they get a one-time link by email, sign in with their own account, add their certificate, and sign this entry with their own password. They see only this entry. Invited by an Owner, they can create their account from the link; otherwise they need one first.'
       log_html: "%{date} · %{log_type} log · %{truncate}"
       their_email: Their email
       message_optional: Message (optional)

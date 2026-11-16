@@ -169,4 +169,22 @@ class SsoTest < ActionDispatch::IntegrationTest
     assert_not User.exists?(email_address: "someone.else@example.com")
     assert_equal 0, invitation.reload.uses_count
   end
+
+  test "an Owner's signing invitation makes the mechanic's account by signing in with SSO, for its address only" do
+    ENV.delete("OIDC_AUTO_CREATE_USERS")
+    owner = create_user("owner3@example.com")
+    aircraft = create_aircraft(owner: owner, tail_number: "N888CD")
+    entry = aircraft.logbook_entries.create!(date: Date.new(2026, 10, 1), log_type: "AC", entry_type: "MAINTENANCE", aircraft_hours_at_entry: 1000, text: "Oil changed.")
+    invitation = entry.signing_invitations.create!(email: "mech@example.com", invited_by: owner)
+
+    get invited_signing_path(invitation.token)
+    mock(uid: "sub-other", email: "not.mech@example.com")
+    sso_sign_in
+    assert_not User.exists?(email_address: "not.mech@example.com")
+
+    get invited_signing_path(invitation.token)
+    mock(uid: "sub-mech", email: "mech@example.com", name: "Mo Mechanic")
+    sso_sign_in
+    assert_equal "sub-mech", User.find_by!(email_address: "mech@example.com").sso_uid
+  end
 end

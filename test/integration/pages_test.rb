@@ -31,6 +31,7 @@ class PagesTest < ActionDispatch::IntegrationTest
   end
 
   test "owner can render every page" do
+    Setting.update_integers("anyone_adds_aircraft" => 1) # anyone may add aircraft here
     a = @a
     paths = [
       root_path, aircraft_path(a), new_aircraft_path, edit_aircraft_path(a),

@@ -41,6 +41,7 @@ class MalformedInputTest < ActionDispatch::IntegrationTest
   end
 
   test "text where a file belongs, or a tampered upload reference, is turned away politely" do
+    Setting.update_integers("anyone_adds_aircraft" => 1) # anyone may add aircraft here
     post import_aircraft_oil_analyses_path(@a), params: { report: "not a file" }
     assert_redirected_to new_aircraft_oil_analysis_path(@a)
     post aircraft_imports_path, params: { archive: "not a file" }

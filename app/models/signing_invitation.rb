@@ -22,4 +22,12 @@ class SigningInvitation < ApplicationRecord
   def self.find_usable(token) = where(token_digest: digest(token), used_at: nil).where("expires_at > ?", Time.current).first
 
   def aircraft = logbook_entry.aircraft
+
+  # Whether the mechanic can make an account for the invited address with it:
+  # when it's from an Owner of the aircraft or an administrator (still, when
+  # it's used). Who can become an Owner is up to the administrator (Admin →
+  # Settings, who can add aircraft); others' invitations need an account.
+  def creates_account?
+    invited_by.present? && !invited_by.disabled? && (invited_by.admin? || invited_by.role_for(aircraft)&.owner?) || false
+  end
 end

@@ -21,6 +21,7 @@ class SetupTest < ActionDispatch::IntegrationTest
   end
 
   test "create aircraft makes creator the owner" do
+    Setting.update_integers("anyone_adds_aircraft" => 1) # anyone may add aircraft here
     user = create_user
     sign_in user
     post aircraft_index_path, params: { aircraft: { tail_number: "N1", tach_time: 50 } }

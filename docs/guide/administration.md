@@ -6,7 +6,7 @@ Admins see the **Admin** menu (on a phone, under ☰). Admins can see and edit e
 
 **Users** lists every account.
 
-- **+ New User**: name, email and a starting password. Tick **Administrator** to make them an admin. Then give them a role on aircraft: **Edit** → **Aircraft access** lists their role on every aircraft, to add, change or remove (an aircraft's Owner can also do it from **More → Access & sharing**, and anyone can add their own aircraft).
+- **+ New User**: name, email and a starting password. Tick **Administrator** to make them an admin. Then give them a role on aircraft: **Edit** → **Aircraft access** lists their role on every aircraft, to add, change or remove (an aircraft's Owner can also do it from **More → Access & sharing**).
 - **Edit** to change details or reset a password when email isn't set up.
 - **Locked** marks an account locked for 15 minutes after 10 failed sign-ins in a row (the user is emailed). **Unlock** clears it straight away, once you know it was really them.
 - **2FA** marks someone using an authenticator app. **Reset 2FA** turns it off for a user who lost their phone and recovery codes. Confirm it's really them first (call them); they can then set it up again.
@@ -28,7 +28,7 @@ To give someone a role on any aircraft, open them in **Admin → Users**: **Airc
 
 ## Invitations
 
-**Admin → Invitations → New invitation** makes a link someone opens to create their own account (or accept with the one they have) and get roles on aircraft. New accounts are only ever made by an administrator: here, from **Users**, or by an administrator's invitation (invitations from an aircraft's Access page are for people who already have an account, and so are signing invitations). An invitation has a label for you, optionally an email address (then only that address can use it, and the link is emailed to it when email is set up) and a name, how many times it works (empty for unlimited, e.g. for a flying club), when it expires (empty for never), and a role on any of the aircraft (none at all gives just an account). The link is shown once, when it's made; copy it then.
+**Admin → Invitations → New invitation** makes a link someone opens to create their own account (or accept with the one they have) and get roles on aircraft. New accounts are made by an administrator (here, or from **Users**), by an administrator's invitation, or by an outside mechanic from an Owner's signing invitation (**Ask someone to sign**). Invitations from an aircraft's Access page are for people who already have an account. Since Owners can bring in mechanics, **Settings → Who can add aircraft** decides who can become one. An invitation has a label for you, optionally an email address (then only that address can use it, and the link is emailed to it when email is set up) and a name, how many times it works (empty for unlimited, e.g. for a flying club), when it expires (empty for never), and a role on any of the aircraft (none at all gives just an account). The link is shown once, when it's made; copy it then.
 
 Where someone already has a role on an aircraft, an invitation leaves it as it is. An invitation never gives more than whoever made it can give when it's used. **Revoke** stops a link working; people who already used it keep their access. With single sign-on, **Continue with** on the invitation page signs them in and makes their account. `OIDC_AUTO_CREATE_USERS=true` in the server's settings instead gives an account to anyone the provider lets in, without an invitation; leave it off to keep accounts to administrators and their invitations.
 
@@ -61,6 +61,7 @@ If single sign-on is broken and `PASSWORD_LOGIN=false` is set, remove that setti
 
 - **Uploads**: the largest file anyone can upload. A proxy in front of the app may have its own smaller limit.
 - **Backups**: how many nightly database copies to keep, on the server and in Google Drive.
+- **Who can add aircraft**: administrators only (the default), or everyone. Adding an aircraft, or importing a .sam.zip, makes you its Owner, and an Owner's signing invitations let outside mechanics make their own account; with administrators only, you add each aircraft and give it its Owners.
 - **Document search**: read scanned documents with Tesseract (free, on the server) or Claude (better on handwriting, needs `ANTHROPIC_API_KEY`, costs API credit). PDFs with text are read directly either way.
 
 ## About

@@ -44,6 +44,11 @@ class ApplicationController < ActionController::Base
     redirect_to new_setup_path if !User.exists? && !is_a?(SetupController)
   end
 
+  # Adding or importing an aircraft (User#can_add_aircraft?).
+  def require_aircraft_adder!
+    redirect_to root_path, alert: t("flash.aircraft.ask_an_administrator") unless current_user.can_add_aircraft?
+  end
+
   def require_admin!
     redirect_to root_path, alert: t("flash.application.admins_only") unless current_user&.admin?
   end

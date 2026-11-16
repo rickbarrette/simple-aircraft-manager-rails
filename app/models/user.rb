@@ -121,6 +121,10 @@ class User < ApplicationRecord
     aircraft_roles.includes(:role).find_by(aircraft: aircraft)&.role
   end
 
+  # Adding an aircraft (or importing one) makes you its Owner: administrators,
+  # or everyone when Admin → Settings allows it.
+  def can_add_aircraft? = admin? || Setting.anyone_adds_aircraft?
+
   # Administrators can do everything on every aircraft.
   def can?(permission, aircraft)
     admin? || role_for(aircraft)&.can?(permission) || false

@@ -7,9 +7,10 @@
 # users edit their email. Otherwise, sign in with a password once and link
 # from the profile page.
 #
-# Someone without an account gets one only from an administrator's
-# invitation they opened first (AccessInvitation, accepted at once), or for
-# anyone the provider lets in when OIDC_AUTO_CREATE_USERS is on.
+# Someone without an account gets one only from an invitation they opened
+# first that can make one (an administrator's AccessInvitation, accepted at
+# once; an Owner's SigningInvitation, for its address), or for anyone the
+# provider lets in when OIDC_AUTO_CREATE_USERS is on.
 class SsoController < ApplicationController
   allow_unauthenticated_access only: %i[callback failure]
   before_action :require_sso
@@ -89,7 +90,7 @@ class SsoController < ApplicationController
     email = auth.info&.email.to_s.strip.downcase
     return if email.blank? || User.exists?(email_address: email)
     invitation = invitation_making_account(email)
-    return unless invitation || Sso.auto_create_users?
+    return unless invitation || signing_invitation_making_account?(email) || Sso.auto_create_users?
     User.transaction do
       # The random password is never shown; a password reset can set a real one.
       user = User.create!(email_address: email, name: auth.info&.name.presence, sso_uid: auth.uid, password: SecureRandom.base58(40))
@@ -98,6 +99,13 @@ class SsoController < ApplicationController
     end
   rescue ActiveRecord::RecordInvalid
     nil
+  end
+
+  # A signing invitation opened in this browser before signing in, from an
+  # Owner, for this email address.
+  def signing_invitation_making_account?(email)
+    invitation = SigningInvitation.find_usable(session[:signing_token])
+    invitation.present? && invitation.creates_account? && invitation.email == email
   end
 
   # The invitation opened in this browser before signing in, when it can

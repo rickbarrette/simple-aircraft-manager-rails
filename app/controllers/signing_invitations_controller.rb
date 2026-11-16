@@ -23,7 +23,7 @@ class SigningInvitationsController < ApplicationController
       end
       log_event("logbook", t("flash.signing_invitations.signature_requested_from_entry", email: @invitation.email, date: l(@entry.date, format: :app)))
       notice = t("flash.signing_invitations.invitation_sent_to_the", email: @invitation.email, days: SigningInvitation::VALID_FOR.in_days.to_i)
-      notice = "#{notice} #{t('flash.signing_invitations.no_account_yet')}" unless invitee
+      notice = "#{notice} #{t('flash.signing_invitations.no_account_yet')}" unless invitee || @invitation.creates_account?
       redirect_to aircraft_logbook_entry_path(@aircraft, @entry), notice: notice
     else
       render :new, status: :unprocessable_entity

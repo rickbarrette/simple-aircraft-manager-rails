@@ -7,7 +7,7 @@ The **Logbook** tab holds the maintenance record entries. Owners and Mechanics w
 **+ New Entry**:
 
 1. Choose a **Template** to start the wording if one fits, and fill in its blanks (`__`). The built-in ones are for a pilot doing preventive maintenance on an aircraft they own or operate (14 CFR 43.3(g)); admins can add their own.
-2. Fill in the date, the **logbook** (aircraft, engine, propeller or other), the **entry type** (usually maintenance or inspection) and the **airframe total time**.
+2. Fill in the date, the **logbook** (aircraft, engine, propeller, avionics or other), the **entry type** (usually maintenance or inspection) and the **airframe total time**.
 3. For an engine or propeller entry, pick the component: its total time and time since overhaul at the entry fill in from the airframe time. Tick any **sub-components** included in the work (an oil filter on the engine) to record their times as well. On a new entry, set a sub-component to **Serviced** or **Replaced** to record that on the Components tab at the same time (an oil and filter change resets their time since service), dated to the entry.
    Its time since service then counts from the airframe time on the entry.
    Under **Inspections completed**, tick any inspection the work completes (an Oil Change): it's recorded as done on the Inspections tab at the entry's date and airframe time, linked to the entry.

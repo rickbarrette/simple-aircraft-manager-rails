@@ -36,7 +36,7 @@ module Api
         render json: { data: Compliance.ad_rows(aircraft).map { ApiPresenter.ad(_1) } }
       end
 
-      # Logbook entries, oldest first (paged); ?log=AC|ENG|PROP|OTHER, ?signed=true|false.
+      # Logbook entries, oldest first (paged); ?log=AC|ENG|PROP|AVIONICS|OTHER, ?signed=true|false.
       def logbook_entries
         aircraft = find_aircraft(params[:id])
         scope = aircraft.logbook_entries.includes(:signature)

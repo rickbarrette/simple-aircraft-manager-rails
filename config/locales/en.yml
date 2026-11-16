@@ -73,6 +73,7 @@ en:
         AC: Aircraft
         ENG: Engine
         PROP: Propeller
+        AVIONICS: Avionics
         OTHER: Other
       entry_types:
         MAINTENANCE: Maintenance

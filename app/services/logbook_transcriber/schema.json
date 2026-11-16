@@ -7,7 +7,7 @@
         "type": "object",
         "properties": {
           "date": { "type": ["string", "null"], "description": "YYYY-MM-DD, or null if unreadable" },
-          "log_type": { "type": "string", "enum": ["AC", "ENG", "PROP", "OTHER"] },
+          "log_type": { "type": "string", "enum": ["AC", "ENG", "PROP", "AVIONICS", "OTHER"] },
           "entry_type": { "type": "string", "enum": ["MAINTENANCE", "INSPECTION", "FLIGHT", "HOURS_UPDATE", "OTHER"] },
           "text": { "type": "string" },
           "aircraft_hours": { "type": ["number", "null"] },

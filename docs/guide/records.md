@@ -4,7 +4,7 @@ These are the instructions for everyone who keeps or signs maintenance records h
 
 ## Writing an entry
 
-On the aircraft's **Logbook** tab, choose **+ New Entry** (Owners and Mechanics: the **Write logbook entries** permission). Give the date, the logbook (aircraft, engine, propeller), the airframe total time and what was done. For an engine or propeller entry, pick the component (its times fill in) and tick any sub-components. A template can start the wording. An entry isn't a signed record until it's signed. See [The logbook](logbook.md).
+On the aircraft's **Logbook** tab, choose **+ New Entry** (Owners and Mechanics: the **Write logbook entries** permission). Give the date, the logbook (aircraft, engine, propeller, avionics or other), the airframe total time and what was done. For an engine or propeller entry, pick the component (its times fill in) and tick any sub-components. A template can start the wording. An entry isn't a signed record until it's signed. See [The logbook](logbook.md).
 
 ## Signing
 

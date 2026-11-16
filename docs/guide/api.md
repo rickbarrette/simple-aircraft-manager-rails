@@ -63,7 +63,7 @@ Squawks have an `external_ref`: your own id for them, such as `redmine:issue:451
 | `GET /aircraft/:id/due` | Everything coming due, soonest first; items due by hours get a projected date |
 | `GET /aircraft/:id/inspections` | Each inspection's status and next due date and hours |
 | `GET /aircraft/:id/ads` | Each AD's status and next due date and hours |
-| `GET /aircraft/:id/logbook_entries` | Logbook entries, with their signatures (`?log=AC`, `ENG`, `PROP` or `OTHER`; `?signed=true` or `false`) |
+| `GET /aircraft/:id/logbook_entries` | Logbook entries, with their signatures (`?log=AC`, `ENG`, `PROP`, `AVIONICS` or `OTHER`; `?signed=true` or `false`) |
 | `GET /aircraft/:id/squawks` | Squawks (`?status=open`, the default, or `resolved` or `all`) |
 | `POST /aircraft/:id/squawks` | Report a squawk |
 | `GET /squawks?external_ref=…` | Find squawks by your id for them |
@@ -120,7 +120,7 @@ POST /api/v1/aircraft/12/draft_batches
 } }
 ```
 
-- **One entry per logbook.** Items are grouped by `log` (`AC`, `ENG`, `PROP` or `OTHER`) into one unsigned entry each, their texts in order, so a visit that touched the engine and the airframe makes two entries, signed one after the other.
+- **One entry per logbook.** Items are grouped by `log` (`AC`, `ENG`, `PROP`, `AVIONICS` or `OTHER`) into one unsigned entry each, their texts in order, so a visit that touched the engine and the airframe makes two entries, signed one after the other.
 - **Inspections** (`completes_inspections`): each needs its `result`, `approved` (airworthy) or `discrepancies` (a list was given to the owner), and the draft needs `aircraft_hours`. The entry recording it is an inspection entry, in the logbook named by `log`, else the airframe log if an item is for it.
 - **Nothing is resolved until it's signed.** The squawks the items resolve and the inspections they complete are held until **every** entry of the draft is signed; then they're resolved and recorded, attributed to the person who signed last, and linked to the entry that described the work. A draft never clears a squawk on its own. The signer sees what signing will do before they sign.
 - **The signer.** Anyone with access to the aircraft and a certificate in their profile can sign, from each entry's `sign_url`. Give `signer.email` for someone else (a mechanic who isn't on the aircraft): each entry then gets an `invitation_url`, a link that lets that person sign that entry with their account for that address, for 14 days. When the integration acts for an Owner of the aircraft, the link also lets them create that account; otherwise they need one first. Pass the link on yourself (for example inside Redmine), or set `send_email: true` to have SAM email it.

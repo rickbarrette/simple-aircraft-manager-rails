@@ -1,6 +1,6 @@
 class LogbookEntry < ApplicationRecord
   include Versioned
-  LOG_TYPES = LabelSet.new("logbook_entry.log_types", %w[AC ENG PROP OTHER])
+  LOG_TYPES = LabelSet.new("logbook_entry.log_types", %w[AC ENG PROP AVIONICS OTHER])
   ENTRY_TYPES = LabelSet.new("logbook_entry.entry_types", %w[MAINTENANCE INSPECTION FLIGHT HOURS_UPDATE OTHER])
 
   # Kind of certificate of the person approving return to service (43.9(a)(4)).

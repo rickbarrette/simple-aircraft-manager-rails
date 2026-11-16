@@ -4209,7 +4209,8 @@ en:
 
           1. Install Docker Desktop (https://www.docker.com/products/docker-desktop/).
           2. In a terminal, go to the "viewer" folder of this package and run:   docker compose up -d
-          3. Open http://localhost:3000 and create the first (admin) account.
+          3. Open http://localhost:3000 and create the first (admin) account. It asks for a one-time setup code,
+             which this shows (in the same folder):   docker compose logs web | grep "Setup code"
           4. Choose Fleet -> More -> Import from a .sam.zip archive and select %{archive} from this package (or this whole zip file).
 
         The copy runs only on your computer and stays separate from the owner's system. Electronic signatures are

@@ -82,6 +82,12 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
       def zip.text(name) = read(name).force_encoding("UTF-8")
       assert_equal %w[README.txt logbook-entries.pdf n12345.sam.zip record-history.csv signatures.csv status-report.html viewer/docker-compose.yml], zip.entries.map(&:name).sort
       readme = zip.text("README.txt")
+      assert_includes readme, 'docker compose logs web | grep "Setup code"'
+      viewer = YAML.safe_load(zip.text("viewer/docker-compose.yml"))
+      version = SystemInfo.new.version
+      assert_equal "barrettefab/simple-aircraft-manager-rails:#{version}", viewer.dig("services", "web", "image") # the release that made it
+      assert_equal "false", viewer.dig("services", "web", "environment", "FORCE_SSL")
+      assert_includes zip.text("viewer/docker-compose.yml"), 'grep "Setup code"'
       assert_includes readme, "All 2 logbook entries, oldest first. 1 are signed electronically"
       assert_includes readme, "Electronic records since: 2026-01-01"
       assert_includes readme, "scans marked \"legacy record\""
@@ -123,7 +129,8 @@ class RecordsIntegrityTest < ActionDispatch::IntegrationTest
     assert_includes readme, SystemInfo.new.repository_url
     viewer = YAML.safe_load(compose)
     web = viewer.dig("services", "web")
-    assert_equal File.read(Rails.root.join("docker-compose.image.yml"))[/image:\s*(\S+)/, 1], web["image"]
+    published = File.read(Rails.root.join("docker-compose.image.yml"))[/image:\s*(\S+)/, 1]
+    assert_equal published.sub(/:[^:\/]+\z/, ":#{SystemInfo.new.version}"), web["image"] # that image, at this release
     assert_equal "false", web.dig("environment", "FORCE_SSL")
     assert_equal 128, web.dig("environment", "SECRET_KEY_BASE").size
     refute_equal Rails.application.secret_key_base, web.dig("environment", "SECRET_KEY_BASE")

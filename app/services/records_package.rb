@@ -64,11 +64,16 @@ class RecordsPackage
 
   def repository = SystemInfo.new.repository_url
 
-  # The published image, as named in the project's docker-compose.image.yml
-  # (APP_IMAGE overrides it, e.g. for a fork's own image).
+  # The published image, as named in the project's docker-compose.image.yml,
+  # at this release (each release is also published under its version, so
+  # whoever opens the package years later gets the version that made it).
+  # APP_IMAGE, e.g. a fork's own image, is used as it is.
   def viewer_image
-    ENV["APP_IMAGE"].presence ||
-      Rails.root.join("docker-compose.image.yml").then { _1.exist? ? _1.read[/^\s*image:\s*(\S+)/, 1] : nil }
+    return ENV["APP_IMAGE"] if ENV["APP_IMAGE"].present?
+    image = Rails.root.join("docker-compose.image.yml").then { _1.exist? ? _1.read[/^\s*image:\s*(\S+)/, 1] : nil } or return
+    version = SystemInfo.new.version
+    return image unless version.match?(/\A\d{4}\.\d{1,2}\.\d+\z/)
+    "#{image.sub(/:[^:\/]+\z/, '')}:#{version}"
   end
 
   # A ready-to-run local viewer, with its own throwaway secret key (never this
@@ -77,8 +82,11 @@ class RecordsPackage
     image = viewer_image
     <<~YAML
       # Simple Aircraft Manager on your own computer, to browse #{@aircraft.tail_number.downcase}.sam.zip.
-      #   docker compose up -d   then open http://localhost:3000, create an account,
-      #   and import #{@aircraft.tail_number.downcase}.sam.zip (Fleet -> Import). Stop: docker compose down
+      #   1. docker compose up -d
+      #   2. Open http://localhost:3000 and create the first (admin) account. It asks
+      #      for a one-time setup code:   docker compose logs web | grep "Setup code"
+      #   3. Fleet -> More -> Import from a .sam.zip archive: choose #{@aircraft.tail_number.downcase}.sam.zip
+      #   Stop: docker compose down (add -v to delete this local copy)
       # Prepared with software version #{SystemInfo.new.version_label}.#{" Source: #{repository}" if repository}
       services:
         web:

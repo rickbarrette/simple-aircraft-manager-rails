@@ -1,7 +1,9 @@
-# Opening an invitation link (AccessInvitation): see what it gives, then
-# create an account (when sign-in by password is on) or sign in, and accept.
-# An invitation for one email address only works for that address. An
-# invalid link (unknown, expired, used up, revoked) gets one answer for all.
+# Opening an invitation link (AccessInvitation): see what it gives, then sign
+# in and accept. Only an administrator's invitation can make a new account
+# (with a password here, or by signing in with SSO: SsoController); others
+# need an existing one. An invitation for one email address only works for
+# that address. Any invalid link (unknown, expired, used up, revoked) gets
+# one answer.
 class JoinsController < ApplicationController
   allow_unauthenticated_access only: %i[show account]
   before_action :set_invitation
@@ -11,6 +13,7 @@ class JoinsController < ApplicationController
   def show
     unless current_user
       session[:return_to_after_authenticating] = request.url
+      session[:join_token] = params[:token] # for an account made by signing in with SSO
       return render(:welcome)
     end
     return redirect_to(root_path, notice: t("flash.joins.already_accepted")) if @invitation.redeemed_by?(current_user)
@@ -21,7 +24,9 @@ class JoinsController < ApplicationController
   # A new account, then the invitation accepted with it.
   def account
     return redirect_to(join_path(params[:token])) if current_user
-    return redirect_to(join_path(params[:token]), alert: t("flash.joins.sign_in_to_continue")) unless Sso.password_login?
+    unless Sso.password_login? && @invitation.creates_accounts?
+      return redirect_to(join_path(params[:token]), alert: t("flash.joins.sign_in_to_continue"))
+    end
     email = @invitation.email || params[:email_address].to_s.strip.downcase
     if User.exists?(email_address: email)
       return redirect_to join_path(params[:token]), alert: t("flash.joins.account_exists")
@@ -35,7 +40,7 @@ class JoinsController < ApplicationController
     if results
       reset_session
       start_new_session_for user
-      redirect_to root_path, notice: summary(results, t("flash.joins.welcome"))
+      redirect_to root_path, notice: [ t("flash.joins.welcome"), AccessInvitation.describe(results) ].join(" ").strip
     else
       @account_errors = user.errors.full_messages
       render :welcome, status: :unprocessable_entity
@@ -47,7 +52,7 @@ class JoinsController < ApplicationController
   def accept
     return redirect_to(root_path, notice: t("flash.joins.already_accepted")) if @invitation.redeemed_by?(current_user)
     return render(:wrong_account) unless @invitation.for?(current_user)
-    redirect_to root_path, notice: summary(@invitation.redeem!(current_user), t("flash.joins.accepted"))
+    redirect_to root_path, notice: [ t("flash.joins.accepted"), AccessInvitation.describe(@invitation.redeem!(current_user)) ].join(" ").strip
   rescue ActiveRecord::RecordInvalid
     render :invalid, layout: "public", status: :not_found
   end
@@ -57,14 +62,6 @@ class JoinsController < ApplicationController
   def set_invitation
     @invitation = AccessInvitation.find_by_token(params[:token])
     render :invalid, layout: "public", status: :not_found unless @invitation&.usable?
-  end
-
-  # "Invitation accepted. N12345: Mechanic. N54321: already Owner, unchanged."
-  def summary(results, lead)
-    parts = results.map do |aircraft, role, message|
-      "#{aircraft.tail_number}: #{[ role&.name, message ].compact.join(', ')}"
-    end
-    [ lead, *parts ].join(" ")
   end
 
   def current_user = Current.user || (resume_session && Current.user)

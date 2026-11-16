@@ -10,7 +10,7 @@ Only an Owner can give or take away the Owner role, nobody can change their own,
 
 ## Invitations
 
-To add someone who has no account yet, or without knowing their email, use **Invitations** on the same page: choose the role, optionally their email (then only they can use it, and it's emailed to them when email is set up), how many times it works and when it expires, then **Create invitation**. Copy the link shown and send it; it isn't shown again. Whoever opens it creates an account, or signs in, and gets the role on this aircraft. **Revoke** stops a link that hasn't been used. Administrators can also make invitations for several aircraft at once (Admin → Invitations).
+To bring in someone who has an account, without knowing their email, use **Invitations** on the same page (new accounts are made only by the administrator or an administrator's invitation, so ask the administrator for someone who has no account yet): choose the role, optionally their email (then only they can use it, and it's emailed to them when email is set up), how many times it works and when it expires, then **Create invitation**. Copy the link shown and send it; it isn't shown again. Whoever opens it creates an account, or signs in, and gets the role on this aircraft. **Revoke** stops a link that hasn't been used. Administrators can also make invitations for several aircraft at once (Admin → Invitations).
 
 ## Share links
 

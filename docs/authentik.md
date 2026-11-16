@@ -29,7 +29,7 @@ OIDC_CLIENT_SECRET=...
 OIDC_PROVIDER_NAME=Authentik
 # Optional:
 OIDC_ADMIN_GROUP=aircraft-admins     # members become app admins; others lose admin at sign-in
-OIDC_AUTO_CREATE_USERS=true          # create an account at first sign-in (new accounts have no aircraft)
+OIDC_AUTO_CREATE_USERS=false         # true: an account for anyone Authentik lets in, without an invitation
 ```
 
 Restart the app. The first SSO sign-in links an existing account with the same email if Authentik marks the email verified. Otherwise sign in with the password and use **Profile → Link Authentik**.
@@ -77,7 +77,7 @@ For domain-level forward auth, Authentik matches each line as a regular expressi
 ^https://aircraft\.example\.com/assets/.+$
 ^https://aircraft\.example\.com/shared/[A-Za-z0-9]{32}(/report)?$
 ^https://aircraft\.example\.com/rails/active_storage/(blobs/redirect|disk)/.+$
-^https://aircraft\.example\.com/sign/[A-Za-z0-9_-]{43}(/account)?$
+^https://aircraft\.example\.com/sign/[A-Za-z0-9_-]{43}$
 ^https://aircraft\.example\.com/session(/new|/two_factor)?(\?.*)?$
 ^https://aircraft\.example\.com/profile/certificates(\?.*)?$
 ^https://aircraft\.example\.com/profile/two_factor(/new|/recovery_codes)?(\?.*)?$
@@ -93,12 +93,14 @@ What each group is for:
 | `/assets/…` | Styles and scripts for share pages and the signing pages | Static files with no data |
 | `/shared/<token>`, `/shared/<token>/report` | Read-only share links (Access & Sharing) | Only with a valid, unexpired, unrevoked 32-character token, and only what that link's level shows |
 | `/rails/active_storage/blobs/redirect/…`, `/rails/active_storage/disk/…` | The aircraft picture and shared documents on share pages | A file only to someone holding its signed link (from a page they could see). Disk links expire after a few minutes; redirect links don't, so a forwarded link keeps working |
-| `/sign/<token>`, `/sign/<token>/account` | Outside mechanics signing an entry from an emailed invitation | Only with a valid, unused invitation token (43 characters, 14-day expiry, stored as a fingerprint) |
+| `/sign/<token>` | Outside mechanics signing an entry from an emailed invitation (with an account they already have) | Only with a valid, unused invitation token (43 characters, 14-day expiry, stored as a fingerprint) |
 | `/session`, `/session/new`, `/session/two_factor` | The app's own sign-in, for invited mechanics | The sign-in page. Protected by rate limits, the account lockout (10 failures lock an account for 15 minutes) and optional authenticator codes. A signed-in app account still can't reach any other page through the proxy |
 | `/profile/certificates` | Invited mechanics adding their certificate before signing | Adding a certificate to their own account; it only returns to a `/sign/…` page |
 | `/profile/two_factor…` | Invited mechanics setting up an authenticator app | Their own two-factor setup |
 | `/help/records` | The "How signing works" link on the signing form | The signing instructions, for signed-in accounts |
 | `/calendar/<token>.ics` | Calendar apps fetching the due-items feed (Profile → Calendar feed) | The due list of that user's aircraft, only with their secret 32-character token; making a new link retires the old one |
+
+New accounts come only from an administrator or an administrator's invitation: opening the invitation link, then **Continue with Authentik**, makes the account and accepts it. With `OIDC_AUTO_CREATE_USERS=true` instead, anyone Authentik lets in gets an account (with no aircraft) without an invitation.
 
 Invitation links (`/join/…`) are deliberately not on the list: behind forward auth, someone with only an app account still couldn't get past the proxy to use the app, so invited people need an Authentik account anyway. They sign in to Authentik, then open the link and accept it.
 
@@ -112,7 +114,7 @@ In a private window:
 
 1. `https://aircraft.example.com/` should go to Authentik.
 2. A share link should open without signing in, styled, with the aircraft picture.
-3. A signing invitation should let you create an account (or sign in), add a certificate and sign.
+3. A signing invitation should let you sign in (with an existing account), add a certificate and sign.
 4. After that, `https://aircraft.example.com/aircraft` in the same window should still go to Authentik.
 
 ### Client addresses

@@ -166,4 +166,26 @@ class InvitationsTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert_not inv.reload.revoked?
   end
+
+  test "only an administrator's invitation makes new accounts; an owner's is for existing accounts" do
+    owners = invitation(creator: @owner, grants: [ [ @a, "pilot" ] ])
+    get join_path(owners.token)
+    assert_select "form[action=?]", account_join_path(owners.token), 0
+    assert_includes response.body, "This invitation is for an existing account"
+    post account_join_path(owners.token), params: { email_address: "new@example.com", name: "X", password: PASSWORD, password_confirmation: PASSWORD }
+    assert_not User.exists?(email_address: "new@example.com")
+    assert_equal 0, owners.reload.uses_count
+
+    existing = create_user("existing@example.com")
+    sign_in existing
+    post accept_join_path(owners.token)
+    assert_equal "pilot", existing.role_for(@a).key
+  end
+
+  test "an administrator's invitation stops making accounts once its creator isn't an administrator" do
+    inv = invitation
+    @admin.update!(admin: false)
+    post account_join_path(inv.token), params: { email_address: "new@example.com", name: "X", password: PASSWORD, password_confirmation: PASSWORD }
+    assert_not User.exists?(email_address: "new@example.com")
+  end
 end

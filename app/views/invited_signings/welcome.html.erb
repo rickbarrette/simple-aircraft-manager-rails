@@ -5,15 +5,7 @@
   <div class="card card-body space-y-3">
     <%= link_to t(".i_have_an_account_sign"), new_session_path, class: "btn-primary w-full justify-center" %>
   </div>
-  <% if Sso.password_login? && !User.exists?(email_address: @invitation.email) %>
-    <%= form_with url: account_invited_signing_path(params[:token]), class: "card card-body space-y-3" do %>
-      <h2 class="card-title"><%= t(".or_create_an_account") %></h2>
-      <% if @account_errors.present? %><div class="rounded-md bg-red-50 p-2 text-sm text-red-700"><%= @account_errors.to_sentence %></div><% end %>
-      <div><label class="label"><%= t(".email") %></label><input class="input" value="<%= @invitation.email %>" disabled></div>
-      <div><%= label_tag :name, t(".your_name"), class: "label" %><%= text_field_tag :name, params[:name], class: "input", required: true %></div>
-      <div><%= label_tag :password, t(".password"), class: "label" %><%= password_field_tag :password, nil, class: "input", required: true, autocomplete: "new-password", minlength: User::PASSWORD_MIN, maxlength: 72 %><p class="hint"><%= t(".at_least_characters_not_one_html", min: (User::PASSWORD_MIN)) %></p></div>
-      <div><%= label_tag :password_confirmation, t(".confirm_password"), class: "label" %><%= password_field_tag :password_confirmation, nil, class: "input", required: true, autocomplete: "new-password" %></div>
-      <%= submit_tag t(".create_account"), class: "btn-secondary" %>
-    <% end %>
+  <% unless User.exists?(email_address: @invitation.email) %>
+    <p class="text-sm text-slate-600"><%= t(".no_account_yet", email: @invitation.email) %></p>
   <% end %>
 </div>

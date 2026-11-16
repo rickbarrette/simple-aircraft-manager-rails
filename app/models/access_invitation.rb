@@ -4,6 +4,10 @@
 # people (its Access page, that aircraft). Limited by number of uses, an
 # expiry, and optionally to one email address; it can be revoked. Only a
 # digest of the code is kept, so the link is shown once, when it's made.
+#
+# New accounts are only ever made by an administrator or from an
+# administrator's invitation: anyone can add an aircraft and so manage its
+# people, so other invitations are for people who already have an account.
 class AccessInvitation < ApplicationRecord
   VALID_FOR = 14.days
 
@@ -40,14 +44,23 @@ class AccessInvitation < ApplicationRecord
     invitation
   end
 
+  # "N12345: Mechanic. N54321: already Owner, unchanged" (from #redeem!).
+  def self.describe(results)
+    results.map { |aircraft, role, message| "#{aircraft.tail_number}: #{[ role&.name, message ].compact.join(', ')}" }.join(" ")
+  end
+
   def self.digest(token) = OpenSSL::Digest::SHA256.hexdigest(token.to_s)
   def self.find_by_token(token) = token.present? ? find_by(token_digest: digest(token)) : nil
 
   def usable? = !revoked? && !expired? && !used_up?
+  # Whether someone without an account can make one with it (see above),
+  # decided when it's used: its creator must still be an administrator.
+  def creates_accounts? = created_by.present? && created_by.admin? && !created_by.disabled?
+  def for_email?(email) = self.email.nil? || self.email == email.to_s.strip.downcase
   def revoked? = revoked_at.present?
   def expired? = expires_at.present? && expires_at <= Time.current
   def used_up? = max_uses.present? && uses_count >= max_uses
-  def for?(user) = email.nil? || email == user.email_address
+  def for?(user) = for_email?(user.email_address)
   def redeemed_by?(user) = redemptions.exists?(user: user)
 
   # Gives the person the invitation's roles, as if its creator added them

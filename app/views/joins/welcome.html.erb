@@ -6,10 +6,15 @@
     <%= render "joins/grants", invitation: @invitation %>
   </div>
   <div class="card card-body space-y-3">
-    <%= link_to t(".i_have_an_account"), new_session_path, class: "btn-primary w-full justify-center" %>
+    <% if Sso.enabled? && @invitation.creates_accounts? %>
+      <%= button_to t(".continue_with", provider: Sso.label), "/auth/#{Sso::PROVIDER}", class: "btn-primary w-full justify-center", data: { turbo: false } %>
+      <p class="hint"><%= t(".sso_hint", provider: Sso.label) %></p>
+    <% end %>
+    <%= link_to t(".i_have_an_account"), new_session_path, class: [ "w-full justify-center", (Sso.enabled? && @invitation.creates_accounts? ? "btn-secondary" : "btn-primary") ] %>
     <% if @invitation.email %><p class="hint"><%= t(".for_email", email: @invitation.email) %></p><% end %>
+    <% unless @invitation.creates_accounts? %><p class="hint"><%= t(".existing_accounts_only") %></p><% end %>
   </div>
-  <% if Sso.password_login? && !(@invitation.email && User.exists?(email_address: @invitation.email)) %>
+  <% if @invitation.creates_accounts? && Sso.password_login? && !(@invitation.email && User.exists?(email_address: @invitation.email)) %>
     <%= form_with url: account_join_path(params[:token]), class: "card card-body space-y-3" do %>
       <h2 class="card-title"><%= t(".or_create_an_account") %></h2>
       <% if @account_errors.present? %><div class="rounded-md bg-red-50 p-2 text-sm text-red-700" role="alert"><%= @account_errors.to_sentence %></div><% end %>

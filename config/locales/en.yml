@@ -869,9 +869,6 @@ en:
       wrong_code: That setup code isn't right. It's in the server's log, on the line starting "Setup code".
       try_again_later: Too many tries. Wait a few minutes and try again.
     invited_signings:
-      try_again_later: Try again later.
-      sign_in_to_continue: Sign in to continue.
-      account_created_add_your: Account created. Add your certificate, then sign.
       signed: Signed. %{label} %{signer_name}, %{certificate_label} %{certificate_number}.
     flight_imports:
       imported_flights:
@@ -1027,6 +1024,7 @@ en:
       this_entry_is_already: This entry is already signed.
       email_isn_t_set: Email isn't set up, so invitations can't be sent (Admin → About).
       invitation_sent_to_the: Invitation sent to %{email}. The link works once, for %{days} days.
+      no_account_yet: They don't have an account here yet; ask the administrator to add them (or invite them) so they can sign.
       signature_requested_from_entry: Signature requested from %{email} (%{date} entry)
     standard_inspections:
       added_record_when_each: Added %{items}. Record when each was last done to see when it's next due.
@@ -1245,7 +1243,7 @@ en:
       index:
         invitations: Invitations
         new_invitation: New invitation
-        intro: An invitation is a link someone opens to create an account, or accept with the one they have, and get roles on aircraft. An aircraft's Owner can also invite people to that aircraft from its Access page.
+        intro: An invitation is a link someone opens to create an account, or accept with the one they have, and get roles on aircraft. New accounts come only from administrators and their invitations; an aircraft's Owner can invite people who already have an account from its Access page.
         label: Invitation
         gives: Gives
         uses: Used
@@ -1966,7 +1964,7 @@ en:
       optional: Optional
       max_uses: Uses
       expires: Expires
-      invitation_hint: A link that gives the role on this aircraft to whoever opens it, with a new or existing account. With an email, it only works for that address (and is emailed to it when email is set up). Leave the expiry empty for never, or the uses empty for unlimited.
+      invitation_hint: A link that gives the role on this aircraft to whoever opens it and signs in. It's for people who already have an account (only the administrator makes new ones). With an email, it only works for that address (and is emailed to it when email is set up). Leave the expiry empty for never, or the uses empty for unlimited.
       create_invitation: Create invitation
       roles_are_set_by_an_administrator: An administrator sets what each role can do, and can add roles (Admin → Roles). Only an Owner can give or take away the Owner role.
       share_links: Share Links
@@ -2701,13 +2699,7 @@ en:
       sign_a_logbook_entry: Sign a logbook entry
       you_ve_been_asked_to_html: You've been asked to sign the %{date} %{log_type} log entry for %{tail_number}. First, sign in as <strong>%{email}</strong>.
       i_have_an_account_sign: 'I have an account: sign in'
-      or_create_an_account: Or create an account
-      email: Email
-      at_least_characters_not_one_html: At least %{min} characters; not one known from a data breach.
-      create_account: Create account
-      confirm_password: Confirm password
-      your_name: Your name
-      password: Password
+      no_account_yet: There's no account for %{email} yet. Ask the aircraft's owner to have the administrator add you (or invite you), then open this link again.
     wrong_account:
       sign_a_logbook_entry: Sign a logbook entry
       wrong_account: Wrong account
@@ -3497,6 +3489,9 @@ en:
       invited_by_html: "<strong>%{who}</strong> invites you (%{label}):"
       an_administrator: An administrator
       i_have_an_account: I have an account – sign in
+      continue_with: Continue with %{provider}
+      sso_hint: Signs you in with %{provider}, making your account here if you don't have one yet.
+      existing_accounts_only: This invitation is for an existing account. If you don't have one, ask the administrator.
       for_email: This invitation is for %{email}.
       or_create_an_account: Or create an account
       email: Email
@@ -3517,7 +3512,7 @@ en:
     wrong_account:
       invitation: Invitation
       wrong_account: This invitation is for someone else
-      for_another_email_html: It's for <strong>%{email}</strong>, but you're signed in as %{email_address}. Sign out and sign in (or create an account) with that address.
+      for_another_email_html: It's for <strong>%{email}</strong>, but you're signed in as %{email_address}. Sign out and sign in with that address.
       sign_out: Sign out
     invalid:
       invitation: Invitation
@@ -3528,18 +3523,18 @@ en:
       asks_you_to_sign_a_html: "%{owner} asks you to sign a logbook entry for <strong>%{tail_number}</strong> (%{date}, %{log_type} log)."
       review_and_sign_the_entry: Review and sign the entry
       the_link_works_once_until_html: "%{link} (the link works once, until %{to_date})."
-      you_ll_sign_in_or_html: You'll sign in or create an account for %{email}, add your certificate, and sign with your password.
+      you_ll_sign_in_or_html: You'll sign in with your account for %{email} (if you don't have one, ask the owner to have the administrator add you first), add your certificate, and sign with your password.
       asks_you_to_sign_a_2_html: "%{owner} asks you to sign a logbook entry for %{tail_number} (%{date}, %{log_type} log)."
       review_and_sign_it_here_html: 'Review and sign it here (the link works once, until %{to_date}):'
       asks_you_to_sign_a_2_text: "%{owner} asks you to sign a logbook entry for %{tail_number} (%{date}, %{log_type} log)."
       review_and_sign_it_here_text: 'Review and sign it here (the link works once, until %{to_date}):'
-      you_ll_sign_in_or_text: You'll sign in or create an account for %{email}, add your certificate, and sign with your password.
+      you_ll_sign_in_or_text: You'll sign in with your account for %{email} (if you don't have one, ask the owner to have the administrator add you first), add your certificate, and sign with your password.
       the_owner: The owner
       subject: Please sign a logbook entry for %{tail_number}
   signing_invitations:
     new:
       ask_someone_to_sign: Ask someone to sign
-      for_a_mechanic_who_did: 'For a mechanic who did the work: they get a one-time link by email, sign in or create their own account, add their certificate, and sign this entry with their own password. They see only this entry.'
+      for_a_mechanic_who_did: 'For a mechanic who did the work: they get a one-time link by email, sign in with their own account, add their certificate, and sign this entry with their own password. They see only this entry. They need an account first: the administrator adds it, or invites them.'
       log_html: "%{date} · %{log_type} log · %{truncate}"
       their_email: Their email
       message_optional: Message (optional)

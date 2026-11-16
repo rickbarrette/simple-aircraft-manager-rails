@@ -137,7 +137,6 @@ Rails.application.routes.draw do
   post "join/:token/accept", to: "joins#accept", as: :accept_join
   post "join/:token/account", to: "joins#account", as: :account_join
   post "sign/:token", to: "invited_signings#create"
-  post "sign/:token/account", to: "invited_signings#account", as: :account_invited_signing
 
   # Calendar feed of what's coming due (secret link; calendar apps can't sign in).
   get "calendar/:token.ics", to: "calendar_feeds#show", as: :calendar_feed, constraints: { token: /[A-Za-z0-9]{32}/ },

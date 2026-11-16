@@ -6,6 +6,10 @@
 # email is verified (or OIDC_TRUST_EMAIL is on), since some providers let
 # users edit their email. Otherwise, sign in with a password once and link
 # from the profile page.
+#
+# Someone without an account gets one only from an administrator's
+# invitation they opened first (AccessInvitation, accepted at once), or for
+# anyone the provider lets in when OIDC_AUTO_CREATE_USERS is on.
 class SsoController < ApplicationController
   allow_unauthenticated_access only: %i[callback failure]
   before_action :require_sso
@@ -29,6 +33,7 @@ class SsoController < ApplicationController
     return_to = session[:return_to_after_authenticating]
     reset_session # fresh session id after signing in
     start_new_session_for user
+    return redirect_to(root_url, notice: [ t("flash.joins.welcome"), AccessInvitation.describe(@joined) ].join(" ").strip) if @joined
     redirect_to return_to || root_url
   end
 
@@ -81,13 +86,25 @@ class SsoController < ApplicationController
   end
 
   def create_user(auth)
-    return unless Sso.auto_create_users?
     email = auth.info&.email.to_s.strip.downcase
     return if email.blank? || User.exists?(email_address: email)
-    # The random password is never shown; a password reset can set a real one.
-    User.create!(email_address: email, name: auth.info&.name.presence, sso_uid: auth.uid, password: SecureRandom.base58(40))
+    invitation = invitation_making_account(email)
+    return unless invitation || Sso.auto_create_users?
+    User.transaction do
+      # The random password is never shown; a password reset can set a real one.
+      user = User.create!(email_address: email, name: auth.info&.name.presence, sso_uid: auth.uid, password: SecureRandom.base58(40))
+      @joined = invitation&.redeem!(user)
+      user
+    end
   rescue ActiveRecord::RecordInvalid
     nil
+  end
+
+  # The invitation opened in this browser before signing in, when it can
+  # make an account (an administrator's) for this email address.
+  def invitation_making_account(email)
+    invitation = AccessInvitation.find_by_token(session[:join_token])
+    invitation if invitation&.usable? && invitation.creates_accounts? && invitation.for_email?(email)
   end
 
   def email_verified?(auth)

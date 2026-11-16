@@ -28,9 +28,9 @@ To give someone a role on any aircraft, open them in **Admin → Users**: **Airc
 
 ## Invitations
 
-**Admin → Invitations → New invitation** makes a link someone opens to create their own account (or accept with the one they have) and get roles on aircraft: a label for you, optionally an email address (then only that address can use it, and the link is emailed to it when email is set up) and a name, how many times it works (empty for unlimited, e.g. for a flying club), when it expires (empty for never), and a role on any of the aircraft (none at all gives just an account). The link is shown once, when it's made; copy it then.
+**Admin → Invitations → New invitation** makes a link someone opens to create their own account (or accept with the one they have) and get roles on aircraft. New accounts are only ever made by an administrator: here, from **Users**, or by an administrator's invitation (invitations from an aircraft's Access page are for people who already have an account, and so are signing invitations). An invitation has a label for you, optionally an email address (then only that address can use it, and the link is emailed to it when email is set up) and a name, how many times it works (empty for unlimited, e.g. for a flying club), when it expires (empty for never), and a role on any of the aircraft (none at all gives just an account). The link is shown once, when it's made; copy it then.
 
-Where someone already has a role on an aircraft, an invitation leaves it as it is. An invitation never gives more than whoever made it can give when it's used. **Revoke** stops a link working; people who already used it keep their access. With sign-in by single sign-on only, people accept invitations after signing in with it.
+Where someone already has a role on an aircraft, an invitation leaves it as it is. An invitation never gives more than whoever made it can give when it's used. **Revoke** stops a link working; people who already used it keep their access. With single sign-on, **Continue with** on the invitation page signs them in and makes their account. `OIDC_AUTO_CREATE_USERS=true` in the server's settings instead gives an account to anyone the provider lets in, without an invitation; leave it off to keep accounts to administrators and their invitations.
 
 ## Account recovery from the command line
 

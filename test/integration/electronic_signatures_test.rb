@@ -159,6 +159,7 @@ class ElectronicSignaturesTest < ActionDispatch::IntegrationTest
         post aircraft_logbook_entry_signing_invitations_path(@a, @entry), params: { signing_invitation: { email: "Outside@Example.com", message: "Thanks!" } }
       end
     end
+    assert_match "They don't have an account here yet", flash[:notice]
     mail = ActionMailer::Base.deliveries.last
     assert_equal [ "outside@example.com" ], mail.to
     path = mail.text_part.body.to_s[%r{http://example\.com(/sign/[\w-]+)}, 1]
@@ -166,8 +167,16 @@ class ElectronicSignaturesTest < ActionDispatch::IntegrationTest
 
     get path
     assert_includes response.body, "sign in as <strong>outside@example.com</strong>"
+    assert_includes response.body, "no account for outside@example.com yet" # a signing link doesn't make accounts
     post "#{path}/account", params: { name: "Olive Outside", password: "longpassword1", password_confirmation: "longpassword1" }
-    assert_redirected_to path
+    assert_response :not_found
+    assert_not User.exists?(email_address: "outside@example.com")
+
+    # The administrator adds their account; they sign in and come back to the link.
+    User.create!(email_address: "outside@example.com", name: "Olive Outside", password: "longpassword1")
+    get path
+    post session_path, params: { email_address: "outside@example.com", password: "longpassword1" }
+    assert_redirected_to "http://www.example.com#{path}"
     follow_redirect!
     assert_select "form[action='#{certificates_path(return_to: path)}']" # add a certificate first
     post certificates_path(return_to: path), params: { user_certificate: { kind: "IA", number: "2222222" } }

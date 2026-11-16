@@ -1,11 +1,11 @@
-# The invited signer's side: sign in (or create an account for the invited
-# address), add a certificate if needed, review the entry and sign it. The
-# invitation gives access to that one entry only.
+# The invited signer's side: sign in with their account for the invited
+# address, add a certificate if needed, review the entry and sign it. The
+# invitation gives access to that one entry only. It doesn't make accounts:
+# only an administrator (or an administrator's invitation) does.
 class InvitedSigningsController < ApplicationController
   include EntrySigning
-  allow_unauthenticated_access only: %i[show account]
+  allow_unauthenticated_access only: :show
   before_action :set_invitation
-  rate_limit to: 10, within: 15.minutes, only: :account, with: -> { redirect_to new_session_path, alert: t("flash.invited_signings.try_again_later") }
 
   def show
     @entry = @invitation.logbook_entry
@@ -18,24 +18,6 @@ class InvitedSigningsController < ApplicationController
     return render(:signed) if @entry.signed?
     prepare_signing(@entry)
     render :new
-  end
-
-  # Creating an account for the invited email address.
-  def account
-    return redirect_to(invited_signing_path(params[:token])) if authenticated?
-    if User.exists?(email_address: @invitation.email) || !Sso.password_login?
-      return redirect_to invited_signing_path(params[:token]), alert: t("flash.invited_signings.sign_in_to_continue")
-    end
-    user = User.new(params.permit(:name, :password, :password_confirmation).merge(email_address: @invitation.email))
-    if user.save
-      reset_session
-      start_new_session_for user
-      redirect_to invited_signing_path(params[:token]), notice: t("flash.invited_signings.account_created_add_your")
-    else
-      @entry = @invitation.logbook_entry
-      @account_errors = user.errors.full_messages
-      render :welcome, status: :unprocessable_entity
-    end
   end
 
   def create

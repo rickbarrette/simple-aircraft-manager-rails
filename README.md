@@ -88,7 +88,7 @@ The app is a standard Rails app. Run `bin/rails db:prepare && bin/thrust bin/rai
 | `APP_URL` | Optional public base URL, e.g. `https://aircraft.example.com` (default `https://APP_HOST`). Used for the SSO and Google Drive redirect URIs. |
 | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Optional. Turn on single sign-on with an OpenID Connect provider (see below). |
 | `OIDC_PROVIDER_NAME` | Button label, e.g. `Authentik` (default `SSO`). |
-| `OIDC_AUTO_CREATE_USERS` | `true` creates an account for anyone the provider lets in. New accounts start with no aircraft. Default off: an admin adds users first. |
+| `OIDC_AUTO_CREATE_USERS` | `true` creates an account for anyone the provider lets in, without an invitation. New accounts start with no aircraft. Default off: accounts come only from an admin or an admin's invitation (SSO sign-in from the invitation link makes the account). |
 | `OIDC_TRUST_EMAIL` | `true` links existing accounts by email even if the provider doesn't mark it verified. Only use it if users can't edit their own email at the provider. |
 | `OIDC_ADMIN_GROUP` | Optional. Members of this provider group become admins and others lose admin, synced at each sign-in. |
 | `PWNED_PASSWORDS_CHECK` | `false` turns off the check of new passwords against Have I Been Pwned (only the first 5 characters of the password's SHA-1 are sent). Use it if the server has no outbound internet access; the check also allows the password if the service can't be reached. |
@@ -202,7 +202,7 @@ Users who aren't on an aircraft get a 404 for it, identical to a missing record.
 Differences from the original:
 - Integer primary keys instead of UUIDs. Share tokens are 32-character random strings.
 - Logbook entries and inspection records don't keep many-to-many links to components. An inspection record or AD compliance can reference one component.
-- Accounts are created by an admin, by the first-run setup, at first SSO sign-in (if `OIDC_AUTO_CREATE_USERS` is on), by an outside mechanic accepting a signing invitation, or by someone opening an invitation link (Admin → Invitations, or an aircraft's Access page).
+- Accounts are created only by an admin, by the first-run setup, by someone opening an admin's invitation link (with a password, or SSO), or at first SSO sign-in when `OIDC_AUTO_CREATE_USERS` is on. Invitations from an aircraft's Access page and signing invitations are for existing accounts.
 
 ### Not yet ported
 

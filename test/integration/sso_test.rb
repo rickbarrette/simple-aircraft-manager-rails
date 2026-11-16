@@ -130,4 +130,43 @@ class SsoTest < ActionDispatch::IntegrationTest
     get "/auth/oidc/callback"
     assert_response :not_found
   end
+
+  test "signing in with SSO makes an account only from an administrator's invitation" do
+    ENV.delete("OIDC_AUTO_CREATE_USERS")
+    mock(uid: "sub-new", email: "newbie@example.com", name: "New Bie")
+    sso_sign_in
+    assert_redirected_to new_session_path
+    assert_not User.exists?(email_address: "newbie@example.com")
+
+    owner = create_user("owner2@example.com")
+    aircraft = create_aircraft(owner: owner, tail_number: "N777AB")
+    owners = AccessInvitation.create_for(owner, { label: "From the owner", max_uses: 1 }, [ [ aircraft, Role.for_key("pilot") ] ])
+    get join_path(owners.token)
+    assert_select "form[action='/auth/oidc']", 0
+    sso_sign_in
+    assert_not User.exists?(email_address: "newbie@example.com")
+
+    admin = create_user("boss@example.com", admin: true)
+    invitation = AccessInvitation.create_for(admin, { label: "Club", max_uses: 1 }, [ [ aircraft, Role.for_key("pilot") ] ])
+    get join_path(invitation.token)
+    assert_select "form[action='/auth/oidc'] button", text: "Continue with Authentik"
+    sso_sign_in
+    assert_redirected_to root_url
+    assert_match "Welcome! Your account is ready. N777AB: Pilot", flash[:notice]
+    newbie = User.find_by!(email_address: "newbie@example.com")
+    assert_equal "sub-new", newbie.sso_uid
+    assert_equal "pilot", newbie.role_for(aircraft).key
+    assert_equal 1, invitation.reload.uses_count
+  end
+
+  test "an administrator's invitation for one address makes an account only for that address" do
+    ENV.delete("OIDC_AUTO_CREATE_USERS")
+    admin = create_user("boss@example.com", admin: true)
+    invitation = AccessInvitation.create_for(admin, { label: "For Kim", email: "kim@example.com", max_uses: 1 }, [])
+    get join_path(invitation.token)
+    mock(uid: "sub-x", email: "someone.else@example.com")
+    sso_sign_in
+    assert_not User.exists?(email_address: "someone.else@example.com")
+    assert_equal 0, invitation.reload.uses_count
+  end
 end

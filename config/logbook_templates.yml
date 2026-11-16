@@ -85,11 +85,13 @@
   reference: "Part 43 App. A (c)(29)"
   text: "Removed, checked and reinstalled the magnetic chip detector: no particles found. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(29)."
   certificate_type: PILOT
+# Not maintenance (14 CFR 43.3(k)), so no entry is required and it isn't
+# signed off as preventive maintenance; this just keeps a note of it.
 - name: "Updating the navigation database"
-  reference: "Part 43 App. A (c)(31)"
-  text: "Updated the __ navigation database to cycle __. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(31)."
-  certificate_type: PILOT
+  reference: "14 CFR 43.3(k)"
+  text: "Updated the __ navigation database to cycle __ from the flight deck, per the manufacturer's instructions, without tools or disassembly. Database update under 14 CFR 43.3(k); not maintenance."
+  entry_type: OTHER
 - name: "Swapping a tray-mounted nav/com unit"
-  reference: "Part 43 App. A (c)(32)"
-  text: "Removed and reinstalled the tray-mounted __ unit. Checked operation. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(32)."
+  reference: "Part 43 App. A (c)(31)"
+  text: "Removed and reinstalled the self-contained, panel-mounted, tray-mounted __ unit per the manufacturer's instructions. Performed an operational check before use. Preventive maintenance per 14 CFR 43.3(g), Part 43 Appendix A paragraph (c)(31)."
   certificate_type: PILOT

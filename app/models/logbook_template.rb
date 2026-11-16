@@ -22,7 +22,7 @@ class LogbookTemplate < ApplicationRecord
     existing = pluck(:name).to_set
     next_position = (maximum(:position) || 0) + 1
     added = defaults.reject { existing.include?(_1["name"]) }
-    added.each_with_index { |d, i| create!(d.slice("name", "reference", "text", "log_type", "certificate_type").merge("position" => next_position + i)) }
+    added.each_with_index { |d, i| create!(d.slice("name", "reference", "text", "entry_type", "log_type", "certificate_type").merge("position" => next_position + i)) }
     added.size
   end
 

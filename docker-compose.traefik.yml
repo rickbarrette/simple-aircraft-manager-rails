@@ -4,6 +4,8 @@
 # the names to your Traefik setup. In .env: APP_HOST=aircraft.example.com, FORCE_SSL=true.
 #
 #   docker compose -f docker-compose.traefik.yml up -d
+#   Then open https://aircraft.example.com and create the admin account with the
+#   setup code from: docker compose -f docker-compose.traefik.yml logs web | grep "Setup code"
 #
 # Authentik: create the proxy provider and the unauthenticated URL list as in
 # docs/authentik.md, then uncomment the middleware lines below. Leave them out

@@ -3,11 +3,19 @@
 # docker-compose.image.yml; behind Traefik (and Authentik), docker-compose.traefik.yml.
 #
 #   cp .env.example .env   # set SECRET_KEY_BASE (bin/rails secret), APP_HOST, FORCE_SSL
-#   docker compose up -d --build
-#   open http://localhost:3000  → create the admin account
+#   APP_REVISION=$(git rev-parse --short HEAD) docker compose up -d --build   # the build shows on Admin → About
+#   open http://localhost:3000  → create the admin account, with the setup code from:
+#   docker compose logs web | grep "Setup code"
+#
+# New accounts after that come from the admin (Admin → Users or Invitations).
+# Only admins add aircraft unless Admin → Settings allows everyone.
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        APP_REVISION: ${APP_REVISION:-}
+        APP_BUILT_AT: ${APP_BUILT_AT:-}
     restart: unless-stopped
     ports:
       - "3000:80"

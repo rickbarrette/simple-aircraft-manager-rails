@@ -112,37 +112,25 @@ class InvitationsTest < ActionDispatch::IntegrationTest
     assert_equal 0, inv.reload.uses_count
   end
 
-  test "an aircraft's manager invites to it from its Access page, emailed, with only roles they can give" do
-    sign_in @owner
+  test "an administrator's invitation for one address is emailed to it" do
+    sign_in @admin
     assert_emails 1 do
       perform_enqueued_jobs do
-        post aircraft_invitations_path(@a), params: { email: "Mech@Example.com", role_id: Role.for_key("mechanic").id, max_uses: 1, expires_at: "" }
+        post admin_invitations_path, params: { access_invitation: { label: "Mechanic", email: "Mech@Example.com", max_uses: 1 }, roles: { @a.id => Role.for_key("mechanic").id } }
       end
     end
-    assert_response :success
     link = join_link_in(response.body)
-    assert_includes ActionMailer::Base.deliveries.last.text_part.body.to_s, link
-    assert_equal [ "mech@example.com" ], ActionMailer::Base.deliveries.last.to
-    inv = AccessInvitation.last
-    assert_equal "Invitation to N12345", inv.label
+    mail = ActionMailer::Base.deliveries.last
+    assert_equal [ "mech@example.com" ], mail.to
+    assert_includes mail.text_part.body.to_s, link
+  end
+
+  test "an aircraft's Access page adds people by email, without invitation links" do
+    sign_in @owner
     get aircraft_aircraft_roles_path(@a)
-    assert_select "#invitations li", 1
-    assert_select "#invitations select[name=role_id] option", text: "Owner"
-
-    partner_role = Role.create!(name: "Partner", permissions: %w[manage_people])
-    partner = create_user("partner@example.com")
-    @a.roles.create!(user: partner, role: partner_role)
-    sign_in partner
-    post aircraft_invitations_path(@a), params: { role_id: Role.owner.id, max_uses: 1 }
-    assert_equal 1, AccessInvitation.count
-    delete aircraft_invitation_path(@a, inv)
-    assert inv.reload.revoked?
-
-    viewer = create_user("viewer@example.com")
-    @a.roles.create!(user: viewer, role: "viewer")
-    sign_in viewer
-    post aircraft_invitations_path(@a), params: { role_id: Role.for_key("viewer").id, max_uses: 1 }
-    assert_equal 1, AccessInvitation.count
+    assert_select "form[action=?]", aircraft_aircraft_roles_path(@a)
+    assert_select "#invitations", 0
+    assert_not_includes response.body, "Create invitation"
   end
 
   test "an invitation can't give more than its creator can when it's used" do
@@ -159,15 +147,7 @@ class InvitationsTest < ActionDispatch::IntegrationTest
     assert_match "N12345:", flash[:notice]
   end
 
-  test "an invitation of someone else's aircraft can't be revoked from another aircraft's page" do
-    inv = invitation(grants: [ [ @b, "pilot" ] ])
-    sign_in @owner
-    delete aircraft_invitation_path(@a, inv)
-    assert_response :not_found
-    assert_not inv.reload.revoked?
-  end
-
-  test "only an administrator's invitation makes new accounts; an owner's is for existing accounts" do
+  test "only an administrator's invitation makes new accounts; others' are for existing accounts" do
     owners = invitation(creator: @owner, grants: [ [ @a, "pilot" ] ])
     get join_path(owners.token)
     assert_select "form[action=?]", account_join_path(owners.token), 0

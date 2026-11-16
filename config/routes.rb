@@ -112,7 +112,6 @@ Rails.application.routes.draw do
     resource :loading_setup, path: "weight_balance/loading", only: %i[edit update] # before the records' :id routes
     resources :weight_balance_records, path: "weight_balance", except: :show
     resources :aircraft_roles, path: "access", only: %i[index create update destroy]
-    resources :invitations, controller: "aircraft_invitations", only: %i[create destroy]
     resources :share_tokens, only: %i[create destroy]
     resource :export, controller: "aircraft_exports", only: :show
     resource :report, controller: "maintenance_reports", only: :show

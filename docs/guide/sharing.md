@@ -8,9 +8,9 @@ Add people by email with a role: **Owner**, **Mechanic**, **Pilot**, **Viewer**,
 
 Only an Owner can give or take away the Owner role, nobody can change their own, and an aircraft always keeps at least one Owner. An administrator can also give people roles on any aircraft from **Admin → Users**.
 
-## Invitations
+## Someone without an account
 
-To bring in someone who has an account, without knowing their email, use **Invitations** on the same page (new accounts are made only by the administrator or an administrator's invitation, so ask the administrator for someone who has no account yet): choose the role, optionally their email (then only they can use it, and it's emailed to them when email is set up), how many times it works and when it expires, then **Create invitation**. Copy the link shown and send it; it isn't shown again. Whoever opens it creates an account, or signs in, and gets the role on this aircraft. **Revoke** stops a link that hasn't been used. Administrators can also make invitations for several aircraft at once (Admin → Invitations).
+For someone who doesn't have an account yet, ask the administrator: they add the account, or send an invitation link that makes it and gives the role (Admin → Invitations). An outside mechanic who only needs to sign an entry can create their own account from your signing invitation (**Ask someone to sign** on the entry; see [Electronic records and signing](records.md)).
 
 ## Share links
 

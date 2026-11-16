@@ -39,37 +39,6 @@
     </details>
   </section>
 
-  <%# Invitation codes for this aircraft (AircraftInvitationsController). %>
-  <section class="card" id="invitations">
-    <div class="card-header"><h2 class="card-title"><%= t(".invitations") %></h2></div>
-    <% if @invitations.any? %>
-      <ul class="divide-y divide-slate-100">
-        <% @invitations.each do |inv| %>
-          <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
-            <div>
-              <span class="font-medium"><%= inv.label %></span>
-              <span class="badge-blue"><%= inv.grants.first&.role&.name %></span>
-              <% if inv.expired? %><span class="badge-red"><%= t(".expired") %></span><% elsif inv.used_up? %><span class="badge-gray"><%= t(".used") %></span><% end %>
-              <div class="text-xs text-slate-500"><%= [ inv.email, t(".uses_html", used: inv.uses_count, max: inv.max_uses || "∞"), (inv.expires_at ? t(".until", time: l(inv.expires_at, format: :app)) : t(".never_expires")), inv.created_by&.display_name ].compact.join(" · ") %></div>
-            </div>
-            <% if inv.usable? %><%= delete_button t(".revoke"), aircraft_invitation_path(@aircraft, inv), confirm: t(".revoke_invitation") %><% end %>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <%= empty_state t(".no_invitations") %>
-    <% end %>
-    <%= form_with url: aircraft_invitations_path(@aircraft), class: "space-y-3 border-t border-slate-100 p-4" do |f| %>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div><%= f.label :email, t(".invite_email"), class: "label" %><%= f.email_field :email, class: "input", placeholder: t(".optional") %></div>
-        <div><%= f.label :role_id, t(".role"), class: "label" %><%= f.select :role_id, roles.map { [ _1.name, _1.id ] }, { selected: Role.for_key("pilot").id }, class: "input" %></div>
-        <div><%= f.label :max_uses, t(".max_uses"), class: "label" %><%= f.number_field :max_uses, value: 1, min: 1, max: 1000, class: "input" %></div>
-        <div><%= f.label :expires_at, t(".expires"), class: "label" %><%= f.datetime_field :expires_at, value: AccessInvitation::VALID_FOR.from_now.strftime("%Y-%m-%dT%H:%M"), class: "input" %></div>
-      </div>
-      <p class="hint"><%= t(".invitation_hint") %></p>
-      <%= f.submit t(".create_invitation"), class: "btn-primary" %>
-    <% end %>
-  </section>
   <% end %>
 
   <% if can?(:manage_sharing) %>

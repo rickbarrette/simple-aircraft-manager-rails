@@ -887,11 +887,6 @@ en:
       account_exists: There's already an account for that email address. Sign in, then open the link again.
       welcome: Welcome! Your account is ready.
       accepted: Invitation accepted.
-    aircraft_invitations:
-      default_label: Invitation to %{tail_number}
-      created_event: Invitation made (%{role})
-      revoked_event: Invitation revoked
-      revoked: Invitation revoked.
     admin_invitations:
       revoked: Invitation revoked.
     aircraft_roles:
@@ -1248,7 +1243,7 @@ en:
       index:
         invitations: Invitations
         new_invitation: New invitation
-        intro: An invitation is a link someone opens to create an account, or accept with the one they have, and get roles on aircraft. New accounts come only from administrators and their invitations; an aircraft's Owner can invite people who already have an account from its Access page.
+        intro: An invitation is a link someone opens to create an account, or accept with the one they have, and get roles on aircraft. An aircraft's Owner adds people who already have an account from its Access page (by email), and invites outside mechanics to sign an entry.
         label: Invitation
         gives: Gives
         uses: Used
@@ -1962,21 +1957,6 @@ en:
       role_for: Role for %{display_name}
       role: Role
       what_each_role_can_do: What each role can do
-      invitations: Invitations
-      expired: Expired
-      used: Used
-      uses_html: "%{used} of %{max} used"
-      until: until %{time}
-      never_expires: never expires
-      revoke: Revoke
-      revoke_invitation: Revoke this invitation? Its link stops working; people who already used it keep their access.
-      no_invitations: No open invitations.
-      invite_email: Email
-      optional: Optional
-      max_uses: Uses
-      expires: Expires
-      invitation_hint: A link that gives the role on this aircraft to whoever opens it and signs in. It's for people who already have an account (only the administrator makes new ones). With an email, it only works for that address (and is emailed to it when email is set up). Leave the expiry empty for never, or the uses empty for unlimited.
-      create_invitation: Create invitation
       roles_are_set_by_an_administrator: An administrator sets what each role can do, and can add roles (Admin → Roles). Only an Owner can give or take away the Owner role.
       share_links: Share Links
       expired: Expired
